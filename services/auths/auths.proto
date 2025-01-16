@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package auths;
+option go_package = "./auths";
+
+message AuthReq {
+  string token = 1;
+}
+message AuthsRes{
+  uint32 status_code = 1; // 状态码，0-成功，其他值-失败
+  string status_msg = 2; // 返回状态描述
+  uint32 user_id = 3; // 用户id
+}
+
+service Auths {
+  rpc Authentication (AuthReq) returns (AuthsRes);
+}
+
+// goctl rpc protoc auth.proto --go_out=./ --go-grpc_out=./ --zrpc_out=. --client=true

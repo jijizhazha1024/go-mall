@@ -1,0 +1,22 @@
+Name: auths.rpc
+ListenOn: 0.0.0.0:10000
+
+# 服务发现
+Consul:
+  Host: 124.71.72.124:8500 # consul endpoint
+  Key: auths.rpc
+  Meta:
+    Protocol: grpc
+
+# redis
+CacheConf:
+  - NodeConf:
+    Host: 124.71.72.124:6379
+    Pass: jjzzchtt
+
+# 链路追踪
+Telemetry:
+  Name: auths.rpc
+  Endpoint: http://124.71.72.124:14268/api/traces
+  Batcher: jaeger
+  Sampler: 1.0

@@ -1,0 +1,21 @@
+syntax = "v1"
+
+type (
+	LoginReq {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	LoginRes {
+		Token string `json:"token"`
+	}
+)
+
+@server (
+	prefix:     /douyin/user
+	middleware: WithMiddleware // 添加中间件
+)
+service user-api {
+	@handler LoginHandler
+	post /login (LoginReq) returns (LoginRes)
+}
+
