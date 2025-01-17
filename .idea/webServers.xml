@@ -9,6 +9,13 @@
           </advancedOptions>
         </fileTransfer>
       </webServer>
+      <webServer id="fdc19daf-94b3-4bc5-9fa0-a4a4a8c357aa" name="华为云">
+        <fileTransfer accessType="SFTP" host="124.71.72.124" port="22" sshConfigId="46f91927-0b62-48ec-9a1d-03ac6a6d66ba" sshConfig="root@124.71.72.124:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
     </option>
   </component>
 </project>

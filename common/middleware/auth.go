@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"github.com/zeromicro/go-zero/zrpc"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/common/response"
 	"jijizhazha1024/go-mall/services/auths/auths"
@@ -27,7 +27,6 @@ var authRpc authsclient.Auths
 func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			fmt.Println(r.URL.Path)
 			// white path
 			if slices.Contains(WhitePath, r.URL.Path) {
 				next(w, r)
@@ -67,7 +66,7 @@ func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFun
 				return
 			}
 			// with user_id, 后面都可以在 请求中获取user_id
-			r.Form.Set("user_id", strconv.Itoa(int(res.UserId)))
+			r.Form.Set(biz.UserIdKey, strconv.Itoa(int(res.UserId)))
 			next(w, r)
 		}
 	}
