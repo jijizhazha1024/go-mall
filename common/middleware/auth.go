@@ -66,7 +66,7 @@ func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFun
 				return
 			}
 			// with user_id, 后面都可以在 请求中获取user_id
-			r.Form.Set(biz.UserIdKey, strconv.Itoa(int(res.UserId)))
+			r.Form.Set(biz.AuthParamKey, strconv.Itoa(int(res.UserId)))
 			next(w, r)
 		}
 	}
