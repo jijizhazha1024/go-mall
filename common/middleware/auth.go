@@ -10,16 +10,11 @@ import (
 	"jijizhazha1024/go-mall/services/auths/auths"
 	"jijizhazha1024/go-mall/services/auths/authsclient"
 	"net/http"
+	"regexp"
 	"slices"
 	"strconv"
 	"sync"
 )
-
-// WhitePath 白名单
-var WhitePath = []string{
-	"/douyin/user/register",
-	"/douyin/user/login",
-}
 
 var once sync.Once
 var authRpc authsclient.Auths
@@ -28,7 +23,7 @@ func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFun
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			// white path
-			if slices.Contains(WhitePath, r.URL.Path) {
+			if slices.Contains(biz.WhitePath, r.URL.Path) {
 				next(w, r)
 				return
 			}
@@ -38,8 +33,14 @@ func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFun
 			} else if token == "" && r.Method == http.MethodPost {
 				token = r.URL.Query().Get("token")
 			}
-
-			if token == "" {
+			// optional token
+			matched, err := regexp.MatchString(`^/douyin/products(/.*)?$`, r.URL.Path)
+			if err != nil {
+				logx.Errorw("regexp match failed", logx.Field("err", err))
+				httpx.OkJsonCtx(r.Context(), w, response.NewResponse(code.ServerError, code.ServerErrorMsg))
+				return
+			}
+			if token == "" && matched {
 				logx.Infof("token is blank")
 				httpx.OkJsonCtx(r.Context(), w, response.NewResponse(code.AuthBlank, code.AuthBlankMsg))
 				return
