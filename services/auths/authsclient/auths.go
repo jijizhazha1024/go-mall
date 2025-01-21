@@ -13,11 +13,20 @@ import (
 )
 
 type (
-	AuthReq  = auths.AuthReq
-	AuthsRes = auths.AuthsRes
+	AuthGenReq     = auths.AuthGenReq
+	AuthGenRes     = auths.AuthGenRes
+	AuthRenewalReq = auths.AuthRenewalReq
+	AuthRenewalRes = auths.AuthRenewalRes
+	AuthReq        = auths.AuthReq
+	AuthsRes       = auths.AuthsRes
 
 	Auths interface {
+		// Authentication 验证用户token合法
 		Authentication(ctx context.Context, in *AuthReq, opts ...grpc.CallOption) (*AuthsRes, error)
+		// GenerateToken 生成toke
+		GenerateToken(ctx context.Context, in *AuthGenReq, opts ...grpc.CallOption) (*AuthGenRes, error)
+		// RenewToken 续期身份
+		RenewToken(ctx context.Context, in *AuthRenewalReq, opts ...grpc.CallOption) (*AuthRenewalRes, error)
 	}
 
 	defaultAuths struct {
@@ -31,7 +40,20 @@ func NewAuths(cli zrpc.Client) Auths {
 	}
 }
 
+// Authentication 验证用户token合法
 func (m *defaultAuths) Authentication(ctx context.Context, in *AuthReq, opts ...grpc.CallOption) (*AuthsRes, error) {
 	client := auths.NewAuthsClient(m.cli.Conn())
 	return client.Authentication(ctx, in, opts...)
+}
+
+// GenerateToken 生成toke
+func (m *defaultAuths) GenerateToken(ctx context.Context, in *AuthGenReq, opts ...grpc.CallOption) (*AuthGenRes, error) {
+	client := auths.NewAuthsClient(m.cli.Conn())
+	return client.GenerateToken(ctx, in, opts...)
+}
+
+// RenewToken 续期身份
+func (m *defaultAuths) RenewToken(ctx context.Context, in *AuthRenewalReq, opts ...grpc.CallOption) (*AuthRenewalRes, error) {
+	client := auths.NewAuthsClient(m.cli.Conn())
+	return client.RenewToken(ctx, in, opts...)
 }

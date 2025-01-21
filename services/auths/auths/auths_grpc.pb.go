@@ -20,13 +20,20 @@ const _ = grpc.SupportPackageIsVersion8
 
 const (
 	Auths_Authentication_FullMethodName = "/auths.Auths/Authentication"
+	Auths_GenerateToken_FullMethodName  = "/auths.Auths/GenerateToken"
+	Auths_RenewToken_FullMethodName     = "/auths.Auths/RenewToken"
 )
 
 // AuthsClient is the client API for Auths service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthsClient interface {
+	// Authentication 验证用户token合法
 	Authentication(ctx context.Context, in *AuthReq, opts ...grpc.CallOption) (*AuthsRes, error)
+	// GenerateToken 生成toke
+	GenerateToken(ctx context.Context, in *AuthGenReq, opts ...grpc.CallOption) (*AuthGenRes, error)
+	// RenewToken 续期身份
+	RenewToken(ctx context.Context, in *AuthRenewalReq, opts ...grpc.CallOption) (*AuthRenewalRes, error)
 }
 
 type authsClient struct {
@@ -47,11 +54,36 @@ func (c *authsClient) Authentication(ctx context.Context, in *AuthReq, opts ...g
 	return out, nil
 }
 
+func (c *authsClient) GenerateToken(ctx context.Context, in *AuthGenReq, opts ...grpc.CallOption) (*AuthGenRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AuthGenRes)
+	err := c.cc.Invoke(ctx, Auths_GenerateToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authsClient) RenewToken(ctx context.Context, in *AuthRenewalReq, opts ...grpc.CallOption) (*AuthRenewalRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AuthRenewalRes)
+	err := c.cc.Invoke(ctx, Auths_RenewToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthsServer is the server API for Auths service.
 // All implementations must embed UnimplementedAuthsServer
 // for forward compatibility
 type AuthsServer interface {
+	// Authentication 验证用户token合法
 	Authentication(context.Context, *AuthReq) (*AuthsRes, error)
+	// GenerateToken 生成toke
+	GenerateToken(context.Context, *AuthGenReq) (*AuthGenRes, error)
+	// RenewToken 续期身份
+	RenewToken(context.Context, *AuthRenewalReq) (*AuthRenewalRes, error)
 	mustEmbedUnimplementedAuthsServer()
 }
 
@@ -61,6 +93,12 @@ type UnimplementedAuthsServer struct {
 
 func (UnimplementedAuthsServer) Authentication(context.Context, *AuthReq) (*AuthsRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Authentication not implemented")
+}
+func (UnimplementedAuthsServer) GenerateToken(context.Context, *AuthGenReq) (*AuthGenRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateToken not implemented")
+}
+func (UnimplementedAuthsServer) RenewToken(context.Context, *AuthRenewalReq) (*AuthRenewalRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RenewToken not implemented")
 }
 func (UnimplementedAuthsServer) mustEmbedUnimplementedAuthsServer() {}
 
@@ -93,6 +131,42 @@ func _Auths_Authentication_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Auths_GenerateToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AuthGenReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthsServer).GenerateToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auths_GenerateToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthsServer).GenerateToken(ctx, req.(*AuthGenReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Auths_RenewToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AuthRenewalReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthsServer).RenewToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Auths_RenewToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthsServer).RenewToken(ctx, req.(*AuthRenewalReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Auths_ServiceDesc is the grpc.ServiceDesc for Auths service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -103,6 +177,14 @@ var Auths_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Authentication",
 			Handler:    _Auths_Authentication_Handler,
+		},
+		{
+			MethodName: "GenerateToken",
+			Handler:    _Auths_GenerateToken_Handler,
+		},
+		{
+			MethodName: "RenewToken",
+			Handler:    _Auths_RenewToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

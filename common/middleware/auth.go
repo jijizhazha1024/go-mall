@@ -18,6 +18,19 @@ import (
 
 var once sync.Once
 var authRpc authsclient.Auths
+var tokenPattern = regexp.MustCompile(`^/douyin/products(/.*)?$`)
+
+func getTokenAndRefreshToken(r *http.Request) (string, string) {
+	var token, refreshToken string
+	if r.Method == http.MethodGet {
+		token = r.URL.Query().Get("token")
+		refreshToken = r.URL.Query().Get("refresh_token")
+	} else if r.Method == http.MethodPost {
+		token = r.PostFormValue("token")
+		refreshToken = r.PostFormValue("refresh_token")
+	}
+	return token, refreshToken
+}
 
 func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
@@ -27,21 +40,17 @@ func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFun
 				next(w, r)
 				return
 			}
-			var token = r.PostFormValue("token")
-			if r.Method == http.MethodGet {
-				token = r.FormValue("token")
-			} else if token == "" && r.Method == http.MethodPost {
-				token = r.URL.Query().Get("token")
-			}
-			// optional token
-			matched, err := regexp.MatchString(`^/douyin/products(/.*)?$`, r.URL.Path)
-			if err != nil {
-				logx.Errorw("regexp match failed", logx.Field("err", err))
-				httpx.OkJsonCtx(r.Context(), w, response.NewResponse(code.ServerError, code.ServerErrorMsg))
-				return
-			}
-			if token == "" && matched {
-				logx.Infof("token is blank")
+
+			token, refreshToken := getTokenAndRefreshToken(r)
+
+			// optional token for specific paths
+			if tokenPattern.MatchString(r.URL.Path) {
+				if token == "" {
+					logx.Infof("token is blank for optional path: %s", r.URL.Path)
+					next(w, r)
+					return
+				}
+			} else if token == "" {
 				httpx.OkJsonCtx(r.Context(), w, response.NewResponse(code.AuthBlank, code.AuthBlankMsg))
 				return
 			}
@@ -62,8 +71,25 @@ func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFun
 			}
 			// auth failed
 			if res.StatusCode != 0 {
-				logx.Infow("auth failed", logx.Field("status_msg", res.StatusMsg))
-				httpx.OkJsonCtx(r.Context(), w, response.NewResponse(int(res.StatusCode), res.StatusMsg))
+				// refresh token
+				if res.StatusCode == code.AuthExpired && refreshToken != "" {
+					renewRes, err := authRpc.RenewToken(r.Context(), &auths.AuthRenewalReq{
+						RefreshToken: refreshToken,
+					})
+					if err != nil {
+						logx.Errorw("refresh token err", logx.Field("err", err))
+						httpx.OkJsonCtx(r.Context(), w, response.NewResponse(code.ServerError, code.ServerErrorMsg))
+						return
+					}
+					if renewRes.StatusCode == code.AuthExpired {
+						// refresh token expired
+						httpx.OkJsonCtx(r.Context(), w, response.NewResponse(code.AuthExpired, code.AuthExpiredMsg))
+						return
+					}
+					httpx.OkJsonCtx(r.Context(), w, renewRes)
+					return
+				}
+				httpx.OkJsonCtx(r.Context(), w, response.NewResponse(code.TokenInvalid, code.TokenInvalidMsg))
 				return
 			}
 			// with user_id, 后面都可以在 请求中获取user_id
