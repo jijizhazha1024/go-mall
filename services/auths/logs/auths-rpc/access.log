@@ -1,0 +1,49 @@
+{"@timestamp":"2025-01-20T22:44:32.111+08:00","caller":"serverinterceptors/statinterceptor.go:90","content":"127.0.0.1:8604 - /auths.Auths/GenerateToken - {\"user_id\":1,\"username\":\"test\"}","duration":"0.5ms","level":"info","span":"e0648693c436dbdf","trace":"da41de804fd7ecfaf5e848b224b7ac59"}
+{"@timestamp":"2025-01-20T22:44:32.112+08:00","caller":"serverinterceptors/statinterceptor.go:90","content":"127.0.0.1:8604 - /auths.Auths/Authentication - {\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6InRlc3QiLCJjcmVhdGVfYXQiOjAsImV4cCI6MTczNzQ3MDY3Mn0.2fPMrtTCDCna8CKHrdv8jEWKxX3WYU6p06rEjkyVNAE\"}","duration":"0.5ms","level":"info","span":"015af2e04a1c76a7","trace":"d0b43f08d43921288a299896a7f1111f"}
+{"@timestamp":"2025-01-20T22:44:41.004+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:44:53.880+08:00","caller":"serverinterceptors/statinterceptor.go:90","content":"127.0.0.1:8612 - /auths.Auths/GenerateToken - {\"user_id\":1,\"username\":\"test\"}","duration":"0.0ms","level":"info","span":"eaa4a72bfedd1cd8","trace":"2bb54a93d704bda3d9009e08c2113af8"}
+{"@timestamp":"2025-01-20T22:44:53.881+08:00","caller":"serverinterceptors/statinterceptor.go:90","content":"127.0.0.1:8612 - /auths.Auths/Authentication - {\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6InRlc3QiLCJjcmVhdGVfYXQiOjAsImV4cCI6MTczNzQ3MDY5M30.3z0losMYFcDSssaCnrh7nDb-qUkPOzhga-MS49U3EpA\"}","duration":"0.0ms","level":"info","span":"f21fd8ef410b5624","trace":"a92e0aa0ea6b7fef34886b244a6b19bd"}
+{"@timestamp":"2025-01-20T22:45:00.002+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:45:14.015+08:00","caller":"serverinterceptors/statinterceptor.go:90","content":"127.0.0.1:8618 - /auths.Auths/GenerateToken - {\"user_id\":1,\"username\":\"test\"}","duration":"0.0ms","level":"info","span":"f9d438ea8cc2843d","trace":"c5c550995dea33e1f30d5864da7a25d4"}
+{"@timestamp":"2025-01-20T22:45:18.995+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:45:37.997+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:45:57.003+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:46:15.996+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:46:35.004+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:46:54.002+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:47:13.010+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:47:32.003+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:47:51.007+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:48:09.997+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:48:28.995+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:48:47.998+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:49:07.002+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:49:25.997+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:49:45.001+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:50:04.001+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:50:22.998+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:50:41.995+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:51:01.006+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:51:20.012+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:51:39.002+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:51:57.993+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:52:16.996+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:52:36.001+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:52:55.007+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:53:13.998+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:53:33.003+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:53:52.006+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:54:10.995+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:54:30.007+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:54:48.999+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:55:08.002+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:55:27.007+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:55:45.992+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:56:05.006+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:56:24.000+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:56:43.005+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:57:01.997+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:57:20.994+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:57:40.001+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:57:58.999+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}
+{"@timestamp":"2025-01-20T22:58:34.402+08:00","caller":"consul@v0.0.0-20231030135404-af9ae855016f/register.go:80","content":"update ttl","level":"info"}

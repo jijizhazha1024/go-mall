@@ -82,3 +82,50 @@ go-mall/
             └── svc    # 与api的svc类似
                 └── servicecontext.go
 ```
+
+
+## 响应api格式
+- 参考 [统一响应格式用法](https://go-zero.dev/docs/tutorials/http/server/response/ext#code-data-%E7%BB%9F%E4%B8%80%E5%93%8D%E5%BA%94%E6%A0%BC%E5%BC%8F%E7%94%A8%E6%B3%95)
+
+handler
+```go
+func LoginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req types.LoginReq
+		if err := httpx.Parse(r, &req); err != nil {
+			// 返回自定义错误
+			xhttp.JsonBaseResponseCtx(r.Context(), w, err)
+			return
+		}
+		l := logic.NewLoginLogic(r.Context(), svcCtx)
+		resp, err := l.Login(&req)
+		if err != nil {
+			xhttp.JsonBaseResponseCtx(r.Context(), w, err)
+			return
+		}
+		xhttp.JsonBaseResponseCtx(r.Context(), w, resp)
+	}
+}
+
+```
+
+logic
+```go
+
+func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginRes, err error) {
+	if req.Email == "admin@qq.com" {
+		return &types.LoginRes{
+			Token: "1234567890",
+		}, nil
+	}
+	return nil, errors.New(1000, "登录失败")
+}
+
+```
+
+
+### 请求成功
+![img.png](assets/img2.png)
+
+### 请求失败
+![img.png](assets/img.png)

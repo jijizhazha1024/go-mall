@@ -7,6 +7,7 @@ toolchain go1.21.5
 require (
 	github.com/stretchr/testify v1.10.0
 	github.com/zeromicro/go-zero v1.7.6
+	github.com/zeromicro/x v0.0.0-20240408115609-8224c482b07e
 	github.com/zeromicro/zero-contrib/zrpc/registry/consul v0.0.0-20231030135404-af9ae855016f
 	golang.org/x/crypto v0.32.0
 	google.golang.org/grpc v1.65.0
