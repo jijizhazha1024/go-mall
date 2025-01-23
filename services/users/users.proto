@@ -20,10 +20,10 @@ message RegisterRequest {
 
 // 定义注册响应消息
 message RegisterResponse {
-    int64 Code = 1;
-  string Msg = 2;
+  uint32 status_code = 1; // 状态码，0-成功，其他值-失败
+  string status_msg = 2; // 返回状态描述
   message data {
-    string user_id = 1;
+  uint32 user_id = 1;
     string token = 2;
   }
   data Data = 3;
@@ -37,10 +37,10 @@ message LoginRequest {
 
 // 定义登录响应消息
 message LoginResponse {
-  int64 Code = 1;
-  string Msg = 2;
+  uint32 status_code = 1; // 状态码，0-成功，其他值-失败
+  string status_msg = 2; // 返回状态描述
   message data {
-    string user_id = 1;
+    uint32 user_id = 1;
     string token = 2;
   }
   data Data = 3;
@@ -48,16 +48,16 @@ message LoginResponse {
 
 // 定义登出请求消息
 message LogoutRequest {
-  string user_id = 1;
+  uint32 user_id = 1;
   string token = 2;
 }
 
 // 定义登出响应消息
 message LogoutResponse {
-  int64 Code = 1;
-  string Msg = 2;
+  uint32 status_code = 1; // 状态码，0-成功，其他值-失败
+  string status_msg = 2; // 返回状态描述
   message data {
-    string user_id = 1;
+uint32 user_id = 1;
     string token = 2;
   }
   data Data = 3;
@@ -66,15 +66,15 @@ message LogoutResponse {
 
 // 定义删除用户请求消息
 message DeleteUserRequest {
-  string user_id = 1;
+ uint32 user_id = 1;
 }
 
 // 定义删除用户响应消息
 message DeleteUserResponse {
-  int64 Code = 1;
-  string Msg = 2;
+  uint32 status_code = 1; // 状态码，0-成功，其他值-失败
+  string status_msg = 2; // 返回状态描述
   message data {
-    string user_id = 1;
+    uint32 user_id = 1;
     string token = 2;
   }
   data Data = 3;
@@ -83,17 +83,17 @@ message DeleteUserResponse {
 
 // 定义更新用户请求消息
 message UpdateUserRequest {
-  string user_id = 1;
+uint32 user_id = 1;
   string email = 2; // 可选，如果需要更新
   string password = 3; // 可选，如果需要更新
 }
 
 // 定义更新用户响应消息
 message UpdateUserResponse {
-  int64 Code = 1;
-  string Msg = 2;
+  uint32 status_code = 1; // 状态码，0-成功，其他值-失败
+  string status_msg = 2; // 返回状态描述
   message data {
-    string user_id = 1;
+    uint32 user_id = 1;
     string email = 2;
     string password = 3;
   }
@@ -103,16 +103,16 @@ message UpdateUserResponse {
 
 // 定义获取用户信息请求消息
 message GetUserRequest {
-  string user_id = 1;
+uint32 user_id = 1;
   string token = 2;
 }
 
 // 定义获取用户信息响应消息
 message GetUserResponse {
-  int64 Code = 1;
-  string Msg = 2;
+  uint32 status_code = 1; // 状态码，0-成功，其他值-失败
+  string status_msg = 2; // 返回状态描述
   message UserData {
-    string user_id = 1;
+    uint32 user_id = 1;
     string email = 2;
     string name = 3;
     // 其他用户信息字段可以在此处添加
