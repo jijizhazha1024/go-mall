@@ -1,5 +1,5 @@
 Name: users.rpc
-ListenOn: 0.0.0.0:9000
+ListenOn: 0.0.0.0:10001
 Mode: dev
 # 服务发现
 Consul:
