@@ -1,0 +1,141 @@
+syntax = "proto3";
+
+package users;
+option go_package="./users";
+
+message Request {
+  string ping = 1;
+}
+
+message Response {
+  string pong = 1;
+}
+
+// 定义注册请求消息
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  string confirm_password = 3;
+}
+
+// 定义注册响应消息
+message RegisterResponse {
+    int64 Code = 1;
+  string Msg = 2;
+  message data {
+    string user_id = 1;
+    string token = 2;
+  }
+  data Data = 3;
+}
+
+// 定义登录请求消息
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+// 定义登录响应消息
+message LoginResponse {
+  int64 Code = 1;
+  string Msg = 2;
+  message data {
+    string user_id = 1;
+    string token = 2;
+  }
+  data Data = 3;
+}
+
+// 定义登出请求消息
+message LogoutRequest {
+  string user_id = 1;
+  string token = 2;
+}
+
+// 定义登出响应消息
+message LogoutResponse {
+  int64 Code = 1;
+  string Msg = 2;
+  message data {
+    string user_id = 1;
+    string token = 2;
+  }
+  data Data = 3;
+}
+
+
+// 定义删除用户请求消息
+message DeleteUserRequest {
+  string user_id = 1;
+}
+
+// 定义删除用户响应消息
+message DeleteUserResponse {
+  int64 Code = 1;
+  string Msg = 2;
+  message data {
+    string user_id = 1;
+    string token = 2;
+  }
+  data Data = 3;
+}
+
+
+// 定义更新用户请求消息
+message UpdateUserRequest {
+  string user_id = 1;
+  string email = 2; // 可选，如果需要更新
+  string password = 3; // 可选，如果需要更新
+}
+
+// 定义更新用户响应消息
+message UpdateUserResponse {
+  int64 Code = 1;
+  string Msg = 2;
+  message data {
+    string user_id = 1;
+    string email = 2;
+    string password = 3;
+  }
+  data Data = 3;
+}
+
+
+// 定义获取用户信息请求消息
+message GetUserRequest {
+  string user_id = 1;
+  string token = 2;
+}
+
+// 定义获取用户信息响应消息
+message GetUserResponse {
+  int64 Code = 1;
+  string Msg = 2;
+  message UserData {
+    string user_id = 1;
+    string email = 2;
+    string name = 3;
+    // 其他用户信息字段可以在此处添加
+  }
+  UserData data = 3;
+}
+
+service Users {
+  rpc Ping(Request) returns(Response);
+
+    // 注册方法
+    rpc Register(RegisterRequest) returns (RegisterResponse);
+    // 登录方法
+    rpc Login(LoginRequest) returns (LoginResponse);
+    // 登出方法
+    rpc Logout(LogoutRequest) returns (LogoutResponse);
+    // 删除用户方法
+    rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+    // 更新用户方法
+    rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+    // 获取用户信息方法
+    rpc GetUser(GetUserRequest) returns (GetUserResponse);
+
+
+
+}
