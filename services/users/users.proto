@@ -114,7 +114,7 @@ message GetUserResponse {
   message UserData {
     uint32 user_id = 1;
     string email = 2;
-    string name = 3;
+    string user_name = 3;
     // 其他用户信息字段可以在此处添加
   }
   UserData data = 3;
