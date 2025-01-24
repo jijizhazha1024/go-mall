@@ -3,7 +3,7 @@ ListenOn: 0.0.0.0:10001
 Mode: dev
 # 服务发现
 Consul:
-  Host: 127.0.0.1:8500 # consul endpoint
+  Host: 124.71.72.124:8500 # consul endpoint
   Key: users.rpc
   Meta:
     Protocol: grpc
@@ -13,3 +13,7 @@ CacheConf:
   - NodeConf:
     Host: 124.71.72.124:6379
     Pass: jjzzchtt
+
+MysqlConfig:
+  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  conntimeout: 5

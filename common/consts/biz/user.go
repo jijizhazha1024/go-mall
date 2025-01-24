@@ -1,5 +1,5 @@
 package biz
 
 const (
-	UsersRpcPort = 10000
+	UsersRpcPort = 10001
 )

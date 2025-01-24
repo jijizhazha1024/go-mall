@@ -7,5 +7,10 @@ import (
 
 type Config struct {
 	zrpc.RpcServerConf
-	Consul consul.Conf
+	MysqlConfig MysqlConfig
+	Consul      consul.Conf
+}
+type MysqlConfig struct {
+	DataSource  string
+	Conntimeout int
 }
