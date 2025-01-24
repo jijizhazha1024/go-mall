@@ -1,0 +1,10 @@
+Name: carts-api
+Host: 0.0.0.0
+Port: 8888
+
+UserRpc:
+  Target: consul://127.0.0.1:8500/users.rpc?wait=14s
+
+Consul:
+  Host: 127.0.0.1:8500 # consul endpoint
+  Key: users.rpc
