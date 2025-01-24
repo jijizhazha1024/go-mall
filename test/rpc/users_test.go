@@ -25,9 +25,9 @@ func initusers() {
 func TestUsersRpc(t *testing.T) {
 	initusers()
 	resp, err := users_client.Register(context.Background(), &users.RegisterRequest{
-		Email:           "test2@test.com",
-		Password:        "234567",
-		ConfirmPassword: "234567",
+		Email:           "test3@test.com",
+		Password:        "1234567",
+		ConfirmPassword: "1234567",
 	})
 	if err != nil {
 		t.Fatal(err)

@@ -55,10 +55,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 	return &users.RegisterResponse{
 		StatusCode: 200,
 		StatusMsg:  "注册成功",
-		Data: &users.RegisterResponseData{
-			UserId: 1,
-
-			Token: "token",
-		},
+		UserId:     1,
+		Token:      "token",
 	}, nil
 }

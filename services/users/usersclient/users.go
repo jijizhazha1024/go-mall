@@ -14,26 +14,20 @@ import (
 )
 
 type (
-	DeleteUserRequest        = users.DeleteUserRequest
-	DeleteUserResponse       = users.DeleteUserResponse
-	DeleteUserResponseData   = users.DeleteUserResponseData
-	GetUserRequest           = users.GetUserRequest
-	GetUserResponse          = users.GetUserResponse
-	GetUserResponse_UserData = users.GetUserResponse_UserData
-	LoginRequest             = users.LoginRequest
-	LoginResponse            = users.LoginResponse
-	LoginResponseData        = users.LoginResponseData
-	LogoutRequest            = users.LogoutRequest
-	LogoutResponse           = users.LogoutResponse
-	LogoutResponseData       = users.LogoutResponseData
-	RegisterRequest          = users.RegisterRequest
-	RegisterResponse         = users.RegisterResponse
-	RegisterResponseData     = users.RegisterResponseData
-	Request                  = users.Request
-	Response                 = users.Response
-	UpdateUserRequest        = users.UpdateUserRequest
-	UpdateUserResponse       = users.UpdateUserResponse
-	UpdateUserResponseData   = users.UpdateUserResponseData
+	DeleteUserRequest  = users.DeleteUserRequest
+	DeleteUserResponse = users.DeleteUserResponse
+	GetUserRequest     = users.GetUserRequest
+	GetUserResponse    = users.GetUserResponse
+	LoginRequest       = users.LoginRequest
+	LoginResponse      = users.LoginResponse
+	LogoutRequest      = users.LogoutRequest
+	LogoutResponse     = users.LogoutResponse
+	RegisterRequest    = users.RegisterRequest
+	RegisterResponse   = users.RegisterResponse
+	Request            = users.Request
+	Response           = users.Response
+	UpdateUserRequest  = users.UpdateUserRequest
+	UpdateUserResponse = users.UpdateUserResponse
 
 	Users interface {
 		Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)

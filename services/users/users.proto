@@ -22,11 +22,10 @@ message RegisterRequest {
 message RegisterResponse {
   uint32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
-  message data {
-  uint32 user_id = 1;
-    string token = 2;
-  }
-  data Data = 3;
+
+  uint32 user_id = 3;
+    string token = 4;
+
 }
 
 // 定义登录请求消息
@@ -39,11 +38,9 @@ message LoginRequest {
 message LoginResponse {
   uint32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
-  message data {
-    uint32 user_id = 1;
-    string token = 2;
-  }
-  data Data = 3;
+
+  uint32 user_id = 3;
+    string token = 4;
 }
 
 // 定义登出请求消息
@@ -56,11 +53,9 @@ message LogoutRequest {
 message LogoutResponse {
   uint32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
-  message data {
-uint32 user_id = 1;
-    string token = 2;
-  }
-  data Data = 3;
+
+  uint32 user_id = 3;
+    string token = 4;
 }
 
 
@@ -73,11 +68,9 @@ message DeleteUserRequest {
 message DeleteUserResponse {
   uint32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
-  message data {
-    uint32 user_id = 1;
-    string token = 2;
-  }
-  data Data = 3;
+ 
+  uint32 user_id = 3;
+    string token = 4;
 }
 
 
@@ -92,12 +85,9 @@ uint32 user_id = 1;
 message UpdateUserResponse {
   uint32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
-  message data {
-    uint32 user_id = 1;
-    string email = 2;
-    string password = 3;
-  }
-  data Data = 3;
+
+  uint32 user_id = 3;
+    string token = 4;
 }
 
 
@@ -111,13 +101,9 @@ uint32 user_id = 1;
 message GetUserResponse {
   uint32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
-  message UserData {
-    uint32 user_id = 1;
-    string email = 2;
-    string user_name = 3;
-    // 其他用户信息字段可以在此处添加
-  }
-  UserData data = 3;
+  uint32 user_id = 3;
+  string email = 4;
+  string user_name = 5;
 }
 
 service Users {
