@@ -22,7 +22,20 @@ func NewAuthsServer(svcCtx *svc.ServiceContext) *AuthsServer {
 	}
 }
 
+// Authentication 验证用户token合法
 func (s *AuthsServer) Authentication(ctx context.Context, in *auths.AuthReq) (*auths.AuthsRes, error) {
 	l := logic.NewAuthenticationLogic(ctx, s.svcCtx)
 	return l.Authentication(in)
+}
+
+// GenerateToken 生成toke
+func (s *AuthsServer) GenerateToken(ctx context.Context, in *auths.AuthGenReq) (*auths.AuthGenRes, error) {
+	l := logic.NewGenerateTokenLogic(ctx, s.svcCtx)
+	return l.GenerateToken(in)
+}
+
+// RenewToken 续期身份
+func (s *AuthsServer) RenewToken(ctx context.Context, in *auths.AuthRenewalReq) (*auths.AuthRenewalRes, error) {
+	l := logic.NewRenewTokenLogic(ctx, s.svcCtx)
+	return l.RenewToken(in)
 }

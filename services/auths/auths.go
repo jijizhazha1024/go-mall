@@ -25,9 +25,6 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 	ctx := svc.NewServiceContext(c)
-	// 添加全局字段
-	logx.AddGlobalFields(logx.Field("service", c.Name))
-
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		auths.RegisterAuthsServer(grpcServer, server.NewAuthsServer(ctx))
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {

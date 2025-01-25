@@ -1,9 +1,21 @@
 package biz
 
+import (
+	"time"
+)
+
 const (
 	AuthsRpcPort = 10000
 	AuthParamKey = "user_id"
 
-	TokenPrefixKey = "token:%s"
-	TokenExpire    = 60 * 60 * 24 * 7 // 7天
+	TokenExpire        = time.Second * 10
+	TokenRenewalExpire = time.Hour * 24 * 7
+)
+
+var (
+	// WhitePath 白名单
+	WhitePath = []string{
+		"/douyin/user/register",
+		"/douyin/user/login",
+	}
 )

@@ -3,16 +3,12 @@ package logic
 import (
 	"context"
 	"errors"
-	"fmt"
-	"github.com/zeromicro/go-zero/core/stores/redis"
-	"jijizhazha1024/go-mall/common/consts/biz"
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/zeromicro/go-zero/core/logx"
 	"jijizhazha1024/go-mall/common/consts/code"
-	"strconv"
-
+	"jijizhazha1024/go-mall/common/utils/token"
 	"jijizhazha1024/go-mall/services/auths/auths"
 	"jijizhazha1024/go-mall/services/auths/internal/svc"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type AuthenticationLogic struct {
@@ -31,35 +27,31 @@ func NewAuthenticationLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Au
 
 func (l *AuthenticationLogic) Authentication(in *auths.AuthReq) (*auths.AuthsRes, error) {
 	res := new(auths.AuthsRes)
-	// valid
-	key := fmt.Sprintf(biz.TokenPrefixKey, in.Token)
-	val, err := l.svcCtx.Rdb.GetCtx(l.ctx, key)
-	if err != nil {
-		// key is not exist err
-		if errors.Is(err, redis.Nil) {
-			res.StatusCode = code.AuthExpired
-			res.StatusMsg = code.AuthExpiredMsg
-			l.Logger.Infow("token is valid or expired", logx.Field("token", in.Token))
-			return res, nil
-		}
-		l.Logger.Errorw("redis get error", logx.Field("token", in.Token), logx.Field("err", err))
-		return nil, err
-	}
-	if val == "" {
+	// parse token
+	claims, err := token.ParseJWT(in.Token)
+
+	switch {
+	case errors.Is(err, jwt.ErrTokenExpired):
 		res.StatusCode = code.AuthExpired
 		res.StatusMsg = code.AuthExpiredMsg
-		l.Logger.Infow("token is valid or expired", logx.Field("token", in.Token))
+		return res, nil
+	case errors.Is(err, jwt.ErrTokenNotValidYet):
+		res.StatusCode = code.TokenValid
+		res.StatusMsg = code.TokenInvalidMsg
 		return res, nil
 	}
-	userID, err := strconv.ParseInt(val, 10, 64)
 	if err != nil {
-		l.Logger.Errorw("strconv.ParseInt error",
-			logx.Field("token", in.Token),
-			logx.Field("val", val),
-			logx.Field("err", err),
-		)
-		return nil, err
+		return res, err
 	}
-	res.UserId = uint32(userID)
+	// comparison of jwt create time and user logout time
+	logOutTime := int64(0)
+	if claims.RegisteredClaims.IssuedAt.Unix() <= logOutTime {
+		res.StatusCode = code.AuthExpired
+		res.StatusMsg = code.AuthExpiredMsg
+		// token expired
+		logx.Infow("token expired by logout", logx.Field("user_id", claims.UserID))
+		return res, nil
+	}
+	res.UserId = claims.UserID
 	return res, nil
 }
