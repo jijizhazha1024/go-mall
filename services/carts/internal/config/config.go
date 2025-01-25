@@ -1,16 +1,16 @@
 package config
 
-import "github.com/zeromicro/go-zero/zrpc"
+import (
+	"github.com/zeromicro/go-zero/zrpc"
+	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
+)
 
 type Config struct {
 	zrpc.RpcServerConf
-	Mysql MysqlConfig
+	MysqlConfig MysqlConfig
+	Consul      consul.Conf
 }
-
 type MysqlConfig struct {
-	User     string
-	Password string
-	Host     string
-	Port     string
-	Database string
+	DataSource  string
+	Conntimeout int
 }
