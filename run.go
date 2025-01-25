@@ -63,13 +63,9 @@ func (sm *ServiceManager) handleSignals() {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 
-	for {
-		select {
-		case sig := <-sigCh:
-			fmt.Printf("Received signal: %s\n", sig)
-			os.Exit(0)
-			return
-		}
+	for sig := range sigCh {
+		fmt.Printf("Received signal: %s\n", sig)
+		os.Exit(0)
 	}
 }
 

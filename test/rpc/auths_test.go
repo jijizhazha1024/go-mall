@@ -20,10 +20,9 @@ var once sync.Once
 
 func setupGRPCConnection(t *testing.T) {
 	once.Do(func() {
-		var conn *grpc.ClientConn
-		var err error
-		conn, err = grpc.Dial(fmt.Sprintf("127.0.0.1:%d", biz.AuthsRpcPort), grpc.WithBlock(),
-			grpc.WithTransportCredentials(insecure.NewCredentials()))
+		conn, err := grpc.NewClient(fmt.Sprintf("127.0.0.1:%d", biz.AuthsRpcPort),
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
 		if err != nil {
 			t.Fatalf("Failed to connect to RPC server: %v", err)
 		}
