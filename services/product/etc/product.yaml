@@ -1,0 +1,19 @@
+Name: products.rpc
+ListenOn: 0.0.0.0:10002
+Mode: dev
+# 服务发现
+Consul:
+  Host: 124.71.72.124:8500 # consul endpoint
+  Key: products.rpc
+  Meta:
+    Protocol: grpc
+
+# redis
+CacheConf:
+  - NodeConf:
+    Host: 124.71.72.124:6379
+    Pass: jjzzchtt
+
+MysqlConfig:
+  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  conntimeout: 5
