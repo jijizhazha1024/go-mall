@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
@@ -29,6 +30,12 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 // 注册方法
 func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResponse, error) {
 	// todo: add your logic here and delete this line
+	//判断密码是否一致
+	if in.Password != in.ConfirmPassword {
+		l.Logger.Error("密码不一致")
+		return nil, errors.New("密码不一致")
+	}
+
 	userMoel := user.NewUsersModel(l.svcCtx.Mysql)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -43,6 +50,31 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 		String: string(hashedPassword),
 		Valid:  true,
 	}
+	//判断邮箱是否已注册，如果已注册，是否处于删除状态
+	existUser, err := userMoel.FindOneByEmail(l.ctx, email)
+	if err != nil {
+		l.Logger.Error("查询用户失败", err)
+		return nil, err
+	}
+	if existUser != nil {
+		l.Logger.Error("邮箱已注册")
+		//判断是否处于删除状态
+		userDeleted := existUser.UserDeleted
+		if userDeleted {
+			userMoel.Update(l.ctx, &user.Users{})
+			return &users.RegisterResponse{
+				StatusCode: 200,
+				StatusMsg:  "注册成功",
+				UserId:     1,
+				Token:      "token",
+			}, nil
+		} else {
+			l.Logger.Error("邮箱已注册")
+			return nil, errors.New("邮箱已注册")
+		}
+
+	}
+
 	_, err = userMoel.Insert(l.ctx, &user.Users{
 		Email:        email,
 		PasswordHash: passwordhash,

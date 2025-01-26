@@ -1,8 +1,6 @@
 package svc
 
-import (
-	"jijizhazha1024/go-mall/services/auths/internal/config"
-)
+import "jijizhazha1024/go-mall/services/product/internal/config"
 
 type ServiceContext struct {
 	Config config.Config
