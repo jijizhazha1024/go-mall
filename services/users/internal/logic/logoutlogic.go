@@ -26,6 +26,9 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 // 登出方法
 func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, error) {
 	// todo: add your logic here and delete this line
+	// 1. 校验token
+	// 2. 删除token
+	// 3. 返回响应
 
 	return &users.LogoutResponse{}, nil
 }

@@ -70,7 +70,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				return nil, errors.New("获取用户ID失败")
 			}
 			return &users.RegisterResponse{
-				StatusCode: 200,
+				StatusCode: 0,
 				StatusMsg:  "注册成功",
 				UserId:     uint32(userId),
 				Token:      "token",
@@ -92,7 +92,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				return nil, errors.New("更新用户状态失败: " + updateErr.Error())
 			}
 			return &users.RegisterResponse{
-				StatusCode: 200,
+				StatusCode: 0,
 				StatusMsg:  "注册成功",
 				UserId:     uint32(existUser.UserId),
 				Token:      "token",
