@@ -1,4 +1,4 @@
-package rpc
+package delete
 
 import (
 	"context"
@@ -22,16 +22,15 @@ func initusers() {
 	users_client = users.NewUsersClient(conn)
 }
 
-func TestUsersRpc(t *testing.T) {
+func TestUsersDeleteRpc(t *testing.T) {
 	initusers()
-	resp, err := users_client.Register(context.Background(), &users.RegisterRequest{
-		Email:           "test3@test.com",
-		Password:        "1234567",
-		ConfirmPassword: "1234567",
+	resp, err := users_client.DeleteUser(context.Background(), &users.DeleteUserRequest{
+		UserId: 6,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("register success", resp)
-	t.Log("register success", resp)
+	fmt.Println("delete user success", resp)
+	t.Log("delete user success", resp)
+
 }
