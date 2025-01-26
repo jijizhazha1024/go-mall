@@ -1,0 +1,16 @@
+Name: carts.rpc
+ListenOn: 0.0.0.0:10003
+
+Consul:
+  Host: 127.71.72.124:8500 # consul endpoint
+  Key: carts.rpc
+  Meta:
+    Protocol: grpc
+
+#MysqlConfig:
+#  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+#  conntimeout: 5
+
+MysqlConfig:
+  datasource: "root:123456@tcp(127.0.0.1:3306)/cart_db?charset=utf8mb4&parseTime=True&loc=Local"
+  conntimeout: 5
