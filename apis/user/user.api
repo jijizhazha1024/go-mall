@@ -1,0 +1,101 @@
+syntax = "v1"
+
+type (
+	// 用户注册请求
+	RegisterRequest {
+		Email           string `json:"email"`
+		Password        string `json:"password"`
+		ConfirmPassword string `json:"confirmPassword"`
+	}
+	// 用户注册响应
+	RegisterResponse {
+		Code    int64  `json:"code"`
+		Message string `json:"message"`
+		UserId  int64  `json:"userId"`
+		Token   string `json:"token"`
+	}
+	// 用户登录请求
+	LoginRequest {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	// 用户登录响应
+	LoginResponse {
+		Code    int64  `json:"code"`
+		Message string `json:"message"`
+		UserId  int64  `json:"userId"`
+		Token   string `json:"token"`
+	}
+	// 用户登出请求
+	LogoutRequest {
+		UserId int64  `json:"userId"`
+		Token  string `json:"token"`
+	}
+	// 用户登出响应
+	LogoutResponse {
+		Code    int64  `json:"code"`
+		Message string `json:"message"`
+	}
+	// 删除用户请求
+	DeleteRequest {
+		UserId int64 `json:"userId"`
+	}
+	// 删除用户响应
+	DeleteResponse {
+		Code    int64  `json:"code"`
+		Message string `json:"message"`
+	}
+	// 更新用户请求
+	UpdateRequest {
+		UserId   int64  `json:"userId"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	// 更新用户响应
+	UpdateResponse {
+		Code     int64  `json:"code"`
+		Message  string `json:"message"`
+		UserId   int64  `json:"userId"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	// 获取用户信息请求
+	GetInfoRequest {
+		UserId int64  `json:"userId"`
+		Token  string `json:"token"`
+	}
+	// 获取用户信息响应
+	GetInfoResponse {
+		Code    int64  `json:"code"`
+		Message string `json:"message"`
+		UserId  int64  `json:"userId"`
+		Email   string `json:"email"`
+		Name    string `json:"name"`
+	}
+)
+
+@server (
+	// 代表当前 service 代码块下的路由生成代码时都会被放到 auth 目录下
+	// 定义路由前缀为
+	prefix: /douyin/users
+)
+service user-api {
+	@handler RegisterHandler
+	post /register (RegisterRequest) returns (RegisterResponse)
+
+	@handler LoginHandler
+	post /login (LoginRequest) returns (LoginResponse)
+
+	@handler LogoutHandler
+	post /logout (LogoutRequest) returns (LogoutResponse)
+
+	@handler DeleteHandler
+	post /delete (DeleteRequest) returns (DeleteResponse)
+
+	@handler UpdateHandler
+	put /update (UpdateRequest) returns (UpdateResponse)
+
+	@handler GetInfoHandler
+	get /info (GetInfoRequest) returns (GetInfoResponse)
+}
+

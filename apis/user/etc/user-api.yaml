@@ -1,0 +1,13 @@
+Name: user-api
+Host: 0.0.0.0
+Port: 8001
+
+
+UserRpc:
+  Target: consul://124.71.72.124:8500/users.rpc?wait=14s
+
+Consul:
+  Host: 124.71.72.124:8500 # consul endpoint
+  Key: users.rpc
+
+
