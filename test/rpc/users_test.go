@@ -1,11 +1,10 @@
-package register
+package rpc
 
 import (
 	"context"
 	"fmt"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/services/users/users"
-	"sync"
 	"testing"
 
 	"google.golang.org/grpc"
@@ -13,23 +12,21 @@ import (
 )
 
 var users_client users.UsersClient
-var once sync.Once
 
 func initusers() {
-	once.Do(func() {
-		conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.UsersRpcPort), grpc.WithBlock(),
-			grpc.WithTransportCredentials(insecure.NewCredentials()))
-		if err != nil {
-			panic(err)
-		}
-		users_client = users.NewUsersClient(conn)
-	})
+
+	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.UsersRpcPort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		panic(err)
+	}
+	users_client = users.NewUsersClient(conn)
 }
 
 func TestUsersRpc(t *testing.T) {
 	initusers()
 	resp, err := users_client.Register(context.Background(), &users.RegisterRequest{
-		Email:           "test5@test.com",
+		Email:           "test3@test.com",
 		Password:        "1234567",
 		ConfirmPassword: "1234567",
 	})
@@ -38,5 +35,4 @@ func TestUsersRpc(t *testing.T) {
 	}
 	fmt.Println("register success", resp)
 	t.Log("register success", resp)
-
 }
