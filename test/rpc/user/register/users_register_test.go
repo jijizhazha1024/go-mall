@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/services/users/users"
+	"sync"
 	"testing"
 
 	"google.golang.org/grpc"
@@ -12,14 +13,17 @@ import (
 )
 
 var users_client users.UsersClient
+var once sync.Once
 
 func initusers() {
-	conn, err := grpc.Dial(fmt.Sprintf("0.0.0.0:%d", biz.UsersRpcPort), grpc.WithBlock(),
-		grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		panic(err)
-	}
-	users_client = users.NewUsersClient(conn)
+	once.Do(func() {
+		conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.UsersRpcPort), grpc.WithBlock(),
+			grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			panic(err)
+		}
+		users_client = users.NewUsersClient(conn)
+	})
 }
 
 func TestUsersRpc(t *testing.T) {
