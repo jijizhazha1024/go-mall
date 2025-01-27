@@ -22,7 +22,7 @@ func initCarts() {
 	carts_client = carts.NewCartClient(conn)
 }
 
-func TestUsersRpc(t *testing.T) {
+func TestCartsRpc(t *testing.T) {
 	initCarts()
 	req := &carts.UserInfo{
 		Id: 3,
