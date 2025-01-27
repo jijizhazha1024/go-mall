@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"context"
+	"fmt"
+
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
@@ -15,6 +18,8 @@ type (
 	UsersModel interface {
 		usersModel
 		withSession(session sqlx.Session) UsersModel
+		UpdateDeletebyId(ctx context.Context, userId int64, userDeleted bool) error
+		UpdateDeletebyEmail(ctx context.Context, email string, userDeleted bool) error
 		UpdateDeletebyId(ctx context.Context, userId int64, userDeleted bool) error
 		UpdateDeletebyEmail(ctx context.Context, email string, userDeleted bool) error
 	}
