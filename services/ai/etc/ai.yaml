@@ -1,0 +1,8 @@
+Name: ai.rpc
+ListenOn: 0.0.0.0:10007
+
+Consul:
+  Host: 124.71.72.124:8500 # consul endpoint
+  Key: ai.rpc
+  Meta:
+    Protocol: grpc

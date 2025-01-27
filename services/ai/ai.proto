@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package ai;
+option go_package="./ai";
+
+message Request {
+  string ping = 1;
+}
+
+message Response {
+  string pong = 1;
+}
+
+service Ai {
+  rpc Ping(Request) returns(Response);
+}
