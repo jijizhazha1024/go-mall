@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/services/product/product"
 	"testing"
 )
@@ -12,7 +13,7 @@ import (
 var product_client product.ProductCatalogServiceClient
 
 func initproduct() {
-	conn, err := grpc.Dial(fmt.Sprintf("0.0.0.0:%d", 10002), grpc.WithBlock(),
+	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.ProductRpcPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
