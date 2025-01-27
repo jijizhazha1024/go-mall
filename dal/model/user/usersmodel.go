@@ -46,27 +46,3 @@ func (m *customUsersModel) UpdateDeletebyEmail(ctx context.Context, email string
 	_, err := m.conn.ExecCtx(ctx, query, userDeleted, email)
 	return err
 }
-
-func (m *customUsersModel) UpdateDeletebyId(ctx context.Context, userId int64, userDeleted bool) error {
-	query := fmt.Sprintf("update %s set `user_deleted` = ? where `user_id` = ?", m.table)
-	_, err := m.conn.ExecCtx(ctx, query, userDeleted, userId)
-	return err
-}
-
-func (m *customUsersModel) UpdateDeletebyEmail(ctx context.Context, email string, userDeleted bool) error {
-	query := fmt.Sprintf("update %s set `user_deleted` = ? where `email` = ?", m.table)
-	_, err := m.conn.ExecCtx(ctx, query, userDeleted, email)
-	return err
-}
-
-func (m *customUsersModel) UpdateDeletebyId(ctx context.Context, userId int64, userDeleted bool) error {
-	query := fmt.Sprintf("update %s set `user_deleted` = ? where `user_id` = ?", m.table)
-	_, err := m.conn.ExecCtx(ctx, query, userDeleted, userId)
-	return err
-}
-
-func (m *customUsersModel) UpdateDeletebyEmail(ctx context.Context, email string, userDeleted bool) error {
-	query := fmt.Sprintf("update %s set `user_deleted` = ? where `email` = ?", m.table)
-	_, err := m.conn.ExecCtx(ctx, query, userDeleted, email)
-	return err
-}
