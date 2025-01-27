@@ -1,0 +1,57 @@
+syntax = "v1"
+
+type (
+	UserInfo {
+		Id int32
+	}
+	// 购物车条目列表响应
+	CartItemListResponse {
+		Total int32               `json:"total"`
+		Data  []*CartInfoResponse `json:"data"`
+	}
+	// 购物车条目响应
+	CartInfoResponse {
+		Id        int32
+		UserId    int32
+		ProductId int32
+		Quantity  int32
+		Checked   bool
+	}
+	// 购物车条目请求，用于添加或更新购物车项
+	CartItemRequest {
+		Id           int32
+		UserId       int32
+		ProductId    int32
+		ProductName  string
+		ProuctImage  string
+		ProductPrice float32
+		Quantity     int32
+		Checked      bool
+	}
+	// 空响应，通常用于删除等操作
+	EmptyCartResponse  {}
+)
+
+@server (
+	// 代表当前 service 代码块下的路由生成代码时都会被放到 auth 目录下
+	// 定义路由前缀为
+	prefix: /douyin/carts
+)
+service carts-api {
+	// 获取用户的购物车信息
+	@handler CartItemListHandler
+	post /get (UserInfo) returns (CartItemListResponse)
+
+	// 添加商品到购物车
+	@handler CreateCartItemHandler
+	post /add (CartItemRequest) returns (CartInfoResponse)
+
+	// 修改购物车信息
+	@handler UpdateCartItemHandler
+	put /update (CartItemRequest) returns (EmptyCartResponse)
+
+	// 删除购物车条目
+	@handler DeleteCartItemHandler
+	delete /delete (CartItemRequest) returns (EmptyCartResponse)
+}
+

@@ -2,18 +2,15 @@ module jijizhazha1024/go-mall
 
 go 1.21
 
-toolchain go1.21.5
-
 require (
 	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/stretchr/testify v1.10.0
 	github.com/zeromicro/go-zero v1.7.6
 	github.com/zeromicro/zero-contrib/zrpc/registry/consul v0.0.0-20231030135404-af9ae855016f
-	golang.org/x/crypto v0.31.0
+	golang.org/x/crypto v0.32.0
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.36.1
-
 )
 
 require (
