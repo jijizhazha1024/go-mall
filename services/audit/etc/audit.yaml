@@ -1,0 +1,22 @@
+Name: audit.rpc
+ListenOn: 0.0.0.0:10008
+# 服务发现
+Consul:
+  Host: 124.71.72.124:8500 # consul endpoint
+  Key: audit.rpc
+  Meta:
+    Protocol: grpc
+
+# 链路追踪
+Telemetry:
+  Name: audit.rpc
+  Endpoint: http://124.71.72.124:14268/api/traces
+  Batcher: jaeger
+  Sampler: 1.0
+
+
+Log:
+  ServiceName: "audit-rpc"
+  Mode: 'console'
+  Encoding: "json"
+  Path: "./logs/audit-rpc"
