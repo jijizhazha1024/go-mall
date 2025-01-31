@@ -7,6 +7,7 @@ import (
 
 	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
+	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -34,10 +35,7 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	userMoel := user.NewUsersModel(l.svcCtx.Mysql)
 	// 1. 校验参数
 	if in.Email == "" || in.Password == "" {
-		return &users.LoginResponse{
-			StatusCode: 1,
-			StatusMsg:  "email or password is empty",
-		}, nil
+		return users_biz.HandleLoginerror("email or password is empty", 1, errors.New("email or password is empty"))
 	}
 	email := sql.NullString{
 		String: in.Email,
@@ -47,12 +45,12 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	user, err := userMoel.FindOneByEmail(l.ctx, email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return &users.LoginResponse{
-				StatusCode: 1,
-				StatusMsg:  "user not found",
-			}, nil
+			return users_biz.HandleLoginerror("user not found", 1, errors.New("user not found"))
 		}
-		return nil, err
+		return users_biz.HandleLoginerror("sql error", 1, errors.New("sql error"))
+	}
+	if user.UserDeleted {
+		return users_biz.HandleLoginerror("user deleted", 1, errors.New("user deleted"))
 	}
 
 	// 3. 校验密码
@@ -60,19 +58,10 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash.String), []byte(in.Password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return &users.LoginResponse{
-				StatusCode: 1,
-				StatusMsg:  "password is incorrect",
-			}, nil
+			return users_biz.HandleLoginerror("password error", 1, errors.New("password error"))
 		}
 		return nil, err
 	}
 
-	return &users.LoginResponse{
-		StatusCode: 0,
-		StatusMsg:  "success",
-		UserId:     uint32(user.UserId),
-		Token:      "token",
-		UserName:   user.Username.String,
-	}, nil
+	return users_biz.HandleLoginResp("login success", 0, uint32(user.UserId), "", user.Username.String)
 }

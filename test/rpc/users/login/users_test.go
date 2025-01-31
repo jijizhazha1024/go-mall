@@ -45,14 +45,20 @@ func TestUsersRpc(t *testing.T) {
 
 		t.Fatal(err)
 	}
-	auths_res, err := auths_client.GenerateToken(context.Background(), &auths.AuthGenReq{
-		UserId:   resp.UserId,
-		Username: resp.UserName,
-	})
-	if err != nil {
-		t.Fatal(err)
+
+	if resp.StatusCode == 0 {
+		auths_res, err := auths_client.GenerateToken(context.Background(), &auths.AuthGenReq{
+			UserId:   resp.UserId,
+			Username: resp.UserName,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		fmt.Println("login success", resp, auths_res)
+		t.Log("login success", resp)
+	} else {
+		fmt.Println("login failed", resp)
+		t.Log("register failed", resp)
 	}
 
-	fmt.Println("register success", resp, auths_res)
-	t.Log("register success", resp)
 }

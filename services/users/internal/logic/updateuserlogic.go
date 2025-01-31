@@ -7,6 +7,7 @@ import (
 
 	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
+	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -32,15 +33,16 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	// todo: add your logic here and delete this line
 
 	usermodel := user.NewUsersModel(l.svcCtx.Mysql)
-	_, err := usermodel.FindOne(l.ctx, int64(in.UserId))
+	update_user, err := usermodel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return &users.UpdateUserResponse{
-				StatusCode: 1, // 修改1: 使用标准的HTTP状态码404表示未找到资源
-				StatusMsg:  "user not found",
-			}, nil
+			return users_biz.HandleUpdateUsererror("user not found", 1, errors.New("user not found"))
 		}
-		return nil, err
+		return users_biz.HandleUpdateUsererror("sql error", 1, errors.New("sql error"))
+	}
+
+	if update_user.UserDeleted {
+		return users_biz.HandleUpdateUsererror("user deleted", 1, errors.New("user deleted"))
 	}
 
 	email := sql.NullString{
@@ -52,7 +54,7 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	if in.Password != "" { // 修改1: 处理密码为空字符串的情况
 		passworhash, err = bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 		if err != nil {
-			return nil, err
+			return users_biz.HandleUpdateUsererror("hash error", 1, errors.New("hash error"))
 		}
 	} else {
 		// 如果密码为空，则不更新密码
@@ -72,11 +74,8 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 		},
 	})
 	if err != nil {
-		return nil, err
+		return users_biz.HandleUpdateUsererror("sql error", 1, errors.New("sql error"))
 	}
+	return users_biz.HandleUpdateUserResp("user updated successfully", 0, in.UserId, "token") // 调用HandleUpdateUserResp方法返回响)
 
-	return &users.UpdateUserResponse{
-		StatusCode: 0,                           // 修改3: 设置成功的状态码为0
-		StatusMsg:  "user updated successfully", // 修改3: 设置成功的状态消息
-	}, nil
 }

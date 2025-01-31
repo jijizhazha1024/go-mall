@@ -7,6 +7,7 @@ import (
 
 	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
+	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -33,14 +34,16 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 	//判断密码是否一致
 	if in.Password != in.ConfirmPassword {
 		l.Logger.Error("密码不一致")
-		return nil, errors.New("密码不一致")
+		return users_biz.HandleRegisterResp("密码不一致", 0, 0, "token")
+
 	}
 
 	userMoel := user.NewUsersModel(l.svcCtx.Mysql)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 	if err != nil {
 		l.Logger.Error("密码哈希生成失败", err)
-		return nil, err
+		return users_biz.HandleRegisterResp("密码哈希生成失败", 0, 0, "token")
+
 	}
 	email := sql.NullString{
 		String: in.Email,
@@ -62,22 +65,17 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			})
 			if insertErr != nil {
 				l.Logger.Error("用户注册失败", insertErr)
-				return nil, errors.New("用户注册失败: " + insertErr.Error())
+				return users_biz.HandleRegistererror("用户注册失败", 1, errors.New("用户注册失败"))
 			}
 			userId, lastInsertErr := result.LastInsertId()
 			if lastInsertErr != nil {
 				l.Logger.Error("获取用户ID失败", lastInsertErr)
-				return nil, errors.New("获取用户ID失败")
+				return users_biz.HandleRegistererror("获取用户id失败", 1, errors.New("获取用户id失败"))
 			}
-			return &users.RegisterResponse{
-				StatusCode: 0,
-				StatusMsg:  "注册成功",
-				UserId:     uint32(userId),
-				Token:      "token",
-			}, nil
+			return users_biz.HandleRegisterResp("注册成功", 0, uint32(userId), "token")
 		}
 		l.Logger.Error("查询用户失败", err)
-		return nil, errors.New("查询用户失败: " + err.Error())
+		return users_biz.HandleRegistererror("查询用户id失败", 1, errors.New("查询用户id失败"))
 	}
 
 	if existUser != nil {
@@ -89,20 +87,15 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			updateErr := userMoel.UpdateDeletebyEmail(l.ctx, in.Email, false)
 			if updateErr != nil {
 				l.Logger.Error("更新用户状态失败", updateErr)
-				return nil, errors.New("更新用户状态失败: " + updateErr.Error())
+				return users_biz.HandleRegistererror("更新用户id失败", 1, errors.New("更新用户id失败"))
 			}
-			return &users.RegisterResponse{
-				StatusCode: 0,
-				StatusMsg:  "注册成功",
-				UserId:     uint32(existUser.UserId),
-				Token:      "token",
-			}, nil
+			return users_biz.HandleRegisterResp("用户已存在，已恢复", 0, uint32(existUser.UserId), "token")
 		} else { // 未删除
 			l.Logger.Error("邮箱已注册")
-			return nil, errors.New("邮箱已注册")
+			return users_biz.HandleRegistererror("邮箱已注册", 1, errors.New("邮箱已注册"))
 		}
 
 	}
 
-	return nil, errors.New("未知错误")
+	return users_biz.HandleRegisterResp("未知错误", 1, 0, "token")
 }

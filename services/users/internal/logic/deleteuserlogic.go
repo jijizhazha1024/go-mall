@@ -7,6 +7,7 @@ import (
 
 	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
+	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -35,19 +36,19 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Info("用户不存在：%d", in.UserId)
-			return nil, errors.New("用户不存在: " + err.Error())
+			return users_biz.HandleDeleteUsererror("用户不存在", 1, err)
 		}
-		return nil, errors.New("查询用户失败: " + err.Error()) // 删除用户
+		return users_biz.HandleDeleteUsererror("查询失败", 1, err)
 	}
 	// 删除用户
 	if exituser.UserDeleted {
 		l.Logger.Info("用户已删除", in.UserId)
-		return nil, errors.New("用户已注销")
+		return users_biz.HandleDeleteUsererror("you have deleted this user", 1, errors.New("you have deleted this user"))
 	}
 	err = userMoel.UpdateDeletebyId(l.ctx, int64(in.UserId), true)
 	if err != nil {
-		return nil, errors.New("删除用户失败: " + err.Error())
+		return users_biz.HandleDeleteUsererror("删除失败", 1, err)
 	}
 
-	return &users.DeleteUserResponse{StatusCode: 0, StatusMsg: "删除成功"}, nil
+	return users_biz.HandleDeleteUserResp("删除成功", 0, in.UserId)
 }
