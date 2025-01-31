@@ -36,34 +36,47 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return &users.UpdateUserResponse{
-				StatusCode: 1,
+				StatusCode: 1, // 修改1: 使用标准的HTTP状态码404表示未找到资源
 				StatusMsg:  "user not found",
 			}, nil
 		}
 		return nil, err
 	}
+
 	email := sql.NullString{
 		String: in.Email,
 		Valid:  true,
 	}
 
-	passworhash, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
+	var passworhash []byte
+	if in.Password != "" { // 修改1: 处理密码为空字符串的情况
+		passworhash, err = bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// 如果密码为空，则不更新密码
+		passworhash = nil
 	}
 
 	err = usermodel.Update(l.ctx, &user.Users{
 		UserId: int64(in.UserId),
-		Email:  email,
+		Username: sql.NullString{
+			String: string(in.UsrName),
+			Valid:  in.UsrName != "",
+		},
+		Email: email,
 		PasswordHash: sql.NullString{
 			String: string(passworhash),
-			Valid:  true,
+			Valid:  passworhash != nil, // 修改1: 根据密码是否为空设置Valid字段
 		},
 	})
 	if err != nil {
-
 		return nil, err
 	}
 
-	return &users.UpdateUserResponse{}, nil
+	return &users.UpdateUserResponse{
+		StatusCode: 0,                           // 修改3: 设置成功的状态码为0
+		StatusMsg:  "user updated successfully", // 修改3: 设置成功的状态消息
+	}, nil
 }

@@ -34,7 +34,7 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 	exituser, err := userMoel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			l.Logger.Info("用户不存在", in.UserId)
+			l.Logger.Info("用户不存在：%d", in.UserId)
 			return nil, errors.New("用户不存在: " + err.Error())
 		}
 		return nil, errors.New("查询用户失败: " + err.Error()) // 删除用户

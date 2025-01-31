@@ -101,6 +101,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			l.Logger.Error("邮箱已注册")
 			return nil, errors.New("邮箱已注册")
 		}
+
 	}
 
 	return nil, errors.New("未知错误")

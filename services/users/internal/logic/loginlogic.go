@@ -73,5 +73,6 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 		StatusMsg:  "success",
 		UserId:     uint32(user.UserId),
 		Token:      "token",
+		UserName:   user.Username.String,
 	}, nil
 }

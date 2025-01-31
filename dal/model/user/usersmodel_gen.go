@@ -45,6 +45,7 @@ type (
 		AvatarUrl    sql.NullString `db:"avatar_url"`    // 头像图片 URL
 		CreatedAt    time.Time      `db:"created_at"`    // 创建时间
 		UserDeleted  bool           `db:"user_deleted"`  // 用户是否已删除
+		LogoutAt     sql.NullTime   `db:"logout_at"`     // 最近一次登录时间
 		UpdatedAt    time.Time      `db:"updated_at"`    // 更新时间
 	}
 )
@@ -91,14 +92,14 @@ func (m *defaultUsersModel) FindOneByEmail(ctx context.Context, email sql.NullSt
 }
 
 func (m *defaultUsersModel) Insert(ctx context.Context, data *Users) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?)", m.table, usersRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.Username, data.Email, data.PasswordHash, data.AvatarUrl, data.UserDeleted)
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?)", m.table, usersRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.Username, data.Email, data.PasswordHash, data.AvatarUrl, data.UserDeleted, data.LogoutAt)
 	return ret, err
 }
 
 func (m *defaultUsersModel) Update(ctx context.Context, newData *Users) error {
 	query := fmt.Sprintf("update %s set %s where `user_id` = ?", m.table, usersRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, newData.Username, newData.Email, newData.PasswordHash, newData.AvatarUrl, newData.UserDeleted, newData.UserId)
+	_, err := m.conn.ExecCtx(ctx, query, newData.Username, newData.Email, newData.PasswordHash, newData.AvatarUrl, newData.UserDeleted, newData.LogoutAt, newData.UserId)
 	return err
 }
 
