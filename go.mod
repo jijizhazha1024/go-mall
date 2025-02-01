@@ -3,7 +3,9 @@ module jijizhazha1024/go-mall
 go 1.21
 
 require (
+	github.com/avast/retry-go v2.7.0+incompatible
 	github.com/golang-jwt/jwt/v4 v4.5.1
+	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.10.0
 	github.com/zeromicro/go-zero v1.7.6
 	github.com/zeromicro/zero-contrib/zrpc/registry/consul v0.0.0-20231030135404-af9ae855016f

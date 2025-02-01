@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -9,6 +10,7 @@ import (
 	"jijizhazha1024/go-mall/services/audit/audit"
 	"sync"
 	"testing"
+	"time"
 )
 
 var auditRpc audit.AuditClient
@@ -28,7 +30,13 @@ func setupAuditRpcServer(t *testing.T) {
 
 func TestCreateAuditLog(t *testing.T) {
 	setupAuditRpcServer(t)
-
+	data, err := json.Marshal(map[string]string{
+		"user_id":  "1",
+		"username": "test",
+	})
+	if err != nil {
+		t.Fatalf("Failed to call CreateAuditLog: %v", err)
+	}
 	res, err := auditRpc.CreateAuditLog(context.Background(), &audit.CreateAuditLogReq{
 		UserId:            1,
 		Username:          "test",
@@ -36,8 +44,9 @@ func TestCreateAuditLog(t *testing.T) {
 		ActionDescription: "test",
 		TargetTable:       "test",
 		TargetId:          1,
-		OldData:           "test",
-		NewData:           "test",
+		OldData:           string(data),
+		NewData:           string(data),
+		CreateAt:          time.Now().Unix(),
 	})
 	if err != nil {
 		t.Fatalf("Failed to call CreateAuditLog: %v", err)

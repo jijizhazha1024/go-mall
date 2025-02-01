@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
-
 	"jijizhazha1024/go-mall/services/audit/audit"
 	"jijizhazha1024/go-mall/services/audit/internal/config"
 	"jijizhazha1024/go-mall/services/audit/internal/server"
@@ -26,7 +25,6 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 	ctx := svc.NewServiceContext(c)
-
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		audit.RegisterAuditServer(grpcServer, server.NewAuditServer(ctx))
 
@@ -34,7 +32,6 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
-
 	// 注册服务
 	if err := consul.RegisterService(c.ListenOn, c.Consul); err != nil {
 		logx.Errorw("register service error", logx.Field("err", err))
