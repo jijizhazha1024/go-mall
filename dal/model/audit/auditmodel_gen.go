@@ -24,9 +24,9 @@ var (
 type (
 	auditModel interface {
 		Insert(ctx context.Context, data *Audit) (sql.Result, error)
-		FindOne(ctx context.Context, id int64) (*Audit, error)
+		FindOne(ctx context.Context, id uint64) (*Audit, error)
 		Update(ctx context.Context, data *Audit) error
-		Delete(ctx context.Context, id int64) error
+		Delete(ctx context.Context, id uint64) error
 	}
 
 	defaultAuditModel struct {
@@ -35,19 +35,19 @@ type (
 	}
 
 	Audit struct {
-		Id                int64          `db:"id"`
-		UserId            int64          `db:"user_id"`
-		Username          string         `db:"username"`
-		ActionType        string         `db:"action_type"`
-		ActionDescription sql.NullString `db:"action_description"`
-		TargetTable       string         `db:"target_table"`
-		OldData           sql.NullString `db:"old_data"`
-		NewData           sql.NullString `db:"new_data"`
-		TargetId          sql.NullInt64  `db:"target_id"`
-		IpAddress         sql.NullString `db:"ip_address"`
-		TraceId           sql.NullString `db:"trace_id"`
-		SpanId            sql.NullString `db:"span_id"`
-		CreatedAt         time.Time      `db:"created_at"`
+		Id          uint64         `db:"id"`           // 主键
+		UserId      uint64         `db:"user_id"`      // 用户id
+		Username    string         `db:"username"`     // 用户名
+		ActionType  string         `db:"action_type"`  // 操作类型
+		ActionDesc  sql.NullString `db:"action_desc"`  // 操作描述
+		OldData     sql.NullString `db:"old_data"`     // 旧数据
+		NewData     sql.NullString `db:"new_data"`     // 新数据
+		TargetTable string         `db:"target_table"` // 目标表
+		TargetId    uint64         `db:"target_id"`    // 目标id
+		ClientIp    sql.NullString `db:"client_ip"`    // ip地址
+		TraceId     sql.NullString `db:"trace_id"`     // traceid
+		SpanId      sql.NullString `db:"span_id"`      // spanid
+		CreatedAt   time.Time      `db:"created_at"`   // 创建时间
 	}
 )
 
@@ -58,13 +58,13 @@ func newAuditModel(conn sqlx.SqlConn) *defaultAuditModel {
 	}
 }
 
-func (m *defaultAuditModel) Delete(ctx context.Context, id int64) error {
+func (m *defaultAuditModel) Delete(ctx context.Context, id uint64) error {
 	query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, id)
 	return err
 }
 
-func (m *defaultAuditModel) FindOne(ctx context.Context, id int64) (*Audit, error) {
+func (m *defaultAuditModel) FindOne(ctx context.Context, id uint64) (*Audit, error) {
 	query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", auditRows, m.table)
 	var resp Audit
 	err := m.conn.QueryRowCtx(ctx, &resp, query, id)
@@ -80,13 +80,13 @@ func (m *defaultAuditModel) FindOne(ctx context.Context, id int64) (*Audit, erro
 
 func (m *defaultAuditModel) Insert(ctx context.Context, data *Audit) (sql.Result, error) {
 	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, auditRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.Username, data.ActionType, data.ActionDescription, data.TargetTable, data.OldData, data.NewData, data.TargetId, data.IpAddress, data.TraceId, data.SpanId)
+	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.Username, data.ActionType, data.ActionDesc, data.OldData, data.NewData, data.TargetTable, data.TargetId, data.ClientIp, data.TraceId, data.SpanId)
 	return ret, err
 }
 
 func (m *defaultAuditModel) Update(ctx context.Context, data *Audit) error {
 	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, auditRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, data.UserId, data.Username, data.ActionType, data.ActionDescription, data.TargetTable, data.OldData, data.NewData, data.TargetId, data.IpAddress, data.TraceId, data.SpanId, data.Id)
+	_, err := m.conn.ExecCtx(ctx, query, data.UserId, data.Username, data.ActionType, data.ActionDesc, data.OldData, data.NewData, data.TargetTable, data.TargetId, data.ClientIp, data.TraceId, data.SpanId, data.Id)
 	return err
 }
 
