@@ -19,7 +19,7 @@ func (a *AuditMQ) consumer() error {
 		for res := range results {
 			var msg *AuditReq
 			if err := json.Unmarshal(res.Body, &msg); err != nil {
-				res.Reject(false)
+				logx.Errorw("failed to unmarshal message", logx.Field("error", err))
 				continue
 			}
 			if _, err := a.model.Insert(context.Background(), &audit.Audit{
@@ -36,11 +36,26 @@ func (a *AuditMQ) consumer() error {
 				TraceId:     sql.NullString{String: msg.TraceID, Valid: true},
 				CreatedAt:   time.Unix(msg.CreatedAt, 0),
 			}); err != nil {
-				res.Reject(false)
+				logx.Errorw("insert failed, rejecting message",
+					logx.Field("err", err),
+					logx.Field("body", string(res.Body)),
+				)
+				// 显式拒绝消息，不重新入队（requeue=false），进入死信队列
+				if err := res.Nack(false, false); err != nil {
+					logx.Errorw("NACK failed",
+						logx.Field("err", err),
+						logx.Field("body", string(res.Body)),
+					)
+				}
 				continue
 			}
 			// 消息确认
-			res.Ack(false)
+			if err := res.Ack(false); err != nil {
+				logx.Errorw("ACK failed",
+					logx.Field("error", err),
+					logx.Field("body", string(res.Body)), // 记录完整消息内容
+				)
+			}
 		}
 	}()
 	return nil
