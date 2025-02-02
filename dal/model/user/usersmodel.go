@@ -17,6 +17,7 @@ type (
 		withSession(session sqlx.Session) UsersModel
 		UpdateDeletebyId(ctx context.Context, userId int64, userDeleted bool) error
 		UpdateDeletebyEmail(ctx context.Context, email string, userDeleted bool) error
+		FindAllEmails() ([]string, error)
 	}
 
 	customUsersModel struct {
@@ -45,4 +46,10 @@ func (m *customUsersModel) UpdateDeletebyEmail(ctx context.Context, email string
 	query := fmt.Sprintf("update %s set `user_deleted` = ? where `email` = ?", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, userDeleted, email)
 	return err
+}
+func (m *customUsersModel) FindAllEmails() ([]string, error) {
+	query := fmt.Sprintf("SELECT email FROM %s", m.table)
+	var emails []string
+	err := m.conn.QueryRows(&emails, query)
+	return emails, err
 }

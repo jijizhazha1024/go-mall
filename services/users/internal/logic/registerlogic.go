@@ -2,8 +2,10 @@ package logic
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
 	"errors"
+	"math/big"
 
 	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
@@ -26,6 +28,22 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 		svcCtx: svcCtx,
 		Logger: logx.WithContext(ctx),
 	}
+}
+
+var avatarList = []string{
+	"http://example.com/avatar1.jpg",
+	"http://example.com/avatar2.jpg",
+	"http://example.com/avatar3.jpg",
+	// 添加更多的头像URL
+}
+
+func getRandomAvatar() (string, error) {
+	max := big.NewInt(int64(len(avatarList)))
+	n, err := rand.Int(rand.Reader, max)
+	if err != nil {
+		return "", err
+	}
+	return avatarList[n.Int64()], nil
 }
 
 // 注册方法
@@ -58,15 +76,24 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Info("用户不存在", email)
+			avatar, err := getRandomAvatar()
+			if err != nil {
+				l.Logger.Error("获取头像失败", err)
+				return users_biz.HandleRegistererror("获取头像失败", 1, errors.New("获取头像失败"))
+			}
+
 			// 用户不存在，直接注册
 			result, insertErr := userMoel.Insert(l.ctx, &user.Users{
 				Email:        email,
 				PasswordHash: passwordhash,
+				AvatarUrl:    sql.NullString{String: avatar, Valid: true},
 			})
+			l.svcCtx.Bf.Add(in.Email)
 			if insertErr != nil {
 				l.Logger.Error("用户注册失败", insertErr)
 				return users_biz.HandleRegistererror("用户注册失败", 1, errors.New("用户注册失败"))
 			}
+
 			userId, lastInsertErr := result.LastInsertId()
 			if lastInsertErr != nil {
 				l.Logger.Error("获取用户ID失败", lastInsertErr)
@@ -89,6 +116,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				l.Logger.Error("更新用户状态失败", updateErr)
 				return users_biz.HandleRegistererror("更新用户id失败", 1, errors.New("更新用户id失败"))
 			}
+
 			return users_biz.HandleRegisterResp("用户已存在，已恢复", 0, uint32(existUser.UserId), "token")
 		} else { // 未删除
 			l.Logger.Error("邮箱已注册")

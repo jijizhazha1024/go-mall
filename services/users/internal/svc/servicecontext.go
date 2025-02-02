@@ -1,6 +1,7 @@
 package svc
 
 import (
+	"jijizhazha1024/go-mall/services/users/internal/bloom_filter"
 	"jijizhazha1024/go-mall/services/users/internal/config"
 	"jijizhazha1024/go-mall/services/users/internal/db"
 
@@ -10,6 +11,7 @@ import (
 type ServiceContext struct {
 	Config config.Config
 	Mysql  sqlx.SqlConn
+	Bf     *bloom_filter.BloomFilter
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {

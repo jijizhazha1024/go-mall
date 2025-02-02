@@ -41,6 +41,10 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 		String: in.Email,
 		Valid:  true,
 	}
+	// 新增：布隆过滤器预检
+	if !l.svcCtx.Bf.Contains(in.Email) {
+		return users_biz.HandleLoginerror("email not allowed", 1, errors.New("email not allowed"))
+	}
 	// 2. 查询用户信息
 	user, err := userMoel.FindOneByEmail(l.ctx, email)
 	if err != nil {

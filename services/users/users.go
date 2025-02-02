@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 
+	"jijizhazha1024/go-mall/dal/model/user"
+	"jijizhazha1024/go-mall/services/users/internal/bloom_filter"
 	"jijizhazha1024/go-mall/services/users/internal/config"
 	"jijizhazha1024/go-mall/services/users/internal/server"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
@@ -40,7 +42,14 @@ func main() {
 		panic(err)
 	}
 	defer s.Stop()
+	bf := bloom_filter.NewBloomFilter(1_000_000, 0.01)
+	userModel := user.NewUsersModel(ctx.Mysql)
+	emails, _ := userModel.FindAllEmails()
 
+	for _, email := range emails {
+		bf.Add(email) // 将字符串添加到布隆过滤器
+	}
+	ctx.Bf = bf // 将布隆过滤器添加到服务上下文
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()
 }
