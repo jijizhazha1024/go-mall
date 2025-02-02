@@ -57,6 +57,8 @@ message LogoutResponse {
 
   uint32 user_id = 3;
     string token = 4;
+   int64    logout_time = 5; // 登出时间
+
 }
 
 

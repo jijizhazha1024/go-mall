@@ -25,10 +25,12 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 
 // 登出方法
 func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, error) {
-	// todo: add your logic here and delete this line
-	// 1. 校验token
-	// 2. 删除token
-	// 3. 返回响应
+	//1、验证token是否有效
+	//2、bool查看用户是否存在
+	// 3、在数据库中加入登出时间
+	//userMoel := user.NewUsersModel(l.svcCtx.Mysql)
+
+	//4、返回登出时间
 
 	return &users.LogoutResponse{}, nil
 }
