@@ -34,3 +34,9 @@ func HandleUpdateUsererror(msg string, code int, err error) (*users.UpdateUserRe
 		StatusMsg:  msg,
 	}, err
 }
+func HandleLogoutUsererror(msg string, code int, err error) (*users.LogoutResponse, error) {
+	return &users.LogoutResponse{
+		StatusCode: uint32(code),
+		StatusMsg:  msg,
+	}, err
+}

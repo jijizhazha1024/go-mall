@@ -1,6 +1,9 @@
 package users_biz
 
-import "jijizhazha1024/go-mall/services/users/users"
+import (
+	"jijizhazha1024/go-mall/services/users/users"
+	"time"
+)
 
 func HandleLoginResp(msg string, code int, user_id uint32, token string, user_name string) (*users.LoginResponse, error) {
 	return &users.LoginResponse{
@@ -40,5 +43,14 @@ func HandleUpdateUserResp(msg string, code int, user_id uint32, token string) (*
 		StatusMsg:  msg,
 		UserId:     user_id,
 		Token:      token,
+	}, nil
+}
+func HandleLogoutUserResp(msg string, code int, user_id uint32, token string, logout_at time.Time) (*users.LogoutResponse, error) {
+	return &users.LogoutResponse{
+		StatusCode: uint32(code),
+		StatusMsg:  msg,
+		UserId:     user_id,
+		Token:      token,
+		LogoutTime: logout_at.Unix(),
 	}, nil
 }

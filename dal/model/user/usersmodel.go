@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
@@ -18,6 +19,9 @@ type (
 		UpdateDeletebyId(ctx context.Context, userId int64, userDeleted bool) error
 		UpdateDeletebyEmail(ctx context.Context, email string, userDeleted bool) error
 		FindAllEmails() ([]string, error)
+		UpdateLogoutTime(ctx context.Context, userId int64, logoutTime time.Time) error
+		// 从数据库中获取登出时间
+
 	}
 
 	customUsersModel struct {
@@ -53,3 +57,10 @@ func (m *customUsersModel) FindAllEmails() ([]string, error) {
 	err := m.conn.QueryRows(&emails, query)
 	return emails, err
 }
+func (m *customUsersModel) UpdateLogoutTime(ctx context.Context, userId int64, logoutTime time.Time) error {
+	query := fmt.Sprintf("update %s set `logout_at` = ? where `user_id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, logoutTime, userId)
+	return err
+}
+
+// 从数据库中获取登出时间
