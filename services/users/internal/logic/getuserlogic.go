@@ -44,5 +44,5 @@ func (l *GetUserLogic) GetUser(in *users.GetUserRequest) (*users.GetUserResponse
 		return users_biz.HandleGetUsererror("user deleted", 1, errors.New("user deleted"))
 	}
 
-	return users_biz.HandleGetUserResp("get user success", 0, uint32(user.UserId), user.Username.String)
+	return users_biz.HandleGetUserResp("get user success", 0, uint32(user.UserId), user.Username.String, user.Email.String)
 }

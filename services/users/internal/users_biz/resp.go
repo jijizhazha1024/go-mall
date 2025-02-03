@@ -22,12 +22,13 @@ func HandleRegisterResp(msg string, code int, user_id uint32, token string) (*us
 		Token:      token,
 	}, nil
 }
-func HandleGetUserResp(msg string, code int, user_id uint32, user_name string) (*users.GetUserResponse, error) {
+func HandleGetUserResp(msg string, code int, user_id uint32, user_name string, email string) (*users.GetUserResponse, error) {
 	return &users.GetUserResponse{
 		StatusCode: uint32(code),
 		StatusMsg:  msg,
 		UserId:     user_id,
 		UserName:   user_name,
+		Email:      email,
 	}, nil
 }
 func HandleDeleteUserResp(msg string, code int, user_id uint32) (*users.DeleteUserResponse, error) {
