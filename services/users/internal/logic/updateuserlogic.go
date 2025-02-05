@@ -36,13 +36,13 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	update_user, err := usermodel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return users_biz.HandleUpdateUsererror("user not found", 1, errors.New("user not found"))
+			return users_biz.HandleUpdateUsererror("user not found", 20016, errors.New("user not found"))
 		}
-		return users_biz.HandleUpdateUsererror("sql error", 1, errors.New("sql error"))
+		return users_biz.HandleUpdateUsererror("sql error", 500, errors.New("sql error"))
 	}
 
 	if update_user.UserDeleted {
-		return users_biz.HandleUpdateUsererror("user deleted", 1, errors.New("user deleted"))
+		return users_biz.HandleUpdateUsererror("user deleted", 20016, errors.New("user deleted"))
 	}
 
 	email := sql.NullString{
@@ -74,7 +74,7 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 		},
 	})
 	if err != nil {
-		return users_biz.HandleUpdateUsererror("sql error", 1, errors.New("sql error"))
+		return users_biz.HandleUpdateUsererror("sql error", 500, errors.New("sql error"))
 	}
 	return users_biz.HandleUpdateUserResp("user updated successfully", 0, in.UserId, "token") // 调用HandleUpdateUserResp方法返回响)
 

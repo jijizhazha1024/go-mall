@@ -36,18 +36,18 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Info("用户不存在：%d", in.UserId)
-			return users_biz.HandleDeleteUsererror("用户不存在", 1, err)
+			return users_biz.HandleDeleteUsererror("用户不存在", 20016, err)
 		}
-		return users_biz.HandleDeleteUsererror("查询失败", 1, err)
+		return users_biz.HandleDeleteUsererror("查询失败", 500, err)
 	}
 	// 删除用户
 	if exituser.UserDeleted {
 		l.Logger.Info("用户已删除", in.UserId)
-		return users_biz.HandleDeleteUsererror("you have deleted this user", 1, errors.New("you have deleted this user"))
+		return users_biz.HandleDeleteUsererror("you have deleted this user", 20016, errors.New("you have deleted this user"))
 	}
 	err = userMoel.UpdateDeletebyId(l.ctx, int64(in.UserId), true)
 	if err != nil {
-		return users_biz.HandleDeleteUsererror("删除失败", 1, err)
+		return users_biz.HandleDeleteUsererror("删除失败", 20011, err)
 	}
 
 	return users_biz.HandleDeleteUserResp("删除成功", 0, in.UserId)

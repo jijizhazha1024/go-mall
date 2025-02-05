@@ -35,7 +35,7 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	userMoel := user.NewUsersModel(l.svcCtx.Mysql)
 	// 1. 校验参数
 	if in.Email == "" || in.Password == "" {
-		return users_biz.HandleLoginerror("email or password is empty", 1, errors.New("email or password is empty"))
+		return users_biz.HandleLoginerror("email or password is empty", 400, errors.New("email or password is empty"))
 	}
 	email := sql.NullString{
 		String: in.Email,
@@ -43,18 +43,18 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	}
 	// 新增：布隆过滤器预检
 	if !l.svcCtx.Bf.Contains(in.Email) {
-		return users_biz.HandleLoginerror("email not allowed", 1, errors.New("email not allowed"))
+		return users_biz.HandleLoginerror("email not allowed", 20016, errors.New("email not allowed"))
 	}
 	// 2. 查询用户信息
 	user, err := userMoel.FindOneByEmail(l.ctx, email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return users_biz.HandleLoginerror("user not found", 1, errors.New("user not found"))
+			return users_biz.HandleLoginerror("user not found", 20016, errors.New("user not found"))
 		}
-		return users_biz.HandleLoginerror("sql error", 1, errors.New("sql error"))
+		return users_biz.HandleLoginerror("sql error", 500, errors.New("sql error"))
 	}
 	if user.UserDeleted {
-		return users_biz.HandleLoginerror("user deleted", 1, errors.New("user deleted"))
+		return users_biz.HandleLoginerror("user deleted", 20016, errors.New("user deleted"))
 	}
 
 	// 3. 校验密码
@@ -62,7 +62,7 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash.String), []byte(in.Password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return users_biz.HandleLoginerror("password error", 1, errors.New("password error"))
+			return users_biz.HandleLoginerror("password error", 400, errors.New("password error"))
 		}
 		return nil, err
 	}

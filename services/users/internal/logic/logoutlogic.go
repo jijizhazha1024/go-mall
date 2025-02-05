@@ -41,17 +41,17 @@ func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, er
 	if err != nil {
 		if errors.Is(err, user.ErrNotFound) {
 			// 用户不存在
-			return users_biz.HandleLogoutUserResp("user not found", 1, 0, "", time.Now())
+			return users_biz.HandleLogoutUserResp("user not found", 20016, 0, "", time.Now())
 		}
 		// 处理错误
-		return users_biz.HandleLogoutUserResp("sql error", 1, 0, "", time.Now())
+		return users_biz.HandleLogoutUserResp("sql error", 500, 0, "", time.Now())
 	}
 
 	// 从数据库中获取登出时间
 	user, err := userMoel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		// 处理错误
-		return users_biz.HandleLogoutUserResp("sql error", 1, 0, "", time.Now())
+		return users_biz.HandleLogoutUserResp("sql error", 500, 0, "", time.Now())
 	}
 
 	// 构造返回值

@@ -91,18 +91,18 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			l.svcCtx.Bf.Add(in.Email)
 			if insertErr != nil {
 				l.Logger.Error("用户注册失败", insertErr)
-				return users_biz.HandleRegistererror("用户注册失败", 1, errors.New("用户注册失败"))
+				return users_biz.HandleRegistererror("用户注册失败", 20002, errors.New("用户注册失败"))
 			}
 
 			userId, lastInsertErr := result.LastInsertId()
 			if lastInsertErr != nil {
 				l.Logger.Error("获取用户ID失败", lastInsertErr)
-				return users_biz.HandleRegistererror("获取用户id失败", 1, errors.New("获取用户id失败"))
+				return users_biz.HandleRegistererror("获取用户id失败", 500, errors.New("获取用户id失败"))
 			}
 			return users_biz.HandleRegisterResp("注册成功", 0, uint32(userId), "token")
 		}
 		l.Logger.Error("查询用户失败", err)
-		return users_biz.HandleRegistererror("查询用户id失败", 1, errors.New("查询用户id失败"))
+		return users_biz.HandleRegistererror("查询用户id失败", 500, errors.New("查询用户id失败"))
 	}
 
 	if existUser != nil {
@@ -114,13 +114,13 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			updateErr := userMoel.UpdateDeletebyEmail(l.ctx, in.Email, false)
 			if updateErr != nil {
 				l.Logger.Error("更新用户状态失败", updateErr)
-				return users_biz.HandleRegistererror("更新用户id失败", 1, errors.New("更新用户id失败"))
+				return users_biz.HandleRegistererror("更新用户id失败", 20013, errors.New("更新用户id失败"))
 			}
 
 			return users_biz.HandleRegisterResp("用户已存在，已恢复", 0, uint32(existUser.UserId), "token")
 		} else { // 未删除
 			l.Logger.Error("邮箱已注册")
-			return users_biz.HandleRegistererror("邮箱已注册", 1, errors.New("邮箱已注册"))
+			return users_biz.HandleRegistererror("邮箱已注册", 20003, errors.New("邮箱已注册"))
 		}
 
 	}
