@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
@@ -32,7 +31,6 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error) {
 	// todo: add your logic here and delete this line
 
-	userMoel := user.NewUsersModel(l.svcCtx.Mysql)
 	// 1. 校验参数
 	if in.Email == "" || in.Password == "" {
 		return users_biz.HandleLoginerror("email or password is empty", 400, errors.New("email or password is empty"))
@@ -46,7 +44,7 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 		return users_biz.HandleLoginerror("email not allowed", 20016, errors.New("email not allowed"))
 	}
 	// 2. 查询用户信息
-	user, err := userMoel.FindOneByEmail(l.ctx, email)
+	user, err := l.svcCtx.UsersModel.FindOneByEmail(l.ctx, email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return users_biz.HandleLoginerror("user not found", 20016, errors.New("user not found"))

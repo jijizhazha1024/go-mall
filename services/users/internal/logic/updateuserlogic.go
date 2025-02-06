@@ -32,8 +32,7 @@ func NewUpdateUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Update
 func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.UpdateUserResponse, error) {
 	// todo: add your logic here and delete this line
 
-	usermodel := user.NewUsersModel(l.svcCtx.Mysql)
-	update_user, err := usermodel.FindOne(l.ctx, int64(in.UserId))
+	update_user, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return users_biz.HandleUpdateUsererror("user not found", 20016, errors.New("user not found"))
@@ -61,7 +60,7 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 		passworhash = nil
 	}
 
-	err = usermodel.Update(l.ctx, &user.Users{
+	err = l.svcCtx.UsersModel.Update(l.ctx, &user.Users{
 		UserId: int64(in.UserId),
 		Username: sql.NullString{
 			String: string(in.UsrName),

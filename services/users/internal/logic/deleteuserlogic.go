@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
@@ -30,9 +29,9 @@ func NewDeleteUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delete
 // 删除用户方法
 func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.DeleteUserResponse, error) {
 	// todo: add your logic here and delete this line
-	userMoel := user.NewUsersModel(l.svcCtx.Mysql)
+
 	// 查询用户是否存在
-	exituser, err := userMoel.FindOne(l.ctx, int64(in.UserId))
+	exituser, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Info("用户不存在：%d", in.UserId)
@@ -45,7 +44,7 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 		l.Logger.Info("用户已删除", in.UserId)
 		return users_biz.HandleDeleteUsererror("you have deleted this user", 20016, errors.New("you have deleted this user"))
 	}
-	err = userMoel.UpdateDeletebyId(l.ctx, int64(in.UserId), true)
+	err = l.svcCtx.UsersModel.UpdateDeletebyId(l.ctx, int64(in.UserId), true)
 	if err != nil {
 		return users_biz.HandleDeleteUsererror("删除失败", 20011, err)
 	}

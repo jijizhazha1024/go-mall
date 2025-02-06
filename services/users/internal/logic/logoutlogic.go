@@ -30,14 +30,12 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 // 登出方法
 func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, error) {
 
-	userMoel := user.NewUsersModel(l.svcCtx.Mysql)
-
 	// 假设你有一个 userId 来标识用户
 
 	// 在数据库中加入登出时间（这部分假设已经完成）
 	logoutTime := time.Now()
 
-	err := userMoel.UpdateLogoutTime(l.ctx, int64(in.UserId), logoutTime)
+	err := l.svcCtx.UsersModel.UpdateLogoutTime(l.ctx, int64(in.UserId), logoutTime)
 	if err != nil {
 		if errors.Is(err, user.ErrNotFound) {
 			// 用户不存在
@@ -48,7 +46,7 @@ func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, er
 	}
 
 	// 从数据库中获取登出时间
-	user, err := userMoel.FindOne(l.ctx, int64(in.UserId))
+	user, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		// 处理错误
 		return users_biz.HandleLogoutUserResp("sql error", 500, 0, "", time.Now())

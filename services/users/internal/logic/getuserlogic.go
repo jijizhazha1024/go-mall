@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
@@ -31,9 +30,7 @@ func NewGetUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserLo
 func (l *GetUserLogic) GetUser(in *users.GetUserRequest) (*users.GetUserResponse, error) {
 	// todo: add your logic here and delete this line
 
-	usermodel := user.NewUsersModel(l.svcCtx.Mysql)
-
-	user, err := usermodel.FindOne(l.ctx, int64(in.UserId))
+	user, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return users_biz.HandleGetUsererror("user not found", 20016, errors.New("user not found"))

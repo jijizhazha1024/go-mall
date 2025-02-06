@@ -56,7 +56,6 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 
 	}
 
-	userMoel := user.NewUsersModel(l.svcCtx.Mysql)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 	if err != nil {
 		l.Logger.Error("密码哈希生成失败", err)
@@ -72,7 +71,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 		Valid:  true,
 	}
 	//判断邮箱是否已注册，如果已注册，是否处于删除状态
-	existUser, err := userMoel.FindOneByEmail(l.ctx, email)
+	existUser, err := l.svcCtx.UsersModel.FindOneByEmail(l.ctx, email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Info("用户不存在", email)
@@ -83,7 +82,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			}
 
 			// 用户不存在，直接注册
-			result, insertErr := userMoel.Insert(l.ctx, &user.Users{
+			result, insertErr := l.svcCtx.UsersModel.Insert(l.ctx, &user.Users{
 				Email:        email,
 				PasswordHash: passwordhash,
 				AvatarUrl:    sql.NullString{String: avatar, Valid: true},
@@ -111,7 +110,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 		userDeleted := existUser.UserDeleted
 		if userDeleted { // 已删除
 			// 将删除状态改为false
-			updateErr := userMoel.UpdateDeletebyEmail(l.ctx, in.Email, false)
+			updateErr := l.svcCtx.UsersModel.UpdateDeletebyEmail(l.ctx, in.Email, false)
 			if updateErr != nil {
 				l.Logger.Error("更新用户状态失败", updateErr)
 				return users_biz.HandleRegistererror("更新用户id失败", 20013, errors.New("更新用户id失败"))
