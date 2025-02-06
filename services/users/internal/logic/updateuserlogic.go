@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/internal/users_biz"
@@ -35,13 +36,17 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	update_user, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return users_biz.HandleUpdateUsererror("user not found", 20016, errors.New("user not found"))
+			logx.Info(code.UserNotFoundMsg, "user_id", in.UserId)
+			return users_biz.HandleUpdateUsererror(code.UserNotFoundMsg, code.UserNotFound)
 		}
-		return users_biz.HandleUpdateUsererror("sql error", 500, errors.New("sql error"))
+		logx.Error(code.ServerErrorMsg, err)
+		return users_biz.HandleUpdateUsererror(code.ServerErrorMsg, code.ServerError)
 	}
 
 	if update_user.UserDeleted {
-		return users_biz.HandleUpdateUsererror("user deleted", 20016, errors.New("user deleted"))
+
+		logx.Info(code.UserHaveDeletedMsg, "user_id", in.UserId)
+		return users_biz.HandleUpdateUsererror(code.UserHaveDeletedMsg, code.UserNotFound)
 	}
 
 	email := sql.NullString{
@@ -53,7 +58,7 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	if in.Password != "" { // 修改1: 处理密码为空字符串的情况
 		passworhash, err = bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 		if err != nil {
-			return users_biz.HandleUpdateUsererror("hash error", 1, errors.New("hash error"))
+			return users_biz.HandleUpdateUsererror("hash error", 1)
 		}
 	} else {
 		// 如果密码为空，则不更新密码
@@ -73,8 +78,9 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 		},
 	})
 	if err != nil {
-		return users_biz.HandleUpdateUsererror("sql error", 500, errors.New("sql error"))
+		logx.Error(code.ServerErrorMsg, err)
+		return users_biz.HandleUpdateUsererror(code.ServerErrorMsg, code.ServerError)
 	}
-	return users_biz.HandleUpdateUserResp("user updated successfully", 0, in.UserId, "token") // 调用HandleUpdateUserResp方法返回响)
+	return users_biz.HandleUpdateUserResp(code.UserUpdatedMsg, code.UserUpdated, in.UserId, "token") // 调用HandleUpdateUserResp方法返回响)
 
 }

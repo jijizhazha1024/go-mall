@@ -33,6 +33,8 @@ const (
 	UserUpdateFailed        = 20013
 	UserInfoRetrieved       = 20014
 	UserInfoRetrievalFailed = 20015
+	UserNotFound            = 20016
+	UserHaveDeleted         = 20017
 
 	// 商品服务
 
@@ -113,6 +115,8 @@ const (
 	UserUpdateFailedMsg        = "用户信息更新失败"
 	UserInfoRetrievedMsg       = "用户身份信息获取成功"
 	UserInfoRetrievalFailedMsg = "用户身份信息获取失败"
+	UserNotFoundMsg            = "用户不存在"
+	UserHaveDeletedMsg         = "用户已删除"
 
 	ProductCreatedMsg             = "商品创建成功"
 	ProductCreationFailedMsg      = "商品创建失败"

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/internal/users_biz"
@@ -38,21 +39,24 @@ func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, er
 	err := l.svcCtx.UsersModel.UpdateLogoutTime(l.ctx, int64(in.UserId), logoutTime)
 	if err != nil {
 		if errors.Is(err, user.ErrNotFound) {
+			logx.Error(code.UserNotFoundMsg, in.UserId, err)
 			// 用户不存在
-			return users_biz.HandleLogoutUserResp("user not found", 20016, 0, "", time.Now())
+			return users_biz.HandleLogoutUsererror(code.UserNotFoundMsg, code.UserNotFound)
 		}
 		// 处理错误
-		return users_biz.HandleLogoutUserResp("sql error", 500, 0, "", time.Now())
+		logx.Error(code.ServerErrorMsg, err)
+		return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError)
 	}
 
 	// 从数据库中获取登出时间
 	user, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
+		logx.Error(code.ServerErrorMsg, err)
 		// 处理错误
-		return users_biz.HandleLogoutUserResp("sql error", 500, 0, "", time.Now())
+		return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError)
 	}
 
 	// 构造返回值
 
-	return users_biz.HandleLogoutUserResp("success", 0, uint32(user.UserId), "token", logoutTime)
+	return users_biz.HandleLogoutUserResp(code.SuccessMsg, code.Success, uint32(user.UserId), "token", logoutTime)
 }

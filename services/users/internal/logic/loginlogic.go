@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
@@ -33,7 +34,7 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 
 	// 1. 校验参数
 	if in.Email == "" || in.Password == "" {
-		return users_biz.HandleLoginerror("email or password is empty", 400, errors.New("email or password is empty"))
+		return users_biz.HandleLoginerror("email or password is empty", 400)
 	}
 	email := sql.NullString{
 		String: in.Email,
@@ -41,29 +42,35 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	}
 	// 新增：布隆过滤器预检
 	if !l.svcCtx.Bf.Contains(in.Email) {
-		return users_biz.HandleLoginerror("email not allowed", 20016, errors.New("email not allowed"))
+		return users_biz.HandleLoginerror(code.UserNotFoundMsg, code.UserNotFound)
 	}
 	// 2. 查询用户信息
 	user, err := l.svcCtx.UsersModel.FindOneByEmail(l.ctx, email)
 	if err != nil {
+
 		if errors.Is(err, sql.ErrNoRows) {
-			return users_biz.HandleLoginerror("user not found", 20016, errors.New("user not found"))
+			logx.Error(code.UserNotFoundMsg, user.Email, err)
+			return users_biz.HandleLoginerror(code.UserNotFoundMsg, code.UserNotFound)
 		}
-		return users_biz.HandleLoginerror("sql error", 500, errors.New("sql error"))
+		logx.Error(code.ServerErrorMsg, err)
+		return users_biz.HandleLoginerror(code.ServerErrorMsg, code.ServerError)
 	}
 	if user.UserDeleted {
-		return users_biz.HandleLoginerror("user deleted", 20016, errors.New("user deleted"))
+		logx.Error(code.UserHaveDeletedMsg, user.Email, err)
+		return users_biz.HandleLoginerror(code.UserHaveDeletedMsg, code.UserHaveDeleted)
 	}
 
 	// 3. 校验密码
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash.String), []byte(in.Password))
 	if err != nil {
+		logx.Error(code.LoginFailedMsg, user.Email, err)
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return users_biz.HandleLoginerror("password error", 400, errors.New("password error"))
+			return users_biz.HandleLoginerror("password error", 400)
+
 		}
 		return nil, err
 	}
 
-	return users_biz.HandleLoginResp("login success", 0, uint32(user.UserId), "", user.Username.String)
+	return users_biz.HandleLoginResp(code.LoginSuccessMsg, code.LoginSuccess, uint32(user.UserId), "", user.Username.String)
 }

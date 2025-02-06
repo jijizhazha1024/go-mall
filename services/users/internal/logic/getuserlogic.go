@@ -3,8 +3,8 @@ package logic
 import (
 	"context"
 	"database/sql"
-	"errors"
 
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
@@ -33,13 +33,17 @@ func (l *GetUserLogic) GetUser(in *users.GetUserRequest) (*users.GetUserResponse
 	user, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return users_biz.HandleGetUsererror("user not found", 20016, errors.New("user not found"))
+			logx.Error(code.UserNotFoundMsg, user.UserId, err)
+			return users_biz.HandleGetUsererror(code.UserNotFoundMsg, code.UserNotFound)
 		}
-		return users_biz.HandleGetUsererror("sql error", 500, errors.New("sql error"))
-	}
-	if user.UserDeleted {
-		return users_biz.HandleGetUsererror("user deleted", 20011, errors.New("user deleted"))
+		logx.Error(code.ServerErrorMsg, err)
+		return users_biz.HandleGetUsererror(code.ServerErrorMsg, code.ServerError)
 	}
 
-	return users_biz.HandleGetUserResp("get user success", 0, uint32(user.UserId), user.Username.String, user.Email.String)
+	if user.UserDeleted {
+		logx.Error(code.UserInfoRetrievalFailedMsg, user.UserId, err)
+		return users_biz.HandleGetUsererror(code.UserInfoRetrievalFailedMsg, code.UserDeleted)
+	}
+
+	return users_biz.HandleGetUserResp(code.UserInfoRetrievedMsg, code.UserInfoRetrieved, uint32(user.UserId), user.Username.String, user.Email.String)
 }

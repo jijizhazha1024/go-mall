@@ -7,6 +7,7 @@ import (
 	"errors"
 	"math/big"
 
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/internal/users_biz"
@@ -78,7 +79,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			avatar, err := getRandomAvatar()
 			if err != nil {
 				l.Logger.Error("获取头像失败", err)
-				return users_biz.HandleRegistererror("获取头像失败", 1, errors.New("获取头像失败"))
+				return users_biz.HandleRegistererror("获取头像失败", 1)
 			}
 
 			// 用户不存在，直接注册
@@ -89,40 +90,40 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			})
 			l.svcCtx.Bf.Add(in.Email)
 			if insertErr != nil {
-				l.Logger.Error("用户注册失败", insertErr)
-				return users_biz.HandleRegistererror("用户注册失败", 20002, errors.New("用户注册失败"))
+				l.Logger.Error(code.UserCreationFailedMsg, insertErr)
+				return users_biz.HandleRegistererror(code.UserCreationFailedMsg, code.UserCreationFailed)
 			}
 
 			userId, lastInsertErr := result.LastInsertId()
 			if lastInsertErr != nil {
-				l.Logger.Error("获取用户ID失败", lastInsertErr)
-				return users_biz.HandleRegistererror("获取用户id失败", 500, errors.New("获取用户id失败"))
+				l.Logger.Error(code.UserInfoRetrievalFailedMsg, lastInsertErr)
+				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed)
 			}
-			return users_biz.HandleRegisterResp("注册成功", 0, uint32(userId), "token")
+			return users_biz.HandleRegisterResp(code.CartCreatedMsg, code.CartCreated, uint32(userId), "token")
 		}
-		l.Logger.Error("查询用户失败", err)
-		return users_biz.HandleRegistererror("查询用户id失败", 500, errors.New("查询用户id失败"))
+		l.Logger.Error(code.UserInfoRetrievalFailedMsg, err)
+		return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrieved)
 	}
 
 	if existUser != nil {
-		l.Logger.Info("用户已存在", existUser)
+		l.Logger.Info(code.UserAlreadyExistsMsg, existUser)
 		// 用户已存在，判断是否处于删除状态
 		userDeleted := existUser.UserDeleted
 		if userDeleted { // 已删除
 			// 将删除状态改为false
 			updateErr := l.svcCtx.UsersModel.UpdateDeletebyEmail(l.ctx, in.Email, false)
 			if updateErr != nil {
-				l.Logger.Error("更新用户状态失败", updateErr)
-				return users_biz.HandleRegistererror("更新用户id失败", 20013, errors.New("更新用户id失败"))
+				l.Logger.Error(code.UserInfoRetrievalFailedMsg, updateErr)
+				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed)
 			}
 
-			return users_biz.HandleRegisterResp("用户已存在，已恢复", 0, uint32(existUser.UserId), "token")
+			return users_biz.HandleRegisterResp(code.UserCreatedMsg, code.UserCreated, uint32(existUser.UserId), "token")
 		} else { // 未删除
-			l.Logger.Error("邮箱已注册")
-			return users_biz.HandleRegistererror("邮箱已注册", 20003, errors.New("邮箱已注册"))
+			l.Logger.Error(code.UserAlreadyExistsMsg)
+			return users_biz.HandleRegistererror(code.UserAlreadyExistsMsg, code.UserAlreadyExists)
 		}
 
 	}
 
-	return users_biz.HandleRegisterResp("未知错误", 1, 0, "token")
+	return users_biz.HandleRegisterResp(code.ServerErrorMsg, code.ServerError, 0, "token")
 }

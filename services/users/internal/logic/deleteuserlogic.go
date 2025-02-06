@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
@@ -34,20 +35,22 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 	exituser, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			l.Logger.Info("用户不存在：%d", in.UserId)
-			return users_biz.HandleDeleteUsererror("用户不存在", 20016, err)
+			l.Logger.Info(code.UserNotFoundMsg, in.UserId, err)
+			return users_biz.HandleDeleteUsererror(code.UserNotFoundMsg, code.UserNotFound)
 		}
-		return users_biz.HandleDeleteUsererror("查询失败", 500, err)
+		l.Logger.Error(code.ServerErrorMsg, err)
+		return users_biz.HandleDeleteUsererror(code.ServerErrorMsg, code.ServerError)
 	}
 	// 删除用户
 	if exituser.UserDeleted {
-		l.Logger.Info("用户已删除", in.UserId)
-		return users_biz.HandleDeleteUsererror("you have deleted this user", 20016, errors.New("you have deleted this user"))
+		l.Logger.Info(code.UserHaveDeletedMsg, in.UserId)
+		return users_biz.HandleDeleteUsererror(code.UserHaveDeletedMsg, code.UserHaveDeleted)
 	}
 	err = l.svcCtx.UsersModel.UpdateDeletebyId(l.ctx, int64(in.UserId), true)
 	if err != nil {
-		return users_biz.HandleDeleteUsererror("删除失败", 20011, err)
+		l.Logger.Error(code.UserDeletionFailedMsg, err)
+		return users_biz.HandleDeleteUsererror(code.UserDeletionFailedMsg, code.UserDeletionFailed)
 	}
 
-	return users_biz.HandleDeleteUserResp("删除成功", 0, in.UserId)
+	return users_biz.HandleDeleteUserResp(code.UserDeletedMsg, code.UserDeleted, in.UserId)
 }
