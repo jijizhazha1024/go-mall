@@ -49,7 +49,9 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	if err != nil {
 
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Error(code.UserNotFoundMsg, user.Email, err)
+			logx.Error(code.UserNotFoundMsg)
+			logx.Field("err", err)
+			logx.Field("user id", in.Email)
 			return users_biz.HandleLoginerror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
 		logx.Error(code.ServerErrorMsg, err)
@@ -57,6 +59,8 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	}
 	if user.UserDeleted {
 		logx.Error(code.UserHaveDeletedMsg, user.Email, err)
+		logx.Field("err", err)
+		logx.Field("email", user.Email)
 		return users_biz.HandleLoginerror(code.UserHaveDeletedMsg, code.UserHaveDeleted, nil)
 	}
 

@@ -37,6 +37,8 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			logx.Info(code.UserNotFoundMsg, "user_id", in.UserId)
+			logx.Field("err", err)
+			logx.Field("user_id", in.UserId)
 			return users_biz.HandleUpdateUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
 		logx.Error(code.ServerErrorMsg, err)
@@ -45,7 +47,9 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 
 	if update_user.UserDeleted {
 
-		logx.Info(code.UserHaveDeletedMsg, "user_id", in.UserId)
+		logx.Info(code.UserHaveDeletedMsg)
+		logx.Field("err", err)
+		logx.Field("user_id", in.UserId)
 		return users_biz.HandleUpdateUsererror(code.UserHaveDeletedMsg, code.UserNotFound, nil)
 	}
 
