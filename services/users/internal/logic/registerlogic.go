@@ -79,7 +79,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			avatar, err := getRandomAvatar()
 			if err != nil {
 				l.Logger.Error("获取头像失败", err)
-				return users_biz.HandleRegistererror("获取头像失败", 1)
+				return users_biz.HandleRegistererror("获取头像失败", 1, nil)
 			}
 
 			// 用户不存在，直接注册
@@ -91,18 +91,18 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			l.svcCtx.Bf.Add(in.Email)
 			if insertErr != nil {
 				l.Logger.Error(code.UserCreationFailedMsg, insertErr)
-				return users_biz.HandleRegistererror(code.UserCreationFailedMsg, code.UserCreationFailed)
+				return users_biz.HandleRegistererror(code.UserCreationFailedMsg, code.UserCreationFailed, nil)
 			}
 
 			userId, lastInsertErr := result.LastInsertId()
 			if lastInsertErr != nil {
 				l.Logger.Error(code.UserInfoRetrievalFailedMsg, lastInsertErr)
-				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed)
+				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, nil)
 			}
 			return users_biz.HandleRegisterResp(code.CartCreatedMsg, code.CartCreated, uint32(userId), "token")
 		}
 		l.Logger.Error(code.UserInfoRetrievalFailedMsg, err)
-		return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrieved)
+		return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrieved, nil)
 	}
 
 	if existUser != nil {
@@ -114,13 +114,13 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			updateErr := l.svcCtx.UsersModel.UpdateDeletebyEmail(l.ctx, in.Email, false)
 			if updateErr != nil {
 				l.Logger.Error(code.UserInfoRetrievalFailedMsg, updateErr)
-				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed)
+				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, nil)
 			}
 
 			return users_biz.HandleRegisterResp(code.UserCreatedMsg, code.UserCreated, uint32(existUser.UserId), "token")
 		} else { // 未删除
 			l.Logger.Error(code.UserAlreadyExistsMsg)
-			return users_biz.HandleRegistererror(code.UserAlreadyExistsMsg, code.UserAlreadyExists)
+			return users_biz.HandleRegistererror(code.UserAlreadyExistsMsg, code.UserAlreadyExists, nil)
 		}
 
 	}

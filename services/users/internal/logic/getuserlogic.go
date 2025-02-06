@@ -34,15 +34,15 @@ func (l *GetUserLogic) GetUser(in *users.GetUserRequest) (*users.GetUserResponse
 	if err != nil {
 		if err == sql.ErrNoRows {
 			logx.Error(code.UserNotFoundMsg, user.UserId, err)
-			return users_biz.HandleGetUsererror(code.UserNotFoundMsg, code.UserNotFound)
+			return users_biz.HandleGetUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
 		logx.Error(code.ServerErrorMsg, err)
-		return users_biz.HandleGetUsererror(code.ServerErrorMsg, code.ServerError)
+		return users_biz.HandleGetUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 
 	if user.UserDeleted {
 		logx.Error(code.UserInfoRetrievalFailedMsg, user.UserId, err)
-		return users_biz.HandleGetUsererror(code.UserInfoRetrievalFailedMsg, code.UserDeleted)
+		return users_biz.HandleGetUsererror(code.UserInfoRetrievalFailedMsg, code.UserDeleted, nil)
 	}
 
 	return users_biz.HandleGetUserResp(code.UserInfoRetrievedMsg, code.UserInfoRetrieved, uint32(user.UserId), user.Username.String, user.Email.String)

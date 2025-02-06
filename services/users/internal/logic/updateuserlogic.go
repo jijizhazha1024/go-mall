@@ -37,16 +37,16 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			logx.Info(code.UserNotFoundMsg, "user_id", in.UserId)
-			return users_biz.HandleUpdateUsererror(code.UserNotFoundMsg, code.UserNotFound)
+			return users_biz.HandleUpdateUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
 		logx.Error(code.ServerErrorMsg, err)
-		return users_biz.HandleUpdateUsererror(code.ServerErrorMsg, code.ServerError)
+		return users_biz.HandleUpdateUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 
 	if update_user.UserDeleted {
 
 		logx.Info(code.UserHaveDeletedMsg, "user_id", in.UserId)
-		return users_biz.HandleUpdateUsererror(code.UserHaveDeletedMsg, code.UserNotFound)
+		return users_biz.HandleUpdateUsererror(code.UserHaveDeletedMsg, code.UserNotFound, nil)
 	}
 
 	email := sql.NullString{
@@ -58,7 +58,7 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	if in.Password != "" { // 修改1: 处理密码为空字符串的情况
 		passworhash, err = bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 		if err != nil {
-			return users_biz.HandleUpdateUsererror("hash error", 1)
+			return users_biz.HandleUpdateUsererror("hash error", 1, nil)
 		}
 	} else {
 		// 如果密码为空，则不更新密码
@@ -79,7 +79,7 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	})
 	if err != nil {
 		logx.Error(code.ServerErrorMsg, err)
-		return users_biz.HandleUpdateUsererror(code.ServerErrorMsg, code.ServerError)
+		return users_biz.HandleUpdateUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 	return users_biz.HandleUpdateUserResp(code.UserUpdatedMsg, code.UserUpdated, in.UserId, "token") // 调用HandleUpdateUserResp方法返回响)
 

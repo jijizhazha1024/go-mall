@@ -41,11 +41,11 @@ func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, er
 		if errors.Is(err, user.ErrNotFound) {
 			logx.Error(code.UserNotFoundMsg, in.UserId, err)
 			// 用户不存在
-			return users_biz.HandleLogoutUsererror(code.UserNotFoundMsg, code.UserNotFound)
+			return users_biz.HandleLogoutUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
 		// 处理错误
 		logx.Error(code.ServerErrorMsg, err)
-		return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError)
+		return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 
 	// 从数据库中获取登出时间
@@ -53,7 +53,7 @@ func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, er
 	if err != nil {
 		logx.Error(code.ServerErrorMsg, err)
 		// 处理错误
-		return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError)
+		return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 
 	// 构造返回值
