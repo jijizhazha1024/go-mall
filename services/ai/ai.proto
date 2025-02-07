@@ -1,16 +1,36 @@
 syntax = "proto3";
-
 package ai;
-option go_package="./ai";
 
-message Request {
-  string ping = 1;
+option go_package = "./ai";
+message NLPExecutorReq {
+  string command = 1;
+  uint32 user_id = 2;
+}
+enum CommandType{
+  Unknown = 0;
+  Query = 1;
+  Order = 2;
 }
 
-message Response {
-  string pong = 1;
+message ProductItem {
+  uint32 id = 1;
+  string name = 2;
+  string description = 3;
+  string picture = 4;
+  float price = 5;
+  int64 stock = 6;
+  repeated string categories = 7;
+}
+
+
+message NLPExecutorResp {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  repeated  ProductItem products = 3;
+  CommandType command_type = 4;
+
 }
 
 service Ai {
-  rpc Ping(Request) returns(Response);
+  rpc NLPExecutor(NLPExecutorReq) returns(NLPExecutorResp);
 }

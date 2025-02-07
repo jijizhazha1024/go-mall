@@ -8,7 +8,7 @@ import (
 
 type CommandStrategy interface {
 	Parse(ctx context.Context, input string, userID int) (model.AST, error)
-	Validate(ctx context.Context, userID int, ast model.AST) error
-	Execute(ctx context.Context, userID int, ast model.AST) (interface{}, error)
+	Validate(ctx context.Context, ast model.AST) error
+	Execute(ctx context.Context, ast model.AST) (interface{}, error)
 	GetCommandType() vars.CommandType
 }

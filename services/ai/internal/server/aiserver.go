@@ -22,7 +22,7 @@ func NewAiServer(svcCtx *svc.ServiceContext) *AiServer {
 	}
 }
 
-func (s *AiServer) Ping(ctx context.Context, in *ai.Request) (*ai.Response, error) {
-	l := logic.NewPingLogic(ctx, s.svcCtx)
-	return l.Ping(in)
+func (s *AiServer) NLPExecutor(ctx context.Context, in *ai.NLPExecutorReq) (*ai.NLPExecutorResp, error) {
+	l := logic.NewNLPExecutorLogic(ctx, s.svcCtx)
+	return l.NLPExecutor(in)
 }

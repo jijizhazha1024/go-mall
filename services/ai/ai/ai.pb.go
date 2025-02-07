@@ -20,16 +20,66 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Request struct {
+type CommandType int32
+
+const (
+	CommandType_Unknown CommandType = 0
+	CommandType_Query   CommandType = 1
+	CommandType_Order   CommandType = 2
+)
+
+// Enum value maps for CommandType.
+var (
+	CommandType_name = map[int32]string{
+		0: "Unknown",
+		1: "Query",
+		2: "Order",
+	}
+	CommandType_value = map[string]int32{
+		"Unknown": 0,
+		"Query":   1,
+		"Order":   2,
+	}
+)
+
+func (x CommandType) Enum() *CommandType {
+	p := new(CommandType)
+	*p = x
+	return p
+}
+
+func (x CommandType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (CommandType) Descriptor() protoreflect.EnumDescriptor {
+	return file_ai_proto_enumTypes[0].Descriptor()
+}
+
+func (CommandType) Type() protoreflect.EnumType {
+	return &file_ai_proto_enumTypes[0]
+}
+
+func (x CommandType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use CommandType.Descriptor instead.
+func (CommandType) EnumDescriptor() ([]byte, []int) {
+	return file_ai_proto_rawDescGZIP(), []int{0}
+}
+
+type NLPExecutorReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Ping string `protobuf:"bytes,1,opt,name=ping,proto3" json:"ping,omitempty"`
+	Command string `protobuf:"bytes,1,opt,name=command,proto3" json:"command,omitempty"`
+	UserId  uint32 `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 }
 
-func (x *Request) Reset() {
-	*x = Request{}
+func (x *NLPExecutorReq) Reset() {
+	*x = NLPExecutorReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_ai_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -37,13 +87,13 @@ func (x *Request) Reset() {
 	}
 }
 
-func (x *Request) String() string {
+func (x *NLPExecutorReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Request) ProtoMessage() {}
+func (*NLPExecutorReq) ProtoMessage() {}
 
-func (x *Request) ProtoReflect() protoreflect.Message {
+func (x *NLPExecutorReq) ProtoReflect() protoreflect.Message {
 	mi := &file_ai_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -55,28 +105,41 @@ func (x *Request) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Request.ProtoReflect.Descriptor instead.
-func (*Request) Descriptor() ([]byte, []int) {
+// Deprecated: Use NLPExecutorReq.ProtoReflect.Descriptor instead.
+func (*NLPExecutorReq) Descriptor() ([]byte, []int) {
 	return file_ai_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Request) GetPing() string {
+func (x *NLPExecutorReq) GetCommand() string {
 	if x != nil {
-		return x.Ping
+		return x.Command
 	}
 	return ""
 }
 
-type Response struct {
+func (x *NLPExecutorReq) GetUserId() uint32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type ProductItem struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Pong string `protobuf:"bytes,1,opt,name=pong,proto3" json:"pong,omitempty"`
+	Id          uint32   `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name        string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description string   `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Picture     string   `protobuf:"bytes,4,opt,name=picture,proto3" json:"picture,omitempty"`
+	Price       float32  `protobuf:"fixed32,5,opt,name=price,proto3" json:"price,omitempty"`
+	Stock       int64    `protobuf:"varint,6,opt,name=stock,proto3" json:"stock,omitempty"`
+	Categories  []string `protobuf:"bytes,7,rep,name=categories,proto3" json:"categories,omitempty"`
 }
 
-func (x *Response) Reset() {
-	*x = Response{}
+func (x *ProductItem) Reset() {
+	*x = ProductItem{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_ai_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -84,13 +147,13 @@ func (x *Response) Reset() {
 	}
 }
 
-func (x *Response) String() string {
+func (x *ProductItem) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Response) ProtoMessage() {}
+func (*ProductItem) ProtoMessage() {}
 
-func (x *Response) ProtoReflect() protoreflect.Message {
+func (x *ProductItem) ProtoReflect() protoreflect.Message {
 	mi := &file_ai_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -102,30 +165,171 @@ func (x *Response) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Response.ProtoReflect.Descriptor instead.
-func (*Response) Descriptor() ([]byte, []int) {
+// Deprecated: Use ProductItem.ProtoReflect.Descriptor instead.
+func (*ProductItem) Descriptor() ([]byte, []int) {
 	return file_ai_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *Response) GetPong() string {
+func (x *ProductItem) GetId() uint32 {
 	if x != nil {
-		return x.Pong
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ProductItem) GetName() string {
+	if x != nil {
+		return x.Name
 	}
 	return ""
+}
+
+func (x *ProductItem) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *ProductItem) GetPicture() string {
+	if x != nil {
+		return x.Picture
+	}
+	return ""
+}
+
+func (x *ProductItem) GetPrice() float32 {
+	if x != nil {
+		return x.Price
+	}
+	return 0
+}
+
+func (x *ProductItem) GetStock() int64 {
+	if x != nil {
+		return x.Stock
+	}
+	return 0
+}
+
+func (x *ProductItem) GetCategories() []string {
+	if x != nil {
+		return x.Categories
+	}
+	return nil
+}
+
+type NLPExecutorResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	StatusCode  uint32         `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
+	StatusMsg   string         `protobuf:"bytes,2,opt,name=status_msg,json=statusMsg,proto3" json:"status_msg,omitempty"`
+	Products    []*ProductItem `protobuf:"bytes,3,rep,name=products,proto3" json:"products,omitempty"`
+	CommandType CommandType    `protobuf:"varint,4,opt,name=command_type,json=commandType,proto3,enum=ai.CommandType" json:"command_type,omitempty"`
+}
+
+func (x *NLPExecutorResp) Reset() {
+	*x = NLPExecutorResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_ai_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *NLPExecutorResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NLPExecutorResp) ProtoMessage() {}
+
+func (x *NLPExecutorResp) ProtoReflect() protoreflect.Message {
+	mi := &file_ai_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NLPExecutorResp.ProtoReflect.Descriptor instead.
+func (*NLPExecutorResp) Descriptor() ([]byte, []int) {
+	return file_ai_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *NLPExecutorResp) GetStatusCode() uint32 {
+	if x != nil {
+		return x.StatusCode
+	}
+	return 0
+}
+
+func (x *NLPExecutorResp) GetStatusMsg() string {
+	if x != nil {
+		return x.StatusMsg
+	}
+	return ""
+}
+
+func (x *NLPExecutorResp) GetProducts() []*ProductItem {
+	if x != nil {
+		return x.Products
+	}
+	return nil
+}
+
+func (x *NLPExecutorResp) GetCommandType() CommandType {
+	if x != nil {
+		return x.CommandType
+	}
+	return CommandType_Unknown
 }
 
 var File_ai_proto protoreflect.FileDescriptor
 
 var file_ai_proto_rawDesc = []byte{
-	0x0a, 0x08, 0x61, 0x69, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x02, 0x61, 0x69, 0x22, 0x1d,
-	0x0a, 0x07, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x69, 0x6e,
-	0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x70, 0x69, 0x6e, 0x67, 0x22, 0x1e, 0x0a,
-	0x08, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x6f, 0x6e,
-	0x67, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x70, 0x6f, 0x6e, 0x67, 0x32, 0x27, 0x0a,
-	0x02, 0x41, 0x69, 0x12, 0x21, 0x0a, 0x04, 0x50, 0x69, 0x6e, 0x67, 0x12, 0x0b, 0x2e, 0x61, 0x69,
-	0x2e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0c, 0x2e, 0x61, 0x69, 0x2e, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x06, 0x5a, 0x04, 0x2e, 0x2f, 0x61, 0x69, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x0a, 0x08, 0x61, 0x69, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x02, 0x61, 0x69, 0x22, 0x43,
+	0x0a, 0x0e, 0x4e, 0x4c, 0x50, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x52, 0x65, 0x71,
+	0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x07, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73,
+	0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x06, 0x75, 0x73, 0x65,
+	0x72, 0x49, 0x64, 0x22, 0xb9, 0x01, 0x0a, 0x0b, 0x50, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x49,
+	0x74, 0x65, 0x6d, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52,
+	0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x20, 0x0a, 0x0b, 0x64, 0x65, 0x73, 0x63, 0x72,
+	0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x64, 0x65,
+	0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x18, 0x0a, 0x07, 0x70, 0x69, 0x63,
+	0x74, 0x75, 0x72, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x70, 0x69, 0x63, 0x74,
+	0x75, 0x72, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x70, 0x72, 0x69, 0x63, 0x65, 0x18, 0x05, 0x20, 0x01,
+	0x28, 0x02, 0x52, 0x05, 0x70, 0x72, 0x69, 0x63, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x73, 0x74, 0x6f,
+	0x63, 0x6b, 0x18, 0x06, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x73, 0x74, 0x6f, 0x63, 0x6b, 0x12,
+	0x1e, 0x0a, 0x0a, 0x63, 0x61, 0x74, 0x65, 0x67, 0x6f, 0x72, 0x69, 0x65, 0x73, 0x18, 0x07, 0x20,
+	0x03, 0x28, 0x09, 0x52, 0x0a, 0x63, 0x61, 0x74, 0x65, 0x67, 0x6f, 0x72, 0x69, 0x65, 0x73, 0x22,
+	0xb2, 0x01, 0x0a, 0x0f, 0x4e, 0x4c, 0x50, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x52,
+	0x65, 0x73, 0x70, 0x12, 0x1f, 0x0a, 0x0b, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x5f, 0x63, 0x6f,
+	0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0a, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73,
+	0x43, 0x6f, 0x64, 0x65, 0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x5f, 0x6d,
+	0x73, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73,
+	0x4d, 0x73, 0x67, 0x12, 0x2b, 0x0a, 0x08, 0x70, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73, 0x18,
+	0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x61, 0x69, 0x2e, 0x50, 0x72, 0x6f, 0x64, 0x75,
+	0x63, 0x74, 0x49, 0x74, 0x65, 0x6d, 0x52, 0x08, 0x70, 0x72, 0x6f, 0x64, 0x75, 0x63, 0x74, 0x73,
+	0x12, 0x32, 0x0a, 0x0c, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x5f, 0x74, 0x79, 0x70, 0x65,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x0f, 0x2e, 0x61, 0x69, 0x2e, 0x43, 0x6f, 0x6d, 0x6d,
+	0x61, 0x6e, 0x64, 0x54, 0x79, 0x70, 0x65, 0x52, 0x0b, 0x63, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64,
+	0x54, 0x79, 0x70, 0x65, 0x2a, 0x30, 0x0a, 0x0b, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x54,
+	0x79, 0x70, 0x65, 0x12, 0x0b, 0x0a, 0x07, 0x55, 0x6e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e, 0x10, 0x00,
+	0x12, 0x09, 0x0a, 0x05, 0x51, 0x75, 0x65, 0x72, 0x79, 0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x4f,
+	0x72, 0x64, 0x65, 0x72, 0x10, 0x02, 0x32, 0x3c, 0x0a, 0x02, 0x41, 0x69, 0x12, 0x36, 0x0a, 0x0b,
+	0x4e, 0x4c, 0x50, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x12, 0x12, 0x2e, 0x61, 0x69,
+	0x2e, 0x4e, 0x4c, 0x50, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72, 0x52, 0x65, 0x71, 0x1a,
+	0x13, 0x2e, 0x61, 0x69, 0x2e, 0x4e, 0x4c, 0x50, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x6f, 0x72,
+	0x52, 0x65, 0x73, 0x70, 0x42, 0x06, 0x5a, 0x04, 0x2e, 0x2f, 0x61, 0x69, 0x62, 0x06, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -140,19 +344,24 @@ func file_ai_proto_rawDescGZIP() []byte {
 	return file_ai_proto_rawDescData
 }
 
-var file_ai_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_ai_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_ai_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_ai_proto_goTypes = []any{
-	(*Request)(nil),  // 0: ai.Request
-	(*Response)(nil), // 1: ai.Response
+	(CommandType)(0),        // 0: ai.CommandType
+	(*NLPExecutorReq)(nil),  // 1: ai.NLPExecutorReq
+	(*ProductItem)(nil),     // 2: ai.ProductItem
+	(*NLPExecutorResp)(nil), // 3: ai.NLPExecutorResp
 }
 var file_ai_proto_depIdxs = []int32{
-	0, // 0: ai.Ai.Ping:input_type -> ai.Request
-	1, // 1: ai.Ai.Ping:output_type -> ai.Response
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: ai.NLPExecutorResp.products:type_name -> ai.ProductItem
+	0, // 1: ai.NLPExecutorResp.command_type:type_name -> ai.CommandType
+	1, // 2: ai.Ai.NLPExecutor:input_type -> ai.NLPExecutorReq
+	3, // 3: ai.Ai.NLPExecutor:output_type -> ai.NLPExecutorResp
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_ai_proto_init() }
@@ -162,7 +371,7 @@ func file_ai_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_ai_proto_msgTypes[0].Exporter = func(v any, i int) any {
-			switch v := v.(*Request); i {
+			switch v := v.(*NLPExecutorReq); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -174,7 +383,19 @@ func file_ai_proto_init() {
 			}
 		}
 		file_ai_proto_msgTypes[1].Exporter = func(v any, i int) any {
-			switch v := v.(*Response); i {
+			switch v := v.(*ProductItem); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_ai_proto_msgTypes[2].Exporter = func(v any, i int) any {
+			switch v := v.(*NLPExecutorResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -191,13 +412,14 @@ func file_ai_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_ai_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   2,
+			NumEnums:      1,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_ai_proto_goTypes,
 		DependencyIndexes: file_ai_proto_depIdxs,
+		EnumInfos:         file_ai_proto_enumTypes,
 		MessageInfos:      file_ai_proto_msgTypes,
 	}.Build()
 	File_ai_proto = out.File

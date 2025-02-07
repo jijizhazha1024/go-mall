@@ -13,11 +13,12 @@ import (
 )
 
 type (
-	Request  = ai.Request
-	Response = ai.Response
+	NLPExecutorReq  = ai.NLPExecutorReq
+	NLPExecutorResp = ai.NLPExecutorResp
+	ProductItem     = ai.ProductItem
 
 	Ai interface {
-		Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+		NLPExecutor(ctx context.Context, in *NLPExecutorReq, opts ...grpc.CallOption) (*NLPExecutorResp, error)
 	}
 
 	defaultAi struct {
@@ -31,7 +32,7 @@ func NewAi(cli zrpc.Client) Ai {
 	}
 }
 
-func (m *defaultAi) Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
+func (m *defaultAi) NLPExecutor(ctx context.Context, in *NLPExecutorReq, opts ...grpc.CallOption) (*NLPExecutorResp, error) {
 	client := ai.NewAiClient(m.cli.Conn())
-	return client.Ping(ctx, in, opts...)
+	return client.NLPExecutor(ctx, in, opts...)
 }

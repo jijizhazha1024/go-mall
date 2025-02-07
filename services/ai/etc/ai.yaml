@@ -6,3 +6,6 @@ Consul:
   Key: ai.rpc
   Meta:
     Protocol: grpc
+Gpt:
+  ApiKey: $GPT_API_KEY
+  ModelID: $GPT_MODEL_ID

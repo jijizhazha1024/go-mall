@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	Ai_Ping_FullMethodName = "/ai.Ai/Ping"
+	Ai_NLPExecutor_FullMethodName = "/ai.Ai/NLPExecutor"
 )
 
 // AiClient is the client API for Ai service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AiClient interface {
-	Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
+	NLPExecutor(ctx context.Context, in *NLPExecutorReq, opts ...grpc.CallOption) (*NLPExecutorResp, error)
 }
 
 type aiClient struct {
@@ -37,10 +37,10 @@ func NewAiClient(cc grpc.ClientConnInterface) AiClient {
 	return &aiClient{cc}
 }
 
-func (c *aiClient) Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
+func (c *aiClient) NLPExecutor(ctx context.Context, in *NLPExecutorReq, opts ...grpc.CallOption) (*NLPExecutorResp, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Response)
-	err := c.cc.Invoke(ctx, Ai_Ping_FullMethodName, in, out, cOpts...)
+	out := new(NLPExecutorResp)
+	err := c.cc.Invoke(ctx, Ai_NLPExecutor_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *aiClient) Ping(ctx context.Context, in *Request, opts ...grpc.CallOptio
 // All implementations must embed UnimplementedAiServer
 // for forward compatibility
 type AiServer interface {
-	Ping(context.Context, *Request) (*Response, error)
+	NLPExecutor(context.Context, *NLPExecutorReq) (*NLPExecutorResp, error)
 	mustEmbedUnimplementedAiServer()
 }
 
@@ -59,8 +59,8 @@ type AiServer interface {
 type UnimplementedAiServer struct {
 }
 
-func (UnimplementedAiServer) Ping(context.Context, *Request) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
+func (UnimplementedAiServer) NLPExecutor(context.Context, *NLPExecutorReq) (*NLPExecutorResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NLPExecutor not implemented")
 }
 func (UnimplementedAiServer) mustEmbedUnimplementedAiServer() {}
 
@@ -75,20 +75,20 @@ func RegisterAiServer(s grpc.ServiceRegistrar, srv AiServer) {
 	s.RegisterService(&Ai_ServiceDesc, srv)
 }
 
-func _Ai_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
+func _Ai_NLPExecutor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NLPExecutorReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AiServer).Ping(ctx, in)
+		return srv.(AiServer).NLPExecutor(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Ai_Ping_FullMethodName,
+		FullMethod: Ai_NLPExecutor_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AiServer).Ping(ctx, req.(*Request))
+		return srv.(AiServer).NLPExecutor(ctx, req.(*NLPExecutorReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -101,8 +101,8 @@ var Ai_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AiServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Ping",
-			Handler:    _Ai_Ping_Handler,
+			MethodName: "NLPExecutor",
+			Handler:    _Ai_NLPExecutor_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
