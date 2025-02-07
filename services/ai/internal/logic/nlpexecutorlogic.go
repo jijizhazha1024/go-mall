@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-
 	"jijizhazha1024/go-mall/services/ai/ai"
 	"jijizhazha1024/go-mall/services/ai/internal/svc"
 

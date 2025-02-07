@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
-	"jijizhazha1024/go-mall/common/utils/gpt"
 	"jijizhazha1024/go-mall/services/ai/internal/config"
 	"jijizhazha1024/go-mall/services/ai/internal/core/model"
 	"jijizhazha1024/go-mall/services/ai/internal/core/prompt/product_query"
 	"jijizhazha1024/go-mall/services/ai/internal/core/vars"
+	"jijizhazha1024/go-mall/services/ai/internal/utils/gpt"
 )
 
 type ProductQueryStrategy struct {

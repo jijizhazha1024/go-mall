@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/jsonx"
-	"jijizhazha1024/go-mall/common/utils/gpt"
 	"jijizhazha1024/go-mall/services/ai/internal/core/model"
+	"jijizhazha1024/go-mall/services/ai/internal/utils/gpt"
 	"testing"
 )
 

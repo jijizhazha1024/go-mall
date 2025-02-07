@@ -45,7 +45,6 @@ func (g *Gpt) ChatWithModel(ctx context.Context,
 	if err != nil {
 		return "", fmt.Errorf("standard chat error: %w", err)
 	}
-
 	if len(resp.Choices) > 0 && resp.Choices[0].Message.Content != nil {
 		return *resp.Choices[0].Message.Content.StringValue, nil
 	}

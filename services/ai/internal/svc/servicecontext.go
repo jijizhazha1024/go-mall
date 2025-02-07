@@ -1,13 +1,18 @@
 package svc
 
-import "jijizhazha1024/go-mall/services/ai/internal/config"
+import (
+	"jijizhazha1024/go-mall/services/ai/internal/config"
+	"jijizhazha1024/go-mall/services/ai/internal/core"
+)
 
 type ServiceContext struct {
-	Config config.Config
+	Config  config.Config
+	Command *core.Command
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
-		Config: c,
+		Command: core.NewCommand(&c),
+		Config:  c,
 	}
 }

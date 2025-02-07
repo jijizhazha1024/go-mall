@@ -3,7 +3,7 @@ package intention
 import (
 	"context"
 	"fmt"
-	"jijizhazha1024/go-mall/common/utils/gpt"
+	"jijizhazha1024/go-mall/services/ai/internal/utils/gpt"
 	"testing"
 )
 
