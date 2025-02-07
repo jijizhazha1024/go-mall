@@ -48,7 +48,7 @@ func (l *CreateAuditLogLogic) CreateAuditLog(in *audit.CreateAuditLogReq) (*audi
 	}
 	if err := l.svcCtx.AuditMQ.Product(&req); err != nil {
 		logx.Errorw("CreateAuditLogLogic.CreateAuditLog",
-			logx.Field("traceID", l.ctx.Value("traceID")),
+			logx.Field("traceID", traceID),
 			logx.Field("err", err.Error()))
 		return nil, err
 	}
