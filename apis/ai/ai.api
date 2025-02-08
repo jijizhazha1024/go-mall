@@ -1,0 +1,19 @@
+syntax = "v1"
+
+type Request {
+	Command string `json:"command"`
+}
+
+type Response {
+	result interface{} `json:"result"`
+}
+
+@server (
+	prefix:     /douyin/ai
+	middleware: WrapperAuthMiddleware // 添加中间件
+)
+service ai-api {
+	@handler AiHandler
+	post / (Request) returns (Response)
+}
+

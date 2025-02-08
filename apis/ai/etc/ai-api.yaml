@@ -1,0 +1,20 @@
+Name: ai-api
+Host: 0.0.0.0
+Port: 8010
+
+Consul:
+  Host: 124.71.72.124:8500
+  Key: ai-api
+
+
+# 链路追踪
+Telemetry:
+  Name: ai-api
+  Endpoint: http://124.71.72.124:14268/api/traces
+  Batcher: jaeger
+  Sampler: 1.0
+
+# rpc服务
+AuthsRpc:
+  Target: consul://124.71.72.124:8500/auths.rpc?wait=14s
+  NonBlock: true # 启动时是否阻塞 , 即使rpc服务没有启动也不会影响客户端的启动
