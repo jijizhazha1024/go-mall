@@ -19,10 +19,8 @@ Log:
   Encoding: "json"
   Path: "./logs/audit-rpc"
 
-MysqlConfig:
+Mysql:
   datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
-
-
 
 RabbitMQ:
   Host: "124.71.72.124"
@@ -30,3 +28,6 @@ RabbitMQ:
   User: "admin"
   Pass: "admin"
   VHost: "/"
+
+ElasticSearch:
+  Addr: "http://113.45.32.164:9200/"

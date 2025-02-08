@@ -27,7 +27,7 @@ func NewCreateAuditLogLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cr
 // CreateAuditLog 创建审计日志
 func (l *CreateAuditLogLogic) CreateAuditLog(in *audit.CreateAuditLogReq) (*audit.CreateAuditLogRes, error) {
 	// 1. 获取ClientIP
-	clientIP := ""
+	clientIP := "192.168.0.1"
 	spanContext := trace.SpanContextFromContext(l.ctx)
 	traceID := spanContext.TraceID().String()
 	spanID := spanContext.SpanID().String()

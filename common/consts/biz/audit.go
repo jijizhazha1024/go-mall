@@ -2,6 +2,8 @@ package biz
 
 const (
 	AuditRpcPort = 10008
+
+	EsIndexName = "audit_logs"
 )
 
 const (

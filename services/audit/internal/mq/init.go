@@ -1,8 +1,13 @@
 package mq
 
 import (
+	"context"
+	"fmt"
+	"github.com/olivere/elastic/v7"
 	"github.com/streadway/amqp"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"jijizhazha1024/go-mall/common/consts/biz"
+	audit2 "jijizhazha1024/go-mall/dal/es/audit"
 	"jijizhazha1024/go-mall/dal/model/audit"
 	"jijizhazha1024/go-mall/services/audit/internal/config"
 )
@@ -19,9 +24,10 @@ const (
 )
 
 type AuditMQ struct {
-	channel *amqp.Channel
-	conn    *amqp.Connection
-	model   audit.AuditModel
+	channel  *amqp.Channel
+	conn     *amqp.Connection
+	model    audit.AuditModel
+	esClient *elastic.Client
 }
 
 func (a *AuditMQ) Close() error {
@@ -106,11 +112,40 @@ func declareDeadQueue(channel *amqp.Channel) error {
 
 	return nil
 }
+
+func initEsIndex(ctx context.Context, client *elastic.Client) error {
+	// 创建索引
+	exists, err := client.IndexExists(biz.EsIndexName).Do(ctx)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		createIndex, err := client.CreateIndex(biz.EsIndexName).Body(audit2.Mapping).Do(context.Background())
+		if err != nil {
+			return err
+		}
+		if !createIndex.Acknowledged {
+			// 处理未确认创建的情况
+			return fmt.Errorf("创建索引失败")
+		}
+	}
+	return nil
+}
 func Init(c config.Config) (*AuditMQ, error) {
 	//mysql conn
 
-	model := audit.NewAuditModel(sqlx.NewMysql(c.MysqlConfig.DataSource))
-
+	model := audit.NewAuditModel(sqlx.NewMysql(c.Mysql.DataSource))
+	// es client
+	client, err := elastic.NewClient(
+		elastic.SetURL(c.ElasticSearch.Addr),
+		elastic.SetSniff(false),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if err := initEsIndex(context.Background(), client); err != nil {
+		return nil, err
+	}
 	// mq conn
 	conn, err := amqp.Dial(c.RabbitMQ.Dns())
 	if err != nil {
@@ -129,9 +164,10 @@ func Init(c config.Config) (*AuditMQ, error) {
 	}
 	// 启动监听协程
 	mq := &AuditMQ{
-		conn:    conn,
-		channel: channel,
-		model:   model,
+		conn:     conn,
+		channel:  channel,
+		model:    model,
+		esClient: client,
 	}
 	// 启动监听协程
 	if err := mq.consumer(); err != nil {

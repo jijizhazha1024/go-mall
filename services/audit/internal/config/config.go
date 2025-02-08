@@ -8,7 +8,8 @@ import (
 
 type Config struct {
 	zrpc.RpcServerConf
-	Consul      consul.Conf
-	RabbitMQ    config.RabbitMQConfig
-	MysqlConfig config.MysqlConfig
+	Consul        consul.Conf
+	RabbitMQ      config.RabbitMQConfig
+	Mysql         config.MysqlConfig
+	ElasticSearch config.ElasticSearchConfig
 }
