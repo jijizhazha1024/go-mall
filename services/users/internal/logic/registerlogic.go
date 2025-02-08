@@ -94,7 +94,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			l.svcCtx.Bf.Add(in.Email)
 			if insertErr != nil {
 
-				logx.Errorf(code.UserCreationFailedMsg, logx.Field("err", err), logx.Field("user email", in.Email))
+				logx.Errorw(code.UserCreationFailedMsg, logx.Field("err", err), logx.Field("user email", in.Email))
 				return users_biz.HandleRegistererror(code.UserCreationFailedMsg, code.UserCreationFailed, nil)
 			}
 
@@ -110,7 +110,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			logx.Field("email", in.Email)
 			return users_biz.HandleRegisterResp(code.CartCreatedMsg, code.CartCreated, uint32(userId), "token")
 		}
-		logx.Errorf(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user email", in.Email))
+		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user email", in.Email))
 
 		return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrieved, nil)
 	}

@@ -39,7 +39,7 @@ func (l *GetUserLogic) GetUser(in *users.GetUserRequest) (*users.GetUserResponse
 			logx.Field("user id", in.UserId)
 			return users_biz.HandleGetUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
-		logx.Errorf(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user id", in.UserId))
+		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user id", in.UserId))
 		return users_biz.HandleGetUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 

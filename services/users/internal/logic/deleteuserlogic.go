@@ -40,7 +40,7 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 			logx.Field("user id", in.UserId)
 			return users_biz.HandleDeleteUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
-		logx.Errorf(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user id", in.UserId))
+		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user id", in.UserId))
 		return users_biz.HandleDeleteUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 	// 删除用户

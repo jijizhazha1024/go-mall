@@ -44,7 +44,7 @@ func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, er
 			return users_biz.HandleLogoutUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
 		// 处理错误
-		logx.Errorf(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user id", in.UserId))
+		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user id", in.UserId))
 		return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 

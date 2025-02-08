@@ -55,7 +55,11 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 			logx.Field("user id", in.Email)
 			return users_biz.HandleLoginerror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
-		logx.Errorf(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user email", in.Email))
+		logx.Errorw("数据库查询失败",
+			logx.Field("err", err),
+			logx.Field("user email", in.Email),
+		)
+
 		return users_biz.HandleLoginerror(code.ServerErrorMsg, code.ServerError, err)
 	}
 	if user.UserDeleted {
@@ -82,8 +86,10 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	//4、更新登陆时间
 	err = l.svcCtx.UsersModel.UpdateLoginTime(l.ctx, user.UserId, time.Now())
 	if err != nil {
-		logx.Errorf(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user email", in.Email))
-		return nil, err
+		logx.Errorw("数据库查询失败",
+			logx.Field("err", err),
+			logx.Field("user email", in.Email),
+		)
 	}
 
 	return users_biz.HandleLoginResp(code.LoginSuccessMsg, code.LoginSuccess, uint32(user.UserId), "", user.Username.String)
