@@ -2,19 +2,6 @@ package code
 
 // 状态码
 const (
-	Success     = 200
-	Fail        = 400
-	ServerError = 500
-
-	// auth
-	AuthBlank          = 10000
-	AuthExpired        = 10001
-	AuthSuccess        = 10002
-	AuthFail           = 10003
-	TokenRenewed       = 10004
-	TokenRenewalFailed = 10005
-	TokenValid         = 10006
-	TokenInvalid       = 10007
 
 	// 用户服务
 
@@ -85,19 +72,6 @@ const (
 
 // 状态码描述
 const (
-	SuccessMsg     = "success"
-	FailMsg        = "请求参数错误"
-	ServerErrorMsg = "服务器错误"
-
-	AuthBlankMsg          = "认证信息为空"
-	AuthExpiredMsg        = "认证过期或不存在"
-	AuthSuccessMsg        = "身份令牌分发成功"
-	AuthFailMsg           = "身份令牌分发失败"
-	TokenRenewedMsg       = "令牌续期成功"
-	TokenRenewalFailedMsg = "令牌续期失败"
-	TokenValidMsg         = "令牌有效"
-	TokenInvalidMsg       = "令牌无效"
-
 	UserCreatedMsg             = "用户创建成功"
 	UserCreationFailedMsg      = "用户创建失败"
 	UserAlreadyExistsMsg       = "用户已存在"
