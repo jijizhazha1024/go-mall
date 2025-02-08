@@ -30,6 +30,7 @@ func setupGRPCConnection(t *testing.T) {
 	})
 }
 
+// 验证token
 func TestAuthenticationLogic_Authentication(t *testing.T) {
 	setupGRPCConnection(t)
 
@@ -52,6 +53,7 @@ func TestAuthenticationLogic_Authentication(t *testing.T) {
 	t.Log(res)
 }
 
+// 签发token
 func TestAuthenticationLogic_GenerateToken(t *testing.T) {
 	setupGRPCConnection(t)
 
@@ -69,6 +71,7 @@ func TestAuthenticationLogic_GenerateToken(t *testing.T) {
 	t.Log(resp)
 }
 
+// 续期token
 func TestAuthenticationLogic_RenewToken(t *testing.T) {
 	setupGRPCConnection(t)
 

@@ -66,7 +66,6 @@ func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFun
 				sendServerError(w, r)
 				return
 			}
-
 			// 处理认证结果
 			switch authRes.StatusCode {
 			case code.Success:
@@ -103,9 +102,10 @@ func handleTokenExpiration(w http.ResponseWriter, r *http.Request, client authsc
 		sendServerError(w, r)
 		return
 	}
-
 	if renewRes.StatusCode == code.Success {
-		httpx.OkJsonCtx(r.Context(), w, renewRes)
+		// 由客户端处理刷新结果，进行再次请求
+		// 返回状态码和刷新结果
+		httpx.OkJsonCtx(r.Context(), w, response.NewRefreshResponse(renewRes))
 		return
 	}
 
