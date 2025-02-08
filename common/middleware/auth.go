@@ -20,18 +20,6 @@ var once sync.Once
 var authRpc authsclient.Auths
 var tokenPattern = regexp.MustCompile(`^/douyin/products(/.*)?$`)
 
-func getTokenAndRefreshToken(r *http.Request) (string, string) {
-	var token, refreshToken string
-	if r.Method == http.MethodGet {
-		token = r.URL.Query().Get("token")
-		refreshToken = r.URL.Query().Get("refresh_token")
-	} else if r.Method == http.MethodPost {
-		token = r.PostFormValue("token")
-		refreshToken = r.PostFormValue("refresh_token")
-	}
-	return token, refreshToken
-}
-
 func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
@@ -40,8 +28,9 @@ func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFun
 				next(w, r)
 				return
 			}
-
-			token, refreshToken := getTokenAndRefreshToken(r)
+			// get token from header
+			token := r.Header.Get("access_token")
+			refreshToken := r.Header.Get("refresh_token")
 
 			// optional token for specific paths
 			if tokenPattern.MatchString(r.URL.Path) {
