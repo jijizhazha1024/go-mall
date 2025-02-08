@@ -33,14 +33,13 @@ func (l *RenewTokenLogic) RenewToken(in *auths.AuthRenewalReq) (*auths.AuthRenew
 	// parse jwt
 	claims, err := token.ParseJWT(in.RefreshToken)
 	var res = new(auths.AuthRenewalRes)
-	switch {
-	case errors.Is(err, jwt.ErrTokenExpired):
-		res.StatusCode = code.AuthExpired
-		res.StatusMsg = code.AuthExpiredMsg
-		return res, nil
-	case errors.Is(err, jwt.ErrTokenNotValidYet):
+	if err != nil {
 		res.StatusCode = code.TokenValid
 		res.StatusMsg = code.TokenInvalidMsg
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			res.StatusCode = code.AuthExpired
+			res.StatusMsg = code.AuthExpiredMsg
+		}
 		return res, nil
 	}
 	// comparison of jwt create time and user logout time

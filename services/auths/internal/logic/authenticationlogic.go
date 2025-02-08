@@ -29,19 +29,14 @@ func (l *AuthenticationLogic) Authentication(in *auths.AuthReq) (*auths.AuthsRes
 	res := new(auths.AuthsRes)
 	// parse token
 	claims, err := token.ParseJWT(in.Token)
-
-	switch {
-	case errors.Is(err, jwt.ErrTokenExpired):
-		res.StatusCode = code.AuthExpired
-		res.StatusMsg = code.AuthExpiredMsg
-		return res, nil
-	case errors.Is(err, jwt.ErrTokenNotValidYet):
+	if err != nil {
 		res.StatusCode = code.TokenValid
 		res.StatusMsg = code.TokenInvalidMsg
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			res.StatusCode = code.AuthExpired
+			res.StatusMsg = code.AuthExpiredMsg
+		}
 		return res, nil
-	}
-	if err != nil {
-		return res, err
 	}
 	// comparison of jwt create time and user logout time
 	logOutTime := int64(0)
