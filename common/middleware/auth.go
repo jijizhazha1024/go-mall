@@ -82,7 +82,7 @@ func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFun
 
 // 设置用户上下文
 func setUserContext(r *http.Request, userId uint32) {
-	ctx := context.WithValue(r.Context(), biz.AuthParamKey, userId)
+	ctx := context.WithValue(r.Context(), biz.UserIDKey, userId)
 	*r = *r.WithContext(ctx)
 }
 
