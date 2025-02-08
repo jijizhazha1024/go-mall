@@ -4,14 +4,16 @@ import (
 	"context"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/jsonx"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/services/ai/internal/core/model"
 	"jijizhazha1024/go-mall/services/ai/internal/utils/gpt"
+	"os"
 	"testing"
 )
 
 func TestPrompt(t *testing.T) {
 
-	newGpt := gpt.NewGpt("", "")
+	newGpt := gpt.NewGpt(os.Getenv(biz.ApiKey), os.Getenv(biz.ModelID))
 	productQueries := []string{
 		"我正在寻找最新的运动鞋，最好是耐克品牌的，价格在300到500元之间，而且要是热门款式的。",
 		"想了解一下新款的笔记本电脑，预算大概是4000到6000元，对品牌没有特别要求，但必须是轻薄型的。",
@@ -26,10 +28,11 @@ func TestPrompt(t *testing.T) {
 	}
 	for _, productQuery := range productQueries {
 		productQueryAST := model.ProductQueryAST{
-			Command: productQuery,
-			UserID:  1,
+			BaseAST: model.BaseAST{
+				Command: productQuery,
+				UserID:  1,
+			},
 		}
-
 		response, err := newGpt.ChatWithModel(context.Background(), Prompt, fmt.Sprintf("用户输入：%s", productQuery))
 		if err != nil {
 			t.Errorf("ChatWithModel error: %v", err)

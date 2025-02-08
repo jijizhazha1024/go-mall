@@ -3,7 +3,9 @@ package intention
 import (
 	"context"
 	"fmt"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/services/ai/internal/utils/gpt"
+	"os"
 	"testing"
 )
 
@@ -12,7 +14,7 @@ func TestEmbed(t *testing.T) {
 }
 func TestPrompt(t *testing.T) {
 
-	newGpt := gpt.NewGpt("", "")
+	newGpt := gpt.NewGpt(os.Getenv(biz.ApiKey), os.Getenv(biz.ModelID))
 	intention := map[string]string{
 		"查询商品": "1",
 	}
