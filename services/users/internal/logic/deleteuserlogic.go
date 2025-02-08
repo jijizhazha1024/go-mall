@@ -29,9 +29,7 @@ func NewDeleteUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delete
 
 // 删除用户方法
 func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.DeleteUserResponse, error) {
-	// todo: add your logic here and delete this line
 
-	// 查询用户是否存在
 	exituser, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

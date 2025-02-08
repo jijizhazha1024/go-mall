@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 
-	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/config"
 	"jijizhazha1024/go-mall/services/users/internal/server"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
@@ -42,8 +41,7 @@ func main() {
 	}
 	defer s.Stop()
 
-	userModel := user.NewUsersModel(ctx.Mysql)
-	emails, _ := userModel.FindAllEmails()
+	emails, _ := ctx.UsersModel.FindAllEmails()
 
 	for _, email := range emails {
 		ctx.Bf.Add(email)
