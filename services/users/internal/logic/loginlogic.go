@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
@@ -73,6 +74,13 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 			return users_biz.HandleLoginerror("password error", 400, nil)
 
 		}
+		return nil, err
+	}
+
+	//4、更新登陆时间
+	err = l.svcCtx.UsersModel.UpdateLoginTime(l.ctx, user.UserId, time.Now())
+	if err != nil {
+		logx.Error(code.ServerErrorMsg, err)
 		return nil, err
 	}
 

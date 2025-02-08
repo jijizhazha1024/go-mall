@@ -38,7 +38,7 @@ func initusers() {
 func TestUsersRpc(t *testing.T) {
 	initusers()
 	resp, err := users_client.Login(context.Background(), &users.LoginRequest{
-		Email:    "test99@test.com",
+		Email:    "test9@test.com",
 		Password: "1234567",
 	})
 	if err != nil {
