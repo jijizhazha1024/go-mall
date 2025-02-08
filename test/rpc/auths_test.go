@@ -90,8 +90,9 @@ func TestAuthenticationLogic_RenewToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Authentication failed: %v", err)
 	}
-	t.Logf("exprie token is %s", resp.AccessToken)
 	if res.StatusCode == code.AuthExpired {
+		t.Logf("exprie token is %s", resp.AccessToken)
+
 		renewResp, err := client.RenewToken(context.Background(), &auths.AuthRenewalReq{
 			RefreshToken: resp.RefreshToken,
 		})
