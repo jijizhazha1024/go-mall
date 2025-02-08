@@ -11,7 +11,7 @@ import (
 
 func TestPrompt(t *testing.T) {
 
-	newGpt := gpt.NewGpt("5b5ab09c-7298-40d7-b60e-433d21314f36", "ep-20241002090911-md25k")
+	newGpt := gpt.NewGpt("", "")
 	productQueries := []string{
 		"我正在寻找最新的运动鞋，最好是耐克品牌的，价格在300到500元之间，而且要是热门款式的。",
 		"想了解一下新款的笔记本电脑，预算大概是4000到6000元，对品牌没有特别要求，但必须是轻薄型的。",

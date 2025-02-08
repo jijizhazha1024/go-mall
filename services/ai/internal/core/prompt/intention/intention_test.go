@@ -12,7 +12,7 @@ func TestEmbed(t *testing.T) {
 }
 func TestPrompt(t *testing.T) {
 
-	newGpt := gpt.NewGpt("5b5ab09c-7298-40d7-b60e-433d21314f36", "ep-20241002090911-md25k")
+	newGpt := gpt.NewGpt("", "")
 	intention := map[string]string{
 		"查询商品": "1",
 	}
