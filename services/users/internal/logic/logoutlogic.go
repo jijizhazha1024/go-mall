@@ -31,34 +31,32 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 // 登出方法
 func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, error) {
 
-	// 假设你有一个 userId 来标识用户
-
 	// 在数据库中加入登出时间（这部分假设已经完成）
 	logoutTime := time.Now()
 
 	err := l.svcCtx.UsersModel.UpdateLogoutTime(l.ctx, int64(in.UserId), logoutTime)
 	if err != nil {
 		if errors.Is(err, user.ErrNotFound) {
-			logx.Error(code.UserNotFoundMsg)
+			logx.Infof(code.UserNotFoundMsg)
 			logx.Field("err", err)
 			logx.Field("user id", in.UserId)
 			// 用户不存在
 			return users_biz.HandleLogoutUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
 		// 处理错误
-		logx.Error(code.ServerErrorMsg, err)
+		logx.Errorf(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user id", in.UserId))
 		return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 
 	// 从数据库中获取登出时间
 	user, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
-		logx.Error(code.ServerErrorMsg, err)
+		logx.Infow(code.ServerErrorMsg)
 		// 处理错误
 		return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 
 	// 构造返回值
 
-	return users_biz.HandleLogoutUserResp(code.SuccessMsg, code.Success, uint32(user.UserId), "token", logoutTime)
+	return users_biz.HandleLogoutUserResp(code.LogoutSuccessMsg, code.LogoutSuccess, "token", user.LogoutAt.Time)
 }

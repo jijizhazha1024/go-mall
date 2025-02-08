@@ -36,19 +36,20 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	update_user, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Info(code.UserNotFoundMsg, "user_id", in.UserId)
+			logx.Infow(code.UserNotFoundMsg)
 			logx.Field("err", err)
 			logx.Field("user_id", in.UserId)
 			return users_biz.HandleUpdateUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
-		logx.Error(code.ServerErrorMsg, err)
+		logx.Errorf(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user id", in.UserId))
+
 		return users_biz.HandleUpdateUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 
 	if update_user.UserDeleted {
 
-		logx.Info(code.UserHaveDeletedMsg)
-		logx.Field("err", err)
+		logx.Infow(code.UserHaveDeletedMsg)
+
 		logx.Field("user_id", in.UserId)
 		return users_biz.HandleUpdateUsererror(code.UserHaveDeletedMsg, code.UserNotFound, nil)
 	}
@@ -62,6 +63,9 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	if in.Password != "" { // 修改1: 处理密码为空字符串的情况
 		passworhash, err = bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 		if err != nil {
+			logx.Infow("hash error")
+			logx.Field("err", err)
+			logx.Field("user_id", in.UserId)
 			return users_biz.HandleUpdateUsererror("hash error", 1, nil)
 		}
 	} else {
@@ -82,7 +86,13 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 		},
 	})
 	if err != nil {
-		logx.Error(code.ServerErrorMsg, err)
+		if errors.Is(err, sql.ErrNoRows) {
+			logx.Infow(code.UserNotFoundMsg)
+			logx.Field("err", err)
+			logx.Field("user_id", in.UserId)
+			return users_biz.HandleUpdateUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
+		}
+		logx.Errorf(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user id", in.UserId))
 		return users_biz.HandleUpdateUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 	return users_biz.HandleUpdateUserResp(code.UserUpdatedMsg, code.UserUpdated, in.UserId, "token") // 调用HandleUpdateUserResp方法返回响)

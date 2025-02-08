@@ -52,14 +52,14 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 	// todo: add your logic here and delete this line
 	//判断密码是否一致
 	if in.Password != in.ConfirmPassword {
-		l.Logger.Error("密码不一致")
+		l.Logger.Infow("密码不一致")
 		return users_biz.HandleRegisterResp("密码不一致", 0, 0, "token")
 
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 	if err != nil {
-		l.Logger.Error("密码哈希生成失败", err)
+		l.Logger.Infow("密码哈希生成失败")
 		return users_biz.HandleRegisterResp("密码哈希生成失败", 0, 0, "token")
 
 	}
@@ -75,12 +75,13 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 	existUser, err := l.svcCtx.UsersModel.FindOneByEmail(l.ctx, email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			l.Logger.Info("用户不存在")
+			l.Logger.Infow("用户不存在")
 			logx.Field("err", err)
 			logx.Field("email", in.Email)
 			avatar, err := getRandomAvatar()
 			if err != nil {
-				l.Logger.Error("获取头像失败", err)
+				l.Logger.Infow("获取头像失败")
+				logx.Field("err", err)
 				return users_biz.HandleRegistererror("获取头像失败", 1, nil)
 			}
 
@@ -92,24 +93,25 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			})
 			l.svcCtx.Bf.Add(in.Email)
 			if insertErr != nil {
-				l.Logger.Error(code.UserCreationFailedMsg, insertErr)
-				logx.Field("err", err)
-				logx.Field("email", in.Email)
+
+				logx.Errorf(code.UserCreationFailedMsg, logx.Field("err", err), logx.Field("user email", in.Email))
 				return users_biz.HandleRegistererror(code.UserCreationFailedMsg, code.UserCreationFailed, nil)
 			}
 
 			userId, lastInsertErr := result.LastInsertId()
 			if lastInsertErr != nil {
-				l.Logger.Error(code.UserInfoRetrievalFailedMsg, lastInsertErr)
+				l.Logger.Infow(code.UserInfoRetrievalFailedMsg)
 				logx.Field("err", err)
 				logx.Field("email", in.Email)
 				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, nil)
 			}
+			logx.Errorw("query ....")
+			logx.Field("err", err)
+			logx.Field("email", in.Email)
 			return users_biz.HandleRegisterResp(code.CartCreatedMsg, code.CartCreated, uint32(userId), "token")
 		}
-		l.Logger.Error(code.UserInfoRetrievalFailedMsg, err)
-		logx.Field("err", err)
-		logx.Field("email", in.Email)
+		logx.Errorf(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user email", in.Email))
+
 		return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrieved, nil)
 	}
 
@@ -121,15 +123,17 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			// 将删除状态改为false
 			updateErr := l.svcCtx.UsersModel.UpdateDeletebyEmail(l.ctx, in.Email, false)
 			if updateErr != nil {
-				l.Logger.Error(code.UserInfoRetrievalFailedMsg)
-				logx.Field("err", err)
+				l.Logger.Infow(code.UserInfoRetrievalFailedMsg)
+				logx.Field("err", updateErr)
 				logx.Field("email", in.Email)
 				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, nil)
 			}
+			logx.Errorw("query ....")
+			logx.Field("err", updateErr)
 
 			return users_biz.HandleRegisterResp(code.UserCreatedMsg, code.UserCreated, uint32(existUser.UserId), "token")
 		} else { // 未删除
-			l.Logger.Error(code.UserAlreadyExistsMsg)
+			l.Logger.Infow(code.UserAlreadyExistsMsg)
 			logx.Field("err", err)
 			logx.Field("email", in.Email)
 			return users_biz.HandleRegistererror(code.UserAlreadyExistsMsg, code.UserAlreadyExists, nil)
