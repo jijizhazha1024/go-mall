@@ -18,9 +18,12 @@ type ServiceContext struct {
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	mysql := db.NewMysql(c.MysqlConfig)
+
 	return &ServiceContext{
 		Config:     c,
 		Mysql:      mysql,
 		UsersModel: user.NewUsersModel(mysql),
+		Bf:         bloom_filter.NewBloomFilter(1000000, 0.00001),
 	}
+
 }

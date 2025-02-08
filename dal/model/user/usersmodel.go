@@ -19,6 +19,7 @@ type (
 		UpdateDeletebyId(ctx context.Context, userId int64, userDeleted bool) error
 		UpdateDeletebyEmail(ctx context.Context, email string, userDeleted bool) error
 		FindAllEmails() ([]string, error)
+		GetLogoutTime(ctx context.Context, userId int64) (time.Time, error)
 		UpdateLoginTime(ctx context.Context, userId int64, loginTime time.Time) error
 		UpdateLogoutTime(ctx context.Context, userId int64, logoutTime time.Time) error
 		GetLoginTime(ctx context.Context, userId int64) (time.Time, error)
@@ -79,6 +80,12 @@ func (m *customUsersModel) GetLoginTime(ctx context.Context, userId int64) (time
 	err := m.conn.QueryRowCtx(ctx, &loginTime, query, userId)
 	return loginTime, err
 
+}
+func (m *customUsersModel) GetLogoutTime(ctx context.Context, userId int64) (time.Time, error) {
+	query := fmt.Sprintf("SELECT `logout_at` FROM %s WHERE `user_id` = ?", m.table)
+	var logoutTime time.Time
+	err := m.conn.QueryRowCtx(ctx, &logoutTime, query, userId)
+	return logoutTime, err
 }
 
 // 从数据库中获取登出时间
