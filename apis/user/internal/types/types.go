@@ -23,6 +23,7 @@ type GetInfoResponse struct {
 	LogoutAt  int64  `json:"logout_at"`
 	CreatedAt int64  `json:"created_at"`
 	UpdateAt  int64  `json:"update_at"`
+	AvatarUrl string `json:"avatar_url"`
 	Email     string `json:"email"`
 	UserName  string `json:"user_name"`
 }
