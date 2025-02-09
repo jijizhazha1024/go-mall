@@ -92,10 +92,10 @@ func TestProductsDeleteRpc(t *testing.T) {
 
 // 七牛云配置
 const (
-	accessKey = "HWnKZNTrL68F3fJYq4kC32zcLzBpg0YRpdWoCFL1"
-	secretKey = "-GsNP_I822WLUWGWpmcwXOJNGzKXdyna0TQSK_de"
-	bucket    = "go-mallxrd"
-	domain    = "srdhk66s0.hb-bkt.clouddn.com" // 七牛云存储空间绑定的域名
+	accessKey = ""
+	secretKey = ""
+	bucket    = ""
+	domain    = "" // 七牛云存储空间绑定的域名
 )
 
 func TestPicture(t *testing.T) {
