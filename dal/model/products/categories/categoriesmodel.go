@@ -1,9 +1,6 @@
 package categories
 
-import (
-	"github.com/zeromicro/go-zero/core/stores/cache"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
-)
+import "github.com/zeromicro/go-zero/core/stores/sqlx"
 
 var _ CategoriesModel = (*customCategoriesModel)(nil)
 
@@ -12,6 +9,7 @@ type (
 	// and implement the added methods in customCategoriesModel.
 	CategoriesModel interface {
 		categoriesModel
+		withSession(session sqlx.Session) CategoriesModel
 	}
 
 	customCategoriesModel struct {
@@ -20,8 +18,12 @@ type (
 )
 
 // NewCategoriesModel returns a model for the database table.
-func NewCategoriesModel(conn sqlx.SqlConn, c cache.CacheConf, opts ...cache.Option) CategoriesModel {
+func NewCategoriesModel(conn sqlx.SqlConn) CategoriesModel {
 	return &customCategoriesModel{
-		defaultCategoriesModel: newCategoriesModel(conn, c, opts...),
+		defaultCategoriesModel: newCategoriesModel(conn),
 	}
+}
+
+func (m *customCategoriesModel) withSession(session sqlx.Session) CategoriesModel {
+	return NewCategoriesModel(sqlx.NewSqlConnFromSession(session))
 }

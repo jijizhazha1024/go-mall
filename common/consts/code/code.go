@@ -36,14 +36,14 @@ const (
 
 	// 商品服务
 
-	ProductCreated             = 30001
+	/*ProductCreated             = 30001
 	ProductCreationFailed      = 30002
 	ProductUpdated             = 30003
 	ProductUpdateFailed        = 30004
 	ProductDeleted             = 30005
 	ProductDeletionFailed      = 30006
 	ProductInfoRetrieved       = 30007
-	ProductInfoRetrievalFailed = 30008
+	ProductInfoRetrievalFailed = 30008*/
 
 	// 购物车服务
 
@@ -114,14 +114,14 @@ const (
 	UserInfoRetrievedMsg       = "用户身份信息获取成功"
 	UserInfoRetrievalFailedMsg = "用户身份信息获取失败"
 
-	ProductCreatedMsg             = "商品创建成功"
+	/*ProductCreatedMsg             = "商品创建成功"
 	ProductCreationFailedMsg      = "商品创建失败"
 	ProductUpdatedMsg             = "商品信息更新成功"
 	ProductUpdateFailedMsg        = "商品信息更新失败"
 	ProductDeletedMsg             = "商品删除成功"
 	ProductDeletionFailedMsg      = "商品删除失败"
 	ProductInfoRetrievedMsg       = "商品信息查询成功"
-	ProductInfoRetrievalFailedMsg = "商品信息查询失败"
+	ProductInfoRetrievalFailedMsg = "商品信息查询失败"*/
 
 	CartCreatedMsg             = "购物车创建成功"
 	CartCreationFailedMsg      = "购物车创建失败"
