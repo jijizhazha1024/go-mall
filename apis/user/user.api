@@ -9,10 +9,10 @@ type (
 	}
 	// 用户注册响应
 	RegisterResponse {
-		Code    int64  `json:"code"`
-		Message string `json:"message"`
-		UserId  int64  `json:"userId"`
-		Token   string `json:"token"`
+		Code         int64  `json:"code"`
+		Msg          string `json:"msg"`
+		AccessToken  string `json:"access_token"`
+		RefreshToken string `json:"refresh_token"`
 	}
 	// 用户登录请求
 	LoginRequest {
@@ -21,63 +21,62 @@ type (
 	}
 	// 用户登录响应
 	LoginResponse {
-		Code    int64  `json:"code"`
-		Message string `json:"message"`
-		UserId  int64  `json:"userId"`
-		Token   string `json:"token"`
+		Code         int64  `json:"code"`
+		Msg          string `json:"msg"`
+		AccessToken  string `json:"access_token"`
+		RefreshToken string `json:"refresh_token"`
 	}
 	// 用户登出请求
 	LogoutRequest {
-		UserId int64  `json:"userId"`
-		Token  string `json:"token"`
+		UserId int64 `json:"user_id"`
 	}
 	// 用户登出响应
 	LogoutResponse {
-		Code    int64  `json:"code"`
-		Message string `json:"message"`
+		Code int64  `json:"code"`
+		Msg  string `json:"msg"`
 	}
 	// 删除用户请求
 	DeleteRequest {
-		UserId int64 `json:"userId"`
+		UserId int64 `json:"user_id"`
 	}
 	// 删除用户响应
 	DeleteResponse {
-		Code    int64  `json:"code"`
-		Message string `json:"message"`
+		Code int64  `json:"code"`
+		Msg  string `json:"msg"`
 	}
 	// 更新用户请求
 	UpdateRequest {
-		UserId   int64  `json:"userId"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		UserName string `json:"user_name"`
 	}
 	// 更新用户响应
 	UpdateResponse {
 		Code     int64  `json:"code"`
-		Message  string `json:"message"`
-		UserId   int64  `json:"userId"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Msg      string `json:"msg"`
+		UserName string `json:"user_name"`
+		UpdateAt int64  `json:"update_at"`
 	}
 	// 获取用户信息请求
 	GetInfoRequest {
-		UserId int64  `json:"userId"`
-		Token  string `json:"token"`
+		UserId int64 `json:"user_id"`
 	}
 	// 获取用户信息响应
 	GetInfoResponse {
-		Code    int64  `json:"code"`
-		Message string `json:"message"`
-		UserId  int64  `json:"userId"`
-		Email   string `json:"email"`
-		Name    string `json:"name"`
+		Code      int64  `json:"code"`
+		Msg       string `json:"msg"`
+		UserId    int64  `json:"user_id"`
+		LogoutAt  int64  `json:"logout_at"`
+		CreatedAt int64  `json:"created_at"`
+		UpdateAt  int64  `json:"update_at"`
+		Email     string `json:"email"`
+		UserName  string `json:"user_name"`
 	}
 )
 
 @server (
 	// 代表当前 service 代码块下的路由生成代码时都会被放到 auth 目录下
 	// 定义路由前缀为
-	prefix: /douyin/users
+	middleware: WrapperAuthMiddleware
+	prefix:     /douyin/users
 )
 service user-api {
 	@handler RegisterHandler

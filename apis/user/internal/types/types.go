@@ -4,25 +4,27 @@
 package types
 
 type DeleteRequest struct {
-	UserId int64 `json:"userId"`
+	UserId int64 `json:"user_id"`
 }
 
 type DeleteResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
+	Code int64  `json:"code"`
+	Msg  string `json:"msg"`
 }
 
 type GetInfoRequest struct {
-	UserId int64  `json:"userId"`
-	Token  string `json:"token"`
+	UserId int64 `json:"user_id"`
 }
 
 type GetInfoResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
-	UserId  int64  `json:"userId"`
-	Email   string `json:"email"`
-	Name    string `json:"name"`
+	Code      int64  `json:"code"`
+	Msg       string `json:"msg"`
+	UserId    int64  `json:"user_id"`
+	LogoutAt  int64  `json:"logout_at"`
+	CreatedAt int64  `json:"created_at"`
+	UpdateAt  int64  `json:"update_at"`
+	Email     string `json:"email"`
+	UserName  string `json:"user_name"`
 }
 
 type LoginRequest struct {
@@ -31,20 +33,19 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
-	UserId  int64  `json:"userId"`
-	Token   string `json:"token"`
+	Code         int64  `json:"code"`
+	Msg          string `json:"msg"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type LogoutRequest struct {
-	UserId int64  `json:"userId"`
-	Token  string `json:"token"`
+	UserId int64 `json:"user_id"`
 }
 
 type LogoutResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
+	Code int64  `json:"code"`
+	Msg  string `json:"msg"`
 }
 
 type RegisterRequest struct {
@@ -54,22 +55,19 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
-	UserId  int64  `json:"userId"`
-	Token   string `json:"token"`
+	Code         int64  `json:"code"`
+	Msg          string `json:"msg"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type UpdateRequest struct {
-	UserId   int64  `json:"userId"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	UserName string `json:"user_name"`
 }
 
 type UpdateResponse struct {
 	Code     int64  `json:"code"`
-	Message  string `json:"message"`
-	UserId   int64  `json:"userId"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Msg      string `json:"msg"`
+	UserName string `json:"user_name"`
+	UpdateAt int64  `json:"update_at"`
 }
