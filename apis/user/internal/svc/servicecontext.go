@@ -15,6 +15,6 @@ type ServiceContext struct {
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config:                c,
-		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.UserRpc), // # 需要指定认证rpc地址
+		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc), // # 需要指定认证rpc地址
 	}
 }

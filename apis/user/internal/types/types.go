@@ -8,8 +8,6 @@ type DeleteRequest struct {
 }
 
 type DeleteResponse struct {
-	Code int64  `json:"code"`
-	Msg  string `json:"msg"`
 }
 
 type GetInfoRequest struct {
@@ -17,8 +15,6 @@ type GetInfoRequest struct {
 }
 
 type GetInfoResponse struct {
-	Code      int64  `json:"code"`
-	Msg       string `json:"msg"`
 	UserId    int64  `json:"user_id"`
 	LogoutAt  int64  `json:"logout_at"`
 	CreatedAt int64  `json:"created_at"`
@@ -34,8 +30,6 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Code         int64  `json:"code"`
-	Msg          string `json:"msg"`
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
@@ -45,8 +39,6 @@ type LogoutRequest struct {
 }
 
 type LogoutResponse struct {
-	Code int64  `json:"code"`
-	Msg  string `json:"msg"`
 }
 
 type RegisterRequest struct {
@@ -56,8 +48,6 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	Code         int64  `json:"code"`
-	Msg          string `json:"msg"`
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
@@ -67,8 +57,6 @@ type UpdateRequest struct {
 }
 
 type UpdateResponse struct {
-	Code     int64  `json:"code"`
-	Msg      string `json:"msg"`
 	UserName string `json:"user_name"`
 	UpdateAt int64  `json:"update_at"`
 }

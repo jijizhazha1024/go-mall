@@ -63,9 +63,9 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	if in.Password != "" { // 修改1: 处理密码为空字符串的情况
 		passworhash, err = bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 		if err != nil {
-			logx.Infow("hash error")
-			logx.Field("err", err)
-			logx.Field("user_id", in.UserId)
+			logx.Infow("hash error", logx.Field("err", err),
+				logx.Field("user_id", in.UserId))
+
 			return users_biz.HandleUpdateUsererror("hash error", 1, nil)
 		}
 	} else {
@@ -87,9 +87,9 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Infow(code.UserNotFoundMsg)
-			logx.Field("err", err)
-			logx.Field("user_id", in.UserId)
+			logx.Infow(code.UserNotFoundMsg, logx.Field("err", err),
+				logx.Field("user_id", in.UserId))
+
 			return users_biz.HandleUpdateUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
 		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user id", in.UserId))

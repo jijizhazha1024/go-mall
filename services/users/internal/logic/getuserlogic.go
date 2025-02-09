@@ -34,19 +34,18 @@ func (l *GetUserLogic) GetUser(in *users.GetUserRequest) (*users.GetUserResponse
 	user, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Infow(code.UserNotFoundMsg)
-			logx.Field("err", err)
-			logx.Field("user id", in.UserId)
+			logx.Infow(code.UserNotFoundMsg, logx.Field("err", err),
+				logx.Field("user id", in.UserId))
+
 			return users_biz.HandleGetUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
-		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user id", in.UserId))
+		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_id", in.UserId))
 		return users_biz.HandleGetUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 
 	if user.UserDeleted {
-		logx.Infow(code.UserInfoRetrievalFailedMsg)
+		logx.Infow(code.UserInfoRetrievalFailedMsg, logx.Field("user_id", in.UserId))
 
-		logx.Field("user id", in.UserId)
 		return users_biz.HandleGetUsererror(code.UserInfoRetrievalFailedMsg, code.UserDeleted, nil)
 	}
 

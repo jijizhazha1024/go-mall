@@ -33,26 +33,25 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 	exituser, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			l.Logger.Infow(code.UserNotFoundMsg)
-			logx.Field("err", err)
-			logx.Field("user id", in.UserId)
+			l.Logger.Infow(code.UserNotFoundMsg, logx.Field("err", err),
+				logx.Field("user_id", in.UserId))
+
 			return users_biz.HandleDeleteUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
-		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user id", in.UserId))
+		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_id", in.UserId))
 		return users_biz.HandleDeleteUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 	// 删除用户
 	if exituser.UserDeleted {
-		l.Logger.Infow(code.UserHaveDeletedMsg)
+		l.Logger.Infow(code.UserHaveDeletedMsg, logx.Field("user_id", in.UserId))
 
-		logx.Field("user id", in.UserId)
 		return users_biz.HandleDeleteUsererror(code.UserHaveDeletedMsg, code.UserHaveDeleted, nil)
 	}
 	err = l.svcCtx.UsersModel.UpdateDeletebyId(l.ctx, int64(in.UserId), true)
 	if err != nil {
-		l.Logger.Infow(code.UserDeletionFailedMsg)
-		logx.Field("err", err)
-		logx.Field("user id", in.UserId)
+		l.Logger.Infow(code.UserDeletionFailedMsg, logx.Field("err", err),
+			logx.Field("user_id", in.UserId))
+
 		return users_biz.HandleDeleteUsererror(code.UserDeletionFailedMsg, code.UserDeletionFailed, nil)
 	}
 

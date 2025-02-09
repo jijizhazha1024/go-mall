@@ -9,8 +9,6 @@ type (
 	}
 	// 用户注册响应
 	RegisterResponse {
-		Code         int64  `json:"code"`
-		Msg          string `json:"msg"`
 		AccessToken  string `json:"access_token"`
 		RefreshToken string `json:"refresh_token"`
 	}
@@ -21,8 +19,6 @@ type (
 	}
 	// 用户登录响应
 	LoginResponse {
-		Code         int64  `json:"code"`
-		Msg          string `json:"msg"`
 		AccessToken  string `json:"access_token"`
 		RefreshToken string `json:"refresh_token"`
 	}
@@ -31,27 +27,19 @@ type (
 		UserId int64 `json:"user_id"`
 	}
 	// 用户登出响应
-	LogoutResponse {
-		Code int64  `json:"code"`
-		Msg  string `json:"msg"`
-	}
+	LogoutResponse  {}
 	// 删除用户请求
 	DeleteRequest {
 		UserId int64 `json:"user_id"`
 	}
 	// 删除用户响应
-	DeleteResponse {
-		Code int64  `json:"code"`
-		Msg  string `json:"msg"`
-	}
+	DeleteResponse  {}
 	// 更新用户请求
 	UpdateRequest {
 		UserName string `json:"user_name"`
 	}
 	// 更新用户响应
 	UpdateResponse {
-		Code     int64  `json:"code"`
-		Msg      string `json:"msg"`
 		UserName string `json:"user_name"`
 		UpdateAt int64  `json:"update_at"`
 	}
@@ -61,8 +49,6 @@ type (
 	}
 	// 获取用户信息响应
 	GetInfoResponse {
-		Code      int64  `json:"code"`
-		Msg       string `json:"msg"`
 		UserId    int64  `json:"user_id"`
 		LogoutAt  int64  `json:"logout_at"`
 		CreatedAt int64  `json:"created_at"`

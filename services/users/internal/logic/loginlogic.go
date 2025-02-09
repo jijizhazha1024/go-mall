@@ -50,9 +50,9 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	if err != nil {
 
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Infow(code.UserNotFoundMsg)
-			logx.Field("err", err)
-			logx.Field("user id", in.Email)
+			logx.Infow(code.UserNotFoundMsg, logx.Field("err", err),
+				logx.Field("user_id", in.Email))
+
 			return users_biz.HandleLoginerror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
 		logx.Errorw("数据库查询失败",
@@ -63,9 +63,8 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 		return users_biz.HandleLoginerror(code.ServerErrorMsg, code.ServerError, err)
 	}
 	if user.UserDeleted {
-		logx.Infow(code.UserHaveDeletedMsg)
+		logx.Infow(code.UserHaveDeletedMsg, logx.Field("email", user.Email))
 
-		logx.Field("email", user.Email)
 		return users_biz.HandleLoginerror(code.UserHaveDeletedMsg, code.UserHaveDeleted, nil)
 	}
 
@@ -79,7 +78,7 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 			return users_biz.HandleLoginerror("password error", 400, nil)
 
 		}
-		logx.Error(code.LoginFailedMsg, user.Email, err)
+		logx.Errorw(code.LoginFailedMsg, logx.Field("email", user.Email))
 		return nil, err
 	}
 
