@@ -76,7 +76,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Infow("用户不存在", logx.Field("err", err),
-				logx.Field("email", in.Email))
+				logx.Field("user_email", in.Email))
 
 			avatar, err := getRandomAvatar()
 			if err != nil {
@@ -94,7 +94,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			l.svcCtx.Bf.Add(in.Email)
 			if insertErr != nil {
 
-				logx.Errorw(code.UserCreationFailedMsg, logx.Field("err", err), logx.Field("user email", in.Email))
+				logx.Errorw(code.UserCreationFailedMsg, logx.Field("err", err), logx.Field("user_email", in.Email))
 				return users_biz.HandleRegistererror(code.UserCreationFailedMsg, code.UserCreationFailed, nil)
 			}
 
@@ -110,7 +110,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 
 			return users_biz.HandleRegisterResp(code.CartCreatedMsg, code.CartCreated, uint32(userId), "token")
 		}
-		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user email", in.Email))
+		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_email", in.Email))
 
 		return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrieved, nil)
 	}

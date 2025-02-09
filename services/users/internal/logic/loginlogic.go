@@ -78,7 +78,7 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 			return users_biz.HandleLoginerror("password error", 400, nil)
 
 		}
-		logx.Errorw(code.LoginFailedMsg, logx.Field("email", user.Email))
+		logx.Errorw(code.LoginFailedMsg, logx.Field("user_email", user.Email))
 		return nil, err
 	}
 
@@ -87,7 +87,7 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	if err != nil {
 		logx.Errorw("数据库查询失败",
 			logx.Field("err", err),
-			logx.Field("user email", in.Email),
+			logx.Field("user_email", in.Email),
 		)
 	}
 
