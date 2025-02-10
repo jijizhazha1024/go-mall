@@ -26,7 +26,7 @@ func initusers() {
 func TestUsersRpc(t *testing.T) {
 	initusers()
 	resp, err := users_client.Logout(context.Background(), &users.LogoutRequest{
-		UserId: 5,
+		UserId: 4,
 		Token:  "token",
 	})
 	if err != nil {
