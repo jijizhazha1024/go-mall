@@ -6,7 +6,7 @@ import (
 )
 
 func TestGenerateJWT(t *testing.T) {
-	jwt, err := GenerateJWT(1, "test", time.Minute)
+	jwt, err := GenerateJWT(1, "test", "", time.Minute)
 	if err != nil {
 		t.Errorf("GenerateJWT() error = %v", err)
 	}
@@ -14,7 +14,7 @@ func TestGenerateJWT(t *testing.T) {
 }
 
 func TestParseJWT(t *testing.T) {
-	jwt, err := GenerateJWT(1, "test", time.Minute)
+	jwt, err := GenerateJWT(1, "test", "", time.Minute)
 	if err != nil {
 		t.Errorf("GenerateJWT() error = %v", err)
 	}

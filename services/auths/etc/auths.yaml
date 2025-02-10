@@ -21,3 +21,6 @@ Log:
   Mode: 'console'
   Encoding: "json"
   Path: "./logs/auths-rpc"
+
+MysqlConfig:
+  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
