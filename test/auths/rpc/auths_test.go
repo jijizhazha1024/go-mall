@@ -3,23 +3,25 @@ package rpc
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/auths/auths"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var client auths.AuthsClient
-var once sync.Once
+var once1 sync.Once
 
 func setupGRPCConnection(t *testing.T) {
-	once.Do(func() {
+	once1.Do(func() {
 		conn, err := grpc.NewClient(fmt.Sprintf("127.0.0.1:%d", biz.AuthsRpcPort),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
