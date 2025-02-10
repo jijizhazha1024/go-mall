@@ -1,4 +1,4 @@
-package rpc
+package get
 
 import (
 	"context"
@@ -25,14 +25,15 @@ func initusers() {
 
 func TestUsersRpc(t *testing.T) {
 	initusers()
-	resp, err := users_client.Register(context.Background(), &users.RegisterRequest{
-		Email:           "test3@test.com",
-		Password:        "1234567",
-		ConfirmPassword: "1234567",
+
+	//这里可以从token中获取user——id
+	resp, err := users_client.GetUser(context.Background(), &users.GetUserRequest{
+		UserId: 4,
+		Token:  "token",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("register success", resp)
-	t.Log("register success", resp)
+	fmt.Println("GET success", resp)
+	t.Log("GET success", resp)
 }
