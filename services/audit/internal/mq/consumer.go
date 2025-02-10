@@ -11,7 +11,11 @@ import (
 )
 
 func (a *AuditMQ) consumer() error {
-	results, err := a.channel.Consume(QueueName, RoutingKeyName, false, false, false, false, nil)
+	channel, err := a.conn.Channel()
+	if err != nil {
+		return err
+	}
+	results, err := channel.Consume(QueueName, RoutingKeyName, false, false, false, false, nil)
 	if err != nil {
 		return err
 	}
@@ -22,6 +26,9 @@ func (a *AuditMQ) consumer() error {
 			var msg *AuditReq
 			if err := json.Unmarshal(res.Body, &msg); err != nil {
 				logx.Errorw("failed to unmarshal message", logx.Field("error", err), logx.Field("body", string(res.Body)))
+				if err := res.Reject(false); err != nil {
+					logx.Errorw("failed to reject message", logx.Field("error", err), logx.Field("body", string(res.Body)))
+				}
 				continue
 			}
 			// 确保入库
@@ -38,6 +45,15 @@ func (a *AuditMQ) consumer() error {
 				logx.Errorw("ACK failed", logx.Field("error", err), logx.Field("body", string(res.Body))) // 记录完整消息内容
 			}
 		}
+		logx.Infow("consumer stopped", logx.Field("queue", QueueName), logx.Field("routingKey", RoutingKeyName))
+		defer func() {
+			if err := channel.Close(); err != nil {
+				logx.Errorw("failed to close channel", logx.Field("error", err))
+			}
+			if err := a.conn.Close(); err != nil {
+				logx.Errorw("failed to close connection", logx.Field("error", err))
+			}
+		}()
 	}()
 	return nil
 }
@@ -86,6 +102,7 @@ func (a *AuditMQ) ToEs(ctx context.Context, data *AuditReq) error {
 	// 使用Elasticsearch客户端的Index()方法插入文档
 	if _, err := a.esClient.Index().
 		Index(biz.EsIndexName).
+		Id(data.TraceID).
 		BodyJson(*data). // 或者使用BodyString()如果你已经有了JSON字符串
 		Do(ctx); err != nil {
 		return err

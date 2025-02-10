@@ -24,17 +24,9 @@ const (
 )
 
 type AuditMQ struct {
-	channel  *amqp.Channel
 	conn     *amqp.Connection
 	model    audit.AuditModel
 	esClient *elastic.Client
-}
-
-func (a *AuditMQ) Close() error {
-	if err := a.channel.Close(); err != nil {
-		return err
-	}
-	return a.conn.Close()
 }
 
 type AuditReq struct {
@@ -156,6 +148,7 @@ func Init(c config.Config) (*AuditMQ, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer channel.Close()
 	// 声明交换机
 	if err := declareMainQueue(channel); err != nil {
 		return nil, err
@@ -166,7 +159,6 @@ func Init(c config.Config) (*AuditMQ, error) {
 	// 启动监听协程
 	mq := &AuditMQ{
 		conn:     conn,
-		channel:  channel,
 		model:    model,
 		esClient: client,
 	}
@@ -174,5 +166,6 @@ func Init(c config.Config) (*AuditMQ, error) {
 	if err := mq.consumer(); err != nil {
 		return nil, err
 	}
+
 	return mq, nil
 }

@@ -2,6 +2,7 @@ package mq
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/avast/retry-go"
 	"github.com/streadway/amqp"
 	"time"
@@ -12,26 +13,49 @@ func (a *AuditMQ) Product(msg *AuditReq) error {
 	if err != nil {
 		return err
 	}
-	// 开启事务
-	if err := a.channel.Tx(); err != nil {
+
+	// 创建新通道
+	channel, err := a.conn.Channel()
+	if err != nil {
 		return err
 	}
-	// 发布消息
-	// 尝试3次
-	if err := retry.Do(func() error {
-		return a.channel.Publish(
-			ExchangeName,
-			RoutingKeyName,
-			false,
-			false,
-			amqp.Publishing{
-				DeliveryMode: amqp.Persistent, // 持久化消息
-				Body:         body,
-			},
-		)
-	}, retry.Attempts(3), retry.Delay(time.Millisecond*100)); err != nil {
-		return a.channel.TxRollback()
+	defer channel.Close()
+
+	// 启用事务模式
+	if err := channel.Tx(); err != nil {
+		return fmt.Errorf("启用事务失败: %v", err)
 	}
+
+	// 发布消息到同一通道
+	publishErr := retry.Do(
+		func() error {
+			return channel.Publish(
+				ExchangeName,
+				RoutingKeyName,
+				false,
+				false,
+				amqp.Publishing{
+					DeliveryMode: amqp.Persistent,
+					Body:         body,
+				},
+			)
+		},
+		retry.Attempts(3),
+		retry.Delay(100*time.Millisecond),
+	)
+
+	if publishErr != nil {
+		// 回滚事务
+		if err := channel.TxRollback(); err != nil {
+			return fmt.Errorf("回滚失败: %v, 发布错误: %w", err, publishErr)
+		}
+		return publishErr
+	}
+
 	// 提交事务
-	return a.channel.TxCommit()
+	if err := channel.TxCommit(); err != nil {
+		return fmt.Errorf("提交事务失败: %v", err)
+	}
+
+	return nil
 }
