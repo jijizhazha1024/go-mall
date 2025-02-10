@@ -1,4 +1,4 @@
-package rpc
+package auths
 
 import (
 	"context"
@@ -19,7 +19,12 @@ import (
 
 var client auths.AuthsClient
 var once1 sync.Once
+var clientIP string
 
+func init() {
+	// 获取客户端IP
+	clientIP = "127.0.0.1"
+}
 func setupGRPCConnection(t *testing.T) {
 	once1.Do(func() {
 		conn, err := grpc.NewClient(fmt.Sprintf("127.0.0.1:%d", biz.AuthsRpcPort),
@@ -32,12 +37,14 @@ func setupGRPCConnection(t *testing.T) {
 	})
 }
 
+// 验证token
 func TestAuthenticationLogic_Authentication(t *testing.T) {
 	setupGRPCConnection(t)
 
 	resp, err := client.GenerateToken(context.Background(), &auths.AuthGenReq{
-		UserId:   1,
+		UserId:   4,
 		Username: "test",
+		ClientIp: clientIP,
 	})
 	if err != nil {
 		t.Fatalf("GenerateToken failed: %v", err)
@@ -54,12 +61,14 @@ func TestAuthenticationLogic_Authentication(t *testing.T) {
 	t.Log(res)
 }
 
+// 签发token
 func TestAuthenticationLogic_GenerateToken(t *testing.T) {
 	setupGRPCConnection(t)
 
 	resp, err := client.GenerateToken(context.Background(), &auths.AuthGenReq{
-		UserId:   1,
+		UserId:   4,
 		Username: "test",
+		ClientIp: clientIP,
 	})
 	if err != nil {
 		t.Fatalf("GenerateToken failed: %v", err)
@@ -71,12 +80,14 @@ func TestAuthenticationLogic_GenerateToken(t *testing.T) {
 	t.Log(resp)
 }
 
+// 续期token
 func TestAuthenticationLogic_RenewToken(t *testing.T) {
 	setupGRPCConnection(t)
 
 	resp, err := client.GenerateToken(context.Background(), &auths.AuthGenReq{
-		UserId:   1,
+		UserId:   4,
 		Username: "test",
+		ClientIp: clientIP,
 	})
 	if err != nil {
 		t.Fatalf("GenerateToken failed: %v", err)
@@ -87,13 +98,15 @@ func TestAuthenticationLogic_RenewToken(t *testing.T) {
 	time.Sleep(time.Second * 11)
 
 	res, err := client.Authentication(context.Background(), &auths.AuthReq{
-		Token: resp.AccessToken,
+		Token:    resp.AccessToken,
+		ClientIp: clientIP,
 	})
 	if err != nil {
 		t.Fatalf("Authentication failed: %v", err)
 	}
-	t.Logf("exprie token is %s", resp.AccessToken)
 	if res.StatusCode == code.AuthExpired {
+		t.Logf("exprie token is %s", resp.AccessToken)
+
 		renewResp, err := client.RenewToken(context.Background(), &auths.AuthRenewalReq{
 			RefreshToken: resp.RefreshToken,
 		})

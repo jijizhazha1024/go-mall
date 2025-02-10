@@ -5,13 +5,16 @@ option go_package = "./auths";
 
 message AuthReq {
   string token = 1;
+  string client_ip = 2;
 }
 message AuthGenReq {
   uint32 user_id = 1;
   string username = 2;
+  string client_ip = 3;
 }
 message AuthRenewalReq {
   string refresh_token = 1; // 用户刷新token
+  string client_ip = 2;
 }
 
 message AuthsRes{

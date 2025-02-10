@@ -9,16 +9,18 @@ import (
 type Claims struct {
 	UserID   uint32 `json:"user_id"`
 	UserName string `json:"username"`
+	ClientIP string `json:"client_ip"`
 	jwt.RegisteredClaims
 }
 
 const secretKey = "go-mall"
 
-func GenerateJWT(userID uint32, userName string, expire time.Duration) (string, error) {
+func GenerateJWT(userID uint32, userName, clientIP string, expire time.Duration) (string, error) {
 	// 设置JWT的负载（Claims）
 	claims := Claims{
 		UserID:   userID,
 		UserName: userName,
+		ClientIP: clientIP,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expire)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
