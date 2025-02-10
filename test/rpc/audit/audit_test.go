@@ -37,20 +37,21 @@ func TestCreateAuditLog(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to call CreateAuditLog: %v", err)
 	}
-	res, err := auditRpc.CreateAuditLog(context.Background(), &audit.CreateAuditLogReq{
-		UserId:            1,
-		ActionType:        "test",
-		ActionDescription: "test",
-		TargetTable:       "test",
-		TargetId:          1,
-		OldData:           string(data),
-		NewData:           string(data),
-		CreateAt:          time.Now().Unix(),
-		ClientIp:          "127.0.0.1",
-	})
-	if err != nil {
-		t.Fatalf("Failed to call CreateAuditLog: %v", err)
+	for i := 0; i < 20; i++ {
+		_, err := auditRpc.CreateAuditLog(context.Background(), &audit.CreateAuditLogReq{
+			UserId:            1,
+			ActionType:        "test",
+			ActionDescription: "test",
+			TargetTable:       "test",
+			TargetId:          1,
+			OldData:           string(data),
+			NewData:           string(data),
+			CreateAt:          time.Now().Unix(),
+			ClientIp:          "127.0.0.1",
+		})
+		if err != nil {
+			t.Fatalf("Failed to call CreateAuditLog: %v", err)
+		}
 	}
 
-	fmt.Println(res)
 }
