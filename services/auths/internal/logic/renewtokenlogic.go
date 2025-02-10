@@ -43,8 +43,13 @@ func (l *RenewTokenLogic) RenewToken(in *auths.AuthRenewalReq) (*auths.AuthRenew
 		return res, nil
 	}
 	// comparison of jwt create time and user logout time
-	logOutTime := int64(0)
-	if claims.RegisteredClaims.IssuedAt.Unix() <= logOutTime {
+	logoutTime, err := l.svcCtx.UserModel.GetLogoutTime(l.ctx, int64(claims.UserID))
+	if err != nil {
+		logx.Errorw("get logout time failed", logx.Field("err", err))
+		return nil, err
+	}
+	issuedAt := claims.RegisteredClaims.IssuedAt
+	if issuedAt.Before(logoutTime) {
 		res.StatusCode = code.AuthExpired
 		res.StatusMsg = code.AuthExpiredMsg
 		// token expired
