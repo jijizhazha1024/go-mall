@@ -17,3 +17,9 @@ CacheConf:
 MysqlConfig:
   datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
   conntimeout: 5
+
+RabbitMQ:
+  Host: "amqp://user:password@localhost:5672/"
+  QueueName: "your_queue"
+  ExchangeName: "your_exchange"
+  RoutingKey: "your_routing_key"

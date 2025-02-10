@@ -38,9 +38,10 @@ message LoginRequest {
 message LoginResponse {
   uint32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
+  string user_name = 3;
 
-  uint32 user_id = 3;
-    string token = 4;
+  uint32 user_id = 4;
+    string token = 5;
 }
 
 // 定义登出请求消息
@@ -54,8 +55,10 @@ message LogoutResponse {
   uint32 status_code = 1; // 状态码，0-成功，其他值-失败
   string status_msg = 2; // 返回状态描述
 
-  uint32 user_id = 3;
-    string token = 4;
+
+    string token = 3;
+   int64    logout_time = 4; // 登出时间
+
 }
 
 
@@ -79,6 +82,7 @@ message UpdateUserRequest {
 uint32 user_id = 1;
   string email = 2; // 可选，如果需要更新
   string password = 3; // 可选，如果需要更新
+  string usr_name = 4; // 可选，如果需要更新
 }
 
 // 定义更新用户响应消息
