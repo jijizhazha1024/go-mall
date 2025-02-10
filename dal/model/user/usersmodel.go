@@ -77,22 +77,32 @@ func (m *customUsersModel) FindAllEmails() ([]string, error) {
 func (m *customUsersModel) GetLoginTime(ctx context.Context, userId int64) (time.Time, error) {
 	query := fmt.Sprintf("select %s from %s where `user_id` = ? limit 1", usersRows, m.table)
 	var user Users
+	now := time.Now()
 	err := m.conn.QueryRowCtx(ctx, &user, query, userId)
-	if err != nil {
+	switch err {
+	case nil:
+		return user.LoginAt.Time, nil
+	case sqlx.ErrNotFound:
+		return now.Add(2 * time.Hour), ErrNotFound
+	default:
 		return time.Time{}, err
 	}
-	return user.LoginAt.Time, nil
 
 }
 
 func (m *customUsersModel) GetLogoutTime(ctx context.Context, userId int64) (time.Time, error) {
 	query := fmt.Sprintf("select %s from %s where `user_id` = ? limit 1", usersRows, m.table)
 	var user Users
+	now := time.Now()
 	err := m.conn.QueryRowCtx(ctx, &user, query, userId)
-	if err != nil {
+	switch err {
+	case nil:
+		return user.LogoutAt.Time, nil
+	case sqlx.ErrNotFound:
+		return now.Add(2 * time.Hour), ErrNotFound
+	default:
 		return time.Time{}, err
 	}
-	return user.LogoutAt.Time, nil
 }
 
 // 从数据库中获取登出时间
