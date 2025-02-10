@@ -3,12 +3,13 @@ package logic
 import (
 	"context"
 	"errors"
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/zeromicro/go-zero/core/logx"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/common/utils/token"
 	"jijizhazha1024/go-mall/services/auths/auths"
 	"jijizhazha1024/go-mall/services/auths/internal/svc"
+
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type AuthenticationLogic struct {
@@ -40,6 +41,7 @@ func (l *AuthenticationLogic) Authentication(in *auths.AuthReq) (*auths.AuthsRes
 	}
 	// comparison of jwt create time and user logout time
 	logOutTime := int64(0)
+
 	if claims.RegisteredClaims.IssuedAt.Unix() <= logOutTime {
 		res.StatusCode = code.AuthExpired
 		res.StatusMsg = code.AuthExpiredMsg
