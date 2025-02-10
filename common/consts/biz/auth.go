@@ -18,6 +18,7 @@ const (
 )
 
 var (
+
 	// WhitePath 白名单
 	WhitePath = []string{
 		"/douyin/user/register",
