@@ -25,6 +25,7 @@ type (
 	auditModel interface {
 		Insert(ctx context.Context, data *Audit) (sql.Result, error)
 		FindOne(ctx context.Context, id uint64) (*Audit, error)
+		FindOneByTraceId(ctx context.Context, traceId string) (*Audit, error)
 		Update(ctx context.Context, data *Audit) error
 		Delete(ctx context.Context, id uint64) error
 	}
@@ -37,16 +38,15 @@ type (
 	Audit struct {
 		Id          uint64         `db:"id"`           // 主键
 		UserId      uint64         `db:"user_id"`      // 用户id
-		Username    string         `db:"username"`     // 用户名
 		ActionType  string         `db:"action_type"`  // 操作类型
 		ActionDesc  sql.NullString `db:"action_desc"`  // 操作描述
 		OldData     sql.NullString `db:"old_data"`     // 旧数据
 		NewData     sql.NullString `db:"new_data"`     // 新数据
 		TargetTable string         `db:"target_table"` // 目标表
 		TargetId    uint64         `db:"target_id"`    // 目标id
-		ClientIp    sql.NullString `db:"client_ip"`    // ip地址
-		TraceId     sql.NullString `db:"trace_id"`     // traceid
-		SpanId      sql.NullString `db:"span_id"`      // spanid
+		ClientIp    string         `db:"client_ip"`    // ip地址
+		TraceId     string         `db:"trace_id"`     // traceid
+		SpanId      string         `db:"span_id"`      // spanid
 		CreatedAt   time.Time      `db:"created_at"`   // 创建时间
 	}
 )
@@ -78,15 +78,29 @@ func (m *defaultAuditModel) FindOne(ctx context.Context, id uint64) (*Audit, err
 	}
 }
 
+func (m *defaultAuditModel) FindOneByTraceId(ctx context.Context, traceId string) (*Audit, error) {
+	var resp Audit
+	query := fmt.Sprintf("select %s from %s where `trace_id` = ? limit 1", auditRows, m.table)
+	err := m.conn.QueryRowCtx(ctx, &resp, query, traceId)
+	switch err {
+	case nil:
+		return &resp, nil
+	case sqlx.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
 func (m *defaultAuditModel) Insert(ctx context.Context, data *Audit) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, auditRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.Username, data.ActionType, data.ActionDesc, data.OldData, data.NewData, data.TargetTable, data.TargetId, data.ClientIp, data.TraceId, data.SpanId)
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, auditRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.ActionType, data.ActionDesc, data.OldData, data.NewData, data.TargetTable, data.TargetId, data.ClientIp, data.TraceId, data.SpanId)
 	return ret, err
 }
 
-func (m *defaultAuditModel) Update(ctx context.Context, data *Audit) error {
+func (m *defaultAuditModel) Update(ctx context.Context, newData *Audit) error {
 	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, auditRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, data.UserId, data.Username, data.ActionType, data.ActionDesc, data.OldData, data.NewData, data.TargetTable, data.TargetId, data.ClientIp, data.TraceId, data.SpanId, data.Id)
+	_, err := m.conn.ExecCtx(ctx, query, newData.UserId, newData.ActionType, newData.ActionDesc, newData.OldData, newData.NewData, newData.TargetTable, newData.TargetId, newData.ClientIp, newData.TraceId, newData.SpanId, newData.Id)
 	return err
 }
 
