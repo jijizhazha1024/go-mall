@@ -3,7 +3,10 @@ package logic
 import (
 	"context"
 	"errors"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
+	"jijizhazha1024/go-mall/common/utils/metadatactx"
 	"jijizhazha1024/go-mall/common/utils/token"
 	"jijizhazha1024/go-mall/services/auths/auths"
 	"jijizhazha1024/go-mall/services/auths/internal/svc"
@@ -37,21 +40,45 @@ func (l *AuthenticationLogic) Authentication(in *auths.AuthReq) (*auths.AuthsRes
 			res.StatusCode = code.AuthExpired
 			res.StatusMsg = code.AuthExpiredMsg
 		}
+		l.Logger.Infow("token parse failed",
+			logx.Field("err", err),
+			logx.Field("access_token", in.Token))
+		return res, nil
+	}
+	clientIP := in.GetClientIp()
+	if clientIP == "" {
+		var ok bool
+		clientIP, ok = metadatactx.ExtractFromMetadataCtx(l.ctx, biz.ClientIPKey)
+		if !ok {
+			res.StatusCode = code.IllegalProxyAddress
+			res.StatusMsg = code.IllegalProxyAddressMsg
+			l.Logger.Infow("client ip is empty", logx.Field("user_id", claims.UserID))
+			return res, nil
+		}
+	}
+	// check if the client IP has changed
+	if clientIP != claims.ClientIP {
+		res.StatusCode = code.AuthExpired
+		res.StatusMsg = code.AuthExpiredMsg
+		l.Logger.Infow("client ip changed",
+			logx.Field("old_ip", claims.ClientIP),
+			logx.Field("new_ip", clientIP))
 		return res, nil
 	}
 
 	// comparison of jwt create time and user logout time
 	logoutTime, err := l.svcCtx.UserModel.GetLogoutTime(l.ctx, int64(claims.UserID))
-	if err != nil {
+	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 		logx.Errorw("get logout time failed", logx.Field("err", err))
 		return nil, err
 	}
 	issuedAt := claims.RegisteredClaims.IssuedAt
 	if issuedAt.Before(logoutTime) {
-		res.StatusCode = code.AuthExpired
-		res.StatusMsg = code.AuthExpiredMsg
+		res.StatusCode = code.AuthExpiredByLogout
+		res.StatusMsg = code.AuthExpiredByLogoutMsg
 		// token expired
-		logx.Infow("token expired by logout", logx.Field("user_id", claims.UserID))
+		logx.Infow("token expired by logout or re-login", logx.Field("user_id", claims.UserID),
+			logx.Field("issued_at", issuedAt.Format("2006-01-02 15:04:05")), logx.Field("logout_time", logoutTime.Format("2006-01-02 15:04:05")))
 		return res, nil
 	}
 	res.UserId = claims.UserID
