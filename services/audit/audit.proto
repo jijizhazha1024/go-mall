@@ -20,7 +20,7 @@ message CreateAuditLogReq {
   string old_data = 7;          // 操作前的数据（JSON格式）
   string new_data = 8;          // 操作后的数据（JSON格式）
   int64 create_at = 9;
-
+  string client_ip = 10;
   //  string ip_address = 9;        // 用户IP地址
   //  string trace_id = 10;
   //  string span_id = 11;
