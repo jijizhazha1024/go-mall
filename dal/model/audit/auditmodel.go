@@ -2,6 +2,7 @@ package audit
 
 import (
 	"context"
+	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
@@ -33,7 +34,8 @@ func (m *customAuditModel) withSession(session sqlx.Session) AuditModel {
 }
 func (m *customAuditModel) CheckExistByTraceID(ctx context.Context, traceID string) (bool, error) {
 	var cnt int64
-	if err := m.conn.QueryRowCtx(ctx, &cnt, "select count(*) from ? where `trace_id` = ?", m.table, traceID); err != nil {
+	query := fmt.Sprintf("select count(*) from %s where `trace_id` = ?", m.table)
+	if err := m.conn.QueryRowCtx(ctx, &cnt, query, traceID); err != nil {
 		return false, err
 	}
 	return cnt > 0, nil
