@@ -39,7 +39,6 @@ func TestCreateAuditLog(t *testing.T) {
 	}
 	res, err := auditRpc.CreateAuditLog(context.Background(), &audit.CreateAuditLogReq{
 		UserId:            1,
-		Username:          "test",
 		ActionType:        "test",
 		ActionDescription: "test",
 		TargetTable:       "test",
@@ -47,6 +46,7 @@ func TestCreateAuditLog(t *testing.T) {
 		OldData:           string(data),
 		NewData:           string(data),
 		CreateAt:          time.Now().Unix(),
+		ClientIp:          "127.0.0.1",
 	})
 	if err != nil {
 		t.Fatalf("Failed to call CreateAuditLog: %v", err)
