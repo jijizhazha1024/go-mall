@@ -75,17 +75,34 @@ func (m *customUsersModel) FindAllEmails() ([]string, error) {
 }
 
 func (m *customUsersModel) GetLoginTime(ctx context.Context, userId int64) (time.Time, error) {
-	query := fmt.Sprintf("SELECT `login_at` FROM %s WHERE `user_id` = ?", m.table)
-	var loginTime time.Time
-	err := m.conn.QueryRowCtx(ctx, &loginTime, query, userId)
-	return loginTime, err
+	query := fmt.Sprintf("select %s from %s where `user_id` = ? limit 1", usersRows, m.table)
+	var user Users
+	now := time.Now()
+	err := m.conn.QueryRowCtx(ctx, &user, query, userId)
+	switch err {
+	case nil:
+		return user.LoginAt.Time, nil
+	case sqlx.ErrNotFound:
+		return now.Add(2 * time.Hour), ErrNotFound
+	default:
+		return time.Time{}, err
+	}
 
 }
+
 func (m *customUsersModel) GetLogoutTime(ctx context.Context, userId int64) (time.Time, error) {
-	query := fmt.Sprintf("SELECT `logout_at` FROM %s WHERE `user_id` = ?", m.table)
-	var logoutTime time.Time
-	err := m.conn.QueryRowCtx(ctx, &logoutTime, query, userId)
-	return logoutTime, err
+	query := fmt.Sprintf("select %s from %s where `user_id` = ? limit 1", usersRows, m.table)
+	var user Users
+	now := time.Now()
+	err := m.conn.QueryRowCtx(ctx, &user, query, userId)
+	switch err {
+	case nil:
+		return user.LogoutAt.Time, nil
+	case sqlx.ErrNotFound:
+		return now.Add(2 * time.Hour), ErrNotFound
+	default:
+		return time.Time{}, err
+	}
 }
 
 // 从数据库中获取登出时间
