@@ -47,7 +47,6 @@ func (l *CreateAuditLogLogic) CreateAuditLog(in *audit.CreateAuditLogReq) (*audi
 
 	req := mq.AuditReq{
 		UserID:      in.UserId,
-		UserName:    in.Username,
 		TargetTable: in.TargetTable,
 		TargetID:    in.TargetId,
 		ActionType:  in.ActionType,

@@ -10,7 +10,7 @@ Consul:
 # 链路追踪
 Telemetry:
   Name: audit.rpc
-  Endpoint: http://124.71.72.124:14268/api/traces
+  Endpoint: http://47.99.130.92:14268/api/traces
   Batcher: jaeger
   Sampler: 1.0
 Log:
@@ -19,7 +19,7 @@ Log:
   Encoding: "json"
   Path: "./logs/audit-rpc"
 
-Mysql:
+MysqlConfig:
   datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
 
 RabbitMQ:

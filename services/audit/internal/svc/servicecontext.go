@@ -16,8 +16,11 @@ type ServiceContext struct {
 func NewServiceContext(c config.Config) *ServiceContext {
 	auditMq, err := mq.Init(c)
 	if err != nil {
-		defer auditMq.Close()
-		logx.Error(err)
+		defer func(auditMq *mq.AuditMQ) {
+			if err := auditMq.Close(); err != nil {
+				logx.Error(err)
+			}
+		}(auditMq)
 	}
 	return &ServiceContext{
 		Config:  c,

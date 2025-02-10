@@ -10,6 +10,6 @@ type Config struct {
 	zrpc.RpcServerConf
 	Consul        consul.Conf
 	RabbitMQ      config.RabbitMQConfig
-	Mysql         config.MysqlConfig
+	MysqlConfig   config.MysqlConfig
 	ElasticSearch config.ElasticSearchConfig
 }

@@ -21,11 +21,10 @@ func (a *AuditMQ) consumer() error {
 		for res := range results {
 			var msg *AuditReq
 			if err := json.Unmarshal(res.Body, &msg); err != nil {
-				logx.Errorw("failed to unmarshal message", logx.Field("error", err))
+				logx.Errorw("failed to unmarshal message", logx.Field("error", err), logx.Field("body", string(res.Body)))
 				continue
 			}
 			// 确保入库
-			// TODO：可能存在重复消息问题，需要优化
 			if err := a.persistData(ctx, msg); err != nil {
 				logx.Errorw("insert failed, rejecting message", logx.Field("err", err), logx.Field("msg", msg))
 				// 显式拒绝消息，不重新入队（requeue=false），进入死信队列
@@ -44,8 +43,14 @@ func (a *AuditMQ) consumer() error {
 }
 
 func (a *AuditMQ) persistData(ctx context.Context, data *AuditReq) error {
-	if err := a.ToMysql(ctx, data); err != nil {
+	exist, err := a.model.CheckExistByTraceID(ctx, data.TraceID)
+	if err != nil {
 		return err
+	}
+	if !exist {
+		if _, err := a.ToMysql(ctx, data); err != nil {
+			return err
+		}
 	}
 	if err := a.ToEs(ctx, data); err != nil {
 		return err
@@ -53,25 +58,30 @@ func (a *AuditMQ) persistData(ctx context.Context, data *AuditReq) error {
 	return nil
 }
 
-func (a *AuditMQ) ToMysql(ctx context.Context, data *AuditReq) error {
-	if _, err := a.model.Insert(ctx, &audit.Audit{
+func (a *AuditMQ) ToMysql(ctx context.Context, data *AuditReq) (int64, error) {
+	res, err := a.model.Insert(ctx, &audit.Audit{
 		UserId:      uint64(data.UserID),
-		Username:    data.UserName,
 		TargetId:    uint64(data.TargetID),
 		TargetTable: data.TargetTable,
 		ActionType:  data.ActionType,
-		ClientIp:    sql.NullString{String: data.ClientIP, Valid: true},
-		ActionDesc:  sql.NullString{String: data.ActionDesc, Valid: true},
-		OldData:     sql.NullString{String: data.OldData, Valid: true},
-		NewData:     sql.NullString{String: data.NewData, Valid: true},
-		SpanId:      sql.NullString{String: data.SpanID, Valid: true},
-		TraceId:     sql.NullString{String: data.TraceID, Valid: true},
+		ClientIp:    data.ClientIP,
+		ActionDesc:  sql.NullString{String: data.ActionDesc, Valid: data.ActionDesc != ""},
+		OldData:     sql.NullString{String: data.OldData, Valid: data.OldData != ""},
+		NewData:     sql.NullString{String: data.NewData, Valid: data.NewData != ""},
+		SpanId:      data.SpanID,
+		TraceId:     data.TraceID,
 		CreatedAt:   time.Unix(data.CreatedAt, 0),
-	}); err != nil {
-		return err
+	})
+	if err != nil {
+		return 0, err
 	}
-	return nil
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
+
 func (a *AuditMQ) ToEs(ctx context.Context, data *AuditReq) error {
 	// 使用Elasticsearch客户端的Index()方法插入文档
 	if _, err := a.esClient.Index().

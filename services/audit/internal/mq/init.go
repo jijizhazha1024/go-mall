@@ -7,9 +7,9 @@ import (
 	"github.com/streadway/amqp"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"jijizhazha1024/go-mall/common/consts/biz"
-	audit2 "jijizhazha1024/go-mall/dal/es/audit"
 	"jijizhazha1024/go-mall/dal/model/audit"
 	"jijizhazha1024/go-mall/services/audit/internal/config"
+	"jijizhazha1024/go-mall/services/audit/model/es"
 )
 
 const (
@@ -39,18 +39,19 @@ func (a *AuditMQ) Close() error {
 
 type AuditReq struct {
 	UserID      uint32 `json:"user_id"`
-	UserName    string `json:"user_name"`
 	ActionType  string `json:"action_type"`
 	ActionDesc  string `json:"action_desc"`
 	TargetTable string `json:"target_table"`
 	TargetID    int64  `json:"target_id"`
 	OldData     string `json:"old_data"`
 	NewData     string `json:"new_data"`
+
 	// trace
-	TraceID   string `json:"trace_id"`
-	SpanID    string `json:"span_id"`
-	ClientIP  string `json:"client_ip"`
-	CreatedAt int64  `json:"created_at"`
+	TraceID  string `json:"trace_id"`
+	SpanID   string `json:"span_id"`
+	ClientIP string `json:"client_ip"`
+
+	CreatedAt int64 `json:"created_at"`
 }
 
 func declareMainQueue(channel *amqp.Channel) error {
@@ -120,7 +121,7 @@ func initEsIndex(ctx context.Context, client *elastic.Client) error {
 		return err
 	}
 	if !exists {
-		createIndex, err := client.CreateIndex(biz.EsIndexName).Body(audit2.Mapping).Do(context.Background())
+		createIndex, err := client.CreateIndex(biz.EsIndexName).Body(es.Mapping).Do(context.Background())
 		if err != nil {
 			return err
 		}
@@ -134,7 +135,7 @@ func initEsIndex(ctx context.Context, client *elastic.Client) error {
 func Init(c config.Config) (*AuditMQ, error) {
 	//mysql conn
 
-	model := audit.NewAuditModel(sqlx.NewMysql(c.Mysql.DataSource))
+	model := audit.NewAuditModel(sqlx.NewMysql(c.MysqlConfig.DataSource))
 	// es client
 	client, err := elastic.NewClient(
 		elastic.SetURL(c.ElasticSearch.Addr),
