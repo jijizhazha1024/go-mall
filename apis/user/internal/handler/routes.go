@@ -13,38 +13,41 @@ import (
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
-		[]rest.Route{
-			{
-				Method:  http.MethodPost,
-				Path:    "/delete",
-				Handler: DeleteHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/info",
-				Handler: GetInfoHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/login",
-				Handler: LoginHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/logout",
-				Handler: LogoutHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/register",
-				Handler: RegisterHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPut,
-				Path:    "/update",
-				Handler: UpdateHandler(serverCtx),
-			},
-		},
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.WrapperAuthMiddleware},
+			[]rest.Route{
+				{
+					Method:  http.MethodPost,
+					Path:    "/delete",
+					Handler: DeleteHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/info",
+					Handler: GetInfoHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/login",
+					Handler: LoginHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/logout",
+					Handler: LogoutHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/register",
+					Handler: RegisterHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/update",
+					Handler: UpdateHandler(serverCtx),
+				},
+			}...,
+		),
 		rest.WithPrefix("/douyin/users"),
 	)
 }
