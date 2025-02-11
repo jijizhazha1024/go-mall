@@ -63,3 +63,32 @@ func (s *UsersServer) GetUser(ctx context.Context, in *users.GetUserRequest) (*u
 	l := logic.NewGetUserLogic(ctx, s.svcCtx)
 	return l.GetUser(in)
 }
+
+func (s *UsersServer) AddAddress(ctx context.Context, in *users.AddAddressRequest) (*users.AddAddressResponse, error) {
+	l := logic.NewAddAddressLogic(ctx, s.svcCtx)
+	return l.AddAddress(in)
+}
+
+// 删除用户地址
+func (s *UsersServer) DeleteAddress(ctx context.Context, in *users.DeleteAddressRequest) (*users.DeleteAddressResponse, error) {
+	l := logic.NewDeleteAddressLogic(ctx, s.svcCtx)
+	return l.DeleteAddress(in)
+}
+
+// 修改用户地址
+func (s *UsersServer) UpdateAddress(ctx context.Context, in *users.UpdateAddressRequest) (*users.UpdateAddressResponse, error) {
+	l := logic.NewUpdateAddressLogic(ctx, s.svcCtx)
+	return l.UpdateAddress(in)
+}
+
+// 获取所有收货地址
+func (s *UsersServer) ListAddresses(ctx context.Context, in *users.AllAddressLitstRequest) (*users.AddressListResponse, error) {
+	l := logic.NewListAddressesLogic(ctx, s.svcCtx)
+	return l.ListAddresses(in)
+}
+
+// 获取单个收货地址
+func (s *UsersServer) GetAddress(ctx context.Context, in *users.GetAddressRequest) (*users.GetAddressResponse, error) {
+	l := logic.NewGetAddressLogic(ctx, s.svcCtx)
+	return l.GetAddress(in)
+}
