@@ -1,10 +1,10 @@
 # 第一阶段：构建
-FROM golang:1.21-alpine as builder
+FROM golang:1.21 as builder
 
 WORKDIR /project/go-mall
 
 # 安装基础工具
-RUN apk add --no-cache bash git gcc musl-dev
+
 
 # 设置Go环境
 ENV CGO_ENABLED=0
@@ -17,9 +17,7 @@ COPY . .
 RUN go mod download
 
 # 执行构建脚本
-RUN chmod +x scripts/build.sh && \
-    ./scripts/build.sh
-
+RUN bash ./scripts/build.sh
 # 第二阶段：运行
 FROM alpine:3.19
 
