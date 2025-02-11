@@ -63,10 +63,10 @@ const (
 	ProductInfoRetrievedMsg       = "商品信息查询成功"
 	ProductInfoRetrievalFailedMsg = "商品信息查询失败"
 
-	CartCreatedMsg             = "购物车创建成功"
-	CartCreationFailedMsg      = "购物车创建失败"
-	CartClearedMsg             = "购物车清空成功"
-	CartClearFailedMsg         = "购物车清空失败"
+	CartCreatedMsg             = "购物车添加成功"
+	CartCreationFailedMsg      = "购物车添加失败"
+	CartClearedMsg             = "购物车删除成功"
+	CartClearFailedMsg         = "购物车删除失败"
 	CartInfoRetrievedMsg       = "购物车信息获取成功"
 	CartInfoRetrievalFailedMsg = "购物车信息获取失败"
 
