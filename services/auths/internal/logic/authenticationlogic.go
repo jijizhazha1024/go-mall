@@ -4,9 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/common/utils/metadatactx"
 	"jijizhazha1024/go-mall/common/utils/token"
 	"jijizhazha1024/go-mall/services/auths/auths"
 	"jijizhazha1024/go-mall/services/auths/internal/svc"
@@ -47,14 +45,10 @@ func (l *AuthenticationLogic) Authentication(in *auths.AuthReq) (*auths.AuthsRes
 	}
 	clientIP := in.GetClientIp()
 	if clientIP == "" {
-		var ok bool
-		clientIP, ok = metadatactx.ExtractFromMetadataCtx(l.ctx, biz.ClientIPKey)
-		if !ok {
-			res.StatusCode = code.IllegalProxyAddress
-			res.StatusMsg = code.IllegalProxyAddressMsg
-			l.Logger.Infow("client ip is empty", logx.Field("user_id", claims.UserID))
-			return res, nil
-		}
+		res.StatusCode = code.NotWithClientIP
+		res.StatusMsg = code.NotWithClientIPMsg
+		l.Logger.Infow("client ip is empty", logx.Field("access_token", in.Token))
+		return res, nil
 	}
 	// check if the client IP has changed
 	if clientIP != claims.ClientIP {

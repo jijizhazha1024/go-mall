@@ -52,7 +52,7 @@ func TestAuthenticationLogic_Authentication(t *testing.T) {
 	assert.Equal(t, uint32(0), resp.StatusCode)
 
 	res, err := client.Authentication(context.Background(), &auths.AuthReq{
-		Token: resp.AccessToken,
+		Token: resp.AccessToken, ClientIp: clientIP,
 	})
 	if err != nil {
 		t.Fatalf("Authentication failed: %v", err)
@@ -109,6 +109,7 @@ func TestAuthenticationLogic_RenewToken(t *testing.T) {
 
 		renewResp, err := client.RenewToken(context.Background(), &auths.AuthRenewalReq{
 			RefreshToken: resp.RefreshToken,
+			ClientIp:     clientIP,
 		})
 		if err != nil {
 			t.Fatalf("RenewToken failed: %v", err)
