@@ -43,6 +43,13 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 
 ```
+
+### 从ctx中获取用户id和客户端IP
+> 注意只能在api层获取到客户端IP和用户id
+```
+clientIP := r.Context().Value(biz.ClientIPKey).(string)
+userId := r.Context().Value(biz.UserIdKey).(string)
+```
 ## 运行脚本使用
 
 项目目录下的run.go为服务运行脚本，使用如下：
