@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"context"
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"google.golang.org/grpc/metadata"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/common/response"
@@ -22,8 +22,8 @@ func WithClientMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			httpx.OkJsonCtx(r.Context(), w, response.NewResponse(code.IllegalProxyAddress, code.IllegalProxyAddressMsg))
 			return
 		}
-		ctxWithClientIP := metadata.NewOutgoingContext(r.Context(), metadata.Pairs(biz.ClientIPKey, clientIP))
-		*r = *r.WithContext(ctxWithClientIP)
+		ctx := context.WithValue(r.Context(), biz.ClientIPKey, clientIP)
+		*r = *r.WithContext(ctx)
 		next(w, r)
 	}
 }
