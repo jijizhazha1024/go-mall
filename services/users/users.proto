@@ -110,6 +110,95 @@ message GetUserResponse {
   string user_name = 5;
 }
 
+ 
+// 请求添加新地址的消息
+message AddAddressRequest {
+  string recipient_name = 1;
+  string phone_number = 2;
+  string province = 3;
+  string city = 4;
+  string detailed_address = 5;
+  bool is_default = 6;
+}
+ 
+// 添加新地址的响应消息
+message AddAddressResponse {
+  int32 code = 1;
+  string msg = 2;
+  AddressData data = 3;
+}
+ 
+// 请求删除地址的消息
+message DeleteAddressRequest {
+  int32 address_id = 1;
+}
+ 
+// 删除地址的响应消息
+message DeleteAddressResponse {
+  int32 code = 1;
+  string msg = 2;
+}
+ 
+// 请求修改地址的消息
+message UpdateAddressRequest {
+  string recipient_name = 1;
+  string phone_number = 2;
+  string province = 3;
+  string city = 4;
+  string detailed_address = 5;
+  bool is_default = 6;
+}
+ 
+// 修改地址的响应消息
+message UpdateAddressResponse {
+  int32 code = 1;
+  string msg = 2;
+  AddressData data = 3;
+}
+ 
+// 获取所有地址的响应消息中的地址数据列表
+message AddressListResponse {
+  int32 code = 1;
+  string msg = 2;
+  repeated AddressData data = 3;
+}
+ 
+// 获取单个地址的响应消息
+message GetAddressResponse {
+  int32 code = 1;
+  string msg = 2;
+  AddressData data = 3;
+}
+ 
+// 地址数据消息
+message AddressData {
+  int32 address_id = 1;
+  string recipient_name = 2;
+  string phone_number = 3;
+  string province = 4;
+  string city = 5;
+  string detailed_address = 6;
+  bool is_default = 7;
+  string created_at = 8;
+  string updated_at = 9;
+}
+
+
+message Empty {
+}
+
+
+
+
+
+
+
+message GetAddressRequest {
+  int32 adrress_id = 1;
+}
+
+
+
 service Users {
   rpc Ping(Request) returns(Response);
 
@@ -126,6 +215,19 @@ service Users {
     // 获取用户信息方法
     rpc GetUser(GetUserRequest) returns (GetUserResponse);
 
+    rpc AddAddress (AddAddressRequest) returns (AddAddressResponse);
+  
+    // 删除用户地址
+    rpc DeleteAddress (DeleteAddressRequest) returns (DeleteAddressResponse);
+    
+    // 修改用户地址
+    rpc UpdateAddress (UpdateAddressRequest) returns (UpdateAddressResponse);
+    
+    // 获取所有收货地址
+    rpc ListAddresses (Empty) returns (AddressListResponse);
+    
+    // 获取单个收货地址
+    rpc GetAddress (GetAddressRequest) returns (GetAddressResponse);
 
 
 }
