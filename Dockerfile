@@ -32,9 +32,8 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 ENV TZ=Asia/Shanghai
 
 # 创建必要的目录
-WORKDIR /project/go-mall
+WORKDIR /app
 RUN mkdir -p apis/logs services/logs
 
 # 从构建阶段复制编译好的文件
-COPY --from=builder /project/go-mall/apis/apis /project/go-mall/apis/
-COPY --from=builder /project/go-mall/services/services /project/go-mall/services/ 
+COPY --from=builder /app /app/ 
