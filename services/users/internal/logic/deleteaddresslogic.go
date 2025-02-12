@@ -36,13 +36,13 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 			return &users.DeleteAddressResponse{
 				StatusCode: code.UserAddressNotFound,
 				StatusMsg:  code.UserAddressNotFoundMsg,
-			}, nil
+			}, err
 		}
 		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
 		return &users.DeleteAddressResponse{
 			StatusCode: code.ServerError,
 			StatusMsg:  code.ServerErrorMsg,
-		}, nil
+		}, err
 	}
 
 	return &users.DeleteAddressResponse{

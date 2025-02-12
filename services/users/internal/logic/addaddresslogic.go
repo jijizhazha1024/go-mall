@@ -47,17 +47,19 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 	})
 
 	if err != nil {
+		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("err", err))
 		return &users.AddAddressResponse{
 			StatusMsg:  code.AddUserAddressFailedMsg,
 			StatusCode: code.AddUserAddressFailed,
-		}, nil
+		}, err
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
+		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("err", err))
 		return &users.AddAddressResponse{
 			StatusMsg:  code.AddUserAddressFailedMsg,
 			StatusCode: code.AddUserAddressFailed,
-		}, nil
+		}, err
 	}
 	data := &users.AddressData{
 		AddressId:       int32(id),

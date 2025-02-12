@@ -73,7 +73,7 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 		passworhash = nil
 	}
 
-	err = l.svcCtx.UsersModel.Update(l.ctx, &user.Users{
+	_, err = l.svcCtx.UsersModel.Update(l.ctx, &user.Users{
 		UserId: int64(in.UserId),
 		Username: sql.NullString{
 			String: string(in.UsrName),

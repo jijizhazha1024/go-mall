@@ -27,7 +27,7 @@ type (
 	userAddressesModel interface {
 		Insert(ctx context.Context, data *UserAddresses) (sql.Result, error)
 		FindOne(ctx context.Context, addressId int32) (*UserAddresses, error)
-		Update(ctx context.Context, data *UserAddresses) error
+		Update(ctx context.Context, data *UserAddresses)(sql.Result, error)
 		Delete(ctx context.Context, addressId int32) error
 	}
 
@@ -57,10 +57,10 @@ func newUserAddressesModel(conn sqlx.SqlConn) *defaultUserAddressesModel {
 	}
 }
 
-func (m *defaultUserAddressesModel) Delete(ctx context.Context, addressId int32) error {
+func (m *defaultUserAddressesModel) Delete(ctx context.Context, addressId int32) error{
 	query := fmt.Sprintf("delete from %s where `address_id` = ?", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, addressId)
-	return err
+	return err	
 }
 
 func (m *defaultUserAddressesModel) FindOne(ctx context.Context, addressId int32) (*UserAddresses, error) {
@@ -83,10 +83,10 @@ func (m *defaultUserAddressesModel) Insert(ctx context.Context, data *UserAddres
 	return ret, err
 }
 
-func (m *defaultUserAddressesModel) Update(ctx context.Context, data *UserAddresses) error {
+func (m *defaultUserAddressesModel) Update(ctx context.Context, data *UserAddresses)(sql.Result, error) {
 	query := fmt.Sprintf("update %s set %s where `address_id` = ?", m.table, userAddressesRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, data.UserId, data.DetailedAddress, data.City, data.Province, data.IsDefault, data.RecipientName, data.PhoneNumber, data.AddressId)
-	return err
+	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.DetailedAddress, data.City, data.Province, data.IsDefault, data.RecipientName, data.PhoneNumber, data.AddressId)
+	return ret, err
 }
 
 func (m *defaultUserAddressesModel) tableName() string {

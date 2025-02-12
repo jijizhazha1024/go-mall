@@ -28,7 +28,7 @@ type (
 		Insert(ctx context.Context, data *Users) (sql.Result, error)
 		FindOne(ctx context.Context, userId int64) (*Users, error)
 		FindOneByEmail(ctx context.Context, email sql.NullString) (*Users, error)
-		Update(ctx context.Context, data *Users) error
+		Update(ctx context.Context, data *Users)(sql.Result, error)
 		Delete(ctx context.Context, userId int64) error
 	}
 
@@ -98,10 +98,10 @@ func (m *defaultUsersModel) Insert(ctx context.Context, data *Users) (sql.Result
 	return ret, err
 }
 
-func (m *defaultUsersModel) Update(ctx context.Context, newData *Users) error {
+func (m *defaultUsersModel) Update(ctx context.Context, newData *Users)(sql.Result, error) {
 	query := fmt.Sprintf("update %s set %s where `user_id` = ?", m.table, usersRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, newData.Username, newData.Email, newData.PasswordHash, newData.AvatarUrl, newData.UserDeleted, newData.LogoutAt, newData.LoginAt, newData.UserId)
-	return err
+	ret, err := m.conn.ExecCtx(ctx, query, newData.Username, newData.Email, newData.PasswordHash, newData.AvatarUrl, newData.UserDeleted, newData.LogoutAt, newData.LoginAt, newData.UserId)
+	return ret,err
 }
 
 func (m *defaultUsersModel) tableName() string {

@@ -33,15 +33,17 @@ func (l *ListAddressesLogic) ListAddresses(in *users.AllAddressLitstRequest) (*u
 	allusers, err := l.svcCtx.AddressModel.FindAllByUserId(l.ctx, in.UserId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))
 			return &users.AddressListResponse{
 				StatusMsg:  code.UserAddressNotFoundMsg,
 				StatusCode: code.UserAddressNotFound,
-			}, nil
+			}, err
 		}
+		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))
 		return &users.AddressListResponse{
 			StatusMsg:  code.ServerErrorMsg,
 			StatusCode: code.ServerError,
-		}, nil
+		}, err
 	}
 	addresslist := make([]*users.AddressData, 0)
 	for _, user := range allusers {

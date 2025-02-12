@@ -30,7 +30,7 @@ func NewUpdateAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upd
 func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*users.UpdateAddressResponse, error) {
 	// todo: add your logic here and delete this line
 
-	err := l.svcCtx.AddressModel.Update(l.ctx, &user_address.UserAddresses{
+	_, err := l.svcCtx.AddressModel.Update(l.ctx, &user_address.UserAddresses{
 
 		AddressId:     int64(in.AddressId),
 		RecipientName: in.RecipientName,
@@ -47,27 +47,45 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 
 	if err != nil {
 		if err == sql.ErrNoRows {
+			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
 			return &users.UpdateAddressResponse{
 				StatusMsg:  code.UserAddressNotFoundMsg,
 				StatusCode: code.UserAddressNotFound,
 			}, nil
 		}
+		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
 		return &users.UpdateAddressResponse{
 			StatusMsg:  code.ServerErrorMsg,
 			StatusCode: code.ServerError,
 		}, nil
 	}
 
+	addressData, err := l.svcCtx.AddressModel.FindOne(l.ctx, in.AddressId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
+			return &users.UpdateAddressResponse{
+				StatusMsg:  code.UserAddressNotFoundMsg,
+				StatusCode: code.UserAddressNotFound,
+			}, err
+		}
+		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
+		return &users.UpdateAddressResponse{
+			StatusMsg:  code.ServerErrorMsg,
+			StatusCode: code.ServerError,
+		}, err
+	}
+
 	data := &users.AddressData{
-		AddressId:       int32(in.AddressId),
-		RecipientName:   in.RecipientName,
-		PhoneNumber:     in.PhoneNumber,
-		Province:        in.Province,
-		City:            in.City,
-		DetailedAddress: in.DetailedAddress,
-		IsDefault:       in.IsDefault,
-		CreatedAt:       "",
-		UpdatedAt:       "",
+		AddressId:       int32(addressData.AddressId),
+		RecipientName:   addressData.RecipientName,
+		PhoneNumber:     addressData.PhoneNumber.String,
+		Province:        addressData.Province.String,
+		City:            addressData.City,
+		DetailedAddress: addressData.DetailedAddress,
+		IsDefault:       addressData.IsDefault,
+		CreatedAt:       addressData.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:       addressData.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
 
 	return &users.UpdateAddressResponse{
