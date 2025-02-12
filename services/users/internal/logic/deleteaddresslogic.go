@@ -29,15 +29,24 @@ func NewDeleteAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*users.DeleteAddressResponse, error) {
 	// todo: add your logic here and delete this line
 
-	err := l.svcCtx.AddressModel.Delete(l.ctx, in.AddressId)
+	_, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.AddressId))
 	if err != nil {
 		if err == sql.ErrNoRows {
 			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
 			return &users.DeleteAddressResponse{
 				StatusCode: code.UserAddressNotFound,
 				StatusMsg:  code.UserAddressNotFoundMsg,
-			}, err
+			}, nil
 		}
+		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
+		return &users.DeleteAddressResponse{
+			StatusCode: code.ServerError,
+			StatusMsg:  code.ServerErrorMsg,
+		}, err
+	}
+
+	err = l.svcCtx.AddressModel.Delete(l.ctx, in.AddressId)
+	if err != nil {
 		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
 		return &users.DeleteAddressResponse{
 			StatusCode: code.ServerError,

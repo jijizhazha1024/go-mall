@@ -28,6 +28,7 @@ const (
 	GetUserAddressSuccess    = 20024
 	GetUserAddressFailed     = 20025
 	UserAddressNotFound      = 20026
+	DefaultAddressHasExist   = 20027
 )
 
 const (
@@ -57,4 +58,5 @@ const (
 	GetUserAddressSuccessMsg    = "用户地址获取成功"
 	GetUserAddressFailedMsg     = "用户地址获取失败"
 	UserAddressNotFoundMsg      = "用户地址不存在"
+	DefaultAddressHasExistMsg   = "默认地址已存在"
 )

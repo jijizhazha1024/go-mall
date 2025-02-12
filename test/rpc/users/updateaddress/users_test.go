@@ -1,4 +1,4 @@
-package addaddress
+package updateaddress
 
 import (
 	"context"
@@ -26,19 +26,19 @@ func initusers() {
 func TestUsersRpc(t *testing.T) {
 	initusers()
 	//这里可以从token中获取user——id
-	resp, err := users_client.AddAddress(context.Background(), &users.AddAddressRequest{
+	resp, err := users_client.UpdateAddress(context.Background(), &users.UpdateAddressRequest{
 
-		RecipientName:   "张三",
+		RecipientName:   "djj",
 		PhoneNumber:     "13800138000",
-		Province:        "山东省",
-		City:            "济南市",
-		DetailedAddress: "历下区",
-		IsDefault:       false,
-		UserId:          1,
+		Province:        "广东省",
+		City:            "广州市",
+		DetailedAddress: "天河区",
+		IsDefault:       true,
+		AddressId:       1,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println("add success", resp)
-	t.Log("addsuccess", resp)
+	fmt.Println("update success", resp)
+	t.Log("updatesuccess", resp)
 }

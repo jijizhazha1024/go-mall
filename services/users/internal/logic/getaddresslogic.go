@@ -35,10 +35,9 @@ func (l *GetAddressLogic) GetAddress(in *users.GetAddressRequest) (*users.GetAdd
 		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))
 			return &users.GetAddressResponse{
-
 				StatusMsg:  code.UserAddressNotFoundMsg,
 				StatusCode: code.UserAddressNotFound,
-			}, err
+			}, nil
 		}
 
 		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))

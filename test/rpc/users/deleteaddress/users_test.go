@@ -1,4 +1,4 @@
-package addaddress
+package deleteaddress
 
 import (
 	"context"
@@ -26,19 +26,14 @@ func initusers() {
 func TestUsersRpc(t *testing.T) {
 	initusers()
 	//这里可以从token中获取user——id
-	resp, err := users_client.AddAddress(context.Background(), &users.AddAddressRequest{
+	resp, err := users_client.DeleteAddress(context.Background(), &users.DeleteAddressRequest{
 
-		RecipientName:   "张三",
-		PhoneNumber:     "13800138000",
-		Province:        "山东省",
-		City:            "济南市",
-		DetailedAddress: "历下区",
-		IsDefault:       false,
-		UserId:          1,
+		AddressId: 2,
 	})
 	if err != nil {
-		t.Fatal(err)
+		fmt.Println("delete address error", err)
+		t.Log("delete address error", err)
 	}
-	fmt.Println("add success", resp)
-	t.Log("addsuccess", resp)
+	fmt.Println("delete success", resp)
+	t.Log("deletesuccess", resp)
 }

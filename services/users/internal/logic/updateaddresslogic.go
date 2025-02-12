@@ -29,6 +29,25 @@ func NewUpdateAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upd
 // 修改用户地址
 func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*users.UpdateAddressResponse, error) {
 	// todo: add your logic here and delete this line
+	if in.IsDefault {
+		defaultaddress, err := l.svcCtx.AddressModel.FindOne(l.ctx, in.AddressId)
+		if err != nil {
+			if err != sql.ErrNoRows {
+				l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
+				return &users.UpdateAddressResponse{
+					StatusMsg:  code.ServerErrorMsg,
+					StatusCode: code.ServerError,
+				}, err
+			}
+		}
+		if defaultaddress != nil {
+			l.Logger.Infow(code.DefaultAddressHasExistMsg, logx.Field("address_id", in.AddressId))
+			return &users.UpdateAddressResponse{
+				StatusMsg:  code.DefaultAddressHasExistMsg,
+				StatusCode: code.DefaultAddressHasExist,
+			}, nil
+		}
+	}
 
 	_, err := l.svcCtx.AddressModel.Update(l.ctx, &user_address.UserAddresses{
 
