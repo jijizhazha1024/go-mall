@@ -28,7 +28,7 @@ func TestUsersRpc(t *testing.T) {
 	//这里可以从token中获取user——id
 	resp, err := users_client.AddAddress(context.Background(), &users.AddAddressRequest{
 
-		RecipientName:   "张三",
+		RecipientName:   "里斯三",
 		PhoneNumber:     "13800138000",
 		Province:        "山东省",
 		City:            "济南市",

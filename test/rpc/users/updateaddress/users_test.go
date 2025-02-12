@@ -34,7 +34,7 @@ func TestUsersRpc(t *testing.T) {
 		City:            "广州市",
 		DetailedAddress: "天河区",
 		IsDefault:       true,
-		AddressId:       1,
+		AddressId:       3,
 	})
 	if err != nil {
 		t.Fatal(err)

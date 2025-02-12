@@ -38,6 +38,7 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 	}
 
 	result, err := l.svcCtx.AddressModel.Insert(l.ctx, &user_address.UserAddresses{
+		UserId:          int64(in.UserId),
 		RecipientName:   in.RecipientName,
 		PhoneNumber:     phonenumber,
 		Province:        province,

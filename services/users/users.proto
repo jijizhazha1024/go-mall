@@ -150,6 +150,7 @@ message UpdateAddressRequest {
   string detailed_address = 5;
   bool is_default = 6;
   int32 address_id = 7;
+  int32 user_id = 8;
 }
  
 // 修改地址的响应消息
