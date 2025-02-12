@@ -1427,6 +1427,8 @@ github.com/zeebo/xxh3 v1.0.2/go.mod h1:5NWz9Sef7zIDm2JHfFlcQvNekmcEl9ekUZQQKCYaD
 github.com/zeromicro/go-zero v1.5.4/go.mod h1:x/aUyLmSwRECvOyjOf+lhwThBOilJIY+s3slmPAeboA=
 github.com/zeromicro/go-zero v1.7.6 h1:SArK4xecdrpVY3ZFJcbc0IZCx+NuWyHNjCv9f1+Gwrc=
 github.com/zeromicro/go-zero v1.7.6/go.mod h1:SmGykRm5e0Z4CGNj+GaSKDffaHzQV56fel0FkymTLlE=
+github.com/zeromicro/x v0.0.0-20240408115609-8224c482b07e h1:F5waakzloTfbJg2lcO1xvrzO6ssn7jQ38lXIDBz+nbQ=
+github.com/zeromicro/x v0.0.0-20240408115609-8224c482b07e/go.mod h1:5TP11tc1RHPCi5C/KDL0kIB0KgJAb9FB3ChpT/qM/jA=
 github.com/zeromicro/zero-contrib/zrpc/registry/consul v0.0.0-20231030135404-af9ae855016f h1:Sn9rM69poyqH4QoWjqgGLqxSBE0yIYmTSsnoewdG50U=
 github.com/zeromicro/zero-contrib/zrpc/registry/consul v0.0.0-20231030135404-af9ae855016f/go.mod h1:Ot01fxZC3vrtt6bIv1m6dINX1j7TtWZRMVZH/G2CCaU=
 go.etcd.io/etcd/api/v3 v3.5.9/go.mod h1:uyAal843mC8uUVSLWz6eHa/d971iDGnCRpmKd2Z+X8k=
