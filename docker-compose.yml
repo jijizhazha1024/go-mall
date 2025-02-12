@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # APIs 服务
+  user-api:
+    image: go-mall:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go-mall-user-api
+    working_dir: /project/go-mall/apis
+    command: ./apis
+    ports:
+      - "8001:8001"  # user-api 端口
+    volumes:
+      - ./logs/apis:/project/go-mall/apis/logs
+    env_file:
+      - .env
+    networks:
+      - go-mall
+    restart: always
+
+  carts-api:
+    image: go-mall:latest
+    container_name: go-mall-carts-api
+    working_dir: /project/go-mall/apis
+    command: ./apis
+    ports:
+      - "8003:8003"  # carts-api 端口
+    volumes:
+      - ./logs/apis:/project/go-mall/apis/logs
+    env_file:
+      - .env
+    networks:
+      - go-mall
+    restart: always
+
+  # Services 服务
+  auths-service:
+    image: go-mall:latest
+    container_name: go-mall-auths-service
+    working_dir: /project/go-mall/services
+    command: ./services
+    ports:
+      - "10000:10000"  # auths-service 端口
+    volumes:
+      - ./logs/services:/project/go-mall/services/logs
+    env_file:
+      - .env
+    networks:
+      - go-mall
+    restart: always
+
+  carts-service:
+    image: go-mall:latest
+    container_name: go-mall-carts-service
+    working_dir: /project/go-mall/services
+    command: ./services
+    ports:
+      - "10003:10003"  # carts-service 端口
+    volumes:
+      - ./logs/services:/project/go-mall/services/logs
+    env_file:
+      - .env
+    networks:
+      - go-mall
+    restart: always
+
+networks:
+  go-mall:
+    external: true 
