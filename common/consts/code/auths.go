@@ -12,6 +12,7 @@ const (
 	TokenInvalid
 	IllegalProxyAddress
 	AuthExpiredByLogout
+	NotWithClientIP
 )
 const (
 	AuthBlankMsg           = "认证信息为空"
@@ -24,4 +25,5 @@ const (
 	TokenInvalidMsg        = "令牌无效"
 	IllegalProxyAddressMsg = "非法代理地址"
 	AuthExpiredByLogoutMsg = "认证过期，用户已注销"
+	NotWithClientIPMsg     = "未携带客户端IP"
 )

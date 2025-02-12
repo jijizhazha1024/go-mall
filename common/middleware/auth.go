@@ -58,11 +58,17 @@ func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFun
 			once.Do(func() {
 				authRpc = authsclient.NewAuths(zrpc.MustNewClient(rpcConf))
 			})
-
+			clientIP := r.Context().Value(biz.ClientIPKey).(string)
+			if clientIP == "" {
+				sendAuthError(w, r, code.IllegalProxyAddress, code.IllegalProxyAddressMsg)
+				return
+			}
 			// 执行认证流程
-			authRes, err := authRpc.Authentication(r.Context(), &auths.AuthReq{Token: token})
+			authRes, err := authRpc.Authentication(r.Context(), &auths.AuthReq{Token: token, ClientIp: clientIP})
 			if err != nil {
-				logx.Errorw("back err", logx.Field("err", err), logx.Field("token", maskToken(token)), logx.Field("path", r.URL.Path))
+				logx.Errorw("back err", logx.Field("err", err),
+					logx.Field("client_ip", clientIP),
+					logx.Field("token", maskToken(token)), logx.Field("path", r.URL.Path))
 				sendServerError(w, r)
 				return
 			}
@@ -72,7 +78,7 @@ func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFun
 				setUserContext(r, authRes.UserId)
 				next(w, r)
 			case code.AuthExpired:
-				handleTokenExpiration(w, r, authRpc, refreshToken)
+				handleTokenExpiration(w, r, authRpc, refreshToken, clientIP)
 			default:
 				sendAuthError(w, r, int(authRes.StatusCode), authRes.StatusMsg)
 			}
@@ -87,18 +93,20 @@ func setUserContext(r *http.Request, userId uint32) {
 }
 
 // 处理令牌过期
-func handleTokenExpiration(w http.ResponseWriter, r *http.Request, client authsclient.Auths, refreshToken string) {
+func handleTokenExpiration(w http.ResponseWriter, r *http.Request, client authsclient.Auths, refreshToken string, clientIP string) {
 	if refreshToken == "" {
 		sendAuthError(w, r, code.AuthExpired, code.AuthExpiredMsg)
 		return
 	}
 
-	renewRes, err := client.RenewToken(r.Context(), &auths.AuthRenewalReq{RefreshToken: refreshToken})
+	renewRes, err := client.RenewToken(r.Context(), &auths.AuthRenewalReq{RefreshToken: refreshToken, ClientIp: clientIP})
 	if err != nil {
 		logx.Errorw("refresh token err",
 			logx.Field("err", err),
 			logx.Field("refreshToken", maskToken(refreshToken)),
-			logx.Field("path", r.URL.Path))
+			logx.Field("path", r.URL.Path),
+			logx.Field("client_ip", clientIP),
+		)
 		sendServerError(w, r)
 		return
 	}
