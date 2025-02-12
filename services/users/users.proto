@@ -124,8 +124,9 @@ message AddAddressRequest {
  
 // 添加新地址的响应消息
 message AddAddressResponse {
-  int32 code = 1;
-  string msg = 2;
+  int32 status_code = 1;
+  string status_msg = 2;
+
   AddressData data = 3;
 }
  
@@ -136,8 +137,8 @@ message DeleteAddressRequest {
  
 // 删除地址的响应消息
 message DeleteAddressResponse {
-  int32 code = 1;
-  string msg = 2;
+  int32 status_code = 1;
+  string status_msg = 2;
 }
  
 // 请求修改地址的消息
@@ -148,26 +149,27 @@ message UpdateAddressRequest {
   string city = 4;
   string detailed_address = 5;
   bool is_default = 6;
+  int32 address_id = 7;
 }
  
 // 修改地址的响应消息
 message UpdateAddressResponse {
-  int32 code = 1;
-  string msg = 2;
+  int32 status_code = 1;
+  string status_msg = 2;
   AddressData data = 3;
 }
  
 // 获取所有地址的响应消息中的地址数据列表
 message AddressListResponse {
-  int32 code = 1;
-  string msg = 2;
+  int32 status_code = 1;
+  string status_msg = 2;
   repeated AddressData data = 3;
 }
  
 // 获取单个地址的响应消息
 message GetAddressResponse {
-  int32 code = 1;
-  string msg = 2;
+  int32 status_code = 1;
+  string status_msg = 2;
   AddressData data = 3;
 }
  

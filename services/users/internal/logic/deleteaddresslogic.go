@@ -2,7 +2,9 @@ package logic
 
 import (
 	"context"
+	"database/sql"
 
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -29,8 +31,22 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 
 	err := l.svcCtx.AddressModel.Delete(l.ctx, in.AddressId)
 	if err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
+			return &users.DeleteAddressResponse{
+				StatusCode: code.UserAddressNotFound,
+				StatusMsg:  code.UserAddressNotFoundMsg,
+			}, nil
+		}
+		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
+		return &users.DeleteAddressResponse{
+			StatusCode: code.ServerError,
+			StatusMsg:  code.ServerErrorMsg,
+		}, nil
 	}
 
-	return &users.DeleteAddressResponse{}, nil
+	return &users.DeleteAddressResponse{
+		StatusCode: code.DeleteUserAddressSuccess,
+		StatusMsg:  code.DeleteUserAddressSuccessMsg,
+	}, nil
 }

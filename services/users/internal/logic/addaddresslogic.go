@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/dal/model/user_address"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
@@ -46,12 +47,17 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 	})
 
 	if err != nil {
-
-		return nil, err
+		return &users.AddAddressResponse{
+			StatusMsg:  code.AddUserAddressFailedMsg,
+			StatusCode: code.AddUserAddressFailed,
+		}, nil
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
-		return nil, err
+		return &users.AddAddressResponse{
+			StatusMsg:  code.AddUserAddressFailedMsg,
+			StatusCode: code.AddUserAddressFailed,
+		}, nil
 	}
 	data := &users.AddressData{
 		AddressId:       int32(id),
@@ -63,7 +69,9 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 		IsDefault:       in.IsDefault,
 	}
 	return &users.AddAddressResponse{
-		Data: data,
+		StatusMsg:  code.AddUserAddressSuccessMsg,
+		StatusCode: code.AddUserAddressSuccess,
+		Data:       data,
 	}, nil
 
 }

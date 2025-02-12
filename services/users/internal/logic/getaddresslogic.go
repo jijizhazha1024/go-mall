@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -32,10 +33,17 @@ func (l *GetAddressLogic) GetAddress(in *users.GetAddressRequest) (*users.GetAdd
 	address, err := l.svcCtx.AddressModel.GetUserAddress(l.ctx, in.UserId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("用户地址不存在")
+			return &users.GetAddressResponse{
+				StatusMsg:  code.UserAddressNotFoundMsg,
+				StatusCode: code.UserAddressNotFound,
+			}, nil
 		}
-		return nil, err
+		return &users.GetAddressResponse{
+			StatusMsg:  code.ServerErrorMsg,
+			StatusCode: code.ServerError,
+		}, nil
 	}
+
 	data := &users.AddressData{
 		AddressId:       int32(address.AddressId),
 		RecipientName:   address.RecipientName,
@@ -49,6 +57,8 @@ func (l *GetAddressLogic) GetAddress(in *users.GetAddressRequest) (*users.GetAdd
 	}
 
 	return &users.GetAddressResponse{
-		Data: data,
+		StatusMsg:  code.GetUserAddressSuccessMsg,
+		StatusCode: code.GetUserAddressSuccess,
+		Data:       data,
 	}, nil
 }

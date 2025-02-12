@@ -47,17 +47,6 @@ func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, er
 		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_id", in.UserId))
 		return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
-
-	// // 从数据库中获取登出时间
-	// user, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
-	// if err != nil {
-	// 	logx.Infow(code.ServerErrorMsg)
-	// 	// 处理错误
-	// 	return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError, err)
-	// }
-
-	// 构造返回值
-
 	logtoutime, err := l.svcCtx.UsersModel.GetLogoutTime(l.ctx, int64(in.UserId))
 	if err != nil {
 		logx.Infow(code.ServerErrorMsg)

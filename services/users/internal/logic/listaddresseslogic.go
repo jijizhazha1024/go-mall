@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -32,9 +33,15 @@ func (l *ListAddressesLogic) ListAddresses(in *users.AllAddressLitstRequest) (*u
 	allusers, err := l.svcCtx.AddressModel.FindAllByUserId(l.ctx, in.UserId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.New("用户地址不存在")
+			return &users.AddressListResponse{
+				StatusMsg:  code.UserAddressNotFoundMsg,
+				StatusCode: code.UserAddressNotFound,
+			}, nil
 		}
-		return nil, err
+		return &users.AddressListResponse{
+			StatusMsg:  code.ServerErrorMsg,
+			StatusCode: code.ServerError,
+		}, nil
 	}
 	addresslist := make([]*users.AddressData, 0)
 	for _, user := range allusers {
@@ -52,6 +59,8 @@ func (l *ListAddressesLogic) ListAddresses(in *users.AllAddressLitstRequest) (*u
 	}
 
 	return &users.AddressListResponse{
-		Data: addresslist,
+		StatusMsg:  code.GetUserAddressSuccessMsg,
+		StatusCode: code.GetUserAddressSuccess,
+		Data:       addresslist,
 	}, nil
 }
