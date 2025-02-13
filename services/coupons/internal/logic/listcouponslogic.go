@@ -25,7 +25,5 @@ func NewListCouponsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListC
 
 // ListCoupons 获取优惠券列表
 func (l *ListCouponsLogic) ListCoupons(in *coupons.ListCouponsReq) (*coupons.ListCouponsResp, error) {
-	// todo: add your logic here and delete this line
-
 	return &coupons.ListCouponsResp{}, nil
 }
