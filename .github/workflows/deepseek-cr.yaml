@@ -1,0 +1,25 @@
+name: Code Review
+on:
+  pull_request:
+    branches: [dev]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    name: Code Review
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: DeepSeek Code Review
+        uses: hustcer/deepseek-review@v1
+        with:
+          chat-token: ${{ secrets.DEEPSEEK_CHAT_TOKEN }} # DeepSeek API Token
+          model: deepseek-chat
+          sys-prompt: "请专注于检查 Go 文件中的代码质量问题，包括但不限于代码风格、逻辑错误和安全漏洞，并提出具体的改进建议。"
+          user-prompt: "请审查以下 Go 文件的代码变更"
+
+
