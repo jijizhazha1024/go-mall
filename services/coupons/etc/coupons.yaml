@@ -1,0 +1,26 @@
+Name: coupons.rpc
+ListenOn: 0.0.0.0:10009
+
+
+# 服务发现
+Consul:
+  Host: 124.71.72.124:8500 # consul endpoint
+  Key: coupons.rpc
+  Meta:
+    Protocol: grpc
+
+# 链路追踪
+Telemetry:
+  Name: coupons.rpc
+  Endpoint: http://124.71.72.124:14268/api/traces
+  Batcher: jaeger
+  Sampler: 1.0
+
+Log:
+  ServiceName: "coupons-rpc"
+  Mode: 'console'
+  Encoding: "json"
+  Path: "./logs/coupons-rpc"
+
+MysqlConfig:
+  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
