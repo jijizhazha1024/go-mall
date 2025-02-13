@@ -2,9 +2,8 @@ package logic
 
 import (
 	"context"
-	"errors"
 	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/common/utils/metadatactx"
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/common/utils/token"
 	"jijizhazha1024/go-mall/services/auths/auths"
 	"jijizhazha1024/go-mall/services/auths/internal/svc"
@@ -28,16 +27,13 @@ func NewGenerateTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Gen
 
 // GenerateToken 生成toke
 func (l *GenerateTokenLogic) GenerateToken(in *auths.AuthGenReq) (*auths.AuthGenRes, error) {
-
-	// 优先级：in.GetClientIp() > metadata 中的 biz.ClientIPKey > 返回错误
+	res := new(auths.AuthGenRes)
 	clientIP := in.GetClientIp()
 	if clientIP == "" {
-		var ok bool
-		clientIP, ok = metadatactx.ExtractFromMetadataCtx(l.ctx, biz.ClientIPKey)
-		if !ok {
-			l.Logger.Errorw("client ip is empty")
-			return nil, errors.New("client ip is empty")
-		}
+		res.StatusCode = code.NotWithClientIP
+		res.StatusMsg = code.NotWithClientIPMsg
+		l.Logger.Infow("client ip is empty", logx.Field("user_id", in.UserId))
+		return res, nil
 	}
 	// 生成access token
 	accessToken, err := token.GenerateJWT(in.UserId, in.Username, clientIP, biz.TokenExpire)
@@ -61,8 +57,7 @@ func (l *GenerateTokenLogic) GenerateToken(in *auths.AuthGenReq) (*auths.AuthGen
 	l.Logger.Infow("tokens generated successfully",
 		logx.Field("user_id", in.UserId),
 		logx.Field("client_ip", clientIP))
-	return &auths.AuthGenRes{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}, nil
+	res.AccessToken = accessToken
+	res.RefreshToken = refreshToken
+	return res, nil
 }
