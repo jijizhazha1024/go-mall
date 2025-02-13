@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
 	"jijizhazha1024/go-mall/dal/model/products/product_categories"
@@ -105,50 +106,42 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 		}, err
 	}
 	// 7. 更新Elasticsearch记录
-	go func(err error) {
-		// Elasticsearch索引名称
-		indexName := "products"
-		// Elasticsearch文档ID
-		docID := fmt.Sprintf("%d", in.Product.Id)
-		// 构造Elasticsearch文档
-		esDoc := map[string]interface{}{
-			"id":          in.Product.Id,
-			"name":        in.Product.Name,
-			"description": in.Product.Description,
-			"picture":     picture_url,
-			"price":       in.Product.Price,
-			"categories":  in.Product.Categories,
-		}
-		// 构造正确的更新请求体
-		updateBody := map[string]interface{}{
-			"doc": esDoc,
-		}
-		// 创建Elasticsearch更新请求
-		req := esapi.UpdateRequest{
-			Index:      indexName,
-			DocumentID: docID,
-			Body:       strings.NewReader(mustJSON(updateBody)),
-			Refresh:    "true",
-		}
+	// Elasticsearch索引名称
+	indexName := biz.ProductEsIndexName
+	// Elasticsearch文档ID
+	docID := fmt.Sprintf("%d", in.Product.Id)
+	// 构造Elasticsearch文档
+	esDoc := map[string]interface{}{
+		"id":          in.Product.Id,
+		"name":        in.Product.Name,
+		"description": in.Product.Description,
+		"picture":     picture_url,
+		"price":       in.Product.Price,
+		"categories":  in.Product.Categories,
+	}
+	// 构造正确的更新请求体
+	updateBody := map[string]interface{}{
+		"doc": esDoc,
+	}
+	var ubstring string
+	if ubstring, err = mustJSON(updateBody); err != nil {
+		l.Logger.Errorw("mustJSON err",
+			logx.Field("err", err))
+		return &product.UpdateProductResp{
+			StatusCode: uint32(code.ProductUpdateFailed),
+			StatusMsg:  code.ProductUpdateFailedMsg,
+		}, err
+	}
+	// 创建Elasticsearch更新请求
+	req := esapi.UpdateRequest{
+		Index:      indexName,
+		DocumentID: docID,
+		Body:       strings.NewReader(ubstring),
+		Refresh:    "true",
+	}
 
-		// 发送请求
-		res, err := req.Do(context.Background(), l.svcCtx.Es)
-		if err != nil {
-			l.Logger.Errorf("更新Elasticsearch记录失败: %v", err)
-			return
-		}
-		defer res.Body.Close()
-
-		// 检查响应
-		if res.IsError() {
-			var e map[string]interface{}
-			if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
-				l.Logger.Errorf("解析Elasticsearch响应失败: %v", err)
-				return
-			}
-			l.Logger.Errorf("Elasticsearch更新失败: %s", e["error"].(map[string]interface{})["reason"])
-		}
-	}(err)
+	// 发送请求
+	res, err := req.Do(context.Background(), l.svcCtx.Es)
 	if err != nil {
 		l.Logger.Errorw("product es update failed",
 			logx.Field("err", err),
@@ -158,22 +151,30 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 			StatusMsg:  code.EsFailedMag,
 		}, err
 	}
+	defer res.Body.Close()
+
+	// 检查响应
+	if res.IsError() {
+		var e map[string]interface{}
+		if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
+			l.Logger.Errorf("解析Elasticsearch响应失败: %v", err)
+		}
+		l.Logger.Errorw("product es update body failed",
+			logx.Field("err", err),
+			logx.Field("product_id", in.Product.Id))
+		return &product.UpdateProductResp{
+			StatusCode: uint32(code.EsFailed),
+			StatusMsg:  code.EsFailedMag,
+		}, err
+	}
+
 	// 8. 延迟第二次删除缓存
-	go func(err error) {
+	go func() {
 		time.Sleep(500 * time.Millisecond)
 		if _, err := l.svcCtx.RedisClient.Del(cacheKey); err != nil {
 			l.Logger.Errorf("第二次删除缓存失败: %v", err)
 		}
-	}(err)
-	if err != nil {
-		l.Logger.Errorw("product delete cache failed",
-			logx.Field("err", err),
-			logx.Field("product_id", in.Product.Id))
-		return &product.UpdateProductResp{
-			StatusCode: uint32(code.ProductCacheFailed),
-			StatusMsg:  code.ProductCacheFailedMsg,
-		}, err
-	}
+	}()
 	// 9. 返回成功响应
 	return &product.UpdateProductResp{
 		StatusCode: uint32(code.ProductUpdated),

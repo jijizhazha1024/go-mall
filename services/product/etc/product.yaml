@@ -11,17 +11,18 @@ Consul:
 
 # MySQL 配置
 MysqlConfig:
-  datasource: "root:123@tcp(127.0.0.1:3306)/douyinmall?charset=utf8mb4&parseTime=True&loc=Local"
+  #datasource: "root:123@tcp(127.0.0.1:3306)/douyinmall?charset=utf8mb4&parseTime=True&loc=Local"
+  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
   conntimeout: 5
 RedisConf:
-  Host: 127.0.0.1:6379
+  Host: 124.71.72.124:6379
   Type: node
-  Pass: "" # 如果有密码则填写
+  Pass: jjzzchtt # 如果有密码则填写
   Tls: false
 # Elasticsearch 配置
 ElasticsearchConfig:
   addresses:
-    - 127.0.0.1:9200
+    - 113.45.32.164:9200
   max_idle_conns_per_host: 10
   response_header_timeout: 30s
 #七牛云

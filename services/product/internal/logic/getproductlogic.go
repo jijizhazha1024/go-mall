@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
 	"jijizhazha1024/go-mall/services/product/internal/svc"
@@ -30,8 +31,20 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 	// todo: add your logic here and delete this line
 	product_id := in.Id
 	productModel := product2.NewProductsModel(l.svcCtx.Mysql)
-	cacheKey := fmt.Sprintf("product:%d", product_id)
-
+	// 在redis中维护商品的访问频率次数 PV
+	// 检查商品 ID 是否存在
+	redisKey := biz.ProductRedisPVName
+	cacheKey := fmt.Sprintf("%d", product_id)
+	_, err := l.svcCtx.RedisClient.Zincrby(redisKey, 1, cacheKey)
+	if err != nil {
+		l.Logger.Errorw("自增商品的访问次数失败",
+			logx.Field("err", err),
+			logx.Field("product_id", in.Id))
+		return &product.GetProductResp{
+			StatusCode: uint32(code.ProductCacheFailed),
+			StatusMsg:  code.ProductCacheFailedMsg,
+		}, err
+	}
 	// 从Redis中获取数据
 	cacheData, err := l.svcCtx.RedisClient.Get(cacheKey)
 	if err != nil {
