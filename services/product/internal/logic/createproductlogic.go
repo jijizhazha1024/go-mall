@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"io/ioutil"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
 	pc "jijizhazha1024/go-mall/dal/model/products/product_categories"
@@ -116,11 +118,19 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 		"price":       in.Price,
 		"categories":  in.Categories,
 	}
-
+	var newBody string
+	if newBody, err = mustJSON(esDoc); err != nil {
+		l.Logger.Errorw("mustJSON err",
+			logx.Field("err", err))
+		return &product.CreateProductResp{
+			StatusCode: uint32(code.ProductCreationFailed),
+			StatusMsg:  code.ProductCreationFailedMsg,
+		}, err
+	}
 	req := esapi.IndexRequest{
-		Index:      "products", // ES 索引名，
+		Index:      biz.ProductEsIndexName, // ES 索引名，
 		DocumentID: fmt.Sprintf("%d", product_Id),
-		Body:       strings.NewReader(mustJSON(esDoc)),
+		Body:       strings.NewReader(newBody),
 		Refresh:    "true",
 	}
 
@@ -134,14 +144,20 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 		}, err
 	}
 	defer res.Body.Close()
-
+	// 检查响应是否包含错误
 	if res.IsError() {
+		body, readErr := ioutil.ReadAll(res.Body)
+		if readErr != nil {
+			l.Logger.Errorf("读取 Elasticsearch 响应体失败: %v", readErr)
+		} else {
+			l.Logger.Errorf("创建 Elasticsearch 记录时返回错误响应: %s", string(body))
+		}
 		return &product.CreateProductResp{
 			StatusCode: uint32(code.EsFailed),
 			StatusMsg:  code.EsFailedMag,
 		}, err
-	}
 
+	}
 	return &product.CreateProductResp{
 		StatusCode: uint32(code.ProductCreated),
 		StatusMsg:  code.ProductCreatedMsg,
@@ -160,10 +176,10 @@ func (l *CreateProductLogic) checkSensitiveWords(text string) error {
 }
 
 // mustJSON 辅助函数，用于将结构体转换为 JSON 字符串
-func mustJSON(v interface{}) string {
+func mustJSON(v interface{}) (string, error) {
 	b, err := json.Marshal(v)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return string(b)
+	return string(b), nil
 }
