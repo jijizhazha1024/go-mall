@@ -63,7 +63,7 @@ func (l *AuthenticationLogic) Authentication(in *auths.AuthReq) (*auths.AuthsRes
 	// comparison of jwt create time and user logout time
 	logoutTime, err := l.svcCtx.UserModel.GetLogoutTime(l.ctx, int64(claims.UserID))
 	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
-		logx.Errorw("get logout time failed", logx.Field("err", err))
+		l.Logger.Errorw("get logout time failed", logx.Field("err", err))
 		return nil, err
 	}
 	issuedAt := claims.RegisteredClaims.IssuedAt
@@ -71,7 +71,7 @@ func (l *AuthenticationLogic) Authentication(in *auths.AuthReq) (*auths.AuthsRes
 		res.StatusCode = code.AuthExpiredByLogout
 		res.StatusMsg = code.AuthExpiredByLogoutMsg
 		// token expired
-		logx.Infow("token expired by logout or re-login", logx.Field("user_id", claims.UserID),
+		l.Logger.Infow("token expired by logout or re-login", logx.Field("user_id", claims.UserID),
 			logx.Field("issued_at", issuedAt.Format("2006-01-02 15:04:05")), logx.Field("logout_time", logoutTime.Format("2006-01-02 15:04:05")))
 		return res, nil
 	}
