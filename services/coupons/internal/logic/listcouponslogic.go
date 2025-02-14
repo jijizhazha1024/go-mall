@@ -44,8 +44,10 @@ func (l *ListCouponsLogic) ListCoupons(in *coupons.ListCouponsReq) (*coupons.Lis
 		logx.Errorw("query coupons error", logx.Field("err", err))
 		return nil, err
 	}
-	for _, coupon := range queryCoupons {
-		res.Coupons = append(res.Coupons, convertCoupon2Resp(coupon))
+	couponsList := make([]*coupons.Coupon, 0, len(queryCoupons))
+	for _, c := range queryCoupons {
+		couponsList = append(couponsList, convertCoupon2Resp(c))
 	}
+	res.Coupons = couponsList
 	return res, nil
 }
