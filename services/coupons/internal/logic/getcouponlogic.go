@@ -2,6 +2,9 @@ package logic
 
 import (
 	"context"
+	"errors"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"jijizhazha1024/go-mall/common/consts/code"
 
 	"jijizhazha1024/go-mall/services/coupons/coupons"
 	"jijizhazha1024/go-mall/services/coupons/internal/svc"
@@ -25,7 +28,32 @@ func NewGetCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetCoup
 
 // GetCoupon 获取单个优惠券
 func (l *GetCouponLogic) GetCoupon(in *coupons.GetCouponReq) (*coupons.GetCouponResp, error) {
-	// todo: add your logic here and delete this line
 
-	return &coupons.GetCouponResp{}, nil
+	res := &coupons.GetCouponResp{}
+
+	if in.Id == "" {
+		res.StatusCode = code.NotWithParam
+		res.StatusMsg = code.NotWithParamMsg
+		return res, nil
+	}
+
+	one, err := l.svcCtx.CouponsModel.FindOne(l.ctx, in.Id)
+	if err != nil {
+		if errors.Is(err, sqlx.ErrNotFound) {
+			res.StatusCode = code.CouponsNotExist
+			res.StatusMsg = code.CouponsNotExistMsg
+			return res, nil
+		}
+		logx.Errorw("query coupons by id error", logx.Field("err", err))
+		return nil, err
+	}
+
+	// check status
+	if one.Status == 0 {
+		res.StatusCode = code.CouponsNotExist
+		res.StatusMsg = code.CouponsNotExistMsg
+		return res, nil
+	}
+	res.Coupon = convertCoupon2Resp(one)
+	return res, nil
 }

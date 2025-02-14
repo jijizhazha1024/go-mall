@@ -45,17 +45,7 @@ func (l *ListCouponsLogic) ListCoupons(in *coupons.ListCouponsReq) (*coupons.Lis
 		return nil, err
 	}
 	for _, coupon := range queryCoupons {
-		res.Coupons = append(res.Coupons, &coupons.Coupon{
-			Id:             coupon.Id,
-			Name:           coupon.Name,
-			Type:           coupons.CouponType(coupon.Type),
-			Value:          int32(coupon.Value),
-			MinAmount:      int32(coupon.MinAmount),
-			RemainingCount: int32(coupon.RemainingCount),
-			TotalCount:     int32(coupon.TotalCount),
-			EndTime:        coupon.EndTime.Format("2006-01-02 15:04:05"),
-			StartTime:      coupon.StartTime.Format("2006-01-02 15:04:05"),
-		})
+		res.Coupons = append(res.Coupons, convertCoupon2Resp(coupon))
 	}
 	return res, nil
 }
