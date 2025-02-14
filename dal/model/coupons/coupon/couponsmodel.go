@@ -1,6 +1,11 @@
 package coupon
 
-import "github.com/zeromicro/go-zero/core/stores/sqlx"
+import (
+	"context"
+	"fmt"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"strings"
+)
 
 var _ CouponsModel = (*customCouponsModel)(nil)
 
@@ -10,12 +15,42 @@ type (
 	CouponsModel interface {
 		couponsModel
 		withSession(session sqlx.Session) CouponsModel
+		QueryCoupons(ctx context.Context, page, pageSize, ctype int32) ([]*Coupons, error)
 	}
 
 	customCouponsModel struct {
 		*defaultCouponsModel
 	}
 )
+
+func (m *customCouponsModel) QueryCoupons(ctx context.Context, page, pageSize, ctype int32) ([]*Coupons, error) {
+	query := fmt.Sprintf("SELECT %s FROM %s", couponsRows, m.table)
+
+	// 构建WHERE条件
+	var where []string
+	var args []interface{}
+
+	if ctype != 0 {
+		where = append(where, "type = ?")
+		args = append(args, ctype)
+	}
+
+	// 组合WHERE条件
+	if len(where) > 0 {
+		query += " WHERE " + strings.Join(where, " AND ")
+	}
+
+	// 添加分页
+	query += " LIMIT ? OFFSET ?"
+	args = append(args, pageSize, (page-1)*pageSize)
+
+	var coupons []*Coupons
+	err := m.conn.QueryRowsCtx(ctx, &coupons, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	return coupons, nil
+}
 
 // NewCouponsModel returns a model for the database table.
 func NewCouponsModel(conn sqlx.SqlConn) CouponsModel {
