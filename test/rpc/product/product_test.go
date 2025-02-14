@@ -9,7 +9,7 @@ import (
 	"github.com/qiniu/go-sdk/v7/storage"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"io/ioutil"
+	"io"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/services/product/product"
 	"os"
@@ -121,7 +121,7 @@ func imageToBase64(imagePath string) (string, error) {
 	}
 	defer file.Close()
 	// 读取图片文件内容
-	imageData, err := ioutil.ReadAll(file)
+	imageData, err := io.ReadAll(file)
 	if err != nil {
 		return "", err
 	}
