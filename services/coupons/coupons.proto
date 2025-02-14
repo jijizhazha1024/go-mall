@@ -17,7 +17,6 @@ message Coupon {
   int32 min_amount = 5; // 最低消费金额（分）
   string start_time = 6; // 有效期开始
   string end_time = 7; // 有效期结束
-  int32 status = 8; // 状态：0-禁用 1-启用
   int32 total_count = 9; // 发行总量
   int32 remaining_count = 10; // 剩余数量
   string created_at = 11; // 创建时间
@@ -63,13 +62,15 @@ message PaginationReq {
 message ListCouponsReq {
   PaginationReq pagination = 1;
   int32 type = 2; // 可选：优惠券类型
-  int32 status = 3; // 可选：优惠券状态
 }
 
 // 获取优惠券列表响应
 message ListCouponsResp {
-  repeated Coupon coupons = 1;
-  int32 total_count = 2;
+  uint32 status_code = 1;
+  string status_msg = 2;
+
+  repeated Coupon coupons = 3;
+  int32 total_count = 4;
 }
 
 // 获取单个优惠券请求
@@ -79,7 +80,9 @@ message GetCouponReq {
 
 // 获取单个优惠券响应
 message GetCouponResp {
-  Coupon coupon = 1;
+  uint32 status_code = 1;
+  string status_msg = 2;
+  Coupon coupon = 3;
 }
 
 // 创建优惠券请求
@@ -89,7 +92,9 @@ message CreateCouponReq {
 
 // 创建优惠券响应
 message CreateCouponResp {
-  string id = 1; // 创建的优惠券ID
+  uint32 status_code = 1;
+  string status_msg = 2;
+  string id = 3; // 创建的优惠券ID
 }
 
 // 更新优惠券请求
@@ -100,7 +105,9 @@ message UpdateCouponReq {
 
 // 更新优惠券响应
 message UpdateCouponResp {
-  bool success = 1; // 更新结果
+  uint32 status_code = 1;
+  string status_msg = 2;
+
 }
 
 // 删除优惠券请求
@@ -110,20 +117,22 @@ message DeleteCouponReq {
 
 // 删除优惠券响应
 message DeleteCouponResp {
-  bool success = 1; // 删除结果
+  uint32 status_code = 1;
+  string status_msg = 2;
 }
 
 // 获取用户优惠券列表请求
 message ListUserCouponsReq {
   int32 user_id = 1; // 用户ID
   PaginationReq pagination = 2;
-  int32 status = 3; // 可选：优惠券状态
 }
 
 // 获取用户优惠券列表响应
 message ListUserCouponsResp {
-  repeated UserCoupon user_coupons = 1;
-  int32 total_count = 2;
+  uint32 status_code = 1;
+  string status_msg = 2;
+  repeated UserCoupon user_coupons = 3;
+  int32 total_count = 4;
 }
 
 // 获取用户优惠券详情请求
@@ -133,7 +142,9 @@ message GetUserCouponReq {
 
 // 获取用户优惠券详情响应
 message GetUserCouponResp {
-  UserCoupon user_coupon = 1;
+  uint32 status_code = 1;
+  string status_msg = 2;
+  UserCoupon user_coupon = 3;
 }
 
 // 用户领取优惠券请求
@@ -144,7 +155,10 @@ message ClaimCouponReq {
 
 // 用户领取优惠券响应
 message ClaimCouponResp {
-  bool success = 1; // 领取结果
+  uint32 status_code = 1;
+  string status_msg = 2;
+
+
 }
 
 // 使用优惠券请求
@@ -156,8 +170,10 @@ message UseCouponReq {
 
 // 使用优惠券响应
 message UseCouponResp {
-  bool success = 1; // 使用结果
-  int32 discount_amount = 2; // 抵扣金额（分）
+  uint32 status_code = 1;
+  string status_msg = 2;
+  bool success = 3; // 使用结果
+  int32 discount_amount = 4; // 抵扣金额（分）
 }
 
 // 获取优惠券使用记录请求
@@ -168,8 +184,10 @@ message ListCouponUsagesReq {
 
 // 获取优惠券使用记录响应
 message ListCouponUsagesResp {
-  repeated CouponUsage usages = 1;
-  int32 total_count = 2;
+  uint32 status_code = 1;
+  string status_msg = 2;
+  repeated CouponUsage usages = 3;
+  int32 total_count = 4;
 
 }
 
