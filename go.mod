@@ -2,8 +2,6 @@ module jijizhazha1024/go-mall
 
 go 1.21
 
-toolchain go1.23.3
-
 require (
 	github.com/elastic/go-elasticsearch/v8 v8.15.0
 	github.com/golang-jwt/jwt/v4 v4.5.1
