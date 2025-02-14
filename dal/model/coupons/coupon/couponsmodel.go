@@ -14,7 +14,7 @@ type (
 	// and implement the added methods in customCouponsModel.
 	CouponsModel interface {
 		couponsModel
-		withSession(session sqlx.Session) CouponsModel
+		WithSession(session sqlx.Session) CouponsModel
 		QueryCoupons(ctx context.Context, page, pageSize, ctype int32) ([]*Coupons, error)
 		FindOneWithLock(ctx context.Context, session sqlx.Session, id string) (*Coupons, error)
 		DecreaseStockWithSession(ctx context.Context, session sqlx.Session, id string, num int) error
@@ -77,6 +77,6 @@ func NewCouponsModel(conn sqlx.SqlConn) CouponsModel {
 	}
 }
 
-func (m *customCouponsModel) withSession(session sqlx.Session) CouponsModel {
+func (m *customCouponsModel) WithSession(session sqlx.Session) CouponsModel {
 	return NewCouponsModel(sqlx.NewSqlConnFromSession(session))
 }

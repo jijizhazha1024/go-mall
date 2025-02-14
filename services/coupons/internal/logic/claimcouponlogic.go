@@ -81,7 +81,7 @@ func (l *ClaimCouponLogic) ClaimCoupon(in *coupons.ClaimCouponReq) (*coupons.Cla
 			return err
 		}
 		// create user coupons
-		if _, err := l.svcCtx.UserCouponsModel.CreateWithSession(ctx, session, &user_coupons.UserCoupons{
+		if _, err := l.svcCtx.UserCouponsModel.WithSession(session).Insert(ctx, &user_coupons.UserCoupons{
 			UserId:   uint64(in.UserId),
 			CouponId: in.CouponId,
 			Status:   int64(coupons.CouponStatus_COUPON_STATUS_NOT_USED),

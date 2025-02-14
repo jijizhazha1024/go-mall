@@ -6,6 +6,10 @@ const (
 	CouponsAlreadyClaimed
 	CouponsOutOfStock
 	CouponsNotAvailable
+	UserNotHaveCoupons
+	CouponsExpired
+	CouponsAlreadyUsed
+	CouponsNotStart
 )
 
 const (
@@ -14,4 +18,8 @@ const (
 	CouponsAlreadyClaimedMsg = "优惠券已被领取"
 	CouponsOutOfStockMsg     = "优惠券已售罄"
 	CouponsNotAvailableMsg   = "优惠券不可用"
+	UserNotHaveCouponsMsg    = "用户未拥有优惠券"
+	CouponsExpiredMsg        = "优惠券已过期"
+	CouponsAlreadyUsedMsg    = "优惠券已被使用"
+	CouponsNotStartMsg       = "优惠券未到使用时间"
 )

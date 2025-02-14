@@ -2,7 +2,6 @@ package user_coupons
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -15,10 +14,10 @@ type (
 	// and implement the added methods in customUserCouponsModel.
 	UserCouponsModel interface {
 		userCouponsModel
-		withSession(session sqlx.Session) UserCouponsModel
+		WithSession(session sqlx.Session) UserCouponsModel
 		QueryUserCoupons(ctx context.Context, userId, page, pageSize int32) ([]*UserCoupons, error)
 		CheckUserCouponExistWithSession(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (bool, error)
-		CreateWithSession(ctx context.Context, session sqlx.Session, data *UserCoupons) (sql.Result, error)
+		GetUserCouponByUserIdCouponIdLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (*UserCoupons, error)
 	}
 
 	customUserCouponsModel struct {
@@ -26,9 +25,18 @@ type (
 	}
 )
 
-func (m *customUserCouponsModel) CreateWithSession(ctx context.Context, session sqlx.Session, data *UserCoupons) (sql.Result, error) {
-	return m.withSession(session).Insert(ctx, data)
-
+func (m *customUserCouponsModel) GetUserCouponByUserIdCouponIdLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (*UserCoupons, error) {
+	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `coupon_id` = ? limit 1 for update", userCouponsRows, m.table)
+	var resp UserCoupons
+	err := m.conn.QueryRowCtx(ctx, &resp, query, userId, couponId)
+	switch {
+	case err == nil:
+		return &resp, nil
+	case errors.Is(err, sqlx.ErrNotFound):
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
 }
 
 func (m *customUserCouponsModel) CheckUserCouponExistWithSession(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (bool, error) {
@@ -66,6 +74,6 @@ func NewUserCouponsModel(conn sqlx.SqlConn) UserCouponsModel {
 	}
 }
 
-func (m *customUserCouponsModel) withSession(session sqlx.Session) UserCouponsModel {
+func (m *customUserCouponsModel) WithSession(session sqlx.Session) UserCouponsModel {
 	return NewUserCouponsModel(sqlx.NewSqlConnFromSession(session))
 }

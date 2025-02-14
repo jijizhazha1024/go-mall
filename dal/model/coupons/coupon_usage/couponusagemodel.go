@@ -9,7 +9,7 @@ type (
 	// and implement the added methods in customCouponUsageModel.
 	CouponUsageModel interface {
 		couponUsageModel
-		withSession(session sqlx.Session) CouponUsageModel
+		WithSession(session sqlx.Session) CouponUsageModel
 	}
 
 	customCouponUsageModel struct {
@@ -24,6 +24,6 @@ func NewCouponUsageModel(conn sqlx.SqlConn) CouponUsageModel {
 	}
 }
 
-func (m *customCouponUsageModel) withSession(session sqlx.Session) CouponUsageModel {
+func (m *customCouponUsageModel) WithSession(session sqlx.Session) CouponUsageModel {
 	return NewCouponUsageModel(sqlx.NewSqlConnFromSession(session))
 }
