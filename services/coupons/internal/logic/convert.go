@@ -4,6 +4,7 @@ import (
 	"jijizhazha1024/go-mall/dal/model/coupons/coupon"
 	"jijizhazha1024/go-mall/dal/model/coupons/user_coupons"
 	"jijizhazha1024/go-mall/services/coupons/coupons"
+	"time"
 )
 
 func convertCoupon2Resp(c *coupon.Coupons) *coupons.Coupon {
@@ -15,10 +16,10 @@ func convertCoupon2Resp(c *coupon.Coupons) *coupons.Coupon {
 		MinAmount:      int32(c.MinAmount),
 		TotalCount:     int32(c.TotalCount),
 		RemainingCount: int32(c.RemainingCount),
-		StartTime:      c.StartTime.Format("2006-01-02 15:04:05"),
-		EndTime:        c.EndTime.Format("2006-01-02 15:04:05"),
-		CreatedAt:      c.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:      c.UpdatedAt.Format("2006-01-02 15:04:05"),
+		StartTime:      c.StartTime.Format(time.DateTime),
+		EndTime:        c.EndTime.Format(time.DateTime),
+		CreatedAt:      c.CreatedAt.Format(time.DateTime),
+		UpdatedAt:      c.UpdatedAt.Format(time.DateTime),
 	}
 }
 
@@ -29,8 +30,8 @@ func convertUserCoupon2Resp(uc *user_coupons.UserCoupons) *coupons.UserCoupon {
 		CouponId:  uc.CouponId,
 		Status:    coupons.CouponStatus(uc.Status),
 		OrderId:   uc.OrderId.String,
-		UsedAt:    uc.UsedAt.Time.Format("2006-01-02 15:04:05"),
-		CreatedAt: uc.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt: uc.UpdatedAt.Format("2006-01-02 15:04:05"),
+		UsedAt:    uc.UsedAt.Time.Format(time.DateTime),
+		CreatedAt: uc.CreatedAt.Format(time.DateTime),
+		UpdatedAt: uc.UpdatedAt.Format(time.DateTime),
 	}
 }
