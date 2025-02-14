@@ -23,8 +23,6 @@ type (
 	DeleteCouponResp     = coupons.DeleteCouponResp
 	GetCouponReq         = coupons.GetCouponReq
 	GetCouponResp        = coupons.GetCouponResp
-	GetUserCouponReq     = coupons.GetUserCouponReq
-	GetUserCouponResp    = coupons.GetUserCouponResp
 	ListCouponUsagesReq  = coupons.ListCouponUsagesReq
 	ListCouponUsagesResp = coupons.ListCouponUsagesResp
 	ListCouponsReq       = coupons.ListCouponsReq
@@ -51,8 +49,6 @@ type (
 		DeleteCoupon(ctx context.Context, in *DeleteCouponReq, opts ...grpc.CallOption) (*DeleteCouponResp, error)
 		// ListUserCoupons 获取用户优惠券列表
 		ListUserCoupons(ctx context.Context, in *ListUserCouponsReq, opts ...grpc.CallOption) (*ListUserCouponsResp, error)
-		// GetUserCoupon 获取用户优惠券详情
-		GetUserCoupon(ctx context.Context, in *GetUserCouponReq, opts ...grpc.CallOption) (*GetUserCouponResp, error)
 		// ClaimCoupon 用户领取优惠券
 		ClaimCoupon(ctx context.Context, in *ClaimCouponReq, opts ...grpc.CallOption) (*ClaimCouponResp, error)
 		// UseCoupon 使用优惠券
@@ -106,12 +102,6 @@ func (m *defaultCoupons) DeleteCoupon(ctx context.Context, in *DeleteCouponReq, 
 func (m *defaultCoupons) ListUserCoupons(ctx context.Context, in *ListUserCouponsReq, opts ...grpc.CallOption) (*ListUserCouponsResp, error) {
 	client := coupons.NewCouponsClient(m.cli.Conn())
 	return client.ListUserCoupons(ctx, in, opts...)
-}
-
-// GetUserCoupon 获取用户优惠券详情
-func (m *defaultCoupons) GetUserCoupon(ctx context.Context, in *GetUserCouponReq, opts ...grpc.CallOption) (*GetUserCouponResp, error) {
-	client := coupons.NewCouponsClient(m.cli.Conn())
-	return client.GetUserCoupon(ctx, in, opts...)
 }
 
 // ClaimCoupon 用户领取优惠券

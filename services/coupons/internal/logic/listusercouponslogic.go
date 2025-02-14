@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"jijizhazha1024/go-mall/common/consts/biz"
 
 	"jijizhazha1024/go-mall/services/coupons/coupons"
 	"jijizhazha1024/go-mall/services/coupons/internal/svc"
@@ -25,7 +26,23 @@ func NewListUserCouponsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *L
 
 // ListUserCoupons 获取用户优惠券列表
 func (l *ListUserCouponsLogic) ListUserCoupons(in *coupons.ListUserCouponsReq) (*coupons.ListUserCouponsResp, error) {
-	// todo: add your logic here and delete this line
 
-	return &coupons.ListUserCouponsResp{}, nil
+	// param check
+	if in.Pagination.Limit <= 0 || in.Pagination.Limit > biz.MaxPageSize {
+		in.Pagination.Limit = biz.MaxPageSize
+	}
+	if in.Pagination.Page <= 0 {
+		in.Pagination.Page = 1
+	}
+	res := &coupons.ListUserCouponsResp{}
+	userCoupons, err := l.svcCtx.UserCouponsModel.QueryUserCoupons(l.ctx, in.UserId, in.Pagination.Page, in.Pagination.Limit)
+	if err != nil {
+		logx.Errorw("query user coupons error", logx.Field("err", err))
+		return nil, err
+	}
+	res.UserCoupons = make([]*coupons.UserCoupon, 0, len(userCoupons))
+	for _, uc := range userCoupons {
+		res.UserCoupons = append(res.UserCoupons, convertUserCoupon2Resp(uc))
+	}
+	return res, nil
 }

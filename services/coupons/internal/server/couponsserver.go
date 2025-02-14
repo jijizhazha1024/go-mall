@@ -58,12 +58,6 @@ func (s *CouponsServer) ListUserCoupons(ctx context.Context, in *coupons.ListUse
 	return l.ListUserCoupons(in)
 }
 
-// GetUserCoupon 获取用户优惠券详情
-func (s *CouponsServer) GetUserCoupon(ctx context.Context, in *coupons.GetUserCouponReq) (*coupons.GetUserCouponResp, error) {
-	l := logic.NewGetUserCouponLogic(ctx, s.svcCtx)
-	return l.GetUserCoupon(in)
-}
-
 // ClaimCoupon 用户领取优惠券
 func (s *CouponsServer) ClaimCoupon(ctx context.Context, in *coupons.ClaimCouponReq) (*coupons.ClaimCouponResp, error) {
 	l := logic.NewClaimCouponLogic(ctx, s.svcCtx)

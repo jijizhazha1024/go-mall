@@ -1212,118 +1212,6 @@ func (x *ListUserCouponsResp) GetTotalCount() int32 {
 	return 0
 }
 
-// 获取用户优惠券详情请求
-type GetUserCouponReq struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Id int32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"` // 用户优惠券ID
-}
-
-func (x *GetUserCouponReq) Reset() {
-	*x = GetUserCouponReq{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_coupons_proto_msgTypes[16]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetUserCouponReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserCouponReq) ProtoMessage() {}
-
-func (x *GetUserCouponReq) ProtoReflect() protoreflect.Message {
-	mi := &file_coupons_proto_msgTypes[16]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserCouponReq.ProtoReflect.Descriptor instead.
-func (*GetUserCouponReq) Descriptor() ([]byte, []int) {
-	return file_coupons_proto_rawDescGZIP(), []int{16}
-}
-
-func (x *GetUserCouponReq) GetId() int32 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-// 获取用户优惠券详情响应
-type GetUserCouponResp struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	StatusCode uint32      `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
-	StatusMsg  string      `protobuf:"bytes,2,opt,name=status_msg,json=statusMsg,proto3" json:"status_msg,omitempty"`
-	UserCoupon *UserCoupon `protobuf:"bytes,3,opt,name=user_coupon,json=userCoupon,proto3" json:"user_coupon,omitempty"`
-}
-
-func (x *GetUserCouponResp) Reset() {
-	*x = GetUserCouponResp{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_coupons_proto_msgTypes[17]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetUserCouponResp) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserCouponResp) ProtoMessage() {}
-
-func (x *GetUserCouponResp) ProtoReflect() protoreflect.Message {
-	mi := &file_coupons_proto_msgTypes[17]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserCouponResp.ProtoReflect.Descriptor instead.
-func (*GetUserCouponResp) Descriptor() ([]byte, []int) {
-	return file_coupons_proto_rawDescGZIP(), []int{17}
-}
-
-func (x *GetUserCouponResp) GetStatusCode() uint32 {
-	if x != nil {
-		return x.StatusCode
-	}
-	return 0
-}
-
-func (x *GetUserCouponResp) GetStatusMsg() string {
-	if x != nil {
-		return x.StatusMsg
-	}
-	return ""
-}
-
-func (x *GetUserCouponResp) GetUserCoupon() *UserCoupon {
-	if x != nil {
-		return x.UserCoupon
-	}
-	return nil
-}
-
 // 用户领取优惠券请求
 type ClaimCouponReq struct {
 	state         protoimpl.MessageState
@@ -1337,7 +1225,7 @@ type ClaimCouponReq struct {
 func (x *ClaimCouponReq) Reset() {
 	*x = ClaimCouponReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coupons_proto_msgTypes[18]
+		mi := &file_coupons_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1350,7 +1238,7 @@ func (x *ClaimCouponReq) String() string {
 func (*ClaimCouponReq) ProtoMessage() {}
 
 func (x *ClaimCouponReq) ProtoReflect() protoreflect.Message {
-	mi := &file_coupons_proto_msgTypes[18]
+	mi := &file_coupons_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1363,7 +1251,7 @@ func (x *ClaimCouponReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClaimCouponReq.ProtoReflect.Descriptor instead.
 func (*ClaimCouponReq) Descriptor() ([]byte, []int) {
-	return file_coupons_proto_rawDescGZIP(), []int{18}
+	return file_coupons_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ClaimCouponReq) GetUserId() int32 {
@@ -1393,7 +1281,7 @@ type ClaimCouponResp struct {
 func (x *ClaimCouponResp) Reset() {
 	*x = ClaimCouponResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coupons_proto_msgTypes[19]
+		mi := &file_coupons_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1406,7 +1294,7 @@ func (x *ClaimCouponResp) String() string {
 func (*ClaimCouponResp) ProtoMessage() {}
 
 func (x *ClaimCouponResp) ProtoReflect() protoreflect.Message {
-	mi := &file_coupons_proto_msgTypes[19]
+	mi := &file_coupons_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1419,7 +1307,7 @@ func (x *ClaimCouponResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClaimCouponResp.ProtoReflect.Descriptor instead.
 func (*ClaimCouponResp) Descriptor() ([]byte, []int) {
-	return file_coupons_proto_rawDescGZIP(), []int{19}
+	return file_coupons_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ClaimCouponResp) GetStatusCode() uint32 {
@@ -1450,7 +1338,7 @@ type UseCouponReq struct {
 func (x *UseCouponReq) Reset() {
 	*x = UseCouponReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coupons_proto_msgTypes[20]
+		mi := &file_coupons_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1463,7 +1351,7 @@ func (x *UseCouponReq) String() string {
 func (*UseCouponReq) ProtoMessage() {}
 
 func (x *UseCouponReq) ProtoReflect() protoreflect.Message {
-	mi := &file_coupons_proto_msgTypes[20]
+	mi := &file_coupons_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1476,7 +1364,7 @@ func (x *UseCouponReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UseCouponReq.ProtoReflect.Descriptor instead.
 func (*UseCouponReq) Descriptor() ([]byte, []int) {
-	return file_coupons_proto_rawDescGZIP(), []int{20}
+	return file_coupons_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *UseCouponReq) GetUserId() int32 {
@@ -1515,7 +1403,7 @@ type UseCouponResp struct {
 func (x *UseCouponResp) Reset() {
 	*x = UseCouponResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coupons_proto_msgTypes[21]
+		mi := &file_coupons_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1528,7 +1416,7 @@ func (x *UseCouponResp) String() string {
 func (*UseCouponResp) ProtoMessage() {}
 
 func (x *UseCouponResp) ProtoReflect() protoreflect.Message {
-	mi := &file_coupons_proto_msgTypes[21]
+	mi := &file_coupons_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1541,7 +1429,7 @@ func (x *UseCouponResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UseCouponResp.ProtoReflect.Descriptor instead.
 func (*UseCouponResp) Descriptor() ([]byte, []int) {
-	return file_coupons_proto_rawDescGZIP(), []int{21}
+	return file_coupons_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *UseCouponResp) GetStatusCode() uint32 {
@@ -1585,7 +1473,7 @@ type ListCouponUsagesReq struct {
 func (x *ListCouponUsagesReq) Reset() {
 	*x = ListCouponUsagesReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coupons_proto_msgTypes[22]
+		mi := &file_coupons_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1598,7 +1486,7 @@ func (x *ListCouponUsagesReq) String() string {
 func (*ListCouponUsagesReq) ProtoMessage() {}
 
 func (x *ListCouponUsagesReq) ProtoReflect() protoreflect.Message {
-	mi := &file_coupons_proto_msgTypes[22]
+	mi := &file_coupons_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1611,7 +1499,7 @@ func (x *ListCouponUsagesReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCouponUsagesReq.ProtoReflect.Descriptor instead.
 func (*ListCouponUsagesReq) Descriptor() ([]byte, []int) {
-	return file_coupons_proto_rawDescGZIP(), []int{22}
+	return file_coupons_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ListCouponUsagesReq) GetCouponId() string {
@@ -1643,7 +1531,7 @@ type ListCouponUsagesResp struct {
 func (x *ListCouponUsagesResp) Reset() {
 	*x = ListCouponUsagesResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_coupons_proto_msgTypes[23]
+		mi := &file_coupons_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1656,7 +1544,7 @@ func (x *ListCouponUsagesResp) String() string {
 func (*ListCouponUsagesResp) ProtoMessage() {}
 
 func (x *ListCouponUsagesResp) ProtoReflect() protoreflect.Message {
-	mi := &file_coupons_proto_msgTypes[23]
+	mi := &file_coupons_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1669,7 +1557,7 @@ func (x *ListCouponUsagesResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCouponUsagesResp.ProtoReflect.Descriptor instead.
 func (*ListCouponUsagesResp) Descriptor() ([]byte, []int) {
-	return file_coupons_proto_rawDescGZIP(), []int{23}
+	return file_coupons_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ListCouponUsagesResp) GetStatusCode() uint32 {
@@ -1832,18 +1720,7 @@ var file_coupons_proto_rawDesc = []byte{
 	0x70, 0x6f, 0x6e, 0x52, 0x0b, 0x75, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73,
 	0x12, 0x1f, 0x0a, 0x0b, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x5f, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x18,
 	0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0a, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x43, 0x6f, 0x75, 0x6e,
-	0x74, 0x22, 0x22, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x75, 0x70,
-	0x6f, 0x6e, 0x52, 0x65, 0x71, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x05, 0x52, 0x02, 0x69, 0x64, 0x22, 0x89, 0x01, 0x0a, 0x11, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65,
-	0x72, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x12, 0x1f, 0x0a, 0x0b, 0x73,
-	0x74, 0x61, 0x74, 0x75, 0x73, 0x5f, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d,
-	0x52, 0x0a, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x43, 0x6f, 0x64, 0x65, 0x12, 0x1d, 0x0a, 0x0a,
-	0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x5f, 0x6d, 0x73, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x09, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x4d, 0x73, 0x67, 0x12, 0x34, 0x0a, 0x0b, 0x75,
-	0x73, 0x65, 0x72, 0x5f, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x13, 0x2e, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x43,
-	0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x52, 0x0a, 0x75, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x75, 0x70, 0x6f,
-	0x6e, 0x22, 0x46, 0x0a, 0x0e, 0x43, 0x6c, 0x61, 0x69, 0x6d, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e,
+	0x74, 0x22, 0x46, 0x0a, 0x0e, 0x43, 0x6c, 0x61, 0x69, 0x6d, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e,
 	0x52, 0x65, 0x71, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x1b, 0x0a, 0x09,
 	0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
@@ -1901,7 +1778,7 @@ var file_coupons_proto_rawDesc = []byte{
 	0x53, 0x45, 0x44, 0x10, 0x01, 0x12, 0x16, 0x0a, 0x12, 0x43, 0x4f, 0x55, 0x50, 0x4f, 0x4e, 0x5f,
 	0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x55, 0x53, 0x45, 0x44, 0x10, 0x02, 0x12, 0x19, 0x0a,
 	0x15, 0x43, 0x4f, 0x55, 0x50, 0x4f, 0x4e, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x45,
-	0x58, 0x50, 0x49, 0x52, 0x45, 0x44, 0x10, 0x03, 0x32, 0xbb, 0x05, 0x0a, 0x07, 0x43, 0x6f, 0x75,
+	0x58, 0x50, 0x49, 0x52, 0x45, 0x44, 0x10, 0x03, 0x32, 0xf3, 0x04, 0x0a, 0x07, 0x43, 0x6f, 0x75,
 	0x70, 0x6f, 0x6e, 0x73, 0x12, 0x40, 0x0a, 0x0b, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f, 0x75, 0x70,
 	0x6f, 0x6e, 0x73, 0x12, 0x17, 0x2e, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x2e, 0x4c, 0x69,
 	0x73, 0x74, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x1a, 0x18, 0x2e, 0x63,
@@ -1928,25 +1805,21 @@ var file_coupons_proto_rawDesc = []byte{
 	0x69, 0x73, 0x74, 0x55, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x52, 0x65,
 	0x71, 0x1a, 0x1c, 0x2e, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x2e, 0x4c, 0x69, 0x73, 0x74,
 	0x55, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x12,
-	0x46, 0x0a, 0x0d, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e,
-	0x12, 0x19, 0x2e, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73,
-	0x65, 0x72, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x1a, 0x2e, 0x63, 0x6f,
-	0x75, 0x70, 0x6f, 0x6e, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x43, 0x6f, 0x75,
-	0x70, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x12, 0x40, 0x0a, 0x0b, 0x43, 0x6c, 0x61, 0x69, 0x6d,
-	0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x12, 0x17, 0x2e, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73,
-	0x2e, 0x43, 0x6c, 0x61, 0x69, 0x6d, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x1a,
-	0x18, 0x2e, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x2e, 0x43, 0x6c, 0x61, 0x69, 0x6d, 0x43,
-	0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x12, 0x3a, 0x0a, 0x09, 0x55, 0x73, 0x65,
-	0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x12, 0x15, 0x2e, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73,
-	0x2e, 0x55, 0x73, 0x65, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x16, 0x2e,
-	0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x2e, 0x55, 0x73, 0x65, 0x43, 0x6f, 0x75, 0x70, 0x6f,
-	0x6e, 0x52, 0x65, 0x73, 0x70, 0x12, 0x4f, 0x0a, 0x10, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f, 0x75,
-	0x70, 0x6f, 0x6e, 0x55, 0x73, 0x61, 0x67, 0x65, 0x73, 0x12, 0x1c, 0x2e, 0x63, 0x6f, 0x75, 0x70,
-	0x6f, 0x6e, 0x73, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x55, 0x73,
-	0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x71, 0x1a, 0x1d, 0x2e, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e,
-	0x73, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x55, 0x73, 0x61, 0x67,
-	0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x42, 0x0b, 0x5a, 0x09, 0x2e, 0x2f, 0x63, 0x6f, 0x75, 0x70,
-	0x6f, 0x6e, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x40, 0x0a, 0x0b, 0x43, 0x6c, 0x61, 0x69, 0x6d, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x12, 0x17,
+	0x2e, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x2e, 0x43, 0x6c, 0x61, 0x69, 0x6d, 0x43, 0x6f,
+	0x75, 0x70, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x18, 0x2e, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e,
+	0x73, 0x2e, 0x43, 0x6c, 0x61, 0x69, 0x6d, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x52, 0x65, 0x73,
+	0x70, 0x12, 0x3a, 0x0a, 0x09, 0x55, 0x73, 0x65, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x12, 0x15,
+	0x2e, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x2e, 0x55, 0x73, 0x65, 0x43, 0x6f, 0x75, 0x70,
+	0x6f, 0x6e, 0x52, 0x65, 0x71, 0x1a, 0x16, 0x2e, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x2e,
+	0x55, 0x73, 0x65, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x12, 0x4f, 0x0a,
+	0x10, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x55, 0x73, 0x61, 0x67, 0x65,
+	0x73, 0x12, 0x1c, 0x2e, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x2e, 0x4c, 0x69, 0x73, 0x74,
+	0x43, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x55, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x71, 0x1a,
+	0x1d, 0x2e, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x2e, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x6f,
+	0x75, 0x70, 0x6f, 0x6e, 0x55, 0x73, 0x61, 0x67, 0x65, 0x73, 0x52, 0x65, 0x73, 0x70, 0x42, 0x0b,
+	0x5a, 0x09, 0x2e, 0x2f, 0x63, 0x6f, 0x75, 0x70, 0x6f, 0x6e, 0x73, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1962,7 +1835,7 @@ func file_coupons_proto_rawDescGZIP() []byte {
 }
 
 var file_coupons_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_coupons_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_coupons_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
 var file_coupons_proto_goTypes = []any{
 	(CouponType)(0),              // 0: coupons.CouponType
 	(CouponStatus)(0),            // 1: coupons.CouponStatus
@@ -1982,14 +1855,12 @@ var file_coupons_proto_goTypes = []any{
 	(*DeleteCouponResp)(nil),     // 15: coupons.DeleteCouponResp
 	(*ListUserCouponsReq)(nil),   // 16: coupons.ListUserCouponsReq
 	(*ListUserCouponsResp)(nil),  // 17: coupons.ListUserCouponsResp
-	(*GetUserCouponReq)(nil),     // 18: coupons.GetUserCouponReq
-	(*GetUserCouponResp)(nil),    // 19: coupons.GetUserCouponResp
-	(*ClaimCouponReq)(nil),       // 20: coupons.ClaimCouponReq
-	(*ClaimCouponResp)(nil),      // 21: coupons.ClaimCouponResp
-	(*UseCouponReq)(nil),         // 22: coupons.UseCouponReq
-	(*UseCouponResp)(nil),        // 23: coupons.UseCouponResp
-	(*ListCouponUsagesReq)(nil),  // 24: coupons.ListCouponUsagesReq
-	(*ListCouponUsagesResp)(nil), // 25: coupons.ListCouponUsagesResp
+	(*ClaimCouponReq)(nil),       // 18: coupons.ClaimCouponReq
+	(*ClaimCouponResp)(nil),      // 19: coupons.ClaimCouponResp
+	(*UseCouponReq)(nil),         // 20: coupons.UseCouponReq
+	(*UseCouponResp)(nil),        // 21: coupons.UseCouponResp
+	(*ListCouponUsagesReq)(nil),  // 22: coupons.ListCouponUsagesReq
+	(*ListCouponUsagesResp)(nil), // 23: coupons.ListCouponUsagesResp
 }
 var file_coupons_proto_depIdxs = []int32{
 	0,  // 0: coupons.Coupon.type:type_name -> coupons.CouponType
@@ -2002,34 +1873,31 @@ var file_coupons_proto_depIdxs = []int32{
 	2,  // 7: coupons.UpdateCouponReq.coupon:type_name -> coupons.Coupon
 	5,  // 8: coupons.ListUserCouponsReq.pagination:type_name -> coupons.PaginationReq
 	3,  // 9: coupons.ListUserCouponsResp.user_coupons:type_name -> coupons.UserCoupon
-	3,  // 10: coupons.GetUserCouponResp.user_coupon:type_name -> coupons.UserCoupon
-	5,  // 11: coupons.ListCouponUsagesReq.pagination:type_name -> coupons.PaginationReq
-	4,  // 12: coupons.ListCouponUsagesResp.usages:type_name -> coupons.CouponUsage
-	6,  // 13: coupons.Coupons.ListCoupons:input_type -> coupons.ListCouponsReq
-	8,  // 14: coupons.Coupons.GetCoupon:input_type -> coupons.GetCouponReq
-	10, // 15: coupons.Coupons.CreateCoupon:input_type -> coupons.CreateCouponReq
-	12, // 16: coupons.Coupons.UpdateCoupon:input_type -> coupons.UpdateCouponReq
-	14, // 17: coupons.Coupons.DeleteCoupon:input_type -> coupons.DeleteCouponReq
-	16, // 18: coupons.Coupons.ListUserCoupons:input_type -> coupons.ListUserCouponsReq
-	18, // 19: coupons.Coupons.GetUserCoupon:input_type -> coupons.GetUserCouponReq
-	20, // 20: coupons.Coupons.ClaimCoupon:input_type -> coupons.ClaimCouponReq
-	22, // 21: coupons.Coupons.UseCoupon:input_type -> coupons.UseCouponReq
-	24, // 22: coupons.Coupons.ListCouponUsages:input_type -> coupons.ListCouponUsagesReq
-	7,  // 23: coupons.Coupons.ListCoupons:output_type -> coupons.ListCouponsResp
-	9,  // 24: coupons.Coupons.GetCoupon:output_type -> coupons.GetCouponResp
-	11, // 25: coupons.Coupons.CreateCoupon:output_type -> coupons.CreateCouponResp
-	13, // 26: coupons.Coupons.UpdateCoupon:output_type -> coupons.UpdateCouponResp
-	15, // 27: coupons.Coupons.DeleteCoupon:output_type -> coupons.DeleteCouponResp
-	17, // 28: coupons.Coupons.ListUserCoupons:output_type -> coupons.ListUserCouponsResp
-	19, // 29: coupons.Coupons.GetUserCoupon:output_type -> coupons.GetUserCouponResp
-	21, // 30: coupons.Coupons.ClaimCoupon:output_type -> coupons.ClaimCouponResp
-	23, // 31: coupons.Coupons.UseCoupon:output_type -> coupons.UseCouponResp
-	25, // 32: coupons.Coupons.ListCouponUsages:output_type -> coupons.ListCouponUsagesResp
-	23, // [23:33] is the sub-list for method output_type
-	13, // [13:23] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	5,  // 10: coupons.ListCouponUsagesReq.pagination:type_name -> coupons.PaginationReq
+	4,  // 11: coupons.ListCouponUsagesResp.usages:type_name -> coupons.CouponUsage
+	6,  // 12: coupons.Coupons.ListCoupons:input_type -> coupons.ListCouponsReq
+	8,  // 13: coupons.Coupons.GetCoupon:input_type -> coupons.GetCouponReq
+	10, // 14: coupons.Coupons.CreateCoupon:input_type -> coupons.CreateCouponReq
+	12, // 15: coupons.Coupons.UpdateCoupon:input_type -> coupons.UpdateCouponReq
+	14, // 16: coupons.Coupons.DeleteCoupon:input_type -> coupons.DeleteCouponReq
+	16, // 17: coupons.Coupons.ListUserCoupons:input_type -> coupons.ListUserCouponsReq
+	18, // 18: coupons.Coupons.ClaimCoupon:input_type -> coupons.ClaimCouponReq
+	20, // 19: coupons.Coupons.UseCoupon:input_type -> coupons.UseCouponReq
+	22, // 20: coupons.Coupons.ListCouponUsages:input_type -> coupons.ListCouponUsagesReq
+	7,  // 21: coupons.Coupons.ListCoupons:output_type -> coupons.ListCouponsResp
+	9,  // 22: coupons.Coupons.GetCoupon:output_type -> coupons.GetCouponResp
+	11, // 23: coupons.Coupons.CreateCoupon:output_type -> coupons.CreateCouponResp
+	13, // 24: coupons.Coupons.UpdateCoupon:output_type -> coupons.UpdateCouponResp
+	15, // 25: coupons.Coupons.DeleteCoupon:output_type -> coupons.DeleteCouponResp
+	17, // 26: coupons.Coupons.ListUserCoupons:output_type -> coupons.ListUserCouponsResp
+	19, // 27: coupons.Coupons.ClaimCoupon:output_type -> coupons.ClaimCouponResp
+	21, // 28: coupons.Coupons.UseCoupon:output_type -> coupons.UseCouponResp
+	23, // 29: coupons.Coupons.ListCouponUsages:output_type -> coupons.ListCouponUsagesResp
+	21, // [21:30] is the sub-list for method output_type
+	12, // [12:21] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_coupons_proto_init() }
@@ -2231,30 +2099,6 @@ func file_coupons_proto_init() {
 			}
 		}
 		file_coupons_proto_msgTypes[16].Exporter = func(v any, i int) any {
-			switch v := v.(*GetUserCouponReq); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_coupons_proto_msgTypes[17].Exporter = func(v any, i int) any {
-			switch v := v.(*GetUserCouponResp); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_coupons_proto_msgTypes[18].Exporter = func(v any, i int) any {
 			switch v := v.(*ClaimCouponReq); i {
 			case 0:
 				return &v.state
@@ -2266,7 +2110,7 @@ func file_coupons_proto_init() {
 				return nil
 			}
 		}
-		file_coupons_proto_msgTypes[19].Exporter = func(v any, i int) any {
+		file_coupons_proto_msgTypes[17].Exporter = func(v any, i int) any {
 			switch v := v.(*ClaimCouponResp); i {
 			case 0:
 				return &v.state
@@ -2278,7 +2122,7 @@ func file_coupons_proto_init() {
 				return nil
 			}
 		}
-		file_coupons_proto_msgTypes[20].Exporter = func(v any, i int) any {
+		file_coupons_proto_msgTypes[18].Exporter = func(v any, i int) any {
 			switch v := v.(*UseCouponReq); i {
 			case 0:
 				return &v.state
@@ -2290,7 +2134,7 @@ func file_coupons_proto_init() {
 				return nil
 			}
 		}
-		file_coupons_proto_msgTypes[21].Exporter = func(v any, i int) any {
+		file_coupons_proto_msgTypes[19].Exporter = func(v any, i int) any {
 			switch v := v.(*UseCouponResp); i {
 			case 0:
 				return &v.state
@@ -2302,7 +2146,7 @@ func file_coupons_proto_init() {
 				return nil
 			}
 		}
-		file_coupons_proto_msgTypes[22].Exporter = func(v any, i int) any {
+		file_coupons_proto_msgTypes[20].Exporter = func(v any, i int) any {
 			switch v := v.(*ListCouponUsagesReq); i {
 			case 0:
 				return &v.state
@@ -2314,7 +2158,7 @@ func file_coupons_proto_init() {
 				return nil
 			}
 		}
-		file_coupons_proto_msgTypes[23].Exporter = func(v any, i int) any {
+		file_coupons_proto_msgTypes[21].Exporter = func(v any, i int) any {
 			switch v := v.(*ListCouponUsagesResp); i {
 			case 0:
 				return &v.state
@@ -2333,7 +2177,7 @@ func file_coupons_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_coupons_proto_rawDesc,
 			NumEnums:      2,
-			NumMessages:   24,
+			NumMessages:   22,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

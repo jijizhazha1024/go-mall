@@ -135,17 +135,6 @@ message ListUserCouponsResp {
   int32 total_count = 4;
 }
 
-// 获取用户优惠券详情请求
-message GetUserCouponReq {
-  int32 id = 1; // 用户优惠券ID
-}
-
-// 获取用户优惠券详情响应
-message GetUserCouponResp {
-  uint32 status_code = 1;
-  string status_msg = 2;
-  UserCoupon user_coupon = 3;
-}
 
 // 用户领取优惠券请求
 message ClaimCouponReq {
@@ -211,8 +200,6 @@ service Coupons {
 
   //  ListUserCoupons 获取用户优惠券列表
   rpc ListUserCoupons(ListUserCouponsReq) returns(ListUserCouponsResp);
-  //  GetUserCoupon 获取用户优惠券详情
-  rpc GetUserCoupon(GetUserCouponReq) returns(GetUserCouponResp);
   //  ClaimCoupon 用户领取优惠券
   rpc ClaimCoupon(ClaimCouponReq) returns(ClaimCouponResp);
   //  UseCoupon 使用优惠券
