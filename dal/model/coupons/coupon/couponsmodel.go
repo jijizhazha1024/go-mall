@@ -16,12 +16,30 @@ type (
 		couponsModel
 		withSession(session sqlx.Session) CouponsModel
 		QueryCoupons(ctx context.Context, page, pageSize, ctype int32) ([]*Coupons, error)
+		FindOneWithLock(ctx context.Context, session sqlx.Session, id string) (*Coupons, error)
+		DecreaseStockWithSession(ctx context.Context, session sqlx.Session, id string, num int) error
 	}
 
 	customCouponsModel struct {
 		*defaultCouponsModel
 	}
 )
+
+func (m *customCouponsModel) FindOneWithLock(ctx context.Context, session sqlx.Session, id string) (*Coupons, error) {
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE `id` = ? FOR UPDATE", couponsRows, m.table)
+	var resp Coupons
+	err := session.QueryRowCtx(ctx, &resp, query, id)
+	return &resp, err
+}
+
+func (m *customCouponsModel) DecreaseStockWithSession(ctx context.Context, session sqlx.Session, id string, num int) error {
+	query := fmt.Sprintf(
+		"UPDATE %s SET remaining_count = remaining_count - ? WHERE id = ? AND remaining_count >= ?",
+		m.table,
+	)
+	_, err := session.ExecCtx(ctx, query, num, id, num)
+	return err
+}
 
 func (m *customCouponsModel) QueryCoupons(ctx context.Context, page, pageSize, ctype int32) ([]*Coupons, error) {
 	query := fmt.Sprintf("SELECT %s FROM %s", couponsRows, m.table)

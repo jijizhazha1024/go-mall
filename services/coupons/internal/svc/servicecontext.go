@@ -11,6 +11,7 @@ type ServiceContext struct {
 	Config           config.Config
 	CouponsModel     coupon.CouponsModel
 	UserCouponsModel user_coupons.UserCouponsModel
+	Model            sqlx.SqlConn
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -18,5 +19,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:           c,
 		CouponsModel:     coupon.NewCouponsModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
 		UserCouponsModel: user_coupons.NewUserCouponsModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
+		Model:            sqlx.NewMysql(c.MysqlConfig.DataSource),
 	}
 }

@@ -24,3 +24,56 @@ func Test_ListUserCouponsLogic_ListUserCoupons(t *testing.T) {
 		t.Log(coupon)
 	}
 }
+
+// --------------- 用户领取优惠卷 ---------------
+// 用户领取
+func Test_ClaimCouponLogic_ClaimCoupon(t *testing.T) {
+	res, err := couponsClient.ClaimCoupon(context.Background(), &coupons.ClaimCouponReq{
+		UserId:   1,
+		CouponId: "67756077ea7111ef86d80242ac120005",
+	})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(res)
+}
+
+// 用户已领取
+func Test_ClaimCouponLogic_ClaimCoupon_AlreadyClaimed(t *testing.T) {
+	res, err := couponsClient.ClaimCoupon(context.Background(), &coupons.ClaimCouponReq{
+		UserId:   1,
+		CouponId: "67508ec1ea7111ef86d80242ac120005",
+	})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(res)
+}
+
+// 优惠券已售罄
+func Test_ClaimCouponLogic_ClaimCoupon_OutOfStock(t *testing.T) {
+	res, err := couponsClient.ClaimCoupon(context.Background(), &coupons.ClaimCouponReq{
+		UserId:   1,
+		CouponId: "679e623cea7111ef86d80242ac120005",
+	})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(res)
+}
+
+// 回滚
+func Test_ClaimCouponLogic_ClaimCoupon_Rollback(t *testing.T) {
+	res, err := couponsClient.ClaimCoupon(context.Background(), &coupons.ClaimCouponReq{
+		UserId:   1,
+		CouponId: "679e623cea7111ef86d80242ac120005",
+	})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(res)
+}
