@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"io/ioutil"
+	"io"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
@@ -146,7 +146,7 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 	defer res.Body.Close()
 	// 检查响应是否包含错误
 	if res.IsError() {
-		body, readErr := ioutil.ReadAll(res.Body)
+		body, readErr := io.ReadAll(res.Body)
 		if readErr != nil {
 			l.Logger.Errorf("读取 Elasticsearch 响应体失败: %v", readErr)
 		} else {
