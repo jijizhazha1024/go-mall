@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/go-elasticsearch/v8/esapi"
+	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"io/ioutil"
 	"jijizhazha1024/go-mall/common/consts/biz"
