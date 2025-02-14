@@ -20,7 +20,7 @@ import (
 	"jijizhazha1024/go-mall/services/product/product"
 )
 
-var configFile = flag.String("f", "services/product/etc/product.yaml", "the config file")
+var configFile = flag.String("f", "etc/product.yaml", "the config file")
 
 func main() {
 	flag.Parse()
