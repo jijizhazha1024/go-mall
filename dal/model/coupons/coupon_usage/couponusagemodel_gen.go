@@ -40,8 +40,8 @@ type (
 		CouponId       string    `db:"coupon_id"`       // 优惠券ID
 		UserId         uint64    `db:"user_id"`         // 用户ID
 		CouponType     int64     `db:"coupon_type"`     // 当时优惠券类型：1-满减 2-折扣 3-立减
-		OriginValue    int64     `db:"origin_value"`    // 当时优惠值（根据类型：分/百分比）
-		DiscountAmount int64     `db:"discount_amount"` // 抵扣金额（分）
+		OriginValue    float64   `db:"origin_value"`    // 当时优惠值（根据类型：分/百分比）
+		DiscountAmount float64   `db:"discount_amount"` // 抵扣金额（分）
 		AppliedAt      time.Time `db:"applied_at"`      // 应用时间
 	}
 )
