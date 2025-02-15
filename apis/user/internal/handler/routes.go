@@ -18,6 +18,31 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Route{
 				{
 					Method:  http.MethodPost,
+					Path:    "/address",
+					Handler: AddAddressHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodDelete,
+					Path:    "/address",
+					Handler: DeleteAddressHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/address",
+					Handler: UpdateAddressHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/address",
+					Handler: GetAddressHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/address/list",
+					Handler: AllAddressListHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
 					Path:    "/delete",
 					Handler: DeleteHandler(serverCtx),
 				},

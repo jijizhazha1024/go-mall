@@ -1,9 +1,6 @@
 syntax = "v1"
 
 type (
-
-
-
 	// 用户注册请求
 	RegisterRequest {
 		Email           string `json:"email"`
@@ -68,108 +65,84 @@ type (
 		Email     string `json:"email"`
 		UserName  string `json:"user_name"`
 	}
-    //  通用地址结构
-	AddressResponse struct {
-		ID             string `json:"id"`
-		RecipientName  string `json:"recipient_name"`
-		PhoneNumber    string `json:"phone_number"`
-		Province       string `json:"province"`
-		City           string `json:"city"`
+	//  通用地址结构
+	AddressResponse {
+		ID              string `json:"id"`
+		RecipientName   string `json:"recipient_name"`
+		PhoneNumber     string `json:"phone_number"`
+		Province        string `json:"province"`
+		City            string `json:"city"`
 		DetailedAddress string `json:"detailed_address"`
-		IsDefault      string `json:"is_default"`
-		CreatedAt      int64  `json:"created_at"`  // 需要将 ISO8601 时间转换为时间戳
-		UpdatedAt      int64  `json:"updated_at"`  // 需要将 ISO8601 时间转换为时间戳
+		IsDefault       string `json:"is_default"`
+		CreatedAt       int64  `json:"created_at"` // 需要将 ISO8601 时间转换为时间戳
+		UpdatedAt       int64  `json:"updated_at"` // 需要将 ISO8601 时间转换为时间戳
 	}
-
 	// 添加新地址的请求消息
-	type AddAddressRequest struct {
-	    RecipientName string `json:"recipient_name"`
-	    PhoneNumber   string `json:"phone_number"`
-	    Province      string `json:"province"`
-	    City          string `json:"city"`
-	    DetailedAddress string `json:"detailed_address"`
-	    IsDefault     bool   `json:"is_default"`
-	    UserID        uint32 `json:"user_id"`
+	AddAddressRequest {
+		RecipientName   string `json:"recipient_name"`
+		PhoneNumber     string `json:"phone_number"`
+		Province        string `json:"province"`
+		City            string `json:"city"`
+		DetailedAddress string `json:"detailed_address"`
+		IsDefault       bool   `json:"is_default"`
+		UserID          uint32 `json:"user_id"`
 	}
-	
 	// 添加新地址的响应消息
-	type AddAddressResponse struct {
-	 
-	    Data       AddressData `json:"data"`
+	AddAddressResponse {
+		Data AddressData `json:"data"`
 	}
-	
 	// 请求删除地址的消息
-	type DeleteAddressRequest struct {
-	    UserID    int32 `json:"user_id"`
-	    AddressID int32 `json:"address_id"`
+	DeleteAddressRequest {
+		UserID    int32 `json:"user_id"`
+		AddressID int32 `json:"address_id"`
 	}
-	
 	// 删除地址的响应消息
-	type DeleteAddressResponse struct {
-	 
-	}
-	
+	DeleteAddressResponse  {}
 	// 请求修改地址的消息
-	type UpdateAddressRequest struct {
-	    RecipientName string `json:"recipient_name"`
-	    PhoneNumber   string `json:"phone_number"`
-	    Province      string `json:"province"`
-	    City          string `json:"city"`
-	    DetailedAddress string `json:"detailed_address"`
-	    IsDefault     bool   `json:"is_default"`
-	    AddressID     int32  `json:"address_id"`
-	    UserID        int32  `json:"user_id"`
+	UpdateAddressRequest {
+		RecipientName   string `json:"recipient_name"`
+		PhoneNumber     string `json:"phone_number"`
+		Province        string `json:"province"`
+		City            string `json:"city"`
+		DetailedAddress string `json:"detailed_address"`
+		IsDefault       bool   `json:"is_default"`
+		AddressID       int32  `json:"address_id"`
+		UserID          int32  `json:"user_id"`
 	}
-	
 	// 修改地址的响应消息
-	type UpdateAddressResponse struct {
-	
-	    Data       AddressData `json:"data"`
+	UpdateAddressResponse {
+		Data AddressData `json:"data"`
 	}
-	
 	// 获取所有地址的响应消息中的地址数据列表
-	type AddressListResponse struct {
-	
-	    Data       []AddressData `json:"data"`
+	AddressListResponse {
+		Data []AddressData `json:"data"`
 	}
-	
 	// 获取单个地址的响应消息
-	type GetAddressResponse struct {
-	  
-	    Data       AddressData `json:"data"`
+	GetAddressResponse {
+		Data AddressData `json:"data"`
 	}
-	
 	// 地址数据消息
-	type AddressData struct {
-	    AddressID     int32  `json:"address_id"`
-	    RecipientName string `json:"recipient_name"`
-	    PhoneNumber   string `json:"phone_number"`
-	    Province      string `json:"province"`
-	    City          string `json:"city"`
-	    DetailedAddress string `json:"detailed_address"`
-	    IsDefault     bool   `json:"is_default"`
-	    CreatedAt     int64  `json:"created_at"`  // ISO8601 时间转换为时间戳
-	    UpdatedAt     int64  `json:"updated_at"`  // ISO8601 时间转换为时间戳
+	AddressData {
+		AddressID       int32  `json:"address_id"`
+		RecipientName   string `json:"recipient_name"`
+		PhoneNumber     string `json:"phone_number"`
+		Province        string `json:"province"`
+		City            string `json:"city"`
+		DetailedAddress string `json:"detailed_address"`
+		IsDefault       bool   `json:"is_default"`
+		CreatedAt       int64  `json:"created_at"` // ISO8601 时间转换为时间戳
+		UpdatedAt       int64  `json:"updated_at"` // ISO8601 时间转换为时间戳
 	}
-	
 	// 获取所有地址的请求消息
-	type AllAddressListRequest struct {
-	    UserID int32 `json:"user_id"`
+	AllAddressListRequest {
+		UserID int32 `json:"user_id"`
 	}
-	
 	// 获取单个地址的请求消息
-	type GetAddressRequest struct {
-	    UserID    int32 `json:"user_id"`  
-	    AddressID int32 `json:"address_id"`
+	GetAddressRequest {
+		UserID    int32 `json:"user_id"`
+		AddressID int32 `json:"address_id"`
 	}
-
-
-
 )
-
-
-
-
 
 @server (
 	// 代表当前 service 代码块下的路由生成代码时都会被放到 auth 目录下
@@ -206,14 +179,9 @@ service user-api {
 	put /address (UpdateAddressRequest) returns (UpdateAddressResponse)
 
 	@handler AllAddressListHandler
-	get /address (AllAddressListRequest) returns (AddressListResponse)
+	get /address/list (AllAddressListRequest) returns (AddressListResponse)
 
 	@handler GetAddressHandler
-	get /address/{address_id} (GetAddressRequest) returns (GetAddressResponse)	
-
-
-
-
-
+	get /address (GetAddressRequest) returns (GetAddressResponse)
 }
 
