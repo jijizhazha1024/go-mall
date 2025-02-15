@@ -13,12 +13,7 @@ AuthsRpc:
 Consul:
   Host: 124.71.72.124:8500 # consul endpoint
   Key: 
-    -users.rpc
-    -auths.rpc
+    users.rpc
+    auths.rpc
 
 
-Telemetry:
-  Name: user-api
-  Endpoint: http://124.71.72.124:14268/api/traces
-  Batcher: jaeger
-  Sampler: 1.0

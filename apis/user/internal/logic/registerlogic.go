@@ -29,13 +29,11 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.RegisterResponse, err error) {
 	// todo: add your logic here and delete this line
 
-	request := &usersclient.RegisterRequest{
+	response, err := l.svcCtx.UserRpc.Register(l.ctx, &usersclient.RegisterRequest{
 		Email:           req.Email,
 		Password:        req.Password,
 		ConfirmPassword: req.ConfirmPassword,
-	}
-
-	response, err := l.svcCtx.UserRpc.Register(l.ctx, request)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -56,5 +54,5 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 		RefreshToken: authrespone.RefreshToken,
 	}
 
-	return resp, err
+	return resp, nil
 }
