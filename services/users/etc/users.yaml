@@ -15,7 +15,7 @@ CacheConf:
     Pass: jjzzchtt
 
 MysqlConfig:
-  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/gomall?charset=utf8mb4&parseTime=True&loc=Local"
   conntimeout: 5
 
 RabbitMQ:

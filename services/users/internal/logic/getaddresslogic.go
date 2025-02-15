@@ -30,7 +30,7 @@ func NewGetAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAdd
 func (l *GetAddressLogic) GetAddress(in *users.GetAddressRequest) (*users.GetAddressResponse, error) {
 	// todo: add your logic here and delete this line
 
-	address, err := l.svcCtx.AddressModel.GetUserAddressbyIdAndUserId(l.ctx, in.UserId, in.AddressId)
+	address, err := l.svcCtx.AddressModel.GetUserAddressbyIdAndUserId(l.ctx, in.AddressId, in.UserId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("user_id", in.UserId), logx.Field("address_id", in.AddressId))

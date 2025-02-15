@@ -5,7 +5,8 @@ import (
 	"jijizhazha1024/go-mall/dal/model/user_address"
 	"jijizhazha1024/go-mall/services/users/internal/bloom_filter"
 	"jijizhazha1024/go-mall/services/users/internal/config"
-	"jijizhazha1024/go-mall/services/users/internal/db"
+
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 type ServiceContext struct {
@@ -13,16 +14,16 @@ type ServiceContext struct {
 	Bf           *bloom_filter.BloomFilter
 	UsersModel   user.UsersModel
 	AddressModel user_address.UserAddressesModel
+	Model        sqlx.SqlConn
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	mysql := db.NewMysql(c.MysqlConfig)
 
 	return &ServiceContext{
-		Config:       c,
-		AddressModel: user_address.NewUserAddressesModel(mysql),
-		UsersModel:   user.NewUsersModel(mysql),
 		Bf:           bloom_filter.NewBloomFilter(1000000, 0.00001),
+		Model:        sqlx.NewMysql(c.MysqlConfig.DataSource),
+		UsersModel:   user.NewUsersModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
+		AddressModel: user_address.NewUserAddressesModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
+		Config:       c,
 	}
-
 }
