@@ -1,0 +1,73 @@
+syntax = "v1"
+
+// --------------- req ---------------
+type (
+	CreateProductReq {
+		Name        string   `json:"name"`
+		Description string   `json:"description"`
+		Picture     string   `json:"picture"`
+		Stock       int64    `json:"stock"`
+		Price       float64  `json:"price"`
+		Categories  []string `json:"categories"`
+	}
+	UpdateProductReq {
+		ID          int64    `json:"id"`
+		Name        string   `json:"name,optional"`
+		Description string   `json:"description,optional"`
+		Picture     string   `json:"picture,optional"`
+		Stock       int64    `json:"stock,optional"`
+		Price       float64  `json:"price,optional"`
+		Categories  []string `json:"categories,optional"`
+	}
+	DeleteProductReq {
+		ID int64 `path:"id"`
+	}
+	GetProductReq {
+		ID int64 `path:"id"`
+	}
+)
+
+// --------------- resp ---------------
+type (
+	CreateProductResp {
+		ProductID int64 `json:"product_id"`
+	}
+	UpdateProductResp {
+		ProductID int64 `json:"product_id"`
+	}
+	DeleteProductResp {
+		Success bool `json:"success"`
+	}
+	GetProductResp {
+		ID          int64    `json:"id"`
+		Name        string   `json:"name"`
+		Description string   `json:"description"`
+		Picture     string   `json:"picture"`
+		Stock       int64    `json:"stock"`
+		Price       float64  `json:"price"`
+		Categories  []string `json:"categories"`
+	}
+)
+
+@server (
+	middleware: WithClientMiddleware,WrapperAuthMiddleware
+	prefix:     /douyin/products
+)
+service product-api {
+	// 创建商品
+	@handler CreateProductHandler
+	post / (CreateProductReq) returns (CreateProductResp)
+
+	// 修改商品信息
+	@handler UpdateProductHandler
+	put /:id (UpdateProductReq) returns (UpdateProductResp)
+
+	// 删除商品
+	@handler DeleteProductHandler
+	delete /:id (DeleteProductReq) returns (DeleteProductResp)
+
+	// 查询商品信息
+	@handler GetProductHandler
+	get /:id (GetProductReq) returns (GetProductResp)
+}
+
