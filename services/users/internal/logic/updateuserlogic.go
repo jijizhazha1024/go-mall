@@ -87,7 +87,7 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Infow(code.UserNotFoundMsg, logx.Field("err", err),
+			logx.Infow(code.UserNotFoundMsg,
 				logx.Field("user_id", in.UserId))
 
 			return users_biz.HandleUpdateUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)

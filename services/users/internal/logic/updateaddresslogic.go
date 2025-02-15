@@ -30,11 +30,11 @@ func NewUpdateAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upd
 func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*users.UpdateAddressResponse, error) {
 	// todo: add your logic here and delete this line
 
-	//将当前用户的地址信息全部改为false
+	//将当前用户的地址信息
 	addresses, err := l.svcCtx.AddressModel.FindAllByUserId(l.ctx, in.UserId)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))
+			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("user_id", in.UserId))
 			return &users.UpdateAddressResponse{
 				StatusMsg:  code.UserAddressNotFoundMsg,
 				StatusCode: code.UserAddressNotFound,
@@ -47,15 +47,13 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 		}, err
 	}
 	// 将所有地址的IsDefault字段设置为false+
-	for _, addr := range addresses {
-		addr.IsDefault = false
-		_, err := l.svcCtx.AddressModel.Update(l.ctx, addr)
-		if err != nil {
-			return &users.UpdateAddressResponse{
-				StatusMsg:  code.ServerErrorMsg,
-				StatusCode: code.ServerError,
-			}, err
-		}
+	err = l.svcCtx.AddressModel.BatchUpdateDeFAULT(l.ctx, addresses)
+	if err != nil {
+		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))
+		return &users.UpdateAddressResponse{
+			StatusMsg:  code.ServerErrorMsg,
+			StatusCode: code.ServerError,
+		}, err
 
 	}
 
