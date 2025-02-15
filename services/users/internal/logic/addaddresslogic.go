@@ -33,7 +33,6 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 	phonenumber := sql.NullString{
 		String: in.PhoneNumber,
 		Valid:  in.PhoneNumber != "",
-		Valid:  in.PhoneNumber != "",
 	}
 	province := sql.NullString{
 		String: in.Province,
@@ -76,14 +75,7 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 		}, err
 	}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		l.Logger.Errorw("add address failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
-		return &users.AddAddressResponse{
-			StatusMsg:  code.AddUserAddressFailedMsg,
-			StatusCode: code.AddUserAddressFailed,
-		}, err
-	}
+	// 构建返回数据（此时id已赋值）
 	data := &users.AddressData{
 		AddressId:       int32(id), // 使用事务中获取的ID
 		RecipientName:   in.RecipientName,

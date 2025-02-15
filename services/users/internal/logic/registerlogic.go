@@ -14,7 +14,6 @@ import (
 	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type RegisterLogic struct {
@@ -51,26 +50,12 @@ func getRandomAvatar() (string, error) {
 func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResponse, error) {
 	// todo: add your logic here and delete this line
 	//判断密码是否一致
-	if in.Password != in.ConfirmPassword {
-		l.Logger.Infow("密码不一致")
-		return users_biz.HandleRegisterResp("密码不一致", 0, 0, "token")
 
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
-	if err != nil {
-		l.Logger.Infow("密码哈希生成失败")
-		return users_biz.HandleRegisterResp("密码哈希生成失败", 0, 0, "token")
-
-	}
 	email := sql.NullString{
 		String: in.Email,
 		Valid:  true,
 	}
-	passwordhash := sql.NullString{
-		String: string(hashedPassword),
-		Valid:  true,
-	}
+
 	//判断邮箱是否已注册，如果已注册，是否处于删除状态
 	existUser, err := l.svcCtx.UsersModel.FindOneByEmail(l.ctx, email)
 	if err != nil {
@@ -88,7 +73,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			// 用户不存在，直接注册
 			result, insertErr := l.svcCtx.UsersModel.Insert(l.ctx, &user.Users{
 				Email:        email,
-				PasswordHash: passwordhash,
+				PasswordHash: sql.NullString{String: in.Password, Valid: true},
 				AvatarUrl:    sql.NullString{String: avatar, Valid: true},
 			})
 			l.svcCtx.Bf.Add(in.Email)
@@ -108,7 +93,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			logx.Errorw("query ....", logx.Field("err", err),
 				logx.Field("email", in.Email))
 
-			return users_biz.HandleRegisterResp(code.CartCreatedMsg, code.CartCreated, uint32(userId), "token")
+			return users_biz.HandleRegisterResp(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrieved, uint32(userId), "token")
 		}
 		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_email", in.Email))
 
@@ -135,7 +120,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			l.Logger.Infow(code.UserAlreadyExistsMsg, logx.Field("err", err),
 				logx.Field("email", in.Email))
 
-			return users_biz.HandleRegistererror(code.UserAlreadyExistsMsg, code.UserAlreadyExists, nil)
+			return users_biz.HandleRegistererror(code.UserAlreadyExistsMsg, code.UserAlreadyExists, errors.New(code.UserAlreadyExistsMsg))
 		}
 
 	}

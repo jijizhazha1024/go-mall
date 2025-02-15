@@ -29,6 +29,8 @@ const (
 	GetUserAddressFailed     = 20025
 	UserAddressNotFound      = 20026
 	DefaultAddressHasExist   = 20027
+	LoginMessageEmpty        = 20028
+	PasswordNotMatch         = 20029
 )
 
 const (
@@ -59,4 +61,6 @@ const (
 	GetUserAddressFailedMsg     = "用户地址获取失败"
 	UserAddressNotFoundMsg      = "用户地址不存在"
 	DefaultAddressHasExistMsg   = "默认地址已存在"
+	LoginMessageEmptyMsg        = "登录信息为空"
+	PasswordNotMatchMsg         = "密码不匹配"
 )

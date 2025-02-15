@@ -39,6 +39,7 @@ type LogoutRequest struct {
 }
 
 type LogoutResponse struct {
+	Logout_at int64 `json:"logout_at"`
 }
 
 type RegisterRequest struct {
@@ -53,10 +54,16 @@ type RegisterResponse struct {
 }
 
 type UpdateRequest struct {
-	UserName string `json:"user_name"`
+	UserId    int64  `json:"user_id"`
+	AvatarUrl string `json:"avatar_url"`
+	Email     string `json:"email"`
+	UserName  string `json:"user_name"`
+	Password  string `json:"password"`
 }
 
 type UpdateResponse struct {
-	UserName string `json:"user_name"`
-	UpdateAt int64  `json:"update_at"`
+	AvatarUrl string `json:"avatar_url"`
+	Email     string `json:"email"`
+	UserName  string `json:"user_name"`
+	UpdateAt  int64  `json:"update_at"`
 }

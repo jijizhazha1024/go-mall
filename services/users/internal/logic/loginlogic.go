@@ -4,15 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
 	"jijizhazha1024/go-mall/common/consts/code"
+	"jijizhazha1024/go-mall/common/utils/cryptx"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type LoginLogic struct {
@@ -33,10 +32,6 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error) {
 	// todo: add your logic here and delete this line
 
-	// 1. 校验参数
-	if in.Email == "" || in.Password == "" {
-		return users_biz.HandleLoginerror("email or password is empty", 400, errors.New("email or password is empty"))
-	}
 	email := sql.NullString{
 		String: in.Email,
 		Valid:  true,
@@ -51,7 +46,7 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 
 		if errors.Is(err, sql.ErrNoRows) {
 			logx.Infow(code.UserNotFoundMsg, logx.Field("err", err),
-				logx.Field("user_id", in.Email))
+				logx.Field("email", in.Email))
 
 			return users_biz.HandleLoginerror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
@@ -69,26 +64,9 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	}
 
 	// 3. 校验密码
-
-	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash.String), []byte(in.Password))
-	if err != nil {
-
-		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			logx.Infow(code.LoginFailedMsg)
-			return users_biz.HandleLoginerror("password error", 400, nil)
-
-		}
-		logx.Errorw(code.LoginFailedMsg, logx.Field("user_email", user.Email))
-		return nil, err
-	}
-
-	//4、更新登陆时间
-	err = l.svcCtx.UsersModel.UpdateLoginTime(l.ctx, user.UserId, time.Now())
-	if err != nil {
-		logx.Errorw("数据库查询失败",
-			logx.Field("err", err),
-			logx.Field("user_email", in.Email),
-		)
+	if !cryptx.PasswordVerify(in.Password, user.PasswordHash.String) {
+		logx.Infow(code.LoginFailedMsg)
+		return users_biz.HandleLoginerror(code.PasswordNotMatchMsg, code.PasswordNotMatch, nil)
 	}
 
 	return users_biz.HandleLoginResp(code.LoginSuccessMsg, code.LoginSuccess, uint32(user.UserId), "", user.Username.String)
