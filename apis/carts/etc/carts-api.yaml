@@ -7,3 +7,14 @@ CartsRpc:
 
 Consul:
   Host: 124.71.72.124:8500 # consul endpoint
+  Key: carts.rpc
+
+AuthsRpc:
+  Target: consul://124.71.72.124:8500/auths.rpc?wait=14s
+  NonBlock: true
+
+Telemetry:
+  Name: user-api
+  Endpoint: http://124.71.72.124:14268/api/traces
+  Batcher: jaeger
+  Sampler: 1.0

@@ -1,15 +1,25 @@
 package svc
 
 import (
+	"github.com/zeromicro/go-zero/rest"
+	"github.com/zeromicro/go-zero/zrpc"
 	"jijizhazha1024/go-mall/apis/carts/internal/config"
+	"jijizhazha1024/go-mall/common/middleware"
+	"jijizhazha1024/go-mall/services/carts/cartsclient"
 )
 
 type ServiceContext struct {
-	Config config.Config
+	Config                config.Config
+	CartRpc               cartsclient.Cart
+	WithClientMiddleware  rest.Middleware
+	WrapperAuthMiddleware rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
-		Config: c,
+		Config:                c,
+		CartRpc:               cartsclient.NewCart(zrpc.MustNewClient(c.CartRpc)),
+		WithClientMiddleware:  middleware.WithClientMiddleware,
+		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc),
 	}
 }
