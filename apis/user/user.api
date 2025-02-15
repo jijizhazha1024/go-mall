@@ -62,8 +62,8 @@ type (
 @server (
 	// 代表当前 service 代码块下的路由生成代码时都会被放到 auth 目录下
 	// 定义路由前缀为
-	middleware: WrapperAuthMiddleware
-	prefix:     /douyin/users
+	middleware: WrapperAuthMiddleware,WithClientMiddleware
+	prefix:     /douyin/user
 )
 service user-api {
 	@handler RegisterHandler

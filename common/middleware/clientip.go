@@ -2,12 +2,13 @@ package middleware
 
 import (
 	"context"
-	"github.com/zeromicro/go-zero/rest/httpx"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/common/response"
 	"net"
 	"net/http"
+
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 func WithClientMiddleware(next http.HandlerFunc) http.HandlerFunc {

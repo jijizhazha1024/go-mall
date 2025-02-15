@@ -15,6 +15,7 @@ type ServiceContext struct {
 	UserRpc               usersclient.Users
 	AuthsRpc              authsclient.Auths
 	WrapperAuthMiddleware rest.Middleware
+	WithClientMiddleware  rest.Middleware
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -22,6 +23,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserRpc:               usersclient.NewUsers(zrpc.MustNewClient(c.UserRpc)),
 		AuthsRpc:              authsclient.NewAuths(zrpc.MustNewClient(c.AuthsRpc)),
 		Config:                c,
+		WithClientMiddleware:  middleware.WithClientMiddleware,
 		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc),
 	}
 }

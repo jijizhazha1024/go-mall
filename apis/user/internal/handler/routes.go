@@ -14,7 +14,7 @@ import (
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.WrapperAuthMiddleware},
+			[]rest.Middleware{serverCtx.WrapperAuthMiddleware, serverCtx.WithClientMiddleware},
 			[]rest.Route{
 				{
 					Method:  http.MethodPost,
@@ -48,6 +48,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 			}...,
 		),
-		rest.WithPrefix("/douyin/users"),
+		rest.WithPrefix("/douyin/user"),
 	)
 }

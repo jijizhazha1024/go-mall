@@ -5,6 +5,7 @@ import (
 
 	"jijizhazha1024/go-mall/apis/user/internal/svc"
 	"jijizhazha1024/go-mall/apis/user/internal/types"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/services/auths/authsclient"
 	"jijizhazha1024/go-mall/services/users/usersclient"
 
@@ -38,10 +39,13 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 	if err != nil {
 		return nil, err
 	}
+	client_IP := l.ctx.Value(biz.ClientIPKey).(string)
+	user_Id := l.ctx.Value(biz.UserIDKey).(string)
+
 	authrespone, err := l.svcCtx.AuthsRpc.GenerateToken(l.ctx, &authsclient.AuthGenReq{
 		UserId:   response.UserId,
-		Username: "",
-		ClientIp: "",
+		Username: user_Id,
+		ClientIp: client_IP,
 	})
 	if err != nil {
 		return nil, err

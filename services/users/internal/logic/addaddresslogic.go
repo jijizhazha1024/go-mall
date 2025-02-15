@@ -30,11 +30,11 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 	// todo: add your logic here and delete this line
 	phonenumber := sql.NullString{
 		String: in.PhoneNumber,
-		Valid:  true,
+		Valid:  in.Province != "",
 	}
 	province := sql.NullString{
 		String: in.Province,
-		Valid:  true,
+		Valid:  in.Province != "",
 	}
 
 	result, err := l.svcCtx.AddressModel.Insert(l.ctx, &user_address.UserAddresses{

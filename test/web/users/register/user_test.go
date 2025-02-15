@@ -12,7 +12,7 @@ import (
 )
 
 func TestRegister(t *testing.T) {
-	url := "http://localhost:8000/douyin/user/register"
+	url := "http://localhost:8001/douyin/user/register"
 	payload := map[string]string{
 		"email":            "user@example.com",
 		"password":         "password123",

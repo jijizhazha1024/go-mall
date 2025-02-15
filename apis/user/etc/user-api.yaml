@@ -12,7 +12,9 @@ AuthsRpc:
 
 Consul:
   Host: 124.71.72.124:8500 # consul endpoint
-  Key: users.rpc
+  Key: 
+    -users.rpc
+    -auths.rpc
 
 
 Telemetry:
