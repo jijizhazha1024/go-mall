@@ -54,6 +54,7 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 			StatusCode: code.AddUserAddressFailed,
 		}, err
 	}
+
 	id, err := result.LastInsertId()
 	if err != nil {
 		l.Logger.Errorw("add address failed", logx.Field("user_id", in.UserId), logx.Field("err", err))

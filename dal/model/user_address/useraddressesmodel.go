@@ -81,5 +81,12 @@ func (m *customUserAddressesModel) GetUserAddressbyIdAndUserId(ctx context.Conte
 	}
 }
 func (m *customUserAddressesModel) BatchUpdateDeFAULT(ctx context.Context, data []*UserAddresses) error {
+	for _, userAddress := range data {
+		query := fmt.Sprintf("update %s set `is_default` = false where `user_id` = ?", m.table)
+		_, err := m.conn.ExecCtx(ctx, query, userAddress.UserId)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
