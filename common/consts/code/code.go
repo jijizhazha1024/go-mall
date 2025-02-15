@@ -14,15 +14,6 @@ const (
 	ProductInfoRetrieved       = 30007
 	ProductInfoRetrievalFailed = 30008
 
-	// 购物车服务
-
-	CartCreated             = 40001
-	CartCreationFailed      = 40002
-	CartCleared             = 40003
-	CartClearFailed         = 40004
-	CartInfoRetrieved       = 40005
-	CartInfoRetrievalFailed = 40006
-
 	// 订单服务
 
 	OrderCreated            = 50001
@@ -62,13 +53,6 @@ const (
 	ProductDeletionFailedMsg      = "商品删除失败"
 	ProductInfoRetrievedMsg       = "商品信息查询成功"
 	ProductInfoRetrievalFailedMsg = "商品信息查询失败"
-
-	CartCreatedMsg             = "购物车添加成功"
-	CartCreationFailedMsg      = "购物车添加失败"
-	CartClearedMsg             = "购物车删除成功"
-	CartClearFailedMsg         = "购物车删除失败"
-	CartInfoRetrievedMsg       = "购物车信息获取成功"
-	CartInfoRetrievalFailedMsg = "购物车信息获取失败"
 
 	OrderCreatedMsg            = "订单创建成功"
 	OrderCreationFailedMsg     = "订单创建失败"
