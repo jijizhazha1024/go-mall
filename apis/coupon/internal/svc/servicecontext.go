@@ -18,7 +18,7 @@ type ServiceContext struct {
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config:                c,
-		CouponRpc:             couponsclient.NewCoupons(zrpc.MustNewClient(c.AuthsRpc)),
+		CouponRpc:             couponsclient.NewCoupons(zrpc.MustNewClient(c.CouponRpc)),
 		WithClientMiddleware:  middleware.WithClientMiddleware,
 		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc),
 	}
