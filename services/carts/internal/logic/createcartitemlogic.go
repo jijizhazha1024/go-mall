@@ -82,7 +82,6 @@ func (l *CreateCartItemLogic) CreateCartItem(in *carts.CartItemRequest) (*carts.
 		}, nil
 	}
 
-	// Step 3: If the item doesn't exist, create a new record
 	result, err := l.svcCtx.CartsModel.Insert(l.ctx, &cart.Carts{
 		UserId: sql.NullInt64{
 			Int64: int64(in.UserId),
