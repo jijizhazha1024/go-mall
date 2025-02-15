@@ -132,7 +132,9 @@ message AddAddressResponse {
  
 // 请求删除地址的消息
 message DeleteAddressRequest {
-  int32 address_id = 1;
+  int32 user_id = 1;
+  int32 address_id = 2;
+  
 }
  
 // 删除地址的响应消息
@@ -196,6 +198,7 @@ message AllAddressLitstRequest {
 
 message GetAddressRequest {
   int32 user_id = 1;
+  int32 address_id = 2;
 }
 
 

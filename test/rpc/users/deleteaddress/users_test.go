@@ -29,6 +29,7 @@ func TestUsersRpc(t *testing.T) {
 	resp, err := users_client.DeleteAddress(context.Background(), &users.DeleteAddressRequest{
 
 		AddressId: 2,
+		UserId:    1,
 	})
 	if err != nil {
 		fmt.Println("delete address error", err)

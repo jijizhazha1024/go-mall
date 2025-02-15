@@ -11,8 +11,6 @@ import (
 	"strings"
 
 	"github.com/zeromicro/go-zero/core/stores/builder"
-	"github.com/zeromicro/go-zero/core/stores/cache"
-	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/core/stringx"
 )
@@ -22,9 +20,6 @@ var (
 	productCategoriesRows                = strings.Join(productCategoriesFieldNames, ",")
 	productCategoriesRowsExpectAutoSet   = strings.Join(stringx.Remove(productCategoriesFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
 	productCategoriesRowsWithPlaceHolder = strings.Join(stringx.Remove(productCategoriesFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
-
-	cacheProductCategoriesIdPrefix                  = "cache:productCategories:id:"
-	cacheProductCategoriesProductIdCategoryIdPrefix = "cache:productCategories:productId:categoryId:"
 )
 
 type (
@@ -37,7 +32,7 @@ type (
 	}
 
 	defaultProductCategoriesModel struct {
-		sqlc.CachedConn
+		conn  sqlx.SqlConn
 		table string
 	}
 
@@ -48,39 +43,27 @@ type (
 	}
 )
 
-func newProductCategoriesModel(conn sqlx.SqlConn, c cache.CacheConf, opts ...cache.Option) *defaultProductCategoriesModel {
+func newProductCategoriesModel(conn sqlx.SqlConn) *defaultProductCategoriesModel {
 	return &defaultProductCategoriesModel{
-		CachedConn: sqlc.NewConn(conn, c, opts...),
-		table:      "`product_categories`",
+		conn:  conn,
+		table: "`product_categories`",
 	}
 }
 
 func (m *defaultProductCategoriesModel) Delete(ctx context.Context, id int64) error {
-	data, err := m.FindOne(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	productCategoriesIdKey := fmt.Sprintf("%s%v", cacheProductCategoriesIdPrefix, id)
-	productCategoriesProductIdCategoryIdKey := fmt.Sprintf("%s%v:%v", cacheProductCategoriesProductIdCategoryIdPrefix, data.ProductId, data.CategoryId)
-	_, err = m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
-		return conn.ExecCtx(ctx, query, id)
-	}, productCategoriesIdKey, productCategoriesProductIdCategoryIdKey)
+	query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, id)
 	return err
 }
 
 func (m *defaultProductCategoriesModel) FindOne(ctx context.Context, id int64) (*ProductCategories, error) {
-	productCategoriesIdKey := fmt.Sprintf("%s%v", cacheProductCategoriesIdPrefix, id)
+	query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", productCategoriesRows, m.table)
 	var resp ProductCategories
-	err := m.QueryRowCtx(ctx, &resp, productCategoriesIdKey, func(ctx context.Context, conn sqlx.SqlConn, v any) error {
-		query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", productCategoriesRows, m.table)
-		return conn.QueryRowCtx(ctx, v, query, id)
-	})
+	err := m.conn.QueryRowCtx(ctx, &resp, query, id)
 	switch err {
 	case nil:
 		return &resp, nil
-	case sqlc.ErrNotFound:
+	case sqlx.ErrNotFound:
 		return nil, ErrNotFound
 	default:
 		return nil, err
@@ -88,19 +71,13 @@ func (m *defaultProductCategoriesModel) FindOne(ctx context.Context, id int64) (
 }
 
 func (m *defaultProductCategoriesModel) FindOneByProductIdCategoryId(ctx context.Context, productId sql.NullInt64, categoryId sql.NullInt64) (*ProductCategories, error) {
-	productCategoriesProductIdCategoryIdKey := fmt.Sprintf("%s%v:%v", cacheProductCategoriesProductIdCategoryIdPrefix, productId, categoryId)
 	var resp ProductCategories
-	err := m.QueryRowIndexCtx(ctx, &resp, productCategoriesProductIdCategoryIdKey, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v any) (i any, e error) {
-		query := fmt.Sprintf("select %s from %s where `product_id` = ? and `category_id` = ? limit 1", productCategoriesRows, m.table)
-		if err := conn.QueryRowCtx(ctx, &resp, query, productId, categoryId); err != nil {
-			return nil, err
-		}
-		return resp.Id, nil
-	}, m.queryPrimary)
+	query := fmt.Sprintf("select %s from %s where `product_id` = ? and `category_id` = ? limit 1", productCategoriesRows, m.table)
+	err := m.conn.QueryRowCtx(ctx, &resp, query, productId, categoryId)
 	switch err {
 	case nil:
 		return &resp, nil
-	case sqlc.ErrNotFound:
+	case sqlx.ErrNotFound:
 		return nil, ErrNotFound
 	default:
 		return nil, err
@@ -108,37 +85,15 @@ func (m *defaultProductCategoriesModel) FindOneByProductIdCategoryId(ctx context
 }
 
 func (m *defaultProductCategoriesModel) Insert(ctx context.Context, data *ProductCategories) (sql.Result, error) {
-	productCategoriesIdKey := fmt.Sprintf("%s%v", cacheProductCategoriesIdPrefix, data.Id)
-	productCategoriesProductIdCategoryIdKey := fmt.Sprintf("%s%v:%v", cacheProductCategoriesProductIdCategoryIdPrefix, data.ProductId, data.CategoryId)
-	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("insert into %s (%s) values (?, ?)", m.table, productCategoriesRowsExpectAutoSet)
-		return conn.ExecCtx(ctx, query, data.ProductId, data.CategoryId)
-	}, productCategoriesIdKey, productCategoriesProductIdCategoryIdKey)
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?)", m.table, productCategoriesRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.ProductId, data.CategoryId)
 	return ret, err
 }
 
 func (m *defaultProductCategoriesModel) Update(ctx context.Context, newData *ProductCategories) error {
-	data, err := m.FindOne(ctx, newData.Id)
-	if err != nil {
-		return err
-	}
-
-	productCategoriesIdKey := fmt.Sprintf("%s%v", cacheProductCategoriesIdPrefix, data.Id)
-	productCategoriesProductIdCategoryIdKey := fmt.Sprintf("%s%v:%v", cacheProductCategoriesProductIdCategoryIdPrefix, data.ProductId, data.CategoryId)
-	_, err = m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, productCategoriesRowsWithPlaceHolder)
-		return conn.ExecCtx(ctx, query, newData.ProductId, newData.CategoryId, newData.Id)
-	}, productCategoriesIdKey, productCategoriesProductIdCategoryIdKey)
+	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, productCategoriesRowsWithPlaceHolder)
+	_, err := m.conn.ExecCtx(ctx, query, newData.ProductId, newData.CategoryId, newData.Id)
 	return err
-}
-
-func (m *defaultProductCategoriesModel) formatPrimary(primary any) string {
-	return fmt.Sprintf("%s%v", cacheProductCategoriesIdPrefix, primary)
-}
-
-func (m *defaultProductCategoriesModel) queryPrimary(ctx context.Context, conn sqlx.SqlConn, v, primary any) error {
-	query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", productCategoriesRows, m.table)
-	return conn.QueryRowCtx(ctx, v, query, primary)
 }
 
 func (m *defaultProductCategoriesModel) tableName() string {

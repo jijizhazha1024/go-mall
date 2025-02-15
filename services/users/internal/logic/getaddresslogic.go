@@ -30,17 +30,17 @@ func NewGetAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAdd
 func (l *GetAddressLogic) GetAddress(in *users.GetAddressRequest) (*users.GetAddressResponse, error) {
 	// todo: add your logic here and delete this line
 
-	address, err := l.svcCtx.AddressModel.GetUserAddress(l.ctx, in.UserId)
+	address, err := l.svcCtx.AddressModel.GetUserAddressbyIdAndUserId(l.ctx, in.AddressId, in.UserId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))
+			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("user_id", in.UserId), logx.Field("address_id", in.AddressId))
 			return &users.GetAddressResponse{
 				StatusMsg:  code.UserAddressNotFoundMsg,
 				StatusCode: code.UserAddressNotFound,
 			}, nil
 		}
 
-		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))
+		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("user_id", in.UserId), logx.Field("address_id", in.AddressId), logx.Field("err", err))
 		return &users.GetAddressResponse{
 			StatusMsg:  code.ServerErrorMsg,
 			StatusCode: code.ServerError,

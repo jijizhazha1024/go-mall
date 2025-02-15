@@ -28,12 +28,12 @@ func TestUsersRpc(t *testing.T) {
 	//这里可以从token中获取user——id
 	resp, err := users_client.AddAddress(context.Background(), &users.AddAddressRequest{
 
-		RecipientName:   "里斯三",
-		PhoneNumber:     "13800138000",
+		RecipientName:   "test2",
+		PhoneNumber:     "13803423123",
 		Province:        "山东省",
-		City:            "济南市",
-		DetailedAddress: "历下区",
-		IsDefault:       false,
+		City:            "威海市",
+		DetailedAddress: "环翠区",
+		IsDefault:       true,
 		UserId:          1,
 	})
 	if err != nil {

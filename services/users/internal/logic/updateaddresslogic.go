@@ -10,6 +10,7 @@ import (
 	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 type UpdateAddressLogic struct {
@@ -28,38 +29,41 @@ func NewUpdateAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upd
 
 // 修改用户地址
 func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*users.UpdateAddressResponse, error) {
-	// todo: add your logic here and delete this line
+	//判断修改后的地址是否是默认地址
+	if in.IsDefault {
 
-	//将当前用户的地址信息全部改为false
-	addresses, err := l.svcCtx.AddressModel.FindAllByUserId(l.ctx, in.UserId)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))
-			return &users.UpdateAddressResponse{
-				StatusMsg:  code.UserAddressNotFoundMsg,
-				StatusCode: code.UserAddressNotFound,
-			}, nil
-		}
-		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))
-		return &users.UpdateAddressResponse{
-			StatusMsg:  code.ServerErrorMsg,
-			StatusCode: code.ServerError,
-		}, err
-	}
-	// 将所有地址的IsDefault字段设置为false+
-	for _, addr := range addresses {
-		addr.IsDefault = false
-		_, err := l.svcCtx.AddressModel.Update(l.ctx, addr)
+		addresses, err := l.svcCtx.AddressModel.FindAllByUserId(l.ctx, in.UserId)
 		if err != nil {
+			if err == sql.ErrNoRows {
+				l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("user_id", in.UserId))
+				return &users.UpdateAddressResponse{
+					StatusMsg:  code.UserAddressNotFoundMsg,
+					StatusCode: code.UserAddressNotFound,
+				}, nil
+			}
+			l.Logger.Errorw(code.ServerErrorMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))
 			return &users.UpdateAddressResponse{
 				StatusMsg:  code.ServerErrorMsg,
 				StatusCode: code.ServerError,
 			}, err
 		}
+		// 将所有地址的IsDefault字段设置为false+
+		if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
 
+			err := l.svcCtx.AddressModel.BatchUpdateDeFaultWithSession(ctx, session, addresses)
+			if err != nil {
+				return err
+			}
+			return nil
+		}); err != nil {
+			l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
+			return &users.UpdateAddressResponse{
+				StatusMsg:  code.ServerErrorMsg,
+				StatusCode: code.ServerError,
+			}, nil
+		}
 	}
-
-	_, err = l.svcCtx.AddressModel.Update(l.ctx, &user_address.UserAddresses{
+	_, err := l.svcCtx.AddressModel.Update(l.ctx, &user_address.UserAddresses{
 
 		AddressId:     int64(in.AddressId),
 		RecipientName: in.RecipientName,
