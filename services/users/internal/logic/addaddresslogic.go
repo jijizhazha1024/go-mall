@@ -30,7 +30,7 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 	// todo: add your logic here and delete this line
 	phonenumber := sql.NullString{
 		String: in.PhoneNumber,
-		Valid:  in.Province != "",
+		Valid:  in.PhoneNumber != "",
 	}
 	province := sql.NullString{
 		String: in.Province,
@@ -48,15 +48,16 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 	})
 
 	if err != nil {
-		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("err", err))
+		l.Logger.Errorw("add address failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
 		return &users.AddAddressResponse{
 			StatusMsg:  code.AddUserAddressFailedMsg,
 			StatusCode: code.AddUserAddressFailed,
 		}, err
 	}
+
 	id, err := result.LastInsertId()
 	if err != nil {
-		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("err", err))
+		l.Logger.Errorw("add address failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
 		return &users.AddAddressResponse{
 			StatusMsg:  code.AddUserAddressFailedMsg,
 			StatusCode: code.AddUserAddressFailed,
