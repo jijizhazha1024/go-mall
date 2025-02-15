@@ -23,11 +23,14 @@ message Coupon {
   string updated_at = 12; // 更新时间
 }
 enum CouponStatus {
-  COUPON_STATUS_UNSPECIFIED = 0; // 未指定
-  COUPON_STATUS_NOT_USED = 1; // 未使用
-  COUPON_STATUS_USED = 2; // 已使用
-  COUPON_STATUS_EXPIRED = 3; // 已过期
+  COUPON_STATUS_UNSPECIFIED = 0; // 未指定或默认状态
+  COUPON_STATUS_AVAILABLE = 1; // 用户领取优惠券后，可正常使用
+  COUPON_STATUS_LOCKED = 2; // 用户点击结算时锁定，锁定期间其他订单不可重复使用
+  COUPON_STATUS_USED = 3; // 支付成功确认，标记为已消耗
+  COUPON_STATUS_EXPIRED = 4; // 超过有效期未使用，自动失效
+  COUPON_STATUS_REVOKED = 5; // 管理员手动作废，强制失效（如活动终止）
 }
+
 // 用户优惠券信息
 message UserCoupon {
   int32 id = 1; // 用户优惠券ID
@@ -47,8 +50,8 @@ message CouponUsage {
   string coupon_id = 3; // 优惠券ID
   int32 user_id = 4; // 用户ID
   CouponType coupon_type = 5; // 当时优惠券类型：1-满减 2-折扣 3-立减
-  int32 origin_value = 6; // 当时优惠值（根据类型：分/百分比）
-  int32 discount_amount = 7; // 抵扣金额（分）
+  string origin_value = 6; // 当时优惠值（根据类型：分/百分比）
+  string discount_amount = 7; // 抵扣金额（分）
   string applied_at = 8; // 应用时间
 }
 
@@ -150,24 +153,30 @@ message ClaimCouponResp {
 
 }
 
-// 使用优惠券请求
-message UseCouponReq {
+// 计算优惠券请求
+message CalculateCouponReq {
   int32 user_id = 1; // 用户ID
   string coupon_id = 2; // 优惠券ID
   string order_id = 3; // 订单ID
 }
 
-// 使用优惠券响应
-message UseCouponResp {
+// 计算优惠券响应
+message CalculateCouponResp {
   uint32 status_code = 1;
   string status_msg = 2;
-  bool success = 3; // 使用结果
-  int32 discount_amount = 4; // 抵扣金额（分）
+  // 金额相关
+  string origin_amount = 3;     // 原始订单金额（单位：分）
+  string final_amount = 4;      // 最终应付金额（分）
+  string discount_amount = 5;   // 总抵扣金额（分）
+  // 优惠券信息
+  string coupon_type = 6;      // 优惠券类型（如 DISCOUNT/满减券）
+  bool is_usable = 7;  // 是否可用
+  string unusable_reason = 8; // 不可用原因（当 is_usable=false 时有效）
 }
 
 // 获取优惠券使用记录请求
 message ListCouponUsagesReq {
-  string coupon_id = 1; // 优惠券ID
+  uint32 user_id = 1;
   PaginationReq pagination = 2;
 }
 
@@ -194,16 +203,16 @@ service Coupons {
   rpc UpdateCoupon(UpdateCouponReq) returns(UpdateCouponResp);
   //  DeleteCoupon 删除优惠券
   rpc DeleteCoupon(DeleteCouponReq) returns(DeleteCouponResp);
+  //  ClaimCoupon 用户领取优惠券
+  rpc ClaimCoupon(ClaimCouponReq) returns(ClaimCouponResp);
 
 
   // -------------------- 用户优惠券相关 --------------------
 
   //  ListUserCoupons 获取用户优惠券列表
   rpc ListUserCoupons(ListUserCouponsReq) returns(ListUserCouponsResp);
-  //  ClaimCoupon 用户领取优惠券
-  rpc ClaimCoupon(ClaimCouponReq) returns(ClaimCouponResp);
-  //  UseCoupon 使用优惠券
-  rpc UseCoupon(UseCouponReq) returns(UseCouponResp);
+  //  CalculateCoupon 使用优惠券
+  rpc CalculateCoupon(CalculateCouponReq) returns(CalculateCouponResp);
   //  ListCouponUsages 获取优惠券使用记录
   rpc ListCouponUsages(ListCouponUsagesReq) returns(ListCouponUsagesResp);
 }
