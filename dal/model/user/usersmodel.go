@@ -77,15 +77,14 @@ func (m *customUsersModel) FindAllEmails() ([]string, error) {
 func (m *customUsersModel) GetLoginTime(ctx context.Context, userId int64) (time.Time, error) {
 	query := fmt.Sprintf("select %s from %s where `user_id` = ? limit 1", usersRows, m.table)
 	var user Users
-	now := time.Now()
+
 	err := m.conn.QueryRowCtx(ctx, &user, query, userId)
+	t := time.Time{}
 	switch err {
 	case nil:
 		return user.LoginAt.Time, nil
-	case sqlx.ErrNotFound:
-		return now.Add(2 * time.Hour), ErrNotFound
 	default:
-		return time.Time{}, err
+		return t, err
 	}
 
 }
