@@ -25,8 +25,8 @@ type AddressData struct {
 	City            string `json:"city"`
 	DetailedAddress string `json:"detailed_address"`
 	IsDefault       bool   `json:"is_default"`
-	CreatedAt       int64  `json:"created_at"` // ISO8601 时间转换为时间戳
-	UpdatedAt       int64  `json:"updated_at"` // ISO8601 时间转换为时间戳
+	CreatedAt       string `json:"created_at"` // ISO8601 时间转换为时间戳
+	UpdatedAt       string `json:"updated_at"` // ISO8601 时间转换为时间戳
 }
 
 type AddressListResponse struct {
@@ -41,8 +41,8 @@ type AddressResponse struct {
 	City            string `json:"city"`
 	DetailedAddress string `json:"detailed_address"`
 	IsDefault       string `json:"is_default"`
-	CreatedAt       int64  `json:"created_at"` // 需要将 ISO8601 时间转换为时间戳
-	UpdatedAt       int64  `json:"updated_at"` // 需要将 ISO8601 时间转换为时间戳
+	CreatedAt       string `json:"created_at"`
+	UpdatedAt       string `json:"updated_at"`
 }
 
 type AllAddressListRequest struct {
@@ -79,10 +79,9 @@ type GetInfoRequest struct {
 
 type GetInfoResponse struct {
 	UserId    int64  `json:"user_id"`
-	LogoutAt  int64  `json:"logout_at"`
-	CreatedAt int64  `json:"created_at"`
-	UpdateAt  int64  `json:"update_at"`
-	AvatarUrl string `json:"avatar_url"`
+	LogoutAt  string `json:"logout_at"`
+	CreatedAt string `json:"created_at"`
+	UpdateAt  string `json:"update_at"`
 	Email     string `json:"email"`
 	UserName  string `json:"user_name"`
 }
@@ -140,8 +139,7 @@ type UpdateRequest struct {
 }
 
 type UpdateResponse struct {
-	AvatarUrl string `json:"avatar_url"`
-	Email     string `json:"email"`
-	UserName  string `json:"user_name"`
-	UpdateAt  int64  `json:"update_at"`
+	Email    string `json:"email"`
+	UserId   int64  `json:"user_id"`
+	UserName string `json:"user_name"`
 }

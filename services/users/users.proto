@@ -92,6 +92,8 @@ message UpdateUserResponse {
 
   uint32 user_id = 3;
     string token = 4;
+    string email = 5;
+    string user_name = 6;
 }
 
 
@@ -108,6 +110,11 @@ message GetUserResponse {
   uint32 user_id = 3;
   string email = 4;
   string user_name = 5;
+  string created_at = 6;
+  string  updated_at = 7;
+  string  logout_at = 8;
+  string avatar_url = 9;
+
 }
 
  
@@ -185,8 +192,8 @@ message AddressData {
   string city = 5;
   string detailed_address = 6;
   bool is_default = 7;
-  string created_at = 8;
-  string updated_at = 9;
+  string  created_at = 8;
+  string  updated_at = 9;
 }
 
 

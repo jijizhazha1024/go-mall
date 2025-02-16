@@ -21,6 +21,7 @@ type (
 		DeleteByAddressIdandUserId(ctx context.Context, addressId int32, userId int32) error
 		InsertWithSession(ctx context.Context, session sqlx.Session, data *UserAddresses) (sql.Result, error)
 		GetUserAddressbyIdAndUserId(ctx context.Context, addressId int32, userId int32) (*UserAddresses, error)
+		UpdateWithSession(ctx context.Context, session sqlx.Session, data *UserAddresses) (sql.Result, error)
 		BatchUpdateDeFaultWithSession(ctx context.Context, session sqlx.Session, data []*UserAddresses) error
 	}
 
@@ -100,5 +101,15 @@ func (m *customUserAddressesModel) InsertWithSession(ctx context.Context, sessio
 		return nil, err
 	}
 
+	return result, nil
+}
+func (m *customUserAddressesModel) UpdateWithSession(ctx context.Context, session sqlx.Session, data *UserAddresses) (sql.Result, error) {
+	// 定义更新的 SQL 语句
+	query := fmt.Sprintf("update %s set %s where `address_id` = ?", m.table, userAddressesRowsWithPlaceHolder)
+	// 使用 session 执行更新操作
+	result, err := session.ExecCtx(ctx, query, data.UserId, data.DetailedAddress, data.City, data.Province, data.IsDefault, data.RecipientName, data.PhoneNumber, data.AddressId)
+	if err != nil {
+		return nil, err
+	}
 	return result, nil
 }

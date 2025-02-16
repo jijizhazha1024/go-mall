@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/dal/model/user_address"
@@ -11,7 +10,6 @@ import (
 	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 type AddAddressLogic struct {
@@ -39,36 +37,29 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 		Valid:  in.Province != "",
 	}
 	// 在外部作用域声明ID变量
-	var id int64
 
-	// 执行事务操作
-	err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
-		// 使用事务session执行插入
-		result, err := l.svcCtx.AddressModel.InsertWithSession(ctx, session, &user_address.UserAddresses{
-			UserId:          int64(in.UserId),
-			DetailedAddress: in.DetailedAddress,
-			City:            in.City,
-			Province:        province,
-			IsDefault:       in.IsDefault,
-			RecipientName:   in.RecipientName,
-			PhoneNumber:     phonenumber,
-		})
-		if err != nil {
-			return err
-		}
-
-		// 获取插入ID并赋值给外部变量
-		id, err = result.LastInsertId()
-		if err != nil {
-			return fmt.Errorf("get last insert id failed: %w", err)
-		}
-
-		return nil
+	// 使用事务session执行插入
+	result, err := l.svcCtx.AddressModel.Insert(l.ctx, &user_address.UserAddresses{
+		UserId:          int64(in.UserId),
+		DetailedAddress: in.DetailedAddress,
+		City:            in.City,
+		Province:        province,
+		IsDefault:       in.IsDefault,
+		RecipientName:   in.RecipientName,
+		PhoneNumber:     phonenumber,
 	})
-
-	// 错误处理
 	if err != nil {
 		l.Logger.Errorw("add address failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
+		return &users.AddAddressResponse{
+			StatusMsg:  code.AddUserAddressFailedMsg,
+			StatusCode: code.AddUserAddressFailed,
+		}, err
+	}
+
+	// 获取插入ID并赋值给外部变量
+	id, err := result.LastInsertId()
+	if err == nil {
+		l.Logger.Errorw("id insert failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
 		return &users.AddAddressResponse{
 			StatusMsg:  code.AddUserAddressFailedMsg,
 			StatusCode: code.AddUserAddressFailed,

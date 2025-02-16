@@ -54,6 +54,20 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 			if err != nil {
 				return err
 			}
+			_, err = l.svcCtx.AddressModel.UpdateWithSession(l.ctx, session, &user_address.UserAddresses{
+
+				AddressId:     int64(in.AddressId),
+				RecipientName: in.RecipientName,
+				PhoneNumber: sql.NullString{
+					String: string(in.PhoneNumber),
+					Valid:  in.PhoneNumber != ""},
+				Province: sql.NullString{
+					String: string(in.Province),
+					Valid:  in.Province != ""},
+				City:            in.City,
+				DetailedAddress: in.DetailedAddress,
+				IsDefault:       in.IsDefault,
+			})
 			return nil
 		}); err != nil {
 			l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
@@ -62,35 +76,6 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 				StatusCode: code.ServerError,
 			}, nil
 		}
-	}
-	_, err := l.svcCtx.AddressModel.Update(l.ctx, &user_address.UserAddresses{
-
-		AddressId:     int64(in.AddressId),
-		RecipientName: in.RecipientName,
-		PhoneNumber: sql.NullString{
-			String: string(in.PhoneNumber),
-			Valid:  in.PhoneNumber != ""},
-		Province: sql.NullString{
-			String: string(in.Province),
-			Valid:  in.Province != ""},
-		City:            in.City,
-		DetailedAddress: in.DetailedAddress,
-		IsDefault:       in.IsDefault,
-	})
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
-			return &users.UpdateAddressResponse{
-				StatusMsg:  code.UserAddressNotFoundMsg,
-				StatusCode: code.UserAddressNotFound,
-			}, nil
-		}
-		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
-		return &users.UpdateAddressResponse{
-			StatusMsg:  code.ServerErrorMsg,
-			StatusCode: code.ServerError,
-		}, nil
 	}
 
 	addressData, err := l.svcCtx.AddressModel.FindOne(l.ctx, in.AddressId)

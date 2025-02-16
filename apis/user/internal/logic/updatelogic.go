@@ -30,23 +30,30 @@ func (l *UpdateLogic) Update(req *types.UpdateRequest) (resp *types.UpdateRespon
 	// todo: add your logic here and delete this line
 
 	updateresp, err := l.svcCtx.UserRpc.UpdateUser(l.ctx, &users.UpdateUserRequest{
-
-		UsrName: req.UserName,
+		Password: req.Password,
+		UserId:   uint32(req.UserId),
+		Email:    req.Email,
+		UsrName:  req.UserName,
 	})
 
 	if err != nil {
 
-		l.Logger.Errorf("call rpc getuser failed", logx.Field("err", err))
+		l.Logger.Errorf("call rpc update failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	} else {
 		if updateresp.StatusCode != code.UserCreated {
-			l.Logger.Errorf("login failed", logx.Field("status_code", updateresp.StatusCode), logx.Field("status_msg", updateresp.StatusMsg))
+			l.Logger.Errorf("update failed", logx.Field("status_code", updateresp.StatusCode), logx.Field("status_msg", updateresp.StatusMsg))
 			return nil, errors.New(int(updateresp.StatusCode), updateresp.StatusMsg)
 		}
 
 	}
 
-	resp = &types.UpdateResponse{}
+	resp = &types.UpdateResponse{
+
+		Email:    updateresp.Email,
+		UserName: updateresp.UserName,
+		UserId:   int64(updateresp.UserId),
+	}
 
 	return
 }

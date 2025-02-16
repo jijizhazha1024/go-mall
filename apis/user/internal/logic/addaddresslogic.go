@@ -5,8 +5,11 @@ import (
 
 	"jijizhazha1024/go-mall/apis/user/internal/svc"
 	"jijizhazha1024/go-mall/apis/user/internal/types"
+	"jijizhazha1024/go-mall/common/consts/code"
+	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/x/errors"
 )
 
 type AddAddressLogic struct {
@@ -25,6 +28,45 @@ func NewAddAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddAdd
 
 func (l *AddAddressLogic) AddAddress(req *types.AddAddressRequest) (resp *types.AddAddressResponse, err error) {
 	// todo: add your logic here and delete this line
+
+	addaddressresp, err := l.svcCtx.UserRpc.AddAddress(l.ctx, &users.AddAddressRequest{
+
+		UserId:          req.UserID,
+		RecipientName:   req.RecipientName,
+		Province:        req.Province,
+		City:            req.City,
+		PhoneNumber:     req.PhoneNumber,
+		DetailedAddress: req.DetailedAddress,
+
+		IsDefault: req.IsDefault,
+	})
+
+	if err != nil {
+
+		l.Logger.Errorf("call rpc add address add failed", logx.Field("err", err))
+
+		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
+	} else {
+		if addaddressresp.StatusCode != code.AddUserAddressSuccess {
+			l.Logger.Errorf("call rpc add address add failed", logx.Field("status_code", addaddressresp.StatusCode), logx.Field("status_msg", addaddressresp.StatusMsg))
+			return nil, errors.New(int(addaddressresp.StatusCode), addaddressresp.StatusMsg)
+		}
+
+	}
+
+	Addressid := types.AddressData{
+		AddressID:       addaddressresp.Data.AddressId,
+		RecipientName:   addaddressresp.Data.RecipientName,
+		PhoneNumber:     addaddressresp.Data.PhoneNumber,
+		Province:        addaddressresp.Data.Province,
+		City:            addaddressresp.Data.City,
+		DetailedAddress: addaddressresp.Data.DetailedAddress,
+		IsDefault:       addaddressresp.Data.IsDefault,
+	}
+
+	resp = &types.AddAddressResponse{
+		Data: Addressid,
+	}
 
 	return
 }

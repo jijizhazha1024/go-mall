@@ -44,10 +44,12 @@ func (l *GetInfoLogic) GetInfo(req *types.GetInfoRequest) (resp *types.GetInfoRe
 
 	}
 	resp = &types.GetInfoResponse{
-		UserId: int64(getresp.UserId),
-
-		Email:    getresp.Email,
-		UserName: getresp.UserName,
+		UserId:    int64(getresp.UserId),
+		LogoutAt:  getresp.LogoutAt,
+		CreatedAt: getresp.CreatedAt,
+		UpdateAt:  getresp.UpdatedAt,
+		Email:     getresp.Email,
+		UserName:  getresp.UserName,
 	}
 
 	return

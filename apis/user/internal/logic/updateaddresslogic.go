@@ -5,8 +5,11 @@ import (
 
 	"jijizhazha1024/go-mall/apis/user/internal/svc"
 	"jijizhazha1024/go-mall/apis/user/internal/types"
+	"jijizhazha1024/go-mall/common/consts/code"
+	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/x/errors"
 )
 
 type UpdateAddressLogic struct {
@@ -26,5 +29,40 @@ func NewUpdateAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upd
 func (l *UpdateAddressLogic) UpdateAddress(req *types.UpdateAddressRequest) (resp *types.UpdateAddressResponse, err error) {
 	// todo: add your logic here and delete this line
 
-	return
+	updateAddressresp, err := l.svcCtx.UserRpc.UpdateAddress(l.ctx, &users.UpdateAddressRequest{
+		RecipientName:   req.RecipientName,
+		PhoneNumber:     req.PhoneNumber,
+		Province:        req.Province,
+		City:            req.City,
+		DetailedAddress: req.DetailedAddress,
+		IsDefault:       req.IsDefault,
+		AddressId:       req.AddressID,
+		UserId:          req.UserID,
+	})
+	if err != nil {
+
+		l.Logger.Errorf("call rpc updateaddress failed", logx.Field("err", err))
+		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
+	} else {
+		if updateAddressresp.StatusCode != code.UserCreated {
+			l.Logger.Errorf("updeteaddress rpc failed", logx.Field("status_code", updateAddressresp.StatusCode), logx.Field("status_msg", updateAddressresp.StatusMsg))
+			return nil, errors.New(int(updateAddressresp.StatusCode), updateAddressresp.StatusMsg)
+		}
+	}
+
+	resp = &types.UpdateAddressResponse{
+		Data: types.AddressData{
+			AddressID:       updateAddressresp.Data.AddressId,
+			RecipientName:   updateAddressresp.Data.RecipientName,
+			PhoneNumber:     updateAddressresp.Data.PhoneNumber,
+			Province:        updateAddressresp.Data.Province,
+			City:            updateAddressresp.Data.City,
+			DetailedAddress: updateAddressresp.Data.DetailedAddress,
+			IsDefault:       updateAddressresp.Data.IsDefault,
+			CreatedAt:       updateAddressresp.Data.CreatedAt,
+			UpdatedAt:       updateAddressresp.Data.UpdatedAt,
+		},
+	}
+
+	return resp, nil
 }

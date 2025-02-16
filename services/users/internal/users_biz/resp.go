@@ -22,13 +22,17 @@ func HandleRegisterResp(msg string, code int, user_id uint32, token string) (*us
 		Token:      token,
 	}, nil
 }
-func HandleGetUserResp(msg string, code int, user_id uint32, user_name string, email string) (*users.GetUserResponse, error) {
+func HandleGetUserResp(msg string, code int, user_id uint32, user_name string, email string, created_at string, updated_at string, logout_at string, avatar_url string) (*users.GetUserResponse, error) {
 	return &users.GetUserResponse{
 		StatusCode: uint32(code),
 		StatusMsg:  msg,
 		UserId:     user_id,
 		UserName:   user_name,
 		Email:      email,
+		CreatedAt:  created_at,
+		UpdatedAt:  updated_at,
+		LogoutAt:   logout_at,
+		AvatarUrl:  avatar_url,
 	}, nil
 }
 func HandleDeleteUserResp(msg string, code int, user_id uint32) (*users.DeleteUserResponse, error) {
@@ -38,12 +42,13 @@ func HandleDeleteUserResp(msg string, code int, user_id uint32) (*users.DeleteUs
 		UserId:     user_id,
 	}, nil
 }
-func HandleUpdateUserResp(msg string, code int, user_id uint32, token string) (*users.UpdateUserResponse, error) {
+func HandleUpdateUserResp(msg string, code int, user_id uint32, email string, user_name string, token string) (*users.UpdateUserResponse, error) {
 	return &users.UpdateUserResponse{
 		StatusCode: uint32(code),
 		StatusMsg:  msg,
 		UserId:     user_id,
-		Token:      token,
+		Email:      email,
+		UserName:   user_name,
 	}, nil
 }
 func HandleLogoutUserResp(msg string, code int, token string, logout_at time.Time) (*users.LogoutResponse, error) {
