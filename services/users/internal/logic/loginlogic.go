@@ -45,12 +45,12 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	if err != nil {
 
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Infow(code.UserNotFoundMsg, logx.Field("err", err),
+			logx.Infow("login failed, user not found", logx.Field("err", err),
 				logx.Field("email", in.Email))
 
 			return users_biz.HandleLoginerror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
-		logx.Errorw("数据库查询失败",
+		logx.Errorw("login failed, database query failed",
 			logx.Field("err", err),
 			logx.Field("user email", in.Email),
 		)
@@ -58,14 +58,14 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 		return users_biz.HandleLoginerror(code.ServerErrorMsg, code.ServerError, err)
 	}
 	if user.UserDeleted {
-		logx.Infow(code.UserHaveDeletedMsg, logx.Field("email", user.Email))
+		logx.Infow("login failed, user have deleted", logx.Field("email", user.Email))
 
 		return users_biz.HandleLoginerror(code.UserHaveDeletedMsg, code.UserHaveDeleted, nil)
 	}
 
 	// 3. 校验密码
 	if !cryptx.PasswordVerify(in.Password, user.PasswordHash.String) {
-		logx.Infow(code.LoginFailedMsg)
+		logx.Infow("login failed, password not match")
 		return users_biz.HandleLoginerror(code.PasswordNotMatchMsg, code.PasswordNotMatch, nil)
 	}
 

@@ -60,14 +60,14 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 	existUser, err := l.svcCtx.UsersModel.FindOneByEmail(l.ctx, email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			l.Logger.Infow("用户不存在", logx.Field("err", err),
+			l.Logger.Infow("register user not exist", logx.Field("err", err),
 				logx.Field("user_email", in.Email))
 
 			avatar, err := getRandomAvatar()
 			if err != nil {
-				l.Logger.Infow("获取头像失败", logx.Field("err", err))
+				l.Logger.Infow("regjister get avatar failed", logx.Field("err", err))
 
-				return users_biz.HandleRegistererror("获取头像失败", 1, nil)
+				return users_biz.HandleRegistererror("get avatar failed", 1, nil)
 			}
 
 			// 用户不存在，直接注册
@@ -85,12 +85,12 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 
 			userId, lastInsertErr := result.LastInsertId()
 			if lastInsertErr != nil {
-				l.Logger.Infow(code.UserInfoRetrievalFailedMsg, logx.Field("err", err),
+				l.Logger.Infow("register get user_id failed", logx.Field("err", err),
 					logx.Field("email", in.Email))
 
 				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, nil)
 			}
-			logx.Errorw("query ....", logx.Field("err", err),
+			logx.Errorw("query faild", logx.Field("err", err),
 				logx.Field("email", in.Email))
 
 			return users_biz.HandleRegisterResp(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrieved, uint32(userId), "token")
@@ -101,14 +101,14 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 	}
 
 	if existUser != nil {
-		l.Logger.Info(code.UserAlreadyExistsMsg, existUser)
+
 		// 用户已存在，判断是否处于删除状态
 		userDeleted := existUser.UserDeleted
 		if userDeleted { // 已删除
 			// 将删除状态改为false
 			updateErr := l.svcCtx.UsersModel.UpdateDeletebyEmail(l.ctx, in.Email, false)
 			if updateErr != nil {
-				l.Logger.Infow(code.UserInfoRetrievalFailedMsg, logx.Field("err", updateErr),
+				l.Logger.Infow("register update user_deleted failed", logx.Field("err", updateErr),
 					logx.Field("email", in.Email))
 
 				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, nil)
@@ -117,7 +117,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 
 			return users_biz.HandleRegisterResp(code.UserCreatedMsg, code.UserCreated, uint32(existUser.UserId), "token")
 		} else { // 未删除
-			l.Logger.Infow(code.UserAlreadyExistsMsg, logx.Field("err", err),
+			l.Logger.Infow("register  user already exist", logx.Field("err", err),
 				logx.Field("email", in.Email))
 
 			return users_biz.HandleRegistererror(code.UserAlreadyExistsMsg, code.UserAlreadyExists, errors.New(code.UserAlreadyExistsMsg))

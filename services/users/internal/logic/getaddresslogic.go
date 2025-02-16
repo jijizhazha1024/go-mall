@@ -33,7 +33,7 @@ func (l *GetAddressLogic) GetAddress(in *users.GetAddressRequest) (*users.GetAdd
 	address, err := l.svcCtx.AddressModel.GetUserAddressbyIdAndUserId(l.ctx, in.AddressId, in.UserId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("user_id", in.UserId), logx.Field("address_id", in.AddressId))
+			l.Logger.Infow("get address not found", logx.Field("user_id", in.UserId), logx.Field("address_id", in.AddressId))
 			return &users.GetAddressResponse{
 				StatusMsg:  code.UserAddressNotFoundMsg,
 				StatusCode: code.UserAddressNotFound,

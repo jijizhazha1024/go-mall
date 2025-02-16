@@ -37,7 +37,7 @@ func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, er
 	err := l.svcCtx.UsersModel.UpdateLogoutTime(l.ctx, int64(in.UserId), logoutTime)
 	if err != nil {
 		if errors.Is(err, user.ErrNotFound) {
-			logx.Infow(code.UserNotFoundMsg, logx.Field("err", err),
+			logx.Infow("logout failed, user not found", logx.Field("err", err),
 				logx.Field("user_id", in.UserId))
 
 			// 用户不存在
@@ -49,7 +49,7 @@ func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, er
 	}
 	logtoutime, err := l.svcCtx.UsersModel.GetLogoutTime(l.ctx, int64(in.UserId))
 	if err != nil {
-		logx.Infow(code.ServerErrorMsg)
+		logx.Infow("get logout time failed  query failed", logx.Field("err", err))
 		// 处理错误
 		return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}

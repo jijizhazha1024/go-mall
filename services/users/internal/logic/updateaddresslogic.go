@@ -35,7 +35,7 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 		addresses, err := l.svcCtx.AddressModel.FindAllByUserId(l.ctx, in.UserId)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("user_id", in.UserId))
+				l.Logger.Infow("update address is default, but user has no address", logx.Field("user_id", in.UserId))
 				return &users.UpdateAddressResponse{
 					StatusMsg:  code.UserAddressNotFoundMsg,
 					StatusCode: code.UserAddressNotFound,
@@ -68,9 +68,12 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 				DetailedAddress: in.DetailedAddress,
 				IsDefault:       in.IsDefault,
 			})
+			if err != nil {
+				return err
+			}
 			return nil
 		}); err != nil {
-			l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
+			l.Logger.Errorw("update address is__default is false, but update address failed", logx.Field("address_id", in.AddressId), logx.Field("err", err))
 			return &users.UpdateAddressResponse{
 				StatusMsg:  code.ServerErrorMsg,
 				StatusCode: code.ServerError,
@@ -81,7 +84,7 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 	addressData, err := l.svcCtx.AddressModel.FindOne(l.ctx, in.AddressId)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			l.Logger.Infow(code.UserAddressNotFoundMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
+			l.Logger.Infow("update address is not default, but address not found", logx.Field("address_id", in.AddressId), logx.Field("err", err))
 			return &users.UpdateAddressResponse{
 				StatusMsg:  code.UserAddressNotFoundMsg,
 				StatusCode: code.UserAddressNotFound,

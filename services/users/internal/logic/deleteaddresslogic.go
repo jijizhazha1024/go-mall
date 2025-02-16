@@ -32,7 +32,9 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 	err := l.svcCtx.AddressModel.DeleteByAddressIdandUserId(l.ctx, in.AddressId, in.UserId)
 	if err != nil {
 		if err == sql.ErrNoRows {
+			l.Logger.Infow("deleteaddress address not found", logx.Field("err", err), logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId))
 			return &users.DeleteAddressResponse{
+
 				StatusCode: code.UserAddressNotFound,
 				StatusMsg:  code.UserAddressNotFoundMsg,
 			}, nil

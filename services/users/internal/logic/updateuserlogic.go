@@ -36,9 +36,9 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	update_user, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Infow(code.UserNotFoundMsg)
-			logx.Field("err", err)
-			logx.Field("user_id", in.UserId)
+			logx.Infow("update user not found", logx.Field("err", err),
+				logx.Field("user_id", in.UserId))
+
 			return users_biz.HandleUpdateUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
 		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_id", in.UserId))
@@ -48,9 +48,8 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 
 	if update_user.UserDeleted {
 
-		logx.Infow(code.UserHaveDeletedMsg)
+		logx.Infow(" update user have deleted", logx.Field("user_id", in.UserId), logx.Field("user_id", in.UserId))
 
-		logx.Field("user_id", in.UserId)
 		return users_biz.HandleUpdateUsererror(code.UserHaveDeletedMsg, code.UserNotFound, nil)
 	}
 
@@ -87,7 +86,7 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Infow(code.UserNotFoundMsg,
+			logx.Infow("upate user not found",
 				logx.Field("user_id", in.UserId))
 
 			return users_biz.HandleUpdateUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
