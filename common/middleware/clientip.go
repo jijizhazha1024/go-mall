@@ -2,23 +2,47 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/common/response"
 	"net"
 	"net/http"
+	"strings"
 )
+
+// GetIP returns request real ip.
+func GetIP(r *http.Request) (string, error) {
+	ip := r.Header.Get("X-Real-IP")
+	if net.ParseIP(ip) != nil {
+		return ip, nil
+	}
+
+	ip = r.Header.Get("X-Forward-For")
+	for _, i := range strings.Split(ip, ",") {
+		if net.ParseIP(i) != nil {
+			return i, nil
+		}
+	}
+
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return "", err
+	}
+
+	if net.ParseIP(ip) != nil {
+		return ip, nil
+	}
+
+	return "", errors.New("no valid ip found")
+}
 
 func WithClientMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// 设置客户端ip，到ctx
-		clientIP, _, err := net.SplitHostPort(r.RemoteAddr)
-		if err != nil {
-			// 处理错误，例如记录日志或使用默认值
-			clientIP = r.RemoteAddr // 或者使用默认的 IP 地址
-		}
-		if clientIP == "" {
+		clientIP, err := GetIP(r)
+		if err != nil || clientIP == "" {
 			httpx.OkJsonCtx(r.Context(), w, response.NewResponse(code.IllegalProxyAddress, code.IllegalProxyAddressMsg))
 			return
 		}
