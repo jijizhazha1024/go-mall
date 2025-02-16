@@ -13,12 +13,12 @@ message Coupon {
   string id = 1; // 优惠券ID
   string name = 2; // 券名称
   CouponType type = 3; // 类型：1-满减 2-折扣 3-立减
-  int32 value = 4; // 优惠值（根据类型：分/百分比）
-  int32 min_amount = 5; // 最低消费金额（分）
+  string value = 4; // 优惠值（根据类型：分/百分比）
+  string min_amount = 5; // 最低消费金额（分）
   string start_time = 6; // 有效期开始
   string end_time = 7; // 有效期结束
-  int32 total_count = 9; // 发行总量
-  int32 remaining_count = 10; // 剩余数量
+  uint64 total_count = 9; // 发行总量
+  uint64 remaining_count = 10; // 剩余数量
   string created_at = 11; // 创建时间
   string updated_at = 12; // 更新时间
 }

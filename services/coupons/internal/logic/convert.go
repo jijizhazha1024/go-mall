@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"github.com/shopspring/decimal"
 	"jijizhazha1024/go-mall/dal/model/coupons/coupon"
 	"jijizhazha1024/go-mall/dal/model/coupons/user_coupons"
 	"jijizhazha1024/go-mall/services/coupons/coupons"
@@ -12,10 +13,10 @@ func convertCoupon2Resp(c *coupon.Coupons) *coupons.Coupon {
 		Id:             c.Id,
 		Name:           c.Name,
 		Type:           coupons.CouponType(c.Type),
-		Value:          int32(c.Value),
-		MinAmount:      int32(c.MinAmount),
-		TotalCount:     int32(c.TotalCount),
-		RemainingCount: int32(c.RemainingCount),
+		Value:          convertToYuan(c.Value),
+		MinAmount:      convertToYuan(c.MinAmount),
+		TotalCount:     c.TotalCount, // 发放
+		RemainingCount: c.RemainingCount,
 		StartTime:      c.StartTime.Format(time.DateTime),
 		EndTime:        c.EndTime.Format(time.DateTime),
 		CreatedAt:      c.CreatedAt.Format(time.DateTime),
@@ -34,4 +35,10 @@ func convertUserCoupon2Resp(uc *user_coupons.UserCoupons) *coupons.UserCoupon {
 		CreatedAt: uc.CreatedAt.Format(time.DateTime),
 		UpdatedAt: uc.UpdatedAt.Format(time.DateTime),
 	}
+}
+
+func convertToYuan(fen int64) string {
+	return decimal.NewFromInt(fen).
+		Div(decimal.NewFromInt(100)).
+		StringFixedBank(2) // 银行家舍入法
 }

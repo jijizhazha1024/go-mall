@@ -4,7 +4,6 @@ import (
 	"context"
 	"jijizhazha1024/go-mall/services/coupons/coupons"
 	"jijizhazha1024/go-mall/services/coupons/internal/svc"
-	"strconv"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -34,15 +33,15 @@ func (l *ListCouponUsagesLogic) ListCouponUsages(in *coupons.ListCouponUsagesReq
 	res := &coupons.ListCouponUsagesResp{
 		Usages: make([]*coupons.CouponUsage, 0, len(couponsUsageList)),
 	}
-	//
+
 	for _, couponUsage := range couponsUsageList {
 		res.Usages = append(res.Usages, &coupons.CouponUsage{
 			Id:         int32(couponUsage.Id),
 			CouponId:   couponUsage.CouponId,
 			CouponType: coupons.CouponType(couponUsage.CouponType),
 			// 确保浮点数精度
-			OriginValue:    strconv.FormatFloat(couponUsage.OriginValue, 'f', 2, 64),
-			DiscountAmount: strconv.FormatFloat(couponUsage.DiscountAmount, 'f', 2, 64),
+			OriginValue:    convertToYuan(couponUsage.OriginValue),
+			DiscountAmount: convertToYuan(couponUsage.DiscountAmount),
 			OrderId:        couponUsage.OrderId,
 			UserId:         int32(couponUsage.UserId),
 			AppliedAt:      couponUsage.AppliedAt.Format(time.DateTime),

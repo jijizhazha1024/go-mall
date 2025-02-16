@@ -4,10 +4,10 @@ CREATE TABLE `coupons`
     `id`              varchar(32)  NOT NULL COMMENT '优惠券ID',
     `name`            varchar(100) NOT NULL COMMENT '券名称',
     `type`            tinyint      NOT NULL COMMENT '类型：1-满减 2-折扣 3-立减',
-    `value`           BIGINT         NOT NULL COMMENT '优惠值（根据类型：分/百分比）', -- 满减立减通用,折扣通用（例如：满200减50存50，8折存80）
-    `min_amount`      BIGINT                  DEFAULT 0 COMMENT '最低消费金额（分）', -- 满减立减通用,折扣通用
-    `start_time`      timestamp NOT NULL COMMENT '有效期开始',
-    `end_time`        timestamp NOT NULL COMMENT '有效期结束',
+    `value`           BIGINT       NOT NULL COMMENT '优惠值（根据类型：分/百分比）', -- 满减立减通用,折扣通用（例如：满200减50存50，8折存80）
+    `min_amount`      BIGINT                DEFAULT 0 COMMENT '最低消费金额（分）', -- 满减立减通用,折扣通用
+    `start_time`      timestamp    NOT NULL COMMENT '有效期开始',
+    `end_time`        timestamp    NOT NULL COMMENT '有效期结束',
     `status`          tinyint      NOT NULL DEFAULT 1 COMMENT '状态：0-禁用 1-启用',
     `total_count`     int          NOT NULL COMMENT '发行总量',
     `remaining_count` int          NOT NULL COMMENT '剩余数量',

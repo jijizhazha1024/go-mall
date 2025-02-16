@@ -43,8 +43,8 @@ type (
 		StartTime      time.Time `db:"start_time"`      // 有效期开始
 		EndTime        time.Time `db:"end_time"`        // 有效期结束
 		Status         int64     `db:"status"`          // 状态：0-禁用 1-启用
-		TotalCount     int64     `db:"total_count"`     // 发行总量
-		RemainingCount int64     `db:"remaining_count"` // 剩余数量
+		TotalCount     uint64    `db:"total_count"`     // 发行总量
+		RemainingCount uint64    `db:"remaining_count"` // 剩余数量
 		CreatedAt      time.Time `db:"created_at"`      // 创建时间
 		UpdatedAt      time.Time `db:"updated_at"`      // 更新时间
 	}
