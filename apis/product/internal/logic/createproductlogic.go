@@ -35,6 +35,7 @@ func (l *CreateProductLogic) CreateProduct(req *types.CreateProductReq) (resp *t
 		Categories:  req.Categories,
 	})
 	if err != nil {
+		l.Logger.Errorw("rpc create product  failed", logx.Field("err", err))
 		return nil, errors.New(int(res.StatusCode), res.StatusMsg)
 	}
 	resp = &types.CreateProductResp{

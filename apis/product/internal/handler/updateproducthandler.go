@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"github.com/zeromicro/x/errors"
+	xhttp "github.com/zeromicro/x/http"
+	"jijizhazha1024/go-mall/common/consts/code"
 	"net/http"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
@@ -13,16 +16,16 @@ func UpdateProductHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.UpdateProductReq
 		if err := httpx.Parse(r, &req); err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			xhttp.JsonBaseResponseCtx(r.Context(), w, errors.New(code.Fail, err.Error()))
 			return
 		}
 
 		l := logic.NewUpdateProductLogic(r.Context(), svcCtx)
 		resp, err := l.UpdateProduct(&req)
 		if err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			xhttp.JsonBaseResponseCtx(r.Context(), w, err)
 		} else {
-			httpx.OkJsonCtx(r.Context(), w, resp)
+			xhttp.JsonBaseResponseCtx(r.Context(), w, resp)
 		}
 	}
 }

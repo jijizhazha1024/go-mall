@@ -30,6 +30,7 @@ func (l *GetProductLogic) GetProduct(req *types.GetProductReq) (resp *types.GetP
 		Id: uint32(req.ID),
 	})
 	if err != nil {
+		l.Logger.Errorw("rpc get product detail  failed", logx.Field("err", err))
 		return nil, errors.New(int(res.StatusCode), res.StatusMsg)
 	}
 	resp = &types.GetProductResp{

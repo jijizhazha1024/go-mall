@@ -38,6 +38,7 @@ func (l *UpdateProductLogic) UpdateProduct(req *types.UpdateProductReq) (resp *t
 		},
 	})
 	if err != nil {
+		l.Logger.Errorw("rpc update product  failed", logx.Field("err", err))
 		return nil, errors.New(int(res.StatusCode), res.StatusMsg)
 	}
 	resp = &types.UpdateProductResp{

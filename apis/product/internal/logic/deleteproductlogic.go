@@ -30,6 +30,7 @@ func (l *DeleteProductLogic) DeleteProduct(req *types.DeleteProductReq) (resp *t
 		Id: req.ID,
 	})
 	if err != nil {
+		l.Logger.Errorw("rpc delete product  failed", logx.Field("err", err))
 		return &types.DeleteProductResp{
 			Success: false,
 		}, errors.New(int(res.StatusCode), res.StatusMsg)
