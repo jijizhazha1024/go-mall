@@ -3,8 +3,7 @@ package logic
 import (
 	"context"
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"jijizhazha1024/go-mall/dal/model/cart"
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/carts/carts"
 	"jijizhazha1024/go-mall/services/carts/internal/svc"
 )
@@ -28,23 +27,19 @@ func (l *CartItemListLogic) CartItemList(in *carts.UserInfo) (*carts.CartItemLis
 	// 定义响应对象
 	var rsp carts.CartItemListResponse
 
-	// 获取购物车模型
-	cartModel := l.svcCtx.Mysql
-	// 查询当前用户的购物车数据
-	var shopCarts []cart.Carts
-	query := `
-	SELECT id, created_at,updated_at,deleted_at,user_id, product_id, quantity, checked
-   	FROM carts
-   	WHERE user_id = ? AND deleted_at IS NULL
-    `
-	err := cartModel.QueryRows(&shopCarts, query, in.Id)
+	shopCarts, err := l.svcCtx.CartsModel.FindByUserID(l.ctx, int64(in.Id))
 	if err != nil {
-		logx.Errorf("Error occurred while querying carts: %v", err)
-		if err == sqlx.ErrNotFound {
-			return &rsp, nil // 没有找到数据，返回空响应
-		}
-		return nil, err // 其他错误，返回错误
+		l.Logger.Errorw("get shopCarts from database failed",
+			logx.Field("err", err),
+			logx.Field("user_id", in.Id))
+		return &carts.CartItemListResponse{
+			StatusCode: code.CartInfoRetrievalFailed,
+			StatusMsg:  code.CartInfoRetrievalFailedMsg,
+			Total:      0,
+			Data:       nil,
+		}, err
 	}
+
 	// 设置响应中的总数
 	rsp.Total = int32(len(shopCarts))
 
@@ -59,5 +54,10 @@ func (l *CartItemListLogic) CartItemList(in *carts.UserInfo) (*carts.CartItemLis
 		})
 	}
 
-	return &rsp, nil
+	return &carts.CartItemListResponse{
+		StatusCode: code.Success,
+		StatusMsg:  code.CartInfoRetrievedMsg,
+		Total:      rsp.Total,
+		Data:       rsp.Data,
+	}, nil
 }
