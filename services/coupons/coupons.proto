@@ -149,7 +149,7 @@ message ClaimCouponReq {
 message ClaimCouponResp {
   uint32 status_code = 1;
   string status_msg = 2;
-
+  Coupon coupon = 3;
 
 }
 

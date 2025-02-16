@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"jijizhazha1024/go-mall/common/consts/code"
+	"jijizhazha1024/go-mall/dal/model/coupons/coupon"
 	"jijizhazha1024/go-mall/dal/model/coupons/user_coupons"
 
 	"jijizhazha1024/go-mall/services/coupons/coupons"
@@ -31,7 +32,7 @@ func NewClaimCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Claim
 func (l *ClaimCouponLogic) ClaimCoupon(in *coupons.ClaimCouponReq) (*coupons.ClaimCouponResp, error) {
 
 	res := &coupons.ClaimCouponResp{}
-
+	var couponQuery *coupon.Coupons
 	if in.CouponId == "" {
 		res.StatusCode = code.NotWithParam
 		res.StatusMsg = code.NotWithParamMsg
@@ -74,6 +75,7 @@ func (l *ClaimCouponLogic) ClaimCoupon(in *coupons.ClaimCouponReq) (*coupons.Cla
 			res.StatusMsg = code.CouponsNotAvailableMsg
 			return nil
 		}
+		couponQuery = one
 		// --------------- create ---------------
 		// decrease coupons stock
 		if err := l.svcCtx.CouponsModel.DecreaseStockWithSession(ctx, session, in.CouponId, 1); err != nil {
@@ -97,5 +99,9 @@ func (l *ClaimCouponLogic) ClaimCoupon(in *coupons.ClaimCouponReq) (*coupons.Cla
 		logx.Errorw("create user coupons error", logx.Field("err", err), logx.Field("user_id", in.UserId), logx.Field("coupon_id", in.CouponId))
 		return res, err
 	}
+	if res.StatusCode != code.Success {
+		return res, nil
+	}
+	res.Coupon = convertCoupon2Resp(couponQuery)
 	return res, nil
 }
