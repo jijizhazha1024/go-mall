@@ -66,7 +66,7 @@ func TestAuthenticationLogic_GenerateToken(t *testing.T) {
 	setupGRPCConnection(t)
 
 	resp, err := client.GenerateToken(context.Background(), &auths.AuthGenReq{
-		UserId:   4,
+		UserId:   1,
 		Username: "test",
 		ClientIp: clientIP,
 	})
