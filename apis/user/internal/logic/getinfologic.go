@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 
 	"jijizhazha1024/go-mall/apis/user/internal/svc"
 	"jijizhazha1024/go-mall/apis/user/internal/types"
@@ -37,7 +38,7 @@ func (l *GetInfoLogic) GetInfo(req *types.GetInfoRequest) (resp *types.GetInfoRe
 		l.Logger.Errorf("call rpc getuser failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	} else {
-		if getresp.StatusCode != code.UserCreated {
+		if getresp.StatusCode != code.UserInfoRetrieved {
 			l.Logger.Errorf("login failed", logx.Field("status_code", getresp.StatusCode), logx.Field("status_msg", getresp.StatusMsg))
 			return nil, errors.New(int(getresp.StatusCode), getresp.StatusMsg)
 		}
@@ -51,6 +52,7 @@ func (l *GetInfoLogic) GetInfo(req *types.GetInfoRequest) (resp *types.GetInfoRe
 		Email:     getresp.Email,
 		UserName:  getresp.UserName,
 	}
+	fmt.Println("resp:", resp)
 
-	return
+	return resp, nil
 }

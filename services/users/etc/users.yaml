@@ -5,7 +5,7 @@ Mode: dev
 # 服务发现
 Consul:
   Host: 124.71.72.124:8500 # consul endpoint
-  Key: ausers.rpc
+  Key: users.rpc
   Meta:
     Protocol: grpc
 
@@ -23,5 +23,5 @@ Log:
   Path: "./logs/users-rpc"
 
 MysqlConfig:
-  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/gomall?charset=utf8mb4&parseTime=True&loc=Local"
+  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
   Conntimeout: 5
