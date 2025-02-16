@@ -38,8 +38,8 @@ type (
 		Id             string    `db:"id"`              // 优惠券ID
 		Name           string    `db:"name"`            // 券名称
 		Type           int64     `db:"type"`            // 类型：1-满减 2-折扣 3-立减
-		Value          float64   `db:"value"`           // 优惠值（根据类型：分/百分比）
-		MinAmount      float64   `db:"min_amount"`      // 最低消费金额（分）
+		Value          int64     `db:"value"`           // 优惠值（根据类型：分/百分比）
+		MinAmount      int64     `db:"min_amount"`      // 最低消费金额（分）
 		StartTime      time.Time `db:"start_time"`      // 有效期开始
 		EndTime        time.Time `db:"end_time"`        // 有效期结束
 		Status         int64     `db:"status"`          // 状态：0-禁用 1-启用
