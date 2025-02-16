@@ -15,6 +15,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.WithClientMiddleware, serverCtx.WrapperAuthMiddleware},
 			[]rest.Route{
 				{
+					Method:  http.MethodPost,
+					Path:    "/claim",
+					Handler: ClaimCouponHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodGet,
 					Path:    "/detail",
 					Handler: GetCouponHandler(serverCtx),

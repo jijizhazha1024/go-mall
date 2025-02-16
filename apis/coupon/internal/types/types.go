@@ -2,7 +2,7 @@
 package types
 
 type CouponItemReq struct {
-	ID string `form:"id"`
+	ID string `json:"id"`
 }
 
 type CouponItemResp struct {
@@ -20,9 +20,9 @@ type CouponItemResp struct {
 }
 
 type CouponListReq struct {
-	Page     uint32 `form:"page,default=1"`
-	PageSize uint32 `form:"size,default=10"`
-	Type     uint8  `form:"type,optional"` // 优惠卷类型
+	Page     uint32 `json:"page,default=1"`
+	PageSize uint32 `json:"size,default=10"`
+	Type     uint8  `json:"type,optional"` // 优惠卷类型
 }
 
 type CouponListResp struct {
