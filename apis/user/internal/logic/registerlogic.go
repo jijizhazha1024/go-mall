@@ -33,6 +33,10 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.RegisterResponse, err error) {
 	// todo: add your logic here and delete this line
 
+	if req.Email == "" || req.Password == "" {
+		return nil, errors.New(code.LoginMessageEmpty, code.LoginMessageEmptyMsg)
+	}
+
 	if req.Password != req.ConfirmPassword {
 		l.Logger.Infow("密码不一致")
 		return nil, errors.New(code.PasswordNotMatch, code.PasswordNotMatchMsg)
