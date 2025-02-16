@@ -19,12 +19,12 @@ type (
 		ID             string `json:"id"`
 		Name           string `json:"name"`
 		Type           uint8  `json:"type"`
-		Value          int32  `json:"value"`
-		MinAmount      int32  `json:"min_amount"`
+		Value          string `json:"value"`
+		MinAmount      string `json:"min_amount"`
 		StartTime      string `json:"start_time"`
 		EndTime        string `json:"end_time"`
-		TotalCount     int32  `json:"total_count"`
-		RemainingCount int32  `json:"remaining_count"`
+		TotalCount     uint64 `json:"total_count"`
+		RemainingCount uint64 `json:"remaining_count"`
 		CreatedAt      string `json:"created_at"`
 		UpdatedAt      string `json:"updated_at"`
 	}
