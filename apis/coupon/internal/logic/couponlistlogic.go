@@ -39,7 +39,7 @@ func (l *CouponListLogic) CouponList(req *types.CouponListReq) (resp *types.Coup
 			// 处理用户级别info 错误
 			return nil, errors.New(int(res.StatusCode), res.StatusMsg)
 		}
-		l.Logger.Errorf("call rpc ListCoupons failed", logx.Field("err", err))
+		l.Logger.Errorw("call rpc ListCoupons failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	}
 

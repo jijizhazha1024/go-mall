@@ -35,7 +35,7 @@ func (l *GetCouponLogic) GetCoupon(req *types.CouponItemReq) (resp *types.Coupon
 			// 处理用户级别info 错误
 			return nil, errors.New(int(res.StatusCode), res.StatusMsg)
 		}
-		l.Logger.Errorf("call rpc GetCoupon failed", logx.Field("err", err))
+		l.Logger.Errorw("call rpc GetCoupon failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	}
 	resp = convertCoupon2Resp(res.Coupon)
