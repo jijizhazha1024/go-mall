@@ -14,7 +14,7 @@ AuthsRpc:
   NonBlock: true
 
 Telemetry:
-  Name: user-api
+  Name: carts-api
   Endpoint: http://124.71.72.124:14268/api/traces
   Batcher: jaeger
   Sampler: 1.0
