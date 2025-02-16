@@ -8,7 +8,7 @@ type (
 		Type     uint8  `form:"type,optional"` // 优惠卷类型
 	}
 	CouponItemReq {
-		ID string `path:"id"`
+		ID string `form:"id"`
 	}
 )
 
@@ -41,9 +41,9 @@ type (
 service coupon-api {
 	// 优惠券列表
 	@handler CouponListHandler
-	get / (CouponListReq) returns (CouponListResp)
+	get /list (CouponListReq) returns (CouponListResp)
 
 	@handler GetCouponHandler
-	get /:id (CouponItemReq) returns (CouponItemResp)
+	get /detail (CouponItemReq) returns (CouponItemResp)
 }
 

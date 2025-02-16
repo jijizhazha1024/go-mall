@@ -16,4 +16,8 @@ AuthsRpc:
   NonBlock: true
 
 
+WhitePathList:
+  - /douyin/coupons/list
 
+OptionPathList:
+  - /douyin/coupons/detail
