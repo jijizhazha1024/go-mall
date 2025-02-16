@@ -4,12 +4,12 @@ import (
 	"time"
 )
 
-type UserCtxKey string
+type CtxKey string
 
 const (
-	AuthsRpcPort            = 10000
-	UserIDKey    UserCtxKey = "user_id"
-	ClientIPKey             = "client_ip"
+	AuthsRpcPort        = 10000
+	UserIDKey    CtxKey = "user_id"
+	ClientIPKey  CtxKey = "client_ip"
 
 	TokenExpire        = time.Hour * 2
 	TokenRenewalExpire = time.Hour * 24 * 7

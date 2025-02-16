@@ -1,0 +1,26 @@
+name: DockerPush
+on:
+  push:
+    branches: [ dev,main ]
+  pull_request:
+    branches: [ dev,main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login docker
+        run: |
+          echo ${{ secrets.REGISTRY_PASSWORD }} | docker login -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin swr.cn-south-1.myhuaweicloud.com
+      - name: Get tag version
+        run: |
+          echo "Full ref: $GITHUB_REF"
+          echo "Tag name: $GITHUB_REF_NAME"
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        with:
+          push: true
+          tags: |
+            swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+            swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:${{ env.IMAGE_TAG }}

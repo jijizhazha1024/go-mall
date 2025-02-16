@@ -1,57 +1,65 @@
 syntax = "v1"
 
 type (
+	// 购物车条目列表响应
 	UserInfo {
 		Id int32
 	}
-	// 购物车条目列表响应
-	CartItemListResponse {
-		Total int32               `json:"total"`
-		Data  []*CartInfoResponse `json:"data"`
+	CartItemListResp {
+		Total    int32               `json:"total"`
+		CartInfo []*CartInfoResponse `json:"cart_info"`
 	}
-	// 购物车条目响应
 	CartInfoResponse {
-		Id        int32
-		UserId    int32
-		ProductId int32
-		Quantity  int32
-		Checked   bool
+		Id        int32 `json:"id"`
+		UserId    int32 `json:"user_id"`
+		ProductId int32 `json:"product_id"`
+		Quantity  int32 `json:"quantity"`
+		Checked   bool  `json:"checked"`
 	}
 	// 购物车条目请求，用于添加或更新购物车项
-	CartItemRequest {
-		Id           int32
-		UserId       int32
-		ProductId    int32
-		ProductName  string
-		ProuctImage  string
-		ProductPrice float32
-		Quantity     int32
-		Checked      bool
+	CreateCartReq {
+		UserId       int32   `json:"user_id"`
+		ProductId    int32   `json:"product_id"`
+		ProductName  string  `json:"product_name"`
+		ProuctImage  string  `json:"prouct_image"`
+		ProductPrice float32 `json:"product_price"`
+		Quantity     int32   `json:"quantity"`
+		Checked      bool    `json:"checked"`
 	}
-	// 空响应，通常用于删除等操作
-	EmptyCartResponse  {}
+	CreateCartResp {
+		Id int32 `json:"id"`
+	}
+	//购物车条目删除请求
+	DeleteCartReq {
+		Id           int32   `json:"id"`
+		UserId       int32   `json:"user_id"`
+		ProductId    int32   `json:"product_id"`
+		ProductName  string  `json:"product_name"`
+		ProuctImage  string  `json:"prouct_image"`
+		ProductPrice float32 `json:"product_price"`
+		Quantity     int32   `json:"quantity"`
+		Checked      bool    `json:"checked"`
+	}
+	DeleteCartResp {
+		Success bool `json:"success"`
+	}
 )
 
 @server (
-	// 代表当前 service 代码块下的路由生成代码时都会被放到 auth 目录下
-	// 定义路由前缀为
-	prefix: /douyin/carts
+	middleware: WithClientMiddleware,WrapperAuthMiddleware
+	prefix:     /douyin/carts
 )
 service carts-api {
 	// 获取用户的购物车信息
 	@handler CartItemListHandler
-	post /get (UserInfo) returns (CartItemListResponse)
+	get /:id (UserInfo) returns (CartItemListResp)
 
 	// 添加商品到购物车
 	@handler CreateCartItemHandler
-	post /add (CartItemRequest) returns (CartInfoResponse)
-
-	// 修改购物车信息
-	@handler UpdateCartItemHandler
-	put /update (CartItemRequest) returns (EmptyCartResponse)
+	post / (CreateCartReq) returns (CreateCartResp)
 
 	// 删除购物车条目
 	@handler DeleteCartItemHandler
-	delete /delete (CartItemRequest) returns (EmptyCartResponse)
+	delete /:id (DeleteCartReq) returns (DeleteCartResp)
 }
 
