@@ -42,6 +42,7 @@ DevServer:
 WhitePathList:
   - /douyin/user/login
   - /douyin/user/register
-
+OptionPathList:
+  - /douyin/user/address 
 
 
