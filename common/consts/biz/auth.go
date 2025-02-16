@@ -17,12 +17,3 @@ const (
 	TokenKey        = "access_token"
 	RefreshTokenKey = "refresh_token"
 )
-
-var (
-
-	// WhitePath 白名单
-	WhitePath = []string{
-		"/douyin/user/register",
-		"/douyin/user/login",
-	}
-)

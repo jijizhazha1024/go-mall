@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"net/http"
-	"strings"
 	"sync"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -16,13 +15,18 @@ import (
 	"jijizhazha1024/go-mall/services/auths/authsclient"
 )
 
-func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFunc) http.HandlerFunc {
-	// 预先生成白名单集合和可选路径前缀
-	whitePathSet := make(map[string]struct{})
-	for _, path := range biz.WhitePath {
+func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf, whitePaths, optionPaths []string) func(next http.HandlerFunc) http.HandlerFunc {
+	whitePathSet := make(map[string]struct{}, len(whitePaths))
+	optionPathSet := make(map[string]struct{}, len(optionPaths))
+	logx.Infow("auth middleware init",
+		logx.Field("white_paths", whitePaths), logx.Field("option_paths", optionPaths))
+
+	for _, path := range whitePaths {
 		whitePathSet[path] = struct{}{}
 	}
-	optionalTokenPrefix := "/douyin/products"
+	for _, path := range optionPaths {
+		optionPathSet[path] = struct{}{}
+	}
 
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		var (
@@ -36,14 +40,12 @@ func WrapperAuthMiddleware(rpcConf zrpc.RpcClientConf) func(next http.HandlerFun
 				next(w, r)
 				return
 			}
-
 			// 获取认证令牌
 			token := r.Header.Get(biz.TokenKey)
 			refreshToken := r.Header.Get(biz.RefreshTokenKey)
 
 			// 处理可选令牌路径
-			isOptionalPath := r.URL.Path == optionalTokenPrefix || strings.HasPrefix(r.URL.Path, optionalTokenPrefix+"/")
-			if isOptionalPath && token == "" {
+			if _, ok := optionPathSet[r.URL.Path]; ok && token == "" {
 				next(w, r)
 				return
 			}
