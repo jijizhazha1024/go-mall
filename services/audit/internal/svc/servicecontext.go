@@ -17,7 +17,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	auditMq, err := mq.Init(c)
 	if err != nil {
 		logx.Error(err)
-		panic("mq init error")
+		panic(err)
 	}
 	return &ServiceContext{
 		Config:  c,

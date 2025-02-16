@@ -2,10 +2,8 @@ package logic
 
 import (
 	"context"
+	"errors"
 	"go.opentelemetry.io/otel/trace"
-	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/common/utils/metadatactx"
 	"jijizhazha1024/go-mall/services/audit/audit"
 	"jijizhazha1024/go-mall/services/audit/internal/mq"
 	"jijizhazha1024/go-mall/services/audit/internal/svc"
@@ -26,20 +24,37 @@ func NewCreateAuditLogLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cr
 		Logger: logx.WithContext(ctx),
 	}
 }
+func Validate(req *audit.CreateAuditLogReq) error {
+	var errs []error
+
+	// 校验必填字段
+	if req.GetUserId() == 0 { // uint32 零值校验
+		errs = append(errs, errors.New("user_id is required"))
+	}
+	if req.GetActionType() == "" {
+		errs = append(errs, errors.New("action_type is required"))
+	}
+	if req.GetTargetTable() == "" {
+		errs = append(errs, errors.New("target_table is required"))
+	}
+	if req.GetTargetId() == 0 { // int64 零值校验
+		errs = append(errs, errors.New("target_id is required"))
+	}
+	if req.GetClientIp() == "" {
+		errs = append(errs, errors.New("client_ip is required"))
+	}
+
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
+	return nil
+}
 
 // CreateAuditLog 创建审计日志
 func (l *CreateAuditLogLogic) CreateAuditLog(in *audit.CreateAuditLogReq) (*audit.CreateAuditLogRes, error) {
-	res := &audit.CreateAuditLogRes{} // 简化变量声明
-	clientIP := in.GetClientIp()
-	if clientIP == "" {
-		var ok bool
-		clientIP, ok = metadatactx.ExtractFromMetadataCtx(l.ctx, biz.ClientIPKey)
-		if !ok {
-			res.StatusCode = code.NotWithClientIP
-			res.StatusMsg = code.NotWithClientIPMsg
-			l.Logger.Infow("client ip is empty", logx.Field("user_id", in.UserId)) // 优化日志记录
-			return res, nil
-		}
+	// --------------- check ---------------
+	if err := Validate(in); err != nil {
+		return nil, err
 	}
 	spanContext := trace.SpanContextFromContext(l.ctx)
 	traceID := spanContext.TraceID().String()
@@ -55,7 +70,7 @@ func (l *CreateAuditLogLogic) CreateAuditLog(in *audit.CreateAuditLogReq) (*audi
 		OldData:     in.OldData,
 		SpanID:      spanID,
 		TraceID:     traceID,
-		ClientIP:    clientIP,
+		ClientIP:    in.ClientIp,
 		CreatedAt:   in.CreateAt,
 	}
 	if err := l.svcCtx.AuditMQ.Product(&req); err != nil {

@@ -3,13 +3,16 @@ package mq
 import (
 	"context"
 	"fmt"
-	"github.com/olivere/elastic/v7"
+	"github.com/elastic/go-elasticsearch/v7"
+	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/streadway/amqp"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"io"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/dal/model/audit"
 	"jijizhazha1024/go-mall/services/audit/internal/config"
 	"jijizhazha1024/go-mall/services/audit/model/es"
+	"strings"
 )
 
 const (
@@ -26,7 +29,7 @@ const (
 type AuditMQ struct {
 	conn     *amqp.Connection
 	model    audit.AuditModel
-	esClient *elastic.Client
+	esClient *elasticsearch.Client
 }
 
 type AuditReq struct {
@@ -106,37 +109,53 @@ func declareDeadQueue(channel *amqp.Channel) error {
 	return nil
 }
 
-func initEsIndex(ctx context.Context, client *elastic.Client) error {
-	// 创建索引
-	exists, err := client.IndexExists(biz.EsIndexName).Do(ctx)
+func initEsIndex(ctx context.Context, client *elasticsearch.Client) error {
+
+	// 创建索引（适配v7客户端）
+	existsResp, err := esapi.IndicesExistsRequest{
+		Index: []string{biz.EsIndexName},
+	}.Do(ctx, client)
 	if err != nil {
-		return err
+		return fmt.Errorf("索引存在检查失败: %w", err)
 	}
-	if !exists {
-		createIndex, err := client.CreateIndex(biz.EsIndexName).Body(es.Mapping).Do(context.Background())
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+	}(existsResp.Body)
+
+	// 检查存在状态
+	if existsResp.StatusCode == 404 { // 索引不存在
+		createResp, err := esapi.IndicesCreateRequest{
+			Index: biz.EsIndexName,
+			Body:  strings.NewReader(es.Mapping),
+		}.Do(ctx, client)
 		if err != nil {
-			return err
+			return fmt.Errorf("创建索引请求失败: %w", err)
 		}
-		if !createIndex.Acknowledged {
-			// 处理未确认创建的情况
-			return fmt.Errorf("创建索引失败")
+		defer func(Body io.ReadCloser) {
+			err = Body.Close()
+		}(createResp.Body)
+		// 解析响应
+		if createResp.IsError() {
+			return fmt.Errorf("ES返回错误: %s", createResp.String())
 		}
 	}
 	return nil
+
 }
 func Init(c config.Config) (*AuditMQ, error) {
 	//mysql conn
 
 	model := audit.NewAuditModel(sqlx.NewMysql(c.MysqlConfig.DataSource))
 	// es client
-	client, err := elastic.NewClient(
-		elastic.SetURL(c.ElasticSearch.Addr),
-		elastic.SetSniff(false),
-	)
+
+	cfg := elasticsearch.Config{
+		Addresses: []string{c.ElasticSearch.Addr},
+	}
+	esClient, err := elasticsearch.NewClient(cfg)
 	if err != nil {
 		return nil, err
 	}
-	if err := initEsIndex(context.Background(), client); err != nil {
+	if err := initEsIndex(context.Background(), esClient); err != nil {
 		return nil, err
 	}
 	// mq conn
@@ -148,7 +167,9 @@ func Init(c config.Config) (*AuditMQ, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer channel.Close()
+	defer func(channel *amqp.Channel) {
+		err = channel.Close()
+	}(channel)
 	// 声明交换机
 	if err := declareMainQueue(channel); err != nil {
 		return nil, err
@@ -160,7 +181,7 @@ func Init(c config.Config) (*AuditMQ, error) {
 	mq := &AuditMQ{
 		conn:     conn,
 		model:    model,
-		esClient: client,
+		esClient: esClient,
 	}
 	// 启动监听协程
 	if err := mq.consumer(); err != nil {

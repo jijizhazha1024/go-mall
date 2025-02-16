@@ -42,7 +42,6 @@ func TestCreateAuditLog(t *testing.T) {
 			UserId:            1,
 			ActionType:        "test",
 			ActionDescription: "test",
-			TargetTable:       "test",
 			TargetId:          1,
 			OldData:           string(data),
 			NewData:           string(data),

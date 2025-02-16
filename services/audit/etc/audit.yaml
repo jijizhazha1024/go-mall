@@ -30,4 +30,4 @@ RabbitMQ:
   VHost: "/"
 
 ElasticSearch:
-  Addr: "http://113.45.32.164:9200/"
+  Addr: "http://113.45.32.164:9200"

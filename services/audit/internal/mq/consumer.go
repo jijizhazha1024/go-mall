@@ -1,9 +1,12 @@
 package mq
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
+	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/zeromicro/go-zero/core/logx"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/dal/model/audit"
@@ -99,13 +102,27 @@ func (a *AuditMQ) ToMysql(ctx context.Context, data *AuditReq) (int64, error) {
 }
 
 func (a *AuditMQ) ToEs(ctx context.Context, data *AuditReq) error {
-	// 使用Elasticsearch客户端的Index()方法插入文档
-	if _, err := a.esClient.Index().
-		Index(biz.EsIndexName).
-		Id(data.TraceID).
-		BodyJson(*data). // 或者使用BodyString()如果你已经有了JSON字符串
-		Do(ctx); err != nil {
-		return err
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("failed to marshal data: %w", err)
+	}
+	// 创建Index请求
+	req := esapi.IndexRequest{
+		Index:      biz.EsIndexName,
+		DocumentID: data.TraceID,
+		Body:       bytes.NewReader(jsonData), // 需要实现AuditReq的JSON序列化方法
+	}
+
+	// 执行请求
+	res, err := req.Do(ctx, a.esClient)
+	if err != nil {
+		return fmt.Errorf("IndexRequest failed: %w", err)
+	}
+	defer res.Body.Close()
+
+	// 检查响应状态
+	if res.IsError() {
+		return fmt.Errorf("elasticsearch error: %s", res.String())
 	}
 	return nil
 }
