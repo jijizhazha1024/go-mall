@@ -37,16 +37,41 @@ func (l *CreateCartItemLogic) CreateCartItem(req *types.CreateCartReq) (resp *ty
 		Quantity:     req.Quantity,
 		Checked:      req.Checked,
 	})
+
+	// 处理 RPC 失败
 	if err != nil {
-		if res != nil && res.StatusCode != code.Success {
-			// 处理用户级别info 错误
-			return nil, errors.New(int(res.StatusCode), res.StatusMsg)
-		}
-		l.Logger.Errorf("call rpc CreateCartItem failed", logx.Field("err", err))
+		l.Logger.Errorw("call rpc CreateCartItem failed",
+			logx.Field("err", err),
+			logx.Field("user_id", req.UserId),
+			logx.Field("product_id", req.ProductId))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	}
-	resp = &types.CreateCartResp{
-		Id: res.Id,
+
+	// 处理 RPC 返回 nil 的情况
+	if res == nil {
+		l.Logger.Errorw("rpc CreateCartItem returned nil response",
+			logx.Field("user_id", req.UserId),
+			logx.Field("product_id", req.ProductId))
+		return nil, errors.New(code.ServerError, "RPC response is nil")
 	}
-	return
+
+	// 处理业务错误
+	if res.StatusCode != code.Success {
+		l.Logger.Debugw("rpc CreateCartItem returned business error",
+			logx.Field("user_id", req.UserId),
+			logx.Field("product_id", req.ProductId),
+			logx.Field("status_code", res.StatusCode),
+			logx.Field("status_msg", res.StatusMsg))
+		return nil, errors.New(int(res.StatusCode), res.StatusMsg)
+	}
+
+	// 操作成功
+	l.Logger.Infow("Cart item created successfully",
+		logx.Field("user_id", req.UserId),
+		logx.Field("product_id", req.ProductId),
+		logx.Field("cart_id", res.Id))
+
+	return &types.CreateCartResp{
+		Id: res.Id,
+	}, nil
 }

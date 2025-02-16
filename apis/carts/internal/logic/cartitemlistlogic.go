@@ -29,17 +29,38 @@ func (l *CartItemListLogic) CartItemList(req *types.UserInfo) (resp *types.CartI
 	res, err := l.svcCtx.CartRpc.CartItemList(l.ctx, &carts.UserInfo{
 		Id: req.Id,
 	})
+
+	// 处理 RPC 失败
 	if err != nil {
-		if res != nil && res.StatusCode != code.Success {
-			// 处理用户级别info 错误
-			return nil, errors.New(int(res.StatusCode), res.StatusMsg)
-		}
-		l.Logger.Errorf("call rpc CartItemList failed", logx.Field("err", err))
+		l.Logger.Errorw("call rpc CartItemList failed",
+			logx.Field("err", err),
+			logx.Field("user_id", req.Id))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	}
-	resp = &types.CartItemListResp{
+
+	// 处理 RPC 返回结果为空的情况
+	if res == nil {
+		l.Logger.Errorw("rpc CartItemList returned nil response",
+			logx.Field("user_id", req.Id))
+		return nil, errors.New(code.ServerError, "RPC response is nil")
+	}
+
+	// 处理业务错误
+	if res.StatusCode != code.Success {
+		l.Logger.Debugw("rpc CartItemList returned business error",
+			logx.Field("user_id", req.Id),
+			logx.Field("status_code", res.StatusCode),
+			logx.Field("status_msg", res.StatusMsg))
+		return nil, errors.New(int(res.StatusCode), res.StatusMsg)
+	}
+
+	// 正常返回
+	l.Logger.Infow("Cart item list retrieved successfully",
+		logx.Field("user_id", req.Id),
+		logx.Field("total", res.Total))
+
+	return &types.CartItemListResp{
 		Total:    res.Total,
 		CartInfo: ConvertCartInfoResponse(res.Data),
-	}
-	return
+	}, nil
 }
