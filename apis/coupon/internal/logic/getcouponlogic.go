@@ -27,9 +27,11 @@ func NewGetCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetCoup
 }
 
 func (l *GetCouponLogic) GetCoupon(req *types.CouponItemReq) (resp *types.CouponItemResp, err error) {
+
 	res, err := l.svcCtx.CouponRpc.GetCoupon(l.ctx, &couponsclient.GetCouponReq{
 		Id: req.ID,
 	})
+
 	if err != nil {
 		if res != nil && res.StatusCode != code.Success {
 			// 处理用户级别info 错误
@@ -37,6 +39,9 @@ func (l *GetCouponLogic) GetCoupon(req *types.CouponItemReq) (resp *types.Coupon
 		}
 		l.Logger.Errorw("call rpc GetCoupon failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
+	}
+	if res.StatusCode != code.Success {
+		return nil, errors.New(int(res.StatusCode), res.StatusMsg)
 	}
 	resp = convertCoupon2Resp(res.Coupon)
 

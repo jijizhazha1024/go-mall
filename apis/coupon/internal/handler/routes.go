@@ -16,13 +16,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Route{
 				{
 					Method:  http.MethodGet,
-					Path:    "/",
-					Handler: CouponListHandler(serverCtx),
+					Path:    "/detail",
+					Handler: GetCouponHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodGet,
-					Path:    "/:id",
-					Handler: GetCouponHandler(serverCtx),
+					Path:    "/list",
+					Handler: CouponListHandler(serverCtx),
 				},
 			}...,
 		),

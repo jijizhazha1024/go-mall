@@ -2,7 +2,7 @@
 package types
 
 type CouponItemReq struct {
-	ID string `path:"id"`
+	ID string `form:"id"`
 }
 
 type CouponItemResp struct {

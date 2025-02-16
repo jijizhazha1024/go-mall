@@ -20,6 +20,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:                c,
 		CouponRpc:             couponsclient.NewCoupons(zrpc.MustNewClient(c.CouponRpc)),
 		WithClientMiddleware:  middleware.WithClientMiddleware,
-		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc),
+		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc, nil, c.OptionPathList),
 	}
 }

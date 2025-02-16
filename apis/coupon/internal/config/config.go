@@ -8,7 +8,8 @@ import (
 
 type Config struct {
 	rest.RestConf
-	Consul    consul.Conf
-	CouponRpc zrpc.RpcClientConf
-	AuthsRpc  zrpc.RpcClientConf
+	Consul         consul.Conf
+	CouponRpc      zrpc.RpcClientConf
+	AuthsRpc       zrpc.RpcClientConf
+	OptionPathList []string `json:",optional"`
 }

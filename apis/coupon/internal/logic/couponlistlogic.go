@@ -42,7 +42,9 @@ func (l *CouponListLogic) CouponList(req *types.CouponListReq) (resp *types.Coup
 		l.Logger.Errorw("call rpc ListCoupons failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	}
-
+	if res.StatusCode != code.Success {
+		return nil, errors.New(int(res.StatusCode), res.StatusMsg)
+	}
 	resp = &types.CouponListResp{
 		CouponList: make([]types.CouponItemResp, 0, len(res.Coupons)),
 	}
