@@ -2,6 +2,7 @@ package coupons
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"jijizhazha1024/go-mall/services/coupons/coupons"
 	"testing"
@@ -21,7 +22,8 @@ func Test_ListCouponsLogic_ListCoupons(t *testing.T) {
 	}
 	assert.Equal(t, uint32(0), resp.StatusCode)
 	for _, coupon := range resp.Coupons {
-		t.Log(coupon)
+		marshal, _ := json.Marshal(coupon)
+		t.Log(string(marshal))
 	}
 }
 

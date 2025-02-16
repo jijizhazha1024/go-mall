@@ -52,22 +52,22 @@ func (s *CouponsServer) DeleteCoupon(ctx context.Context, in *coupons.DeleteCoup
 	return l.DeleteCoupon(in)
 }
 
-// ListUserCoupons 获取用户优惠券列表
-func (s *CouponsServer) ListUserCoupons(ctx context.Context, in *coupons.ListUserCouponsReq) (*coupons.ListUserCouponsResp, error) {
-	l := logic.NewListUserCouponsLogic(ctx, s.svcCtx)
-	return l.ListUserCoupons(in)
-}
-
 // ClaimCoupon 用户领取优惠券
 func (s *CouponsServer) ClaimCoupon(ctx context.Context, in *coupons.ClaimCouponReq) (*coupons.ClaimCouponResp, error) {
 	l := logic.NewClaimCouponLogic(ctx, s.svcCtx)
 	return l.ClaimCoupon(in)
 }
 
-// UseCoupon 使用优惠券
-func (s *CouponsServer) UseCoupon(ctx context.Context, in *coupons.UseCouponReq) (*coupons.UseCouponResp, error) {
-	l := logic.NewUseCouponLogic(ctx, s.svcCtx)
-	return l.UseCoupon(in)
+// ListUserCoupons 获取用户优惠券列表
+func (s *CouponsServer) ListUserCoupons(ctx context.Context, in *coupons.ListUserCouponsReq) (*coupons.ListUserCouponsResp, error) {
+	l := logic.NewListUserCouponsLogic(ctx, s.svcCtx)
+	return l.ListUserCoupons(in)
+}
+
+// CalculateCoupon 使用优惠券
+func (s *CouponsServer) CalculateCoupon(ctx context.Context, in *coupons.CalculateCouponReq) (*coupons.CalculateCouponResp, error) {
+	l := logic.NewCalculateCouponLogic(ctx, s.svcCtx)
+	return l.CalculateCoupon(in)
 }
 
 // ListCouponUsages 获取优惠券使用记录

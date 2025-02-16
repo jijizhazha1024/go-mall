@@ -84,7 +84,7 @@ func (l *ClaimCouponLogic) ClaimCoupon(in *coupons.ClaimCouponReq) (*coupons.Cla
 		if _, err := l.svcCtx.UserCouponsModel.WithSession(session).Insert(ctx, &user_coupons.UserCoupons{
 			UserId:   uint64(in.UserId),
 			CouponId: in.CouponId,
-			Status:   int64(coupons.CouponStatus_COUPON_STATUS_NOT_USED),
+			Status:   int64(coupons.CouponStatus_COUPON_STATUS_UNSPECIFIED),
 		}); err != nil {
 			logx.Errorw("create user coupons error", logx.Field("err", err))
 			return err
@@ -94,7 +94,7 @@ func (l *ClaimCouponLogic) ClaimCoupon(in *coupons.ClaimCouponReq) (*coupons.Cla
 	}); err != nil {
 		res.StatusCode = code.ServerError
 		res.StatusMsg = code.ServerErrorMsg
-		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_id", in.UserId), logx.Field("coupon_id", in.CouponId))
+		logx.Errorw("create user coupons error", logx.Field("err", err), logx.Field("user_id", in.UserId), logx.Field("coupon_id", in.CouponId))
 		return res, err
 	}
 	return res, nil

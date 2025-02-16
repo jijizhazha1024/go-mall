@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+// --------------- 用户优惠卷列表 ---------------
 func Test_ListUserCouponsLogic_ListUserCoupons(t *testing.T) {
 	userCoupons, err := couponsClient.ListUserCoupons(context.Background(), &coupons.ListUserCouponsReq{
 		Pagination: &coupons.PaginationReq{
@@ -26,6 +27,7 @@ func Test_ListUserCouponsLogic_ListUserCoupons(t *testing.T) {
 }
 
 // --------------- 用户领取优惠卷 ---------------
+
 // 用户领取
 func Test_ClaimCouponLogic_ClaimCoupon(t *testing.T) {
 	res, err := couponsClient.ClaimCoupon(context.Background(), &coupons.ClaimCouponReq{
@@ -76,4 +78,23 @@ func Test_ClaimCouponLogic_ClaimCoupon_Rollback(t *testing.T) {
 		return
 	}
 	t.Log(res)
+}
+
+// --------------- 优惠券使用记录 ---------------
+func Test_ListCouponUsagesLogic_ListCouponUsages(t *testing.T) {
+	couponUsages, err := couponsClient.ListCouponUsages(context.Background(), &coupons.ListCouponUsagesReq{
+		Pagination: &coupons.PaginationReq{
+			Limit: 10,
+			Page:  1,
+		},
+		UserId: 1,
+	})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	assert.Equal(t, uint32(0), couponUsages.StatusCode)
+	for _, couponUsage := range couponUsages.Usages {
+		t.Log(couponUsage)
+	}
 }
