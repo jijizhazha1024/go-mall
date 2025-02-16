@@ -2,7 +2,7 @@ package logic
 
 import (
 	"context"
-
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/carts/carts"
 	"jijizhazha1024/go-mall/services/carts/internal/svc"
 
@@ -25,22 +25,20 @@ func NewDeleteCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *De
 
 func (l *DeleteCartItemLogic) DeleteCartItem(in *carts.CartItemRequest) (*carts.EmptyCartResponse, error) {
 	// todo: add your logic here and delete this line
-	//// 1. 查询购物车记录是否存在
-	//var shopCart model.Cart
-	//
-	//// 查找对应的购物车记录
-	//if result := l.svcCtx.DB.Where("product_id = ? AND user_id = ?", in.ProductId, in.UserId).First(&shopCart); result.RowsAffected == 0 {
-	//	// 如果没有找到，返回一个“未找到”错误
-	//	return nil, errors.New("购物车记录不存在")
-	//}
-	//
-	//// 2. 删除购物车记录
-	//if result := l.svcCtx.DB.Where("product_id = ? AND user_id = ?", in.ProductId, in.UserId).Delete(&model.Cart{}); result.RowsAffected == 0 {
-	//	// 如果删除失败，返回错误
-	//	return nil, errors.New("删除购物车记录失败")
-	//}
-	//
-	//// 3. 返回空响应
-	//return &carts.EmptyCartResponse{}, nil
-	return nil, nil
+	err := l.svcCtx.CartsModel.DeleteCartItem(l.ctx, in.UserId, in.ProductId)
+	if err != nil {
+		l.Logger.Errorw("Error deleting cart item",
+			logx.Field("err", err),
+			logx.Field("user_id", in.Id),
+			logx.Field("product_id", in.ProductId))
+		return &carts.EmptyCartResponse{
+			StatusCode: code.CartClearFailed,
+			StatusMsg:  code.CartClearFailedMsg,
+		}, err
+	} else {
+		return &carts.EmptyCartResponse{
+			StatusCode: code.Success,
+			StatusMsg:  code.CartClearedMsg,
+		}, nil
+	}
 }
