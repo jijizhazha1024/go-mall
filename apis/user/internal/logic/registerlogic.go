@@ -47,7 +47,7 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 	if err != nil {
 
 		l.Logger.Errorf("call rpc register failed", logx.Field("err", err))
-		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
+		return nil, errors.New(code.ServerError, err.Error())
 	} else {
 		if response.StatusCode != code.UserCreated {
 			l.Logger.Errorf("login failed", logx.Field("status_code", response.StatusCode), logx.Field("status_msg", response.StatusMsg))

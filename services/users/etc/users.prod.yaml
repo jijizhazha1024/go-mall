@@ -13,6 +13,7 @@ Consul:
 
 MysqlConfig:
   datasource: ${MYSQL_DATA_SOURCE}
+  Conntimeout: 5
 
 Log:
   ServiceName: "users-rpc"

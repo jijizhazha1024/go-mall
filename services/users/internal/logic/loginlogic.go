@@ -36,10 +36,7 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 		String: in.Email,
 		Valid:  true,
 	}
-	// 新增：布隆过滤器预检
-	if !l.svcCtx.Bf.Contains(in.Email) {
-		return users_biz.HandleLoginerror(code.UserNotFoundMsg, code.UserNotFound, nil)
-	}
+
 	// 2. 查询用户信息
 	user, err := l.svcCtx.UsersModel.FindOneByEmail(l.ctx, email)
 	if err != nil {

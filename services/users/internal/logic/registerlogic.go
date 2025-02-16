@@ -76,16 +76,16 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				PasswordHash: sql.NullString{String: in.Password, Valid: true},
 				AvatarUrl:    sql.NullString{String: avatar, Valid: true},
 			})
-			l.svcCtx.Bf.Add(in.Email)
+
 			if insertErr != nil {
 
 				logx.Errorw(code.UserCreationFailedMsg, logx.Field("err", err), logx.Field("user_email", in.Email))
-				return users_biz.HandleRegistererror(code.UserCreationFailedMsg, code.UserCreationFailed, nil)
+				return users_biz.HandleRegistererror(code.UserCreationFailedMsg, code.UserCreationFailed, insertErr)
 			}
 
 			userId, lastInsertErr := result.LastInsertId()
 			if lastInsertErr != nil {
-				l.Logger.Infow("register get user_id failed", logx.Field("err", err),
+				l.Logger.Infow("register get user_id failed", logx.Field("err", lastInsertErr),
 					logx.Field("email", in.Email))
 
 				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, nil)
@@ -97,7 +97,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 		}
 		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_email", in.Email))
 
-		return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrieved, nil)
+		return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrieved, err)
 	}
 
 	if existUser != nil {
@@ -108,12 +108,11 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			// 将删除状态改为false
 			updateErr := l.svcCtx.UsersModel.UpdateDeletebyEmail(l.ctx, in.Email, false)
 			if updateErr != nil {
-				l.Logger.Infow("register update user_deleted failed", logx.Field("err", updateErr),
+				l.Logger.Errorw("register update user_deleted failed", logx.Field("err", updateErr),
 					logx.Field("email", in.Email))
 
-				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, nil)
+				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, err)
 			}
-			logx.Errorw("query ....", logx.Field("err", updateErr))
 
 			return users_biz.HandleRegisterResp(code.UserCreatedMsg, code.UserCreated, uint32(existUser.UserId), "token")
 		} else { // 未删除
