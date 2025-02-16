@@ -1,0 +1,47 @@
+Name: user-api
+Host: 0.0.0.0
+Port: 8001
+Mode: pro
+Verbose: false # 关闭详细日志
+
+
+UserRpc:
+  Target: consul://${CONSUL_HOST}/users.rpc?wait=14s
+  NonBlock: true
+AuthsRpc:
+  Target: consul://${CONSUL_HOST}/auths.rpc?wait=14s
+  NonBlock: true 
+
+Consul:
+  Host: ${CONSUL_HOST}
+  Key: 
+    users.rpc
+    auths.rpc
+    # 日志配置
+Log:
+  ServiceName: "user-api"
+  Mode: 'file'
+  Encoding: "json"
+  Path: "./logs/user-api"
+  KeepDays: 30    # 保留30天日志
+  Compress: true  # 启用日志压缩
+  Rotation: size  # 按大小切割日志
+  MaxSize: 100    # 每个日志文件最大100MB
+  # 链路追踪
+Telemetry:
+  Name: user-api
+  Endpoint: ${TRACES_ENDPOINT}
+  Batcher: jaeger
+  Sampler: 0.1
+# 指标监控配置
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port: 8101 # api服务端口+100，例如api端口为8001，指标端口是8101
+  EnablePprof: false
+
+WhitePathList:
+  - /douyin/user/login
+  - /douyin/user/register
+
+
