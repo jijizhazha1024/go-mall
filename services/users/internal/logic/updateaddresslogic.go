@@ -29,10 +29,30 @@ func NewUpdateAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upd
 
 // 修改用户地址
 func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*users.UpdateAddressResponse, error) {
+
+	//判断address——id和user——id是否存在
+
+	_, err := l.svcCtx.AddressModel.GetUserAddressbyIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
+	if err != nil {
+		if err == sql.ErrNoRows {
+			l.Logger.Infow("update address not found", logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId))
+			return &users.UpdateAddressResponse{
+				StatusMsg:  code.UserAddressNotFoundMsg,
+				StatusCode: code.UserAddressNotFound,
+			}, nil
+		}
+		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
+		return &users.UpdateAddressResponse{
+			StatusMsg:  code.ServerErrorMsg,
+			StatusCode: code.ServerError,
+		}, err
+	}
+
 	//判断修改后的地址是否是默认地址
+
 	if in.IsDefault {
 
-		addresses, err := l.svcCtx.AddressModel.FindAllByUserId(l.ctx, in.UserId)
+		addresses, err := l.svcCtx.AddressModel.FindAllByUserId(l.ctx, int32(in.UserId))
 		if err != nil {
 			if err == sql.ErrNoRows {
 				l.Logger.Infow("update address is default, but user has no address", logx.Field("user_id", in.UserId))
@@ -67,6 +87,7 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 				City:            in.City,
 				DetailedAddress: in.DetailedAddress,
 				IsDefault:       in.IsDefault,
+				UserId:          int64(in.UserId),
 			})
 			if err != nil {
 				return err
@@ -79,6 +100,30 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 				StatusCode: code.ServerError,
 			}, nil
 		}
+	} else {
+		_, err = l.svcCtx.AddressModel.Update(l.ctx, &user_address.UserAddresses{
+
+			AddressId:     int64(in.AddressId),
+			RecipientName: in.RecipientName,
+			PhoneNumber: sql.NullString{
+				String: string(in.PhoneNumber),
+				Valid:  in.PhoneNumber != ""},
+			Province: sql.NullString{
+				String: string(in.Province),
+				Valid:  in.Province != ""},
+			City:            in.City,
+			DetailedAddress: in.DetailedAddress,
+			IsDefault:       in.IsDefault,
+			UserId:          int64(in.UserId),
+		})
+		if err != nil {
+			l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
+			return &users.UpdateAddressResponse{
+				StatusMsg:  code.ServerErrorMsg,
+				StatusCode: code.ServerError,
+			}, err
+		}
+
 	}
 
 	addressData, err := l.svcCtx.AddressModel.FindOne(l.ctx, in.AddressId)

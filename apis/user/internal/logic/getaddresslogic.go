@@ -29,7 +29,7 @@ func NewGetAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAdd
 
 func (l *GetAddressLogic) GetAddress(req *types.GetAddressRequest) (resp *types.GetAddressResponse, err error) {
 
-	user_id := l.ctx.Value(biz.UserIDKey).(int32)
+	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
 	getaddressresp, err := l.svcCtx.UserRpc.GetAddress(l.ctx, &users.GetAddressRequest{
 		UserId:    user_id,
 		AddressId: req.AddressID,

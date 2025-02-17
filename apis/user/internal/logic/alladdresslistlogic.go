@@ -29,7 +29,7 @@ func NewAllAddressListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Al
 
 func (l *AllAddressListLogic) AllAddressList(req *types.AllAddressListRequest) (resp *types.AddressListResponse, err error) {
 	// 调用用户 RPC 获取地址列表
-	user_id := l.ctx.Value(biz.UserIDKey).(int32)
+	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
 	listaddressresp, err := l.svcCtx.UserRpc.ListAddresses(l.ctx, &users.AllAddressLitstRequest{
 		UserId: user_id,
 	})

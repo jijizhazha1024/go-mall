@@ -27,9 +27,25 @@ func NewDeleteAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 
 // 删除用户地址
 func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*users.DeleteAddressResponse, error) {
-	// todo: add your logic here and delete this line
+	//判断address——id和user——id是否存在
 
-	err := l.svcCtx.AddressModel.DeleteByAddressIdandUserId(l.ctx, in.AddressId, in.UserId)
+	_, err := l.svcCtx.AddressModel.GetUserAddressbyIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
+	if err != nil {
+		if err == sql.ErrNoRows {
+			l.Logger.Infow("delete address not found", logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId))
+			return &users.DeleteAddressResponse{
+				StatusMsg:  code.UserAddressNotFoundMsg,
+				StatusCode: code.UserAddressNotFound,
+			}, nil
+		}
+		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
+		return &users.DeleteAddressResponse{
+			StatusMsg:  code.ServerErrorMsg,
+			StatusCode: code.ServerError,
+		}, err
+	}
+
+	err = l.svcCtx.AddressModel.DeleteByAddressIdandUserId(l.ctx, in.AddressId, int32(in.UserId))
 	if err != nil {
 		if err == sql.ErrNoRows {
 			l.Logger.Infow("deleteaddress address not found", logx.Field("err", err), logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId))

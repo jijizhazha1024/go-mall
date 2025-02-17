@@ -30,7 +30,7 @@ func NewListAddressesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Lis
 func (l *ListAddressesLogic) ListAddresses(in *users.AllAddressLitstRequest) (*users.AddressListResponse, error) {
 	// todo: add your logic here and delete this line
 
-	allusers, err := l.svcCtx.AddressModel.FindAllByUserId(l.ctx, in.UserId)
+	allusers, err := l.svcCtx.AddressModel.FindAllByUserId(l.ctx, int32(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Infow("address list user address not found", logx.Field("user_id", in.UserId))

@@ -28,7 +28,7 @@ func TestUsersRpc(t *testing.T) {
 
 	//这里可以从token中获取user——id
 	resp, err := users_client.GetAddress((context.Context)(context.Background()), &users.GetAddressRequest{
-		UserId:    0,
+		UserId:    30,
 		AddressId: 1,
 	})
 

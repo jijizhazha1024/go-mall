@@ -28,7 +28,7 @@ func NewDeleteAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 }
 
 func (l *DeleteAddressLogic) DeleteAddress(req *types.DeleteAddressRequest) (resp *types.DeleteAddressResponse, err error) {
-	user_id := l.ctx.Value(biz.UserIDKey).(int32)
+	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
 	DeleteAddResp, err := l.svcCtx.UserRpc.DeleteAddress(l.ctx, &users.DeleteAddressRequest{
 		UserId:    user_id,
 		AddressId: req.AddressID,
