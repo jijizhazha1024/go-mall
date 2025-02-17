@@ -9,7 +9,6 @@ import (
 	"jijizhazha1024/go-mall/apis/user/internal/types"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
-	"jijizhazha1024/go-mall/common/utils/cryptx"
 	"jijizhazha1024/go-mall/services/auths/authsclient"
 	"jijizhazha1024/go-mall/services/users/usersclient"
 
@@ -42,10 +41,10 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 		return nil, errors.New(code.PasswordNotMatch, code.PasswordNotMatchMsg)
 
 	}
-	PasswordHash := cryptx.PasswordEncrypt(req.Password)
+
 	response, err := l.svcCtx.UserRpc.Register(l.ctx, &usersclient.RegisterRequest{
 		Email:           req.Email,
-		Password:        PasswordHash,
+		Password:        req.Password,
 		ConfirmPassword: req.ConfirmPassword,
 	})
 	if err != nil {

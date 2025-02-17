@@ -94,6 +94,6 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user id", in.UserId))
 		return users_biz.HandleUpdateUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
-	return users_biz.HandleUpdateUserResp(code.UserUpdatedMsg, code.UserUpdated, in.UserId, in.Email, in.UsrName, "token") // 调用HandleUpdateUserResp方法返回响)
+	return users_biz.HandleUpdateUserResp(code.UserUpdatedMsg, code.UserUpdated, in.UserId, in.Email, in.UsrName) // 调用HandleUpdateUserResp方法返回响)
 
 }

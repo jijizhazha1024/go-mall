@@ -66,5 +66,5 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 		return users_biz.HandleLoginerror(code.PasswordNotMatchMsg, code.PasswordNotMatch, nil)
 	}
 
-	return users_biz.HandleLoginResp(code.LoginSuccessMsg, code.LoginSuccess, uint32(user.UserId), "", user.Username.String)
+	return users_biz.HandleLoginResp(code.LoginSuccessMsg, code.LoginSuccess, uint32(user.UserId), user.Username.String)
 }

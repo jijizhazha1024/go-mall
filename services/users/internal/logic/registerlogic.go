@@ -8,6 +8,7 @@ import (
 	"math/big"
 
 	"jijizhazha1024/go-mall/common/consts/code"
+	"jijizhazha1024/go-mall/common/utils/cryptx"
 	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/internal/users_biz"
@@ -54,31 +55,27 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 		String: in.Email,
 		Valid:  true,
 	}
-
+	PasswordHash := cryptx.PasswordEncrypt(in.Password)
 	//判断邮箱是否已注册，如果已注册，是否处于删除状态
 	existUser, err := l.svcCtx.UsersModel.FindOneByEmail(l.ctx, email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			l.Logger.Infow("register user not exist", logx.Field("err", err),
-				logx.Field("user_email", in.Email))
 
 			avatar, err := getRandomAvatar()
 			if err != nil {
 				l.Logger.Infow("register get avatar failed", logx.Field("err", err))
-
-				return users_biz.HandleRegistererror("get avatar failed", 1, nil)
 			}
 
 			// 用户不存在，直接注册
 			result, insertErr := l.svcCtx.UsersModel.Insert(l.ctx, &user.Users{
 				Email:        email,
-				PasswordHash: sql.NullString{String: in.Password, Valid: true},
+				PasswordHash: sql.NullString{String: PasswordHash, Valid: true},
 				AvatarUrl:    sql.NullString{String: avatar, Valid: true},
 			})
 
 			if insertErr != nil {
 
-				logx.Errorw(code.UserCreationFailedMsg, logx.Field("err", insertErr), logx.Field("user_email", in.Email))
+				logx.Errorw("register insert user failed", logx.Field("err", insertErr), logx.Field("user_email", in.Email))
 				return users_biz.HandleRegistererror(code.UserCreationFailedMsg, code.UserCreationFailed, insertErr)
 			}
 
@@ -90,7 +87,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, nil)
 			}
 
-			return users_biz.HandleRegisterResp(code.UserCreatedMsg, code.UserCreated, uint32(userId), "token")
+			return users_biz.HandleRegisterResp(code.UserCreatedMsg, code.UserCreated, uint32(userId))
 		}
 		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_email", in.Email))
 
@@ -111,7 +108,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, updateErr)
 			}
 
-			return users_biz.HandleRegisterResp(code.UserCreatedMsg, code.UserCreated, uint32(existUser.UserId), "token")
+			return users_biz.HandleRegisterResp(code.UserCreatedMsg, code.UserCreated, uint32(existUser.UserId))
 		} else { // 未删除
 			l.Logger.Infow("register  user already exist",
 				logx.Field("email", in.Email))

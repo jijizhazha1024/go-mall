@@ -24,7 +24,7 @@ message RegisterResponse {
   string status_msg = 2; // 返回状态描述
 
   uint32 user_id = 3;
-    string token = 4;
+  
 
 }
 
@@ -41,13 +41,13 @@ message LoginResponse {
   string user_name = 3;
 
   uint32 user_id = 4;
-    string token = 5;
+ 
 }
 
 // 定义登出请求消息
 message LogoutRequest {
   uint32 user_id = 1;
-  string token = 2;
+
 }
 
 // 定义登出响应消息
@@ -56,7 +56,7 @@ message LogoutResponse {
   string status_msg = 2; // 返回状态描述
 
 
-    string token = 3;
+
    int64    logout_time = 4; // 登出时间
 
 }
@@ -73,7 +73,7 @@ message DeleteUserResponse {
   string status_msg = 2; // 返回状态描述
  
   uint32 user_id = 3;
-    string token = 4;
+   
 }
 
 
@@ -91,16 +91,16 @@ message UpdateUserResponse {
   string status_msg = 2; // 返回状态描述
 
   uint32 user_id = 3;
-    string token = 4;
-    string email = 5;
-    string user_name = 6;
+
+    string email = 4;
+    string user_name = 5;
 }
 
 
 // 定义获取用户信息请求消息
 message GetUserRequest {
 uint32 user_id = 1;
-  string token = 2;
+
 }
 
 // 定义获取用户信息响应消息

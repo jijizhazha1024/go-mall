@@ -54,6 +54,6 @@ func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, er
 		return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 
-	return users_biz.HandleLogoutUserResp(code.LogoutSuccessMsg, code.LogoutSuccess, "token", logtoutime)
+	return users_biz.HandleLogoutUserResp(code.LogoutSuccessMsg, code.LogoutSuccess, logtoutime)
 
 }
