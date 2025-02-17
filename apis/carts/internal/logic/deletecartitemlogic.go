@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"github.com/zeromicro/x/errors"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/carts/carts"
 
@@ -27,9 +28,10 @@ func NewDeleteCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *De
 }
 
 func (l *DeleteCartItemLogic) DeleteCartItem(req *types.DeleteCartReq) (resp *types.DeleteCartResp, err error) {
-	// todo: add your logic here and delete this line
+	userId := l.ctx.Value(biz.UserIDKey).(uint32)
 	res, err := l.svcCtx.CartRpc.DeleteCartItem(l.ctx, &carts.CartItemRequest{
-		Id: req.Id,
+		UserId:    int32(userId),
+		ProductId: req.ProductId,
 	})
 
 	// 处理 RPC 层面的错误
