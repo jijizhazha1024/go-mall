@@ -23,7 +23,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserRpc:               usersclient.NewUsers(zrpc.MustNewClient(c.UserRpc)),
 		AuthsRpc:              authsclient.NewAuths(zrpc.MustNewClient(c.AuthsRpc)),
 		Config:                c,
-		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc, c.WhitePathList, c.OptionPathList), // # 需要指定认证rpc地址
+		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc, nil, nil),
 
 		WithClientMiddleware: middleware.WithClientMiddleware,
 	}
