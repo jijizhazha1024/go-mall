@@ -10,7 +10,6 @@ type AddAddressRequest struct {
 	City            string `json:"city"`
 	DetailedAddress string `json:"detailed_address"`
 	IsDefault       bool   `json:"is_default"`
-	UserID          uint32 `json:"user_id"`
 }
 
 type AddAddressResponse struct {
@@ -46,11 +45,9 @@ type AddressResponse struct {
 }
 
 type AllAddressListRequest struct {
-	UserID int32 `json:"user_id"`
 }
 
 type DeleteAddressRequest struct {
-	UserID    int32 `json:"user_id"`
 	AddressID int32 `json:"address_id"`
 }
 
@@ -64,7 +61,6 @@ type DeleteResponse struct {
 }
 
 type GetAddressRequest struct {
-	UserID    int32 `json:"user_id"`
 	AddressID int32 `json:"address_id"`
 }
 
@@ -120,7 +116,6 @@ type UpdateAddressRequest struct {
 	DetailedAddress string `json:"detailed_address"`
 	IsDefault       bool   `json:"is_default"`
 	AddressID       int32  `json:"address_id"`
-	UserID          int32  `json:"user_id"`
 }
 
 type UpdateAddressResponse struct {

@@ -72,7 +72,6 @@ type (
 		City            string `json:"city"`
 		DetailedAddress string `json:"detailed_address"`
 		IsDefault       bool   `json:"is_default"`
-		UserID          uint32 `json:"user_id"`
 	}
 	// 添加新地址的响应消息
 	AddAddressResponse {
@@ -80,7 +79,6 @@ type (
 	}
 	// 请求删除地址的消息
 	DeleteAddressRequest {
-		UserID    int32 `json:"user_id"`
 		AddressID int32 `json:"address_id"`
 	}
 	// 删除地址的响应消息
@@ -94,7 +92,6 @@ type (
 		DetailedAddress string `json:"detailed_address"`
 		IsDefault       bool   `json:"is_default"`
 		AddressID       int32  `json:"address_id"`
-		UserID          int32  `json:"user_id"`
 	}
 	// 修改地址的响应消息
 	UpdateAddressResponse {
@@ -121,12 +118,9 @@ type (
 		UpdatedAt       string `json:"updated_at"` // ISO8601 时间转换为时间戳
 	}
 	// 获取所有地址的请求消息
-	AllAddressListRequest {
-		UserID int32 `json:"user_id"`
-	}
+	AllAddressListRequest  {}
 	// 获取单个地址的请求消息
 	GetAddressRequest {
-		UserID    int32 `json:"user_id"`
 		AddressID int32 `json:"address_id"`
 	}
 )

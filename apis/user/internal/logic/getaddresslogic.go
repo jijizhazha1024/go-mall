@@ -5,6 +5,7 @@ import (
 
 	"jijizhazha1024/go-mall/apis/user/internal/svc"
 	"jijizhazha1024/go-mall/apis/user/internal/types"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -27,10 +28,10 @@ func NewGetAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetAdd
 }
 
 func (l *GetAddressLogic) GetAddress(req *types.GetAddressRequest) (resp *types.GetAddressResponse, err error) {
-	// todo: add your logic here and delete this line
 
+	user_id := l.ctx.Value(biz.UserIDKey).(int32)
 	getaddressresp, err := l.svcCtx.UserRpc.GetAddress(l.ctx, &users.GetAddressRequest{
-		UserId:    req.UserID,
+		UserId:    user_id,
 		AddressId: req.AddressID,
 	})
 
@@ -38,7 +39,7 @@ func (l *GetAddressLogic) GetAddress(req *types.GetAddressRequest) (resp *types.
 		l.Logger.Errorf("调用 rpc 获取地址失败", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	} else {
-		if getaddressresp.StatusCode != code.AddUserAddressSuccess {
+		if getaddressresp.StatusCode != code.GetUserAddressSuccess {
 			l.Logger.Errorf("调用 rpc 获取地址失败", logx.Field("status_code", getaddressresp.StatusCode), logx.Field("status_msg", getaddressresp.StatusMsg))
 			return nil, errors.New(int(getaddressresp.StatusCode), getaddressresp.StatusMsg)
 		}

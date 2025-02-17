@@ -5,6 +5,7 @@ import (
 
 	"jijizhazha1024/go-mall/apis/user/internal/svc"
 	"jijizhazha1024/go-mall/apis/user/internal/types"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -28,7 +29,7 @@ func NewUpdateAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upd
 
 func (l *UpdateAddressLogic) UpdateAddress(req *types.UpdateAddressRequest) (resp *types.UpdateAddressResponse, err error) {
 	// todo: add your logic here and delete this line
-
+	user_id := l.ctx.Value(biz.UserIDKey).(int32)
 	updateAddressresp, err := l.svcCtx.UserRpc.UpdateAddress(l.ctx, &users.UpdateAddressRequest{
 		RecipientName:   req.RecipientName,
 		PhoneNumber:     req.PhoneNumber,
@@ -37,14 +38,14 @@ func (l *UpdateAddressLogic) UpdateAddress(req *types.UpdateAddressRequest) (res
 		DetailedAddress: req.DetailedAddress,
 		IsDefault:       req.IsDefault,
 		AddressId:       req.AddressID,
-		UserId:          req.UserID,
+		UserId:          user_id,
 	})
 	if err != nil {
 
 		l.Logger.Errorf("call rpc updateaddress failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	} else {
-		if updateAddressresp.StatusCode != code.UserCreated {
+		if updateAddressresp.StatusCode != code.UpdateUserAddressSuccess {
 			l.Logger.Errorf("updeteaddress rpc failed", logx.Field("status_code", updateAddressresp.StatusCode), logx.Field("status_msg", updateAddressresp.StatusMsg))
 			return nil, errors.New(int(updateAddressresp.StatusCode), updateAddressresp.StatusMsg)
 		}
