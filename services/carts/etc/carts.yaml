@@ -7,10 +7,10 @@ Consul:
   Meta:
     Protocol: grpc
 
-MysqlConfig:
-  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
-  conntimeout: 5
-
 #MysqlConfig:
-#  datasource: "root:123456@tcp(127.0.0.1:3306)/cart_db?charset=utf8mb4&parseTime=True&loc=Local"
+#  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
 #  conntimeout: 5
+
+MysqlConfig:
+  datasource: "root:123456@tcp(127.0.0.1:3306)/cart_db?charset=utf8mb4&parseTime=True&loc=Local"
+  conntimeout: 5
