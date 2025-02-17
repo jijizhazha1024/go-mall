@@ -7,9 +7,7 @@ import (
 
 type Config struct {
 	rest.RestConf
-	AuthsRpc       zrpc.RpcClientConf
-	CartsRpc       zrpc.RpcClientConf
-	ProductRpc     zrpc.RpcClientConf
-	WhitePathList  []string
-	OptionPathList []string
+	AuthsRpc   zrpc.RpcClientConf
+	CartsRpc   zrpc.RpcClientConf
+	ProductRpc zrpc.RpcClientConf
 }
