@@ -5,7 +5,8 @@ option go_package = "./carts";
 
 service Cart {
   rpc CartItemList(UserInfo) returns(CartItemListResponse);   //获取用户的购物车信息
-  rpc CreateCartItem(CartItemRequest) returns(CreateCartResponse); //添加商品到购物车
+  rpc CreateCartItem(CartItemRequest) returns(CreateCartResponse); //商品+1
+  rpc SubCartItem(CartItemRequest) returns(SubCartResponse); //商品-1
   rpc DeleteCartItem(CartItemRequest) returns(EmptyCartResponse); //删除购物车条目
 }
 
@@ -29,6 +30,11 @@ message CartInfoResponse {
 }
 
 message CreateCartResponse {
+    int32 status_code = 1;
+    string status_msg = 2;
+    int32 id = 3;
+}
+message SubCartResponse {
     int32 status_code = 1;
     string status_msg = 2;
     int32 id = 3;
