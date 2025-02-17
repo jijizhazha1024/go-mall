@@ -58,8 +58,7 @@ func (l *SubCartItemLogic) SubCartItem(req *types.SubCartReq) (resp *types.SubCa
 		l.Logger.Errorw("call rpc SubCartItem failed",
 			logx.Field("err", err),
 			logx.Field("user_id", userId),
-			logx.Field("product_id", req.ProductId),
-			logx.Field("quantity", req.Quantity))
+			logx.Field("product_id", req.ProductId))
 		return nil, errors.New(code.CartSubFailed, code.CartSubFailedMsg)
 	}
 

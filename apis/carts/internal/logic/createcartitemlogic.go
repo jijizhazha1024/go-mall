@@ -50,10 +50,9 @@ func (l *CreateCartItemLogic) CreateCartItem(req *types.CreateCartReq) (resp *ty
 	}
 
 	// 3. 检查库存是否足够
-	if productRes.Product.Stock < int64(req.Quantity) {
+	if productRes.Product.Stock == 0 {
 		l.Logger.Errorw("insufficient stock",
 			logx.Field("product_id", req.ProductId),
-			logx.Field("requested_quantity", req.Quantity),
 			logx.Field("available_stock", productRes.Product.Stock))
 		return nil, errors.New(code.InsufficientInventoryOfProduct, code.InsufficientInventoryOfProductMsg)
 	}
@@ -92,8 +91,7 @@ func (l *CreateCartItemLogic) CreateCartItem(req *types.CreateCartReq) (resp *ty
 	// 7. 记录成功日志并返回结果
 	l.Logger.Infow("Cart item created successfully",
 		logx.Field("user_id", userId),
-		logx.Field("product_id", req.ProductId),
-		logx.Field("cart_id", res.Id))
+		logx.Field("product_id", req.ProductId))
 
 	return &types.CreateCartResp{
 		Id: res.Id,
