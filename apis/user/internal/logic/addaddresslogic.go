@@ -30,7 +30,7 @@ func NewAddAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *AddAdd
 func (l *AddAddressLogic) AddAddress(req *types.AddAddressRequest) (resp *types.AddAddressResponse, err error) {
 
 	//校验
-	if req.City == "" || req.DetailedAddress == "" || req.DetailedAddress == "" || req.PhoneNumber == "" || req.Province == "" {
+	if req.City == "" || req.DetailedAddress == "" || req.PhoneNumber == "" || req.Province == "" {
 
 		l.Logger.Errorf("用户信息为空", logx.Field("err", err))
 		return nil, errors.New(code.Fail, "user informaition empty")

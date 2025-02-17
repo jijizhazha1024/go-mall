@@ -29,7 +29,7 @@ func NewUpdateAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upd
 
 func (l *UpdateAddressLogic) UpdateAddress(req *types.UpdateAddressRequest) (resp *types.UpdateAddressResponse, err error) {
 
-	if req.City == "" || req.DetailedAddress == "" || req.DetailedAddress == "" || req.PhoneNumber == "" || req.Province == "" {
+	if req.City == ""|| req.DetailedAddress == "" || req.PhoneNumber == "" || req.Province == "" {
 
 		l.Logger.Errorf("用户信息为空", logx.Field("err", err))
 		return nil, errors.New(code.Fail, "user informaition empty")
