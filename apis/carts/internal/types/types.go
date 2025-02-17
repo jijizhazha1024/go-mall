@@ -9,6 +9,7 @@ type CartInfoResponse struct {
 	ProductId int32 `json:"product_id"`
 	Quantity  int32 `json:"quantity"`
 	Checked   bool  `json:"checked"`
+	Product []interface{} `json:"product"`
 }
 
 type CartItemListResp struct {
