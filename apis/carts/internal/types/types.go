@@ -3,14 +3,12 @@
 
 package types
 
-
 type CartInfoResponse struct {
 	Id        int32 `json:"id"`
 	UserId    int32 `json:"user_id"`
 	ProductId int32 `json:"product_id"`
 	Quantity  int32 `json:"quantity"`
 	Checked   bool  `json:"checked"`
-	Product []interface{} `json:"product"`
 }
 
 type CartItemListResp struct {
@@ -45,6 +43,20 @@ type DeleteCartReq struct {
 
 type DeleteCartResp struct {
 	Success bool `json:"success"`
+}
+
+type SubCartReq struct {
+	UserId       int32   `json:"user_id"`
+	ProductId    int32   `json:"product_id"`
+	ProductName  string  `json:"product_name"`
+	ProuctImage  string  `json:"prouct_image"`
+	ProductPrice float32 `json:"product_price"`
+	Quantity     int32   `json:"quantity"`
+	Checked      bool    `json:"checked"`
+}
+
+type SubCartResp struct {
+	Id int32 `json:"id"`
 }
 
 type UserInfo struct {

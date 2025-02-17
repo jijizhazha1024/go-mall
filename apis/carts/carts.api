@@ -16,7 +16,7 @@ type (
 		Quantity  int32 `json:"quantity"`
 		Checked   bool  `json:"checked"`
 	}
-	// 购物车条目请求，用于添加或更新购物车项
+	// 购物车条目请求，用于添加购物车项
 	CreateCartReq {
 		UserId       int32   `json:"user_id"`
 		ProductId    int32   `json:"product_id"`
@@ -27,6 +27,19 @@ type (
 		Checked      bool    `json:"checked"`
 	}
 	CreateCartResp {
+		Id int32 `json:"id"`
+	}
+	// 购物车条目请求，用于扣减购物车项
+	SubCartReq {
+		UserId       int32   `json:"user_id"`
+		ProductId    int32   `json:"product_id"`
+		ProductName  string  `json:"product_name"`
+		ProuctImage  string  `json:"prouct_image"`
+		ProductPrice float32 `json:"product_price"`
+		Quantity     int32   `json:"quantity"`
+		Checked      bool    `json:"checked"`
+	}
+	SubCartResp {
 		Id int32 `json:"id"`
 	}
 	//购物车条目删除请求
@@ -54,9 +67,13 @@ service carts-api {
 	@handler CartItemListHandler
 	get /:id (UserInfo) returns (CartItemListResp)
 
-	// 添加商品到购物车
+	// 增加商品到购物车
 	@handler CreateCartItemHandler
 	post / (CreateCartReq) returns (CreateCartResp)
+
+	//扣减商品到购物车
+	@handler SubCartItemHandler
+	post / (SubCartReq) returns (SubCartResp)
 
 	// 删除购物车条目
 	@handler DeleteCartItemHandler

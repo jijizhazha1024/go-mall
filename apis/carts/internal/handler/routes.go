@@ -22,6 +22,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: CreateCartItemHandler(serverCtx),
 				},
 				{
+					Method:  http.MethodPost,
+					Path:    "/",
+					Handler: SubCartItemHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodGet,
 					Path:    "/:id",
 					Handler: CartItemListHandler(serverCtx),
