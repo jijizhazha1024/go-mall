@@ -22,7 +22,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:                c,
 		CartsRpc:              cartsclient.NewCart(zrpc.MustNewClient(c.CartsRpc)),
 		ProductRpc:            productcatalogservice.NewProductCatalogService(zrpc.MustNewClient(c.ProductRpc)),
-		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc, c.WhitePathList, c.OptionPathList),
+		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc, nil, nil),
 		WithClientMiddleware:  middleware.WithClientMiddleware,
 	}
 }

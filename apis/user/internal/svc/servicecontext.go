@@ -23,7 +23,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserRpc:               usersclient.NewUsers(zrpc.MustNewClient(c.UserRpc)),
 		AuthsRpc:              authsclient.NewAuths(zrpc.MustNewClient(c.AuthsRpc)),
 		Config:                c,
-		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc, nil, nil),
+		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc, c.WhitePathList, c.OptionPathList),
 
 		WithClientMiddleware: middleware.WithClientMiddleware,
 	}
