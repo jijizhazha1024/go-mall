@@ -29,7 +29,6 @@ func TestUsersRpc(t *testing.T) {
 	//这里可以从token中获取user——id
 	resp, err := users_client.GetUser(context.Background(), &users.GetUserRequest{
 		UserId: 4,
-		Token:  "token",
 	})
 	if err != nil {
 		t.Fatal(err)

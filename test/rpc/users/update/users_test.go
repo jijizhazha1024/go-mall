@@ -29,10 +29,9 @@ func initusers() {
 func TestUsersRpc(t *testing.T) {
 	initusers()
 	resp, err := users_client.UpdateUser(context.Background(), &users.UpdateUserRequest{
-		Email:    "djj@test.com",
-		Password: "1234567",
-		UsrName:  "test4",
-		UserId:   4, //通过id修改
+
+		UsrName: "test4",
+		UserId:  4, //通过id修改
 	})
 	if err != nil {
 		t.Fatal(err)
