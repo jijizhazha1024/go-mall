@@ -5,6 +5,7 @@ import (
 
 	"jijizhazha1024/go-mall/apis/user/internal/svc"
 	"jijizhazha1024/go-mall/apis/user/internal/types"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -27,11 +28,12 @@ func NewUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateLogi
 }
 
 func (l *UpdateLogic) Update(req *types.UpdateRequest) (resp *types.UpdateResponse, err error) {
-	// todo: add your logic here and delete this line
+
+	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
 
 	updateresp, err := l.svcCtx.UserRpc.UpdateUser(l.ctx, &users.UpdateUserRequest{
 		Password: req.Password,
-		UserId:   uint32(req.UserId),
+		UserId:   user_id,
 		Email:    req.Email,
 		UsrName:  req.UserName,
 	})

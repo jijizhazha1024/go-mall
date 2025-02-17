@@ -5,6 +5,7 @@ import (
 
 	"jijizhazha1024/go-mall/apis/user/internal/svc"
 	"jijizhazha1024/go-mall/apis/user/internal/types"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/usersclient"
 
@@ -27,10 +28,12 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 }
 
 func (l *LogoutLogic) Logout(req *types.LogoutRequest) (resp *types.LogoutResponse, err error) {
-	// todo: add your logic here and delete this line
+
+	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
+
 	logoutrep, err := l.svcCtx.UserRpc.Logout(l.ctx, &usersclient.LogoutRequest{
 
-		UserId: uint32(req.UserId),
+		UserId: user_id,
 	})
 	if err != nil {
 

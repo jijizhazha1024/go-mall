@@ -23,22 +23,17 @@ type (
 		RefreshToken string `json:"refresh_token"`
 	}
 	// 用户登出请求
-	LogoutRequest {
-		UserId int64 `json:"user_id"`
-	}
+	LogoutRequest  {}
 	// 用户登出响应
 	LogoutResponse {
 		logout_at int64 `json:"logout_at"`
 	}
 	// 删除用户请求
-	DeleteRequest {
-		UserId int64 `json:"user_id"`
-	}
+	DeleteRequest  {}
 	// 删除用户响应
 	DeleteResponse  {}
 	// 更新用户请求
 	UpdateRequest {
-		UserId    int64  `json:"user_id"`
 		AvatarUrl string `json:"avatar_url"`
 		Email     string `json:"email"`
 		UserName  string `json:"user_name"`
@@ -51,9 +46,7 @@ type (
 		UserName string `json:"user_name"`
 	}
 	// 获取用户信息请求
-	GetInfoRequest {
-		UserId int64 `json:"user_id"`
-	}
+	GetInfoRequest  {}
 	// 获取用户信息响应
 	GetInfoResponse {
 		UserId    int64  `json:"user_id"`

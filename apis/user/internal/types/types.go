@@ -58,7 +58,6 @@ type DeleteAddressResponse struct {
 }
 
 type DeleteRequest struct {
-	UserId int64 `json:"user_id"`
 }
 
 type DeleteResponse struct {
@@ -74,7 +73,6 @@ type GetAddressResponse struct {
 }
 
 type GetInfoRequest struct {
-	UserId int64 `json:"user_id"`
 }
 
 type GetInfoResponse struct {
@@ -97,7 +95,6 @@ type LoginResponse struct {
 }
 
 type LogoutRequest struct {
-	UserId int64 `json:"user_id"`
 }
 
 type LogoutResponse struct {
@@ -131,7 +128,6 @@ type UpdateAddressResponse struct {
 }
 
 type UpdateRequest struct {
-	UserId    int64  `json:"user_id"`
 	AvatarUrl string `json:"avatar_url"`
 	Email     string `json:"email"`
 	UserName  string `json:"user_name"`

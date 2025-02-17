@@ -5,6 +5,7 @@ import (
 
 	"jijizhazha1024/go-mall/apis/user/internal/svc"
 	"jijizhazha1024/go-mall/apis/user/internal/types"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/usersclient"
 
@@ -27,10 +28,11 @@ func NewDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteLogi
 }
 
 func (l *DeleteLogic) Delete(req *types.DeleteRequest) (resp *types.DeleteResponse, err error) {
-	// todo: add your logic here and delete this line
+
+	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
 
 	deleteresp, err := l.svcCtx.UserRpc.DeleteUser(l.ctx, &usersclient.DeleteUserRequest{
-		UserId: uint32(req.UserId),
+		UserId: uint32(user_id),
 	})
 	if err != nil {
 

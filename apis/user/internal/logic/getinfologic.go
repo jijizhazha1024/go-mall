@@ -6,6 +6,7 @@ import (
 
 	"jijizhazha1024/go-mall/apis/user/internal/svc"
 	"jijizhazha1024/go-mall/apis/user/internal/types"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -28,10 +29,11 @@ func NewGetInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetInfoLo
 }
 
 func (l *GetInfoLogic) GetInfo(req *types.GetInfoRequest) (resp *types.GetInfoResponse, err error) {
-	// todo: add your logic here and delete this line
+
+	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
 
 	getresp, err := l.svcCtx.UserRpc.GetUser(l.ctx, &users.GetUserRequest{
-		UserId: uint32(req.UserId),
+		UserId: user_id,
 	})
 	if err != nil {
 
