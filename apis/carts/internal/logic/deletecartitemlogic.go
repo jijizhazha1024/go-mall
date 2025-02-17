@@ -29,7 +29,7 @@ func NewDeleteCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *De
 
 func (l *DeleteCartItemLogic) DeleteCartItem(req *types.DeleteCartReq) (resp *types.DeleteCartResp, err error) {
 	userId := l.ctx.Value(biz.UserIDKey).(uint32)
-	res, err := l.svcCtx.CartRpc.DeleteCartItem(l.ctx, &carts.CartItemRequest{
+	res, err := l.svcCtx.CartsRpc.DeleteCartItem(l.ctx, &carts.CartItemRequest{
 		UserId:    int32(userId),
 		ProductId: req.ProductId,
 	})
@@ -38,7 +38,6 @@ func (l *DeleteCartItemLogic) DeleteCartItem(req *types.DeleteCartReq) (resp *ty
 	if err != nil {
 		l.Logger.Errorw("call rpc DeleteCartItem failed",
 			logx.Field("err", err),
-			logx.Field("request_id", req.Id),
 			logx.Field("user_id", req.UserId),
 			logx.Field("product_id", req.ProductId))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)

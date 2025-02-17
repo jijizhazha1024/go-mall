@@ -8,7 +8,8 @@ import (
 type Config struct {
 	rest.RestConf
 	AuthsRpc       zrpc.RpcClientConf
-	CartRpc        zrpc.RpcClientConf
+	CartsRpc       zrpc.RpcClientConf
+	ProductRpc     zrpc.RpcClientConf
 	WhitePathList  []string `json:",optional"`
 	OptionPathList []string `json:",optional"`
 }

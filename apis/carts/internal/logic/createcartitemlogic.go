@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"github.com/zeromicro/x/errors"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/carts/carts"
 
@@ -27,9 +28,9 @@ func NewCreateCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cr
 }
 
 func (l *CreateCartItemLogic) CreateCartItem(req *types.CreateCartReq) (resp *types.CreateCartResp, err error) {
-	// todo: add your logic here and delete this line
-	res, err := l.svcCtx.CartRpc.CreateCartItem(l.ctx, &carts.CartItemRequest{
-		UserId:       req.UserId,
+	userId := l.ctx.Value(biz.UserIDKey).(uint32)
+	res, err := l.svcCtx.CartsRpc.CreateCartItem(l.ctx, &carts.CartItemRequest{
+		UserId:       int32(userId),
 		ProductId:    req.ProductId,
 		ProductName:  req.ProductName,
 		ProductImage: req.ProuctImage,
