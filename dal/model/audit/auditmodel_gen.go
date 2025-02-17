@@ -42,6 +42,7 @@ type (
 		ActionDesc  sql.NullString `db:"action_desc"`  // 操作描述
 		OldData     sql.NullString `db:"old_data"`     // 旧数据
 		NewData     sql.NullString `db:"new_data"`     // 新数据
+		ServiceName string         `db:"service_name"` // 服务名称
 		TargetTable string         `db:"target_table"` // 目标表
 		TargetId    uint64         `db:"target_id"`    // 目标id
 		ClientIp    string         `db:"client_ip"`    // ip地址
@@ -93,14 +94,14 @@ func (m *defaultAuditModel) FindOneByTraceId(ctx context.Context, traceId string
 }
 
 func (m *defaultAuditModel) Insert(ctx context.Context, data *Audit) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, auditRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.ActionType, data.ActionDesc, data.OldData, data.NewData, data.TargetTable, data.TargetId, data.ClientIp, data.TraceId, data.SpanId)
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, auditRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.ActionType, data.ActionDesc, data.OldData, data.NewData, data.ServiceName, data.TargetTable, data.TargetId, data.ClientIp, data.TraceId, data.SpanId)
 	return ret, err
 }
 
 func (m *defaultAuditModel) Update(ctx context.Context, newData *Audit) error {
 	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, auditRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, newData.UserId, newData.ActionType, newData.ActionDesc, newData.OldData, newData.NewData, newData.TargetTable, newData.TargetId, newData.ClientIp, newData.TraceId, newData.SpanId, newData.Id)
+	_, err := m.conn.ExecCtx(ctx, query, newData.UserId, newData.ActionType, newData.ActionDesc, newData.OldData, newData.NewData, newData.ServiceName, newData.TargetTable, newData.TargetId, newData.ClientIp, newData.TraceId, newData.SpanId, newData.Id)
 	return err
 }
 

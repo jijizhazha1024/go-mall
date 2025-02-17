@@ -84,12 +84,14 @@ func (a *AuditMQ) ToMysql(ctx context.Context, data *AuditReq) (int64, error) {
 		TargetTable: data.TargetTable,
 		ActionType:  data.ActionType,
 		ClientIp:    data.ClientIP,
+		ServiceName: data.ServiceName,
 		ActionDesc:  sql.NullString{String: data.ActionDesc, Valid: data.ActionDesc != ""},
 		OldData:     sql.NullString{String: data.OldData, Valid: data.OldData != ""},
 		NewData:     sql.NullString{String: data.NewData, Valid: data.NewData != ""},
-		SpanId:      data.SpanID,
-		TraceId:     data.TraceID,
-		CreatedAt:   time.Unix(data.CreatedAt, 0),
+
+		SpanId:    data.SpanID,
+		TraceId:   data.TraceID,
+		CreatedAt: time.Unix(data.CreatedAt, 0),
 	})
 	if err != nil {
 		return 0, err

@@ -3,6 +3,7 @@
     "properties": {
       "user_id": { "type": "integer" },
       "action_type": { "type": "keyword" },
+      "service_name": { "type": "keyword" },
       "action_desc": { "type": "text" },
       "old_data": { "type": "text" },
       "new_data": { "type": "text" },

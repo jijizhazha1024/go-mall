@@ -40,6 +40,7 @@ type AuditReq struct {
 	TargetID    int64  `json:"target_id"`
 	OldData     string `json:"old_data"`
 	NewData     string `json:"new_data"`
+	ServiceName string `json:"service_name"`
 
 	// trace
 	TraceID  string `json:"trace_id"`

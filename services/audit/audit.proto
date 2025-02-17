@@ -20,6 +20,7 @@ message CreateAuditLogReq {
   string new_data = 7;          // 操作后的数据（JSON格式）
   int64 create_at = 8;
   string client_ip = 9;
+  string service_name = 10;
 }
 
 // 创建审计日志响应

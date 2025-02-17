@@ -43,6 +43,9 @@ func Validate(req *audit.CreateAuditLogReq) error {
 	if req.GetClientIp() == "" {
 		errs = append(errs, errors.New("client_ip is required"))
 	}
+	if req.GetServiceName() == "" {
+		errs = append(errs, errors.New("service_name is required"))
+	}
 
 	if len(errs) > 0 {
 		return errors.Join(errs...)
