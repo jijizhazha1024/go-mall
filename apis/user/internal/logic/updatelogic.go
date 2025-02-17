@@ -32,10 +32,10 @@ func (l *UpdateLogic) Update(req *types.UpdateRequest) (resp *types.UpdateRespon
 	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
 
 	updateresp, err := l.svcCtx.UserRpc.UpdateUser(l.ctx, &users.UpdateUserRequest{
-		Password: req.Password,
-		UserId:   user_id,
-		Email:    req.Email,
-		UsrName:  req.UserName,
+
+		UserId: user_id,
+
+		UsrName: req.UserName,
 	})
 
 	if err != nil {
@@ -52,7 +52,6 @@ func (l *UpdateLogic) Update(req *types.UpdateRequest) (resp *types.UpdateRespon
 
 	resp = &types.UpdateResponse{
 
-		Email:    updateresp.Email,
 		UserName: updateresp.UserName,
 		UserId:   int64(updateresp.UserId),
 	}

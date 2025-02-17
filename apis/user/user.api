@@ -34,14 +34,10 @@ type (
 	DeleteResponse  {}
 	// 更新用户请求
 	UpdateRequest {
-		AvatarUrl string `json:"avatar_url"`
-		Email     string `json:"email"`
-		UserName  string `json:"user_name"`
-		Password  string `json:"password"`
+		UserName string `json:"user_name"`
 	}
 	// 更新用户响应
 	UpdateResponse {
-		Email    string `json:"email"`
 		UserId   int64  `json:"user_id"`
 		UserName string `json:"user_name"`
 	}

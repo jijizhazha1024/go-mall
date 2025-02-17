@@ -128,14 +128,10 @@ type UpdateAddressResponse struct {
 }
 
 type UpdateRequest struct {
-	AvatarUrl string `json:"avatar_url"`
-	Email     string `json:"email"`
-	UserName  string `json:"user_name"`
-	Password  string `json:"password"`
+	UserName string `json:"user_name"`
 }
 
 type UpdateResponse struct {
-	Email    string `json:"email"`
 	UserId   int64  `json:"user_id"`
 	UserName string `json:"user_name"`
 }

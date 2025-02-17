@@ -19,6 +19,7 @@ type (
 		UpdateDeletebyId(ctx context.Context, userId int64, userDeleted bool) error
 		UpdateDeletebyEmail(ctx context.Context, email string, userDeleted bool) error
 		FindAllEmails() ([]string, error)
+		UpdateUserName(ctx context.Context, userId int64, userName string) error
 		GetLogoutTime(ctx context.Context, userId int64) (time.Time, error)
 		UpdateLoginTime(ctx context.Context, userId int64, loginTime time.Time) error
 		UpdateLogoutTime(ctx context.Context, userId int64, logoutTime time.Time) error
@@ -46,6 +47,11 @@ func (m *customUsersModel) withSession(session sqlx.Session) UsersModel {
 func (m *customUsersModel) UpdateDeletebyId(ctx context.Context, userId int64, userDeleted bool) error {
 	query := fmt.Sprintf("update %s set `user_deleted` = ? where `user_id` = ?", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, userDeleted, userId)
+	return err
+}
+func (m *customUsersModel) UpdateUserName(ctx context.Context, userId int64, userName string) error {
+	query := fmt.Sprintf("update %s set `username` = ? where `user_id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, userName, userId)
 	return err
 }
 
