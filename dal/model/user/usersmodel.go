@@ -24,6 +24,7 @@ type (
 		UpdateLoginTime(ctx context.Context, userId int64, loginTime time.Time) error
 		UpdateLogoutTime(ctx context.Context, userId int64, logoutTime time.Time) error
 		GetLoginTime(ctx context.Context, userId int64) (time.Time, error)
+		UpdatePasswordHash(ctx context.Context, userId int64, passwordHash string) error
 		// 从数据库中获取登出时间
 
 	}
@@ -108,6 +109,11 @@ func (m *customUsersModel) GetLogoutTime(ctx context.Context, userId int64) (tim
 	default:
 		return time.Time{}, err
 	}
+}
+func (m *customUsersModel) UpdatePasswordHash(ctx context.Context, userId int64, passwordHash string) error {
+	query := fmt.Sprintf("update %s set `password_hash` = ? where `user_id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, passwordHash, userId)
+	return err
 }
 
 // 从数据库中获取登出时间

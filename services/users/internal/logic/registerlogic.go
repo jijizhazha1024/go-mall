@@ -108,6 +108,14 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, updateErr)
 			}
 
+			updatepasswordErr := l.svcCtx.UsersModel.UpdatePasswordHash(l.ctx, existUser.UserId, PasswordHash)
+			if updatepasswordErr != nil {
+				l.Logger.Errorw("register update password_hash failed", logx.Field("err", updatepasswordErr),
+					logx.Field("email", in.Email))
+
+				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, updatepasswordErr)
+			}
+
 			return users_biz.HandleRegisterResp(code.UserCreatedMsg, code.UserCreated, uint32(existUser.UserId))
 		} else { // 未删除
 			l.Logger.Infow("register  user already exist",
