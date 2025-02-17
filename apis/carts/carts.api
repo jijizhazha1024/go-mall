@@ -65,18 +65,18 @@ type (
 service carts-api {
 	// 获取用户的购物车信息
 	@handler CartItemListHandler
-	get /:id (UserInfo) returns (CartItemListResp)
+	get /list (UserInfo) returns (CartItemListResp)
 
 	// 增加商品到购物车
 	@handler CreateCartItemHandler
-	post / (CreateCartReq) returns (CreateCartResp)
+	post /add (CreateCartReq) returns (CreateCartResp)
 
 	//扣减商品到购物车
 	@handler SubCartItemHandler
-	post / (SubCartReq) returns (SubCartResp)
+	post /sub (SubCartReq) returns (SubCartResp)
 
 	// 删除购物车条目
 	@handler DeleteCartItemHandler
-	delete /:id (DeleteCartReq) returns (DeleteCartResp)
+	delete /delete (DeleteCartReq) returns (DeleteCartResp)
 }
 
