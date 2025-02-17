@@ -10,6 +10,6 @@ type Config struct {
 	AuthsRpc       zrpc.RpcClientConf
 	CartsRpc       zrpc.RpcClientConf
 	ProductRpc     zrpc.RpcClientConf
-	WhitePathList  []string `json:",optional"`
-	OptionPathList []string `json:",optional"`
+	WhitePathList  []string
+	OptionPathList []string
 }
