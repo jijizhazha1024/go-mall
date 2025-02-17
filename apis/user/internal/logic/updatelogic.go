@@ -29,6 +29,10 @@ func NewUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateLogi
 
 func (l *UpdateLogic) Update(req *types.UpdateRequest) (resp *types.UpdateResponse, err error) {
 
+	if req.UserName == "" {
+		return nil, errors.New(code.Fail, "用户名不能为空")
+	}
+
 	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
 
 	updateresp, err := l.svcCtx.UserRpc.UpdateUser(l.ctx, &users.UpdateUserRequest{
