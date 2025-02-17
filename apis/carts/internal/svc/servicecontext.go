@@ -19,7 +19,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
 		Config:                c,
 		CartRpc:               cartsclient.NewCart(zrpc.MustNewClient(c.CartRpc)),
+		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc, c.WhitePathList, c.OptionPathList),
 		WithClientMiddleware:  middleware.WithClientMiddleware,
-		WrapperAuthMiddleware: middleware.WrapperAuthMiddleware(c.AuthsRpc),
 	}
 }

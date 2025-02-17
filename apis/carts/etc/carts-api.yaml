@@ -5,9 +5,6 @@ Port: 8003
 CartsRpc:
   Target: consul://124.71.72.124:8500/carts.rpc?wait=14s
 
-Consul:
-  Host: 124.71.72.124:8500 # consul endpoint
-  Key: carts.rpc
 
 AuthsRpc:
   Target: consul://124.71.72.124:8500/auths.rpc?wait=14s
