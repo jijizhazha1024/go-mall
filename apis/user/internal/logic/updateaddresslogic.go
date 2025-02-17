@@ -28,7 +28,14 @@ func NewUpdateAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upd
 }
 
 func (l *UpdateAddressLogic) UpdateAddress(req *types.UpdateAddressRequest) (resp *types.UpdateAddressResponse, err error) {
-	// todo: add your logic here and delete this line
+
+	if req.City == "" || req.DetailedAddress == "" || req.DetailedAddress == "" || req.PhoneNumber == "" || req.Province == "" {
+
+		l.Logger.Errorf("用户信息为空", logx.Field("err", err))
+		return nil, errors.New(-1, "user informaition empty")
+
+	}
+
 	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
 	updateAddressresp, err := l.svcCtx.UserRpc.UpdateAddress(l.ctx, &users.UpdateAddressRequest{
 		RecipientName:   req.RecipientName,
