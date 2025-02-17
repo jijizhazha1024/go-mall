@@ -2,55 +2,77 @@ package audit
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/services/audit/audit"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"jijizhazha1024/go-mall/common/consts/biz"
 )
 
-var auditRpc audit.AuditClient
-var auditRpcOnce sync.Once
+var auditClient audit.AuditClient
+var auditOnce sync.Once
 
-func setupAuditRpcServer(t *testing.T) {
-	auditRpcOnce.Do(func() {
-		conn, err := grpc.NewClient(fmt.Sprintf("127.0.0.1:%d", biz.AuditRpcPort),
+func setupAuditClient(t *testing.T) {
+	auditOnce.Do(func() {
+		conn, err := grpc.NewClient(
+			fmt.Sprintf("127.0.0.1:%d", biz.AuditRpcPort),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 		if err != nil {
-			t.Fatalf("Failed to connect to RPC server: %v", err)
+			t.Fatalf("连接审计服务失败: %v", err)
 		}
-		auditRpc = audit.NewAuditClient(conn)
+		auditClient = audit.NewAuditClient(conn)
 	})
 }
 
 func TestCreateAuditLog(t *testing.T) {
-	setupAuditRpcServer(t)
-	data, err := json.Marshal(map[string]string{
-		"user_id":  "1",
-		"username": "test",
-	})
-	if err != nil {
-		t.Fatalf("Failed to call CreateAuditLog: %v", err)
-	}
-	for i := 0; i < 20; i++ {
-		_, err := auditRpc.CreateAuditLog(context.Background(), &audit.CreateAuditLogReq{
-			UserId:            1,
-			ActionType:        "test",
-			ActionDescription: "test",
-			TargetId:          1,
-			OldData:           string(data),
-			NewData:           string(data),
-			CreateAt:          time.Now().Unix(),
-			ClientIp:          "127.0.0.1",
-		})
-		if err != nil {
-			t.Fatalf("Failed to call CreateAuditLog: %v", err)
+	setupAuditClient(t)
+	ctx := context.Background()
+	now := time.Now().Unix()
+
+	t.Run("正常创建审计日志", func(t *testing.T) {
+		validReq := &audit.CreateAuditLogReq{
+			UserId:      1001,
+			ActionType:  "UPDATE",
+			TargetTable: "products",
+			TargetId:    2001,
+			ClientIp:    "192.168.1.1",
+			ServiceName: "product_service",
+			// 以下为非必填字段
+			ActionDescription: "更新商品价格",
+			OldData:           `{"price": 100}`,
+			NewData:           `{"price": 120}`,
+			CreateAt:          now,
 		}
-	}
+
+		// 调用服务
+		resp, err := auditClient.CreateAuditLog(ctx, validReq)
+		assert.NoError(t, err)
+		assert.Equal(t, uint32(0), resp.StatusCode)
+		assert.True(t, resp.Ok)
+	})
+	t.Run("创建审计日志时缺少必填字段", func(t *testing.T) {
+		invalidReq := &audit.CreateAuditLogReq{
+			UserId:      1001,
+			ActionType:  "UPDATE",
+			TargetTable: "products",
+			TargetId:    2001,
+			ServiceName: "product_service",
+			// 以下为非必填字段
+			ActionDescription: "更新商品价格",
+			OldData:           `{"price": 100}`,
+			NewData:           `{"price": 120}`,
+			CreateAt:          now,
+		}
+		// 调用服务
+		_, err := auditClient.CreateAuditLog(ctx, invalidReq)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "client_ip is required")
+	})
 
 }
