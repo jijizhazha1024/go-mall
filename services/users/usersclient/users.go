@@ -14,20 +14,31 @@ import (
 )
 
 type (
-	DeleteUserRequest  = users.DeleteUserRequest
-	DeleteUserResponse = users.DeleteUserResponse
-	GetUserRequest     = users.GetUserRequest
-	GetUserResponse    = users.GetUserResponse
-	LoginRequest       = users.LoginRequest
-	LoginResponse      = users.LoginResponse
-	LogoutRequest      = users.LogoutRequest
-	LogoutResponse     = users.LogoutResponse
-	RegisterRequest    = users.RegisterRequest
-	RegisterResponse   = users.RegisterResponse
-	Request            = users.Request
-	Response           = users.Response
-	UpdateUserRequest  = users.UpdateUserRequest
-	UpdateUserResponse = users.UpdateUserResponse
+	AddAddressRequest      = users.AddAddressRequest
+	AddAddressResponse     = users.AddAddressResponse
+	AddressData            = users.AddressData
+	AddressListResponse    = users.AddressListResponse
+	AllAddressLitstRequest = users.AllAddressLitstRequest
+	DeleteAddressRequest   = users.DeleteAddressRequest
+	DeleteAddressResponse  = users.DeleteAddressResponse
+	DeleteUserRequest      = users.DeleteUserRequest
+	DeleteUserResponse     = users.DeleteUserResponse
+	GetAddressRequest      = users.GetAddressRequest
+	GetAddressResponse     = users.GetAddressResponse
+	GetUserRequest         = users.GetUserRequest
+	GetUserResponse        = users.GetUserResponse
+	LoginRequest           = users.LoginRequest
+	LoginResponse          = users.LoginResponse
+	LogoutRequest          = users.LogoutRequest
+	LogoutResponse         = users.LogoutResponse
+	RegisterRequest        = users.RegisterRequest
+	RegisterResponse       = users.RegisterResponse
+	Request                = users.Request
+	Response               = users.Response
+	UpdateAddressRequest   = users.UpdateAddressRequest
+	UpdateAddressResponse  = users.UpdateAddressResponse
+	UpdateUserRequest      = users.UpdateUserRequest
+	UpdateUserResponse     = users.UpdateUserResponse
 
 	Users interface {
 		Ping(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
@@ -43,6 +54,15 @@ type (
 		UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
 		// 获取用户信息方法
 		GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
+		AddAddress(ctx context.Context, in *AddAddressRequest, opts ...grpc.CallOption) (*AddAddressResponse, error)
+		// 删除用户地址
+		DeleteAddress(ctx context.Context, in *DeleteAddressRequest, opts ...grpc.CallOption) (*DeleteAddressResponse, error)
+		// 修改用户地址
+		UpdateAddress(ctx context.Context, in *UpdateAddressRequest, opts ...grpc.CallOption) (*UpdateAddressResponse, error)
+		// 获取所有收货地址
+		ListAddresses(ctx context.Context, in *AllAddressLitstRequest, opts ...grpc.CallOption) (*AddressListResponse, error)
+		// 获取单个收货地址
+		GetAddress(ctx context.Context, in *GetAddressRequest, opts ...grpc.CallOption) (*GetAddressResponse, error)
 	}
 
 	defaultUsers struct {
@@ -95,4 +115,33 @@ func (m *defaultUsers) UpdateUser(ctx context.Context, in *UpdateUserRequest, op
 func (m *defaultUsers) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
 	client := users.NewUsersClient(m.cli.Conn())
 	return client.GetUser(ctx, in, opts...)
+}
+
+func (m *defaultUsers) AddAddress(ctx context.Context, in *AddAddressRequest, opts ...grpc.CallOption) (*AddAddressResponse, error) {
+	client := users.NewUsersClient(m.cli.Conn())
+	return client.AddAddress(ctx, in, opts...)
+}
+
+// 删除用户地址
+func (m *defaultUsers) DeleteAddress(ctx context.Context, in *DeleteAddressRequest, opts ...grpc.CallOption) (*DeleteAddressResponse, error) {
+	client := users.NewUsersClient(m.cli.Conn())
+	return client.DeleteAddress(ctx, in, opts...)
+}
+
+// 修改用户地址
+func (m *defaultUsers) UpdateAddress(ctx context.Context, in *UpdateAddressRequest, opts ...grpc.CallOption) (*UpdateAddressResponse, error) {
+	client := users.NewUsersClient(m.cli.Conn())
+	return client.UpdateAddress(ctx, in, opts...)
+}
+
+// 获取所有收货地址
+func (m *defaultUsers) ListAddresses(ctx context.Context, in *AllAddressLitstRequest, opts ...grpc.CallOption) (*AddressListResponse, error) {
+	client := users.NewUsersClient(m.cli.Conn())
+	return client.ListAddresses(ctx, in, opts...)
+}
+
+// 获取单个收货地址
+func (m *defaultUsers) GetAddress(ctx context.Context, in *GetAddressRequest, opts ...grpc.CallOption) (*GetAddressResponse, error) {
+	client := users.NewUsersClient(m.cli.Conn())
+	return client.GetAddress(ctx, in, opts...)
 }

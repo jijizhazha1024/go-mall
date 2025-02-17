@@ -19,10 +19,12 @@ type (
 		UpdateDeletebyId(ctx context.Context, userId int64, userDeleted bool) error
 		UpdateDeletebyEmail(ctx context.Context, email string, userDeleted bool) error
 		FindAllEmails() ([]string, error)
+		UpdateUserName(ctx context.Context, userId int64, userName string) error
 		GetLogoutTime(ctx context.Context, userId int64) (time.Time, error)
 		UpdateLoginTime(ctx context.Context, userId int64, loginTime time.Time) error
 		UpdateLogoutTime(ctx context.Context, userId int64, logoutTime time.Time) error
 		GetLoginTime(ctx context.Context, userId int64) (time.Time, error)
+		UpdatePasswordHash(ctx context.Context, userId int64, passwordHash string) error
 		// 从数据库中获取登出时间
 
 	}
@@ -46,6 +48,11 @@ func (m *customUsersModel) withSession(session sqlx.Session) UsersModel {
 func (m *customUsersModel) UpdateDeletebyId(ctx context.Context, userId int64, userDeleted bool) error {
 	query := fmt.Sprintf("update %s set `user_deleted` = ? where `user_id` = ?", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, userDeleted, userId)
+	return err
+}
+func (m *customUsersModel) UpdateUserName(ctx context.Context, userId int64, userName string) error {
+	query := fmt.Sprintf("update %s set `username` = ? where `user_id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, userName, userId)
 	return err
 }
 
@@ -77,15 +84,14 @@ func (m *customUsersModel) FindAllEmails() ([]string, error) {
 func (m *customUsersModel) GetLoginTime(ctx context.Context, userId int64) (time.Time, error) {
 	query := fmt.Sprintf("select %s from %s where `user_id` = ? limit 1", usersRows, m.table)
 	var user Users
-	now := time.Now()
+
 	err := m.conn.QueryRowCtx(ctx, &user, query, userId)
+	t := time.Time{}
 	switch err {
 	case nil:
 		return user.LoginAt.Time, nil
-	case sqlx.ErrNotFound:
-		return now.Add(2 * time.Hour), ErrNotFound
 	default:
-		return time.Time{}, err
+		return t, err
 	}
 
 }
@@ -103,6 +109,11 @@ func (m *customUsersModel) GetLogoutTime(ctx context.Context, userId int64) (tim
 	default:
 		return time.Time{}, err
 	}
+}
+func (m *customUsersModel) UpdatePasswordHash(ctx context.Context, userId int64, passwordHash string) error {
+	query := fmt.Sprintf("update %s set `password_hash` = ? where `user_id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, passwordHash, userId)
+	return err
 }
 
 // 从数据库中获取登出时间
