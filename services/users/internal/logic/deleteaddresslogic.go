@@ -39,10 +39,7 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 			}, nil
 		}
 		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
-		return &users.DeleteAddressResponse{
-			StatusMsg:  code.ServerErrorMsg,
-			StatusCode: code.ServerError,
-		}, err
+		return &users.DeleteAddressResponse{}, err
 	}
 
 	err = l.svcCtx.AddressModel.DeleteByAddressIdandUserId(l.ctx, in.AddressId, int32(in.UserId))
@@ -56,14 +53,8 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 			}, nil
 		}
 		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
-		return &users.DeleteAddressResponse{
-			StatusCode: code.ServerError,
-			StatusMsg:  code.ServerErrorMsg,
-		}, err
+		return &users.DeleteAddressResponse{}, err
 	}
 
-	return &users.DeleteAddressResponse{
-		StatusCode: code.DeleteUserAddressSuccess,
-		StatusMsg:  code.DeleteUserAddressSuccessMsg,
-	}, nil
+	return &users.DeleteAddressResponse{}, nil
 }

@@ -38,11 +38,9 @@ func (l *DeleteLogic) Delete(req *types.DeleteRequest) (resp *types.DeleteRespon
 
 		l.Logger.Errorf("call rpc deleteuser failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
-	} else {
-		if deleteresp.StatusCode != code.UserDeleted {
-			l.Logger.Errorf("delete failed", logx.Field("status_code", deleteresp.StatusCode), logx.Field("status_msg", deleteresp.StatusMsg))
-			return nil, errors.New(int(deleteresp.StatusCode), deleteresp.StatusMsg)
-		}
+	} else if deleteresp.StatusMsg != "" {
+		l.Logger.Errorf("delete failed", logx.Field("status_code", deleteresp.StatusCode), logx.Field("status_msg", deleteresp.StatusMsg))
+		return nil, errors.New(int(deleteresp.StatusCode), deleteresp.StatusMsg)
 
 	}
 	resp = &types.DeleteResponse{}

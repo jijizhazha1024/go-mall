@@ -28,8 +28,8 @@ func TestUsersRpc(t *testing.T) {
 
 	//这里可以从token中获取user——id
 	resp, err := users_client.GetAddress((context.Context)(context.Background()), &users.GetAddressRequest{
-		UserId:    30,
-		AddressId: 1,
+		UserId:    1,
+		AddressId: 13,
 	})
 
 	if err != nil {

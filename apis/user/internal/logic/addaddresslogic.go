@@ -55,11 +55,9 @@ func (l *AddAddressLogic) AddAddress(req *types.AddAddressRequest) (resp *types.
 		l.Logger.Errorf("call rpc add address add failed", logx.Field("err", err))
 
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
-	} else {
-		if addaddressresp.StatusCode != code.AddUserAddressSuccess {
-			l.Logger.Errorf("call rpc add address add failed", logx.Field("status_code", addaddressresp.StatusCode), logx.Field("status_msg", addaddressresp.StatusMsg))
-			return nil, errors.New(int(addaddressresp.StatusCode), addaddressresp.StatusMsg)
-		}
+	} else if addaddressresp.StatusMsg != "" {
+		l.Logger.Errorf("call rpc add address add failed", logx.Field("status_code", addaddressresp.StatusCode), logx.Field("status_msg", addaddressresp.StatusMsg))
+		return nil, errors.New(int(addaddressresp.StatusCode), addaddressresp.StatusMsg)
 
 	}
 

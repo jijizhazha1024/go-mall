@@ -41,10 +41,7 @@ func (l *GetAddressLogic) GetAddress(in *users.GetAddressRequest) (*users.GetAdd
 		}
 
 		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("user_id", in.UserId), logx.Field("address_id", in.AddressId), logx.Field("err", err))
-		return &users.GetAddressResponse{
-			StatusMsg:  code.ServerErrorMsg,
-			StatusCode: code.ServerError,
-		}, err
+		return &users.GetAddressResponse{}, err
 	}
 
 	data := &users.AddressData{
@@ -60,8 +57,7 @@ func (l *GetAddressLogic) GetAddress(in *users.GetAddressRequest) (*users.GetAdd
 	}
 
 	return &users.GetAddressResponse{
-		StatusMsg:  code.GetUserAddressSuccessMsg,
-		StatusCode: code.GetUserAddressSuccess,
-		Data:       data,
+
+		Data: data,
 	}, nil
 }
