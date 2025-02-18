@@ -8,6 +8,8 @@ import (
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
+	productDal "jijizhazha1024/go-mall/dal/model/products/product"
+	"jijizhazha1024/go-mall/dal/model/products/product_categories"
 	"jijizhazha1024/go-mall/services/product/internal/svc"
 	"jijizhazha1024/go-mall/services/product/product"
 )
@@ -31,6 +33,7 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 	// todo: add your logic here and delete this line
 	product_id := in.Id
 	productModel := product2.NewProductsModel(l.svcCtx.Mysql)
+	product_categoriesModel := product_categories.NewProductCategoriesModel(l.svcCtx.Mysql)
 	// 在redis中维护商品的访问频率次数 PV
 	// 检查商品 ID 是否存在
 	redisKey := biz.ProductRedisPVName
@@ -78,8 +81,27 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 
 	// 如果Redis中没有数据，从数据库中获取
 	productData, err := productModel.FindOne(l.ctx, int64(product_id))
+	if err == productDal.ErrNotFound {
+		l.Logger.Errorf("don't find product from database",
+			logx.Field("err", err),
+			logx.Field("product_id", in.Id))
+		return &product.GetProductResp{
+			StatusCode: uint32(code.NoProductFromDataBase),
+			StatusMsg:  code.NoProductFromDataBaseMsg,
+		}, err
+	}
 	if err != nil {
 		l.Logger.Errorw("Failed to find product from database",
+			logx.Field("err", err),
+			logx.Field("product_id", in.Id))
+		return &product.GetProductResp{
+			StatusCode: uint32(code.ProductInfoRetrievalFailed),
+			StatusMsg:  code.ProductInfoRetrievalFailedMsg,
+		}, err
+	}
+	ids, err := product_categoriesModel.FindCategoriesByIds(l.ctx, int64(product_id))
+	if err != nil {
+		l.Logger.Errorw("Failed to find product_category from database",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Id))
 		return &product.GetProductResp{
@@ -95,7 +117,7 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 		Picture:     productData.Picture.String,
 		Price:       float32(productData.Price),
 		Stock:       productData.Stock,
-		Categories:  nil,
+		Categories:  ids,
 	}
 
 	// 将数据缓存到Redis中
