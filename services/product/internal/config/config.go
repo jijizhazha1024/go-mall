@@ -15,6 +15,7 @@ type Config struct {
 	ElasticsearchConfig ElasticsearchConfig
 	QiNiu               QiNiu
 	Consul              consul.Conf
+	InventoryRpc        zrpc.RpcClientConf
 }
 type MysqlConfig struct {
 	DataSource  string

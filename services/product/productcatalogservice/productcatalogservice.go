@@ -22,6 +22,8 @@ type (
 	GetAllProductsResp = product.GetAllProductsResp
 	GetProductReq      = product.GetProductReq
 	GetProductResp     = product.GetProductResp
+	IsExistProductReq  = product.IsExistProductReq
+	IsExistProductResp = product.IsExistProductResp
 	Product            = product.Product
 	UpdateProductReq   = product.UpdateProductReq
 	UpdateProductResp  = product.UpdateProductResp
@@ -37,6 +39,8 @@ type (
 		DeleteProduct(ctx context.Context, in *DeleteProductReq, opts ...grpc.CallOption) (*DeleteProductResp, error)
 		// 分页得到全部商品
 		GetAllProduct(ctx context.Context, in *GetAllProductsReq, opts ...grpc.CallOption) (*GetAllProductsResp, error)
+		// 判断商品是否存在
+		IsExistProduct(ctx context.Context, in *IsExistProductReq, opts ...grpc.CallOption) (*IsExistProductResp, error)
 	}
 
 	defaultProductCatalogService struct {
@@ -78,4 +82,10 @@ func (m *defaultProductCatalogService) DeleteProduct(ctx context.Context, in *De
 func (m *defaultProductCatalogService) GetAllProduct(ctx context.Context, in *GetAllProductsReq, opts ...grpc.CallOption) (*GetAllProductsResp, error) {
 	client := product.NewProductCatalogServiceClient(m.cli.Conn())
 	return client.GetAllProduct(ctx, in, opts...)
+}
+
+// 判断商品是否存在
+func (m *defaultProductCatalogService) IsExistProduct(ctx context.Context, in *IsExistProductReq, opts ...grpc.CallOption) (*IsExistProductResp, error) {
+	client := product.NewProductCatalogServiceClient(m.cli.Conn())
+	return client.IsExistProduct(ctx, in, opts...)
 }

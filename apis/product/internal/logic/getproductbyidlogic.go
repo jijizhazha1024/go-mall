@@ -2,13 +2,11 @@ package logic
 
 import (
 	"context"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/x/errors"
-	"jijizhazha1024/go-mall/services/product/product"
-
 	"jijizhazha1024/go-mall/apis/product/internal/svc"
 	"jijizhazha1024/go-mall/apis/product/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
+	"jijizhazha1024/go-mall/services/product/product"
 )
 
 type GetProductByIDLogic struct {

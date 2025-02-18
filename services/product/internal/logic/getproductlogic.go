@@ -43,10 +43,7 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 		l.Logger.Errorw("自增商品的访问次数失败",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Id))
-		return &product.GetProductResp{
-			StatusCode: uint32(code.ProductCacheFailed),
-			StatusMsg:  code.ProductCacheFailedMsg,
-		}, err
+		return nil, err
 	}
 	// 从Redis中获取数据
 	cacheData, err := l.svcCtx.RedisClient.Get(cacheKey)
@@ -57,7 +54,7 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 		return &product.GetProductResp{
 			StatusCode: uint32(code.ProductCacheFailed),
 			StatusMsg:  code.ProductCacheFailedMsg,
-		}, err
+		}, nil
 	}
 
 	// 如果Redis中有数据，直接反序列化并返回
@@ -67,10 +64,7 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 			l.Logger.Errorw("Failed to unmarshal data",
 				logx.Field("err", err),
 				logx.Field("product_id", in.Id))
-			return &product.GetProductResp{
-				StatusCode: uint32(code.ProductCacheFailed),
-				StatusMsg:  code.ProductCacheFailedMsg,
-			}, err
+			return nil, err
 		}
 		return &product.GetProductResp{
 			StatusCode: uint32(code.ProductInfoRetrieved),
@@ -85,29 +79,20 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 		l.Logger.Errorf("don't find product from database",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Id))
-		return &product.GetProductResp{
-			StatusCode: uint32(code.NoProductFromDataBase),
-			StatusMsg:  code.NoProductFromDataBaseMsg,
-		}, err
+		return nil, err
 	}
 	if err != nil {
 		l.Logger.Errorw("Failed to find product from database",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Id))
-		return &product.GetProductResp{
-			StatusCode: uint32(code.ProductInfoRetrievalFailed),
-			StatusMsg:  code.ProductInfoRetrievalFailedMsg,
-		}, err
+		return nil, err
 	}
 	ids, err := product_categoriesModel.FindCategoriesByIds(l.ctx, int64(product_id))
 	if err != nil {
 		l.Logger.Errorw("Failed to find product_category from database",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Id))
-		return &product.GetProductResp{
-			StatusCode: uint32(code.ProductInfoRetrievalFailed),
-			StatusMsg:  code.ProductInfoRetrievalFailedMsg,
-		}, err
+		return nil, err
 	}
 	// 构造响应
 	resp := &product.Product{
@@ -127,20 +112,14 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 		l.Logger.Errorw("Failed to unmarshal data",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Id))
-		return &product.GetProductResp{
-			StatusCode: uint32(code.ProductCacheFailed),
-			StatusMsg:  code.ProductCacheFailedMsg,
-		}, err
+		return nil, err
 	}
 	err = l.svcCtx.RedisClient.Set(cacheKey, cacheData)
 	if err != nil {
 		l.Logger.Errorw("Failed to save redis data",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Id))
-		return &product.GetProductResp{
-			StatusCode: uint32(code.ProductCacheFailed),
-			StatusMsg:  code.ProductCacheFailedMsg,
-		}, err
+		return nil, err
 	}
 	return &product.GetProductResp{
 		StatusCode: uint32(code.ProductInfoRetrieved),

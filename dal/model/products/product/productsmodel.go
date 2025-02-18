@@ -16,6 +16,7 @@ type (
 		WithSession(session sqlx.Session) ProductsModel
 		FindPage(ctx context.Context, offset, limit int) ([]*Products, error)
 		Count(ctx context.Context) (int64, error)
+		FindProductIsExist(ctx context.Context, productID int64) (bool, error)
 	}
 
 	CustomProductsModel struct {
@@ -51,4 +52,14 @@ func (m *defaultProductsModel) Count(ctx context.Context) (int64, error) {
 		return 0, err
 	}
 	return count, nil
+}
+func (m *defaultProductsModel) FindProductIsExist(ctx context.Context, productID int64) (bool, error) {
+	var count int
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE id=?", m.table)
+
+	err := m.conn.QueryRowCtx(ctx, &count, query, productID)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }
