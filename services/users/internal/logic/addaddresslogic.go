@@ -87,18 +87,12 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 			return nil
 		}); err != nil {
 			l.Logger.Errorw("update and add default address failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
-			return &users.AddAddressResponse{
-				StatusMsg:  code.AddUserAddressFailedMsg,
-				StatusCode: code.AddUserAddressFailed,
-			}, err
+			return &users.AddAddressResponse{}, err
 		}
 		id, err := result.LastInsertId()
 		if err != nil {
 			l.Logger.Errorw("id insert failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
-			return &users.AddAddressResponse{
-				StatusMsg:  code.AddUserAddressFailedMsg,
-				StatusCode: code.AddUserAddressFailed,
-			}, err
+			return &users.AddAddressResponse{}, err
 		}
 
 		data := &users.AddressData{
@@ -112,9 +106,8 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 		}
 
 		return &users.AddAddressResponse{
-			StatusMsg:  code.AddUserAddressSuccessMsg,
-			StatusCode: code.AddUserAddressSuccess,
-			Data:       data,
+
+			Data: data,
 		}, nil
 
 	} else { //不存在 增加新的默认地址
@@ -129,20 +122,14 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 		})
 		if err != nil {
 			l.Logger.Errorw("add address failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
-			return &users.AddAddressResponse{
-				StatusMsg:  code.AddUserAddressFailedMsg,
-				StatusCode: code.AddUserAddressFailed,
-			}, err
+			return &users.AddAddressResponse{}, err
 		}
 
 		// 获取插入ID并赋值给外部变量
 		id, err := result.LastInsertId()
 		if err != nil {
 			l.Logger.Errorw("id insert failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
-			return &users.AddAddressResponse{
-				StatusMsg:  code.AddUserAddressFailedMsg,
-				StatusCode: code.AddUserAddressFailed,
-			}, err
+			return &users.AddAddressResponse{}, err
 		}
 
 		// 构建返回数据（此时id已赋值）
@@ -157,9 +144,8 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 		}
 
 		return &users.AddAddressResponse{
-			StatusMsg:  code.AddUserAddressSuccessMsg,
-			StatusCode: code.AddUserAddressSuccess,
-			Data:       data,
+
+			Data: data,
 		}, nil
 
 	}

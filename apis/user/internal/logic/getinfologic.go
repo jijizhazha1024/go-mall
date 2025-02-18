@@ -39,11 +39,9 @@ func (l *GetInfoLogic) GetInfo(req *types.GetInfoRequest) (resp *types.GetInfoRe
 
 		l.Logger.Errorf("call rpc getuser failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
-	} else {
-		if getresp.StatusCode != code.UserInfoRetrieved {
-			l.Logger.Errorf("login failed", logx.Field("status_code", getresp.StatusCode), logx.Field("status_msg", getresp.StatusMsg))
-			return nil, errors.New(int(getresp.StatusCode), getresp.StatusMsg)
-		}
+	} else if getresp.StatusMsg != "" {
+		l.Logger.Errorf("login failed", logx.Field("status_code", getresp.StatusCode), logx.Field("status_msg", getresp.StatusMsg))
+		return nil, errors.New(int(getresp.StatusCode), getresp.StatusMsg)
 
 	}
 	resp = &types.GetInfoResponse{

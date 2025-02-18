@@ -7,7 +7,6 @@ import (
 
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
-	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -35,25 +34,34 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Infow("delete user not found", logx.Field("err", err),
 				logx.Field("user_id", in.UserId))
+			return &users.DeleteUserResponse{
 
-			return users_biz.HandleDeleteUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
+				StatusCode: code.UserAddressNotFound,
+				StatusMsg:  code.UserAddressNotFoundMsg,
+			}, nil
 		}
 		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_id", in.UserId))
-		return users_biz.HandleDeleteUsererror(code.ServerErrorMsg, code.ServerError, err)
+		return &users.DeleteUserResponse{}, err
 	}
 	// 删除用户
 	if exituser.UserDeleted {
 		l.Logger.Infow("delete user have deleted", logx.Field("user_id", in.UserId))
+		return &users.DeleteUserResponse{
 
-		return users_biz.HandleDeleteUsererror(code.UserHaveDeletedMsg, code.UserHaveDeleted, nil)
+			StatusCode: code.UserHaveDeleted,
+			StatusMsg:  code.UserHaveDeletedMsg,
+		}, nil
+
 	}
 	err = l.svcCtx.UsersModel.UpdateDeletebyId(l.ctx, int64(in.UserId), true)
 	if err != nil {
 		l.Logger.Infow("delete update deletebyid failed", logx.Field("err", err),
 			logx.Field("user_id", in.UserId))
 
-		return users_biz.HandleDeleteUsererror(code.UserDeletionFailedMsg, code.UserDeletionFailed, nil)
+		return &users.DeleteUserResponse{}, err
 	}
 
-	return users_biz.HandleDeleteUserResp(code.UserDeletedMsg, code.UserDeleted, in.UserId)
+	return &users.DeleteUserResponse{
+		UserId: in.UserId,
+	}, nil
 }
