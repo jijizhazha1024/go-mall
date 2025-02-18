@@ -37,14 +37,20 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 		String: in.Province,
 		Valid:  in.Province != "",
 	}
+	var addresses []*user_address.UserAddresses
 
-	//查找用户是否已经存在默认地址
-	defaultAddress, err := l.svcCtx.AddressModel.FindDefaultByUserId(l.ctx, int32(in.UserId))
-	if err != nil {
-
-		l.Logger.Infow("find default address failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
-		if err != sqlx.ErrNotFound {
-			l.Logger.Errorw("find default address failed  server error", logx.Field("user_id", in.UserId), logx.Field("err", err))
+	if in.IsDefault {
+		var err error
+		addresses, err = l.svcCtx.AddressModel.FindAllByUserId(l.ctx, int32(in.UserId))
+		if err != nil {
+			if err == sql.ErrNoRows {
+				l.Logger.Infow("update address is default, but user has no address", logx.Field("user_id", in.UserId))
+				return &users.AddAddressResponse{
+					StatusMsg:  code.UserAddressNotFoundMsg,
+					StatusCode: code.UserAddressNotFound,
+				}, nil
+			}
+			l.Logger.Errorw(code.ServerErrorMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))
 			return &users.AddAddressResponse{
 				StatusMsg:  code.ServerErrorMsg,
 				StatusCode: code.ServerError,
@@ -52,17 +58,14 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 		}
 	}
 
-	if defaultAddress != nil {
+	if addresses != nil {
 		//如果存在，则将其设为非默认地址然后增加新的默认地址
 		var result sql.Result
 
-		defaultAddress.IsDefault = false
-
 		if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
 
-			_, err = l.svcCtx.AddressModel.UpdateWithSession(l.ctx, session, defaultAddress)
+			err := l.svcCtx.AddressModel.BatchUpdateDeFaultWithSession(ctx, session, addresses)
 			if err != nil {
-				l.Logger.Errorw("update default address failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
 				return err
 			}
 
