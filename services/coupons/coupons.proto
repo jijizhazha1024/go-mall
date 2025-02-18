@@ -37,7 +37,7 @@ message UserCoupon {
   int32 user_id = 2; // 用户ID
   string coupon_id = 3; // 优惠券ID
   CouponStatus status = 4; // 状态：0-未使用 1-已使用 2-已过期
-  string order_id = 5; // 使用的订单ID
+  string order_id = 5; // 订单完成指定的订单
   string used_at = 6; // 使用时间
   string created_at = 7; // 创建时间
   string updated_at = 8; // 更新时间
@@ -46,19 +46,20 @@ message UserCoupon {
 // 优惠券使用记录
 message CouponUsage {
   int32 id = 1; // 使用记录ID
-  string order_id = 2; // 关联的订单ID
-  string coupon_id = 3; // 优惠券ID
-  int32 user_id = 4; // 用户ID
-  CouponType coupon_type = 5; // 当时优惠券类型：1-满减 2-折扣 3-立减
-  string origin_value = 6; // 当时优惠值（根据类型：分/百分比）
-  string discount_amount = 7; // 抵扣金额（分）
-  string applied_at = 8; // 应用时间
+  string pre_order_id = 2; // 关联的订单ID
+  string order_id = 3;
+  string coupon_id = 4; // 优惠券ID
+  int32 user_id = 5; // 用户ID
+  CouponType coupon_type = 6; // 当时优惠券类型：1-满减 2-折扣 3-立减
+  string origin_value = 7; // 当时优惠值（根据类型：分/百分比）
+  string discount_amount = 8; // 抵扣金额（分）
+  string applied_at = 9; // 应用时间
 }
 
 // 分页请求
 message PaginationReq {
   int32 page = 1; // 页码
-  int32 limit = 2; // 每页记录数
+  int32 size = 2; // 每页记录数
 }
 
 // 获取优惠券列表请求
@@ -157,7 +158,7 @@ message ClaimCouponResp {
 message CalculateCouponReq {
   int32 user_id = 1; // 用户ID
   string coupon_id = 2; // 优惠券ID
-  string order_id = 3; // 订单ID
+  string pre_order_id = 3; // 订单ID
 }
 
 // 计算优惠券响应
@@ -189,9 +190,36 @@ message ListCouponUsagesResp {
 
 }
 
+// 请求/响应结构
+message LockCouponReq {
+  int32 user_id = 1;
+  string user_coupon_id = 2; // 用户优惠券ID
+  string pre_order_id = 3;       // 关联订单ID
+}
+
+message UseCouponReq {
+  string user_coupon_id = 1;
+  string pre_order_id = 2;
+  string order_id = 3;
+}
+
+message ReleaseCouponReq {
+  string user_coupon_id = 1;
+  string pre_order_id = 2;
+  string reason = 3; // 释放原因（超时/用户取消）
+}
+message EmptyResp{
+  int32 status_code = 1;
+  string status_msg = 2;
+}
+
+
+
+
 // 优惠券服务
 service Coupons {
   // -------------------- 优惠券相关 --------------------
+
 
   //  ListCoupons 获取优惠券列表
   rpc ListCoupons(ListCouponsReq) returns(ListCouponsResp);
@@ -211,8 +239,16 @@ service Coupons {
 
   //  ListUserCoupons 获取用户优惠券列表
   rpc ListUserCoupons(ListUserCouponsReq) returns(ListUserCouponsResp);
-  //  CalculateCoupon 使用优惠券
+  //  CalculateCoupon 计算优惠券
   rpc CalculateCoupon(CalculateCouponReq) returns(CalculateCouponResp);
   //  ListCouponUsages 获取优惠券使用记录
   rpc ListCouponUsages(ListCouponUsagesReq) returns(ListCouponUsagesResp);
+
+  // --------------- 使用优惠券 --------------- pre_order_id来进行使用
+  // 锁定优惠券（结算时预占）
+  rpc LockCoupon(LockCouponReq) returns (EmptyResp);
+  // 释放优惠券（订单取消/超时释放）
+  rpc ReleaseCoupon(ReleaseCouponReq) returns (EmptyResp);
+  // 使用优惠券（支付成功确认）
+  rpc UseCoupon(UseCouponReq) returns (EmptyResp);
 }
