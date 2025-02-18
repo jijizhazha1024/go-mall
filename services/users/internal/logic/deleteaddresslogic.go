@@ -29,7 +29,7 @@ func NewDeleteAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*users.DeleteAddressResponse, error) {
 	//判断address——id和user——id是否存在
 
-	_, err := l.svcCtx.AddressModel.GetUserAddressbyIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
+	_, err := l.svcCtx.AddressModel.GetUserAddressExistsByIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
 	if err != nil {
 		if err == sql.ErrNoRows {
 			l.Logger.Infow("delete address not found", logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId))

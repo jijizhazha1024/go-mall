@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/dal/model/user_address"
@@ -32,9 +33,9 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 
 	//判断address——id和user——id是否存在
 
-	_, err := l.svcCtx.AddressModel.GetUserAddressbyIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
+	_, err := l.svcCtx.AddressModel.GetUserAddressExistsByIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Infow("update address not found", logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId))
 			return &users.UpdateAddressResponse{
 				StatusMsg:  code.UserAddressNotFoundMsg,
