@@ -31,7 +31,23 @@ func NewCreateCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cr
 func (l *CreateCartItemLogic) CreateCartItem(req *types.CreateCartReq) (resp *types.CreateCartResp, err error) {
 	userId := l.ctx.Value(biz.UserIDKey).(uint32)
 
-	// 1. 调用 GetProduct RPC 获取商品详情
+	// 1. 先检查商品是否存在
+	exist, err := l.svcCtx.ProductRpc.IsExistProduct(l.ctx, &product.IsExistProductReq{
+		Id: int64(req.ProductId),
+	})
+	if err != nil {
+		l.Logger.Errorw("call rpc IsExistProduct failed",
+			logx.Field("err", err),
+			logx.Field("product_id", req.ProductId))
+		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
+	}
+	if !exist.Exist {
+		l.Logger.Errorw("product does not exist",
+			logx.Field("product_id", req.ProductId))
+		return nil, errors.New(code.ProductInfoRetrievalFailed, code.ProductInfoRetrievalFailedMsg)
+	}
+
+	// 2. 调用 GetProduct RPC 获取商品详情
 	productRes, err := l.svcCtx.ProductRpc.GetProduct(l.ctx, &product.GetProductReq{
 		Id: uint32(req.ProductId),
 	})
@@ -40,13 +56,6 @@ func (l *CreateCartItemLogic) CreateCartItem(req *types.CreateCartReq) (resp *ty
 			logx.Field("err", err),
 			logx.Field("product_id", req.ProductId))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
-	}
-
-	// 2. 检查商品是否存在
-	if productRes == nil || productRes.Product == nil {
-		l.Logger.Errorw("rpc GetProduct returned nil response",
-			logx.Field("product_id", req.ProductId))
-		return nil, errors.New(code.ProductInfoRetrievalFailed, code.ProductInfoRetrievalFailedMsg)
 	}
 
 	// 3. 检查库存是否足够

@@ -31,25 +31,23 @@ func NewSubCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *SubCa
 func (l *SubCartItemLogic) SubCartItem(req *types.SubCartReq) (resp *types.SubCartResp, err error) {
 	userId := l.ctx.Value(biz.UserIDKey).(uint32)
 
-	// 1. 调用 GetProduct RPC 获取商品详情
-	productRes, err := l.svcCtx.ProductRpc.GetProduct(l.ctx, &product.GetProductReq{
-		Id: uint32(req.ProductId),
+	// 1. 先检查商品是否存在
+	exist, err := l.svcCtx.ProductRpc.IsExistProduct(l.ctx, &product.IsExistProductReq{
+		Id: int64(req.ProductId),
 	})
 	if err != nil {
-		l.Logger.Errorw("call rpc GetProduct failed",
+		l.Logger.Errorw("call rpc IsExistProduct failed",
 			logx.Field("err", err),
 			logx.Field("product_id", req.ProductId))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	}
-
-	// 2. 检查商品是否存在
-	if productRes == nil || productRes.Product == nil {
-		l.Logger.Errorw("rpc GetProduct returned nil response",
+	if !exist.Exist {
+		l.Logger.Errorw("product does not exist",
 			logx.Field("product_id", req.ProductId))
 		return nil, errors.New(code.ProductInfoRetrievalFailed, code.ProductInfoRetrievalFailedMsg)
 	}
 
-	// 3. 调用 SubCartItem RPC 从购物车减少商品数量
+	// 2. 调用 SubCartItem RPC 从购物车减少商品数量
 	res, err := l.svcCtx.CartsRpc.SubCartItem(l.ctx, &carts.CartItemRequest{
 		UserId:    int32(userId),
 		ProductId: req.ProductId,
@@ -62,7 +60,7 @@ func (l *SubCartItemLogic) SubCartItem(req *types.SubCartReq) (resp *types.SubCa
 		return nil, errors.New(code.CartSubFailed, code.CartSubFailedMsg)
 	}
 
-	// 4. 处理 RPC 返回 nil 的情况
+	// 3. 处理 RPC 返回 nil 的情况
 	if res == nil {
 		l.Logger.Errorw("rpc SubCartItem returned nil response",
 			logx.Field("user_id", userId),
@@ -70,7 +68,7 @@ func (l *SubCartItemLogic) SubCartItem(req *types.SubCartReq) (resp *types.SubCa
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	}
 
-	// 5. 处理业务错误
+	// 4. 处理业务错误
 	if res.StatusCode != code.Success {
 		l.Logger.Debugw("rpc SubCartItem returned business error",
 			logx.Field("user_id", userId),
@@ -80,7 +78,7 @@ func (l *SubCartItemLogic) SubCartItem(req *types.SubCartReq) (resp *types.SubCa
 		return nil, errors.New(int(res.StatusCode), res.StatusMsg)
 	}
 
-	// 6. 记录成功日志并返回结果
+	// 5. 记录成功日志并返回结果
 	l.Logger.Infow("Cart item subtracted successfully",
 		logx.Field("user_id", userId),
 		logx.Field("product_id", req.ProductId))
