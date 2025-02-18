@@ -19,10 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	ProductCatalogService_GetProduct_FullMethodName    = "/product.ProductCatalogService/GetProduct"
-	ProductCatalogService_CreateProduct_FullMethodName = "/product.ProductCatalogService/CreateProduct"
-	ProductCatalogService_UpdateProduct_FullMethodName = "/product.ProductCatalogService/UpdateProduct"
-	ProductCatalogService_DeleteProduct_FullMethodName = "/product.ProductCatalogService/DeleteProduct"
+	ProductCatalogService_GetProduct_FullMethodName     = "/product.ProductCatalogService/GetProduct"
+	ProductCatalogService_CreateProduct_FullMethodName  = "/product.ProductCatalogService/CreateProduct"
+	ProductCatalogService_UpdateProduct_FullMethodName  = "/product.ProductCatalogService/UpdateProduct"
+	ProductCatalogService_DeleteProduct_FullMethodName  = "/product.ProductCatalogService/DeleteProduct"
+	ProductCatalogService_GetAllProduct_FullMethodName  = "/product.ProductCatalogService/GetAllProduct"
+	ProductCatalogService_IsExistProduct_FullMethodName = "/product.ProductCatalogService/IsExistProduct"
 )
 
 // ProductCatalogServiceClient is the client API for ProductCatalogService service.
@@ -37,6 +39,10 @@ type ProductCatalogServiceClient interface {
 	UpdateProduct(ctx context.Context, in *UpdateProductReq, opts ...grpc.CallOption) (*UpdateProductResp, error)
 	// 删除商品
 	DeleteProduct(ctx context.Context, in *DeleteProductReq, opts ...grpc.CallOption) (*DeleteProductResp, error)
+	// 分页得到全部商品
+	GetAllProduct(ctx context.Context, in *GetAllProductsReq, opts ...grpc.CallOption) (*GetAllProductsResp, error)
+	// 判断商品是否存在
+	IsExistProduct(ctx context.Context, in *IsExistProductReq, opts ...grpc.CallOption) (*IsExistProductResp, error)
 }
 
 type productCatalogServiceClient struct {
@@ -83,6 +89,24 @@ func (c *productCatalogServiceClient) DeleteProduct(ctx context.Context, in *Del
 	return out, nil
 }
 
+func (c *productCatalogServiceClient) GetAllProduct(ctx context.Context, in *GetAllProductsReq, opts ...grpc.CallOption) (*GetAllProductsResp, error) {
+	out := new(GetAllProductsResp)
+	err := c.cc.Invoke(ctx, ProductCatalogService_GetAllProduct_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *productCatalogServiceClient) IsExistProduct(ctx context.Context, in *IsExistProductReq, opts ...grpc.CallOption) (*IsExistProductResp, error) {
+	out := new(IsExistProductResp)
+	err := c.cc.Invoke(ctx, ProductCatalogService_IsExistProduct_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProductCatalogServiceServer is the server API for ProductCatalogService service.
 // All implementations must embed UnimplementedProductCatalogServiceServer
 // for forward compatibility
@@ -95,6 +119,10 @@ type ProductCatalogServiceServer interface {
 	UpdateProduct(context.Context, *UpdateProductReq) (*UpdateProductResp, error)
 	// 删除商品
 	DeleteProduct(context.Context, *DeleteProductReq) (*DeleteProductResp, error)
+	// 分页得到全部商品
+	GetAllProduct(context.Context, *GetAllProductsReq) (*GetAllProductsResp, error)
+	// 判断商品是否存在
+	IsExistProduct(context.Context, *IsExistProductReq) (*IsExistProductResp, error)
 	mustEmbedUnimplementedProductCatalogServiceServer()
 }
 
@@ -113,6 +141,12 @@ func (UnimplementedProductCatalogServiceServer) UpdateProduct(context.Context, *
 }
 func (UnimplementedProductCatalogServiceServer) DeleteProduct(context.Context, *DeleteProductReq) (*DeleteProductResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteProduct not implemented")
+}
+func (UnimplementedProductCatalogServiceServer) GetAllProduct(context.Context, *GetAllProductsReq) (*GetAllProductsResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllProduct not implemented")
+}
+func (UnimplementedProductCatalogServiceServer) IsExistProduct(context.Context, *IsExistProductReq) (*IsExistProductResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsExistProduct not implemented")
 }
 func (UnimplementedProductCatalogServiceServer) mustEmbedUnimplementedProductCatalogServiceServer() {}
 
@@ -199,6 +233,42 @@ func _ProductCatalogService_DeleteProduct_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProductCatalogService_GetAllProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAllProductsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductCatalogServiceServer).GetAllProduct(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProductCatalogService_GetAllProduct_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductCatalogServiceServer).GetAllProduct(ctx, req.(*GetAllProductsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProductCatalogService_IsExistProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IsExistProductReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductCatalogServiceServer).IsExistProduct(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProductCatalogService_IsExistProduct_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductCatalogServiceServer).IsExistProduct(ctx, req.(*IsExistProductReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProductCatalogService_ServiceDesc is the grpc.ServiceDesc for ProductCatalogService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -221,6 +291,14 @@ var ProductCatalogService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteProduct",
 			Handler:    _ProductCatalogService_DeleteProduct_Handler,
+		},
+		{
+			MethodName: "GetAllProduct",
+			Handler:    _ProductCatalogService_GetAllProduct_Handler,
+		},
+		{
+			MethodName: "IsExistProduct",
+			Handler:    _ProductCatalogService_IsExistProduct_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

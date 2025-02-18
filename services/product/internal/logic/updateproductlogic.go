@@ -44,10 +44,7 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 		l.Logger.Errorw("product delete cache failed",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Product.Id))
-		return &product.UpdateProductResp{
-			StatusCode: uint32(code.ProductCacheFailed),
-			StatusMsg:  code.ProductCacheFailedMsg,
-		}, err
+		return nil, err
 	}
 
 	// 2. 使用 Transact 开启事务
@@ -103,7 +100,7 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 		return &product.UpdateProductResp{
 			StatusCode: uint32(code.ProductUpdateFailed),
 			StatusMsg:  code.ProductUpdateFailedMsg,
-		}, err
+		}, nil
 	}
 	// 7. 更新Elasticsearch记录
 	// Elasticsearch索引名称
@@ -127,10 +124,7 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 	if ubstring, err = mustJSON(updateBody); err != nil {
 		l.Logger.Errorw("mustJSON err",
 			logx.Field("err", err))
-		return &product.UpdateProductResp{
-			StatusCode: uint32(code.ProductUpdateFailed),
-			StatusMsg:  code.ProductUpdateFailedMsg,
-		}, err
+		return nil, err
 	}
 	// 创建Elasticsearch更新请求
 	req := esapi.UpdateRequest{
@@ -146,10 +140,7 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 		l.Logger.Errorw("product es update failed",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Product.Id))
-		return &product.UpdateProductResp{
-			StatusCode: uint32(code.EsFailed),
-			StatusMsg:  code.EsFailedMag,
-		}, err
+		return nil, err
 	}
 	defer res.Body.Close()
 
@@ -162,10 +153,7 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 		l.Logger.Errorw("product es update body failed",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Product.Id))
-		return &product.UpdateProductResp{
-			StatusCode: uint32(code.EsFailed),
-			StatusMsg:  code.EsFailedMag,
-		}, err
+		return nil, err
 	}
 
 	// 8. 延迟第二次删除缓存
