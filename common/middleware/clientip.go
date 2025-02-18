@@ -3,13 +3,14 @@ package middleware
 import (
 	"context"
 	"errors"
-	"github.com/zeromicro/go-zero/rest/httpx"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/common/response"
 	"net"
 	"net/http"
 	"strings"
+
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 // GetIP returns request real ip.

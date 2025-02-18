@@ -3,23 +3,79 @@
 
 package types
 
+type AddAddressRequest struct {
+	RecipientName   string `json:"recipient_name"`
+	PhoneNumber     string `json:"phone_number"`
+	Province        string `json:"province"`
+	City            string `json:"city"`
+	DetailedAddress string `json:"detailed_address"`
+	IsDefault       bool   `json:"is_default"`
+}
+
+type AddAddressResponse struct {
+	Data AddressData `json:"data"`
+}
+
+type AddressData struct {
+	AddressID       int32  `json:"address_id"`
+	RecipientName   string `json:"recipient_name"`
+	PhoneNumber     string `json:"phone_number"`
+	Province        string `json:"province"`
+	City            string `json:"city"`
+	DetailedAddress string `json:"detailed_address"`
+	IsDefault       bool   `json:"is_default"`
+	CreatedAt       string `json:"created_at"` // ISO8601 时间转换为时间戳
+	UpdatedAt       string `json:"updated_at"` // ISO8601 时间转换为时间戳
+}
+
+type AddressListResponse struct {
+	Data []AddressData `json:"data"`
+}
+
+type AddressResponse struct {
+	ID              string `json:"id"`
+	RecipientName   string `json:"recipient_name"`
+	PhoneNumber     string `json:"phone_number"`
+	Province        string `json:"province"`
+	City            string `json:"city"`
+	DetailedAddress string `json:"detailed_address"`
+	IsDefault       string `json:"is_default"`
+	CreatedAt       string `json:"created_at"`
+	UpdatedAt       string `json:"updated_at"`
+}
+
+type AllAddressListRequest struct {
+}
+
+type DeleteAddressRequest struct {
+	AddressID int32 `json:"address_id"`
+}
+
+type DeleteAddressResponse struct {
+}
+
 type DeleteRequest struct {
-	UserId int64 `json:"user_id"`
 }
 
 type DeleteResponse struct {
 }
 
+type GetAddressRequest struct {
+	AddressID int32 `json:"address_id"`
+}
+
+type GetAddressResponse struct {
+	Data AddressData `json:"data"`
+}
+
 type GetInfoRequest struct {
-	UserId int64 `json:"user_id"`
 }
 
 type GetInfoResponse struct {
 	UserId    int64  `json:"user_id"`
-	LogoutAt  int64  `json:"logout_at"`
-	CreatedAt int64  `json:"created_at"`
-	UpdateAt  int64  `json:"update_at"`
-	AvatarUrl string `json:"avatar_url"`
+	LogoutAt  string `json:"logout_at"`
+	CreatedAt string `json:"created_at"`
+	UpdateAt  string `json:"update_at"`
 	Email     string `json:"email"`
 	UserName  string `json:"user_name"`
 }
@@ -35,10 +91,10 @@ type LoginResponse struct {
 }
 
 type LogoutRequest struct {
-	UserId int64 `json:"user_id"`
 }
 
 type LogoutResponse struct {
+	Logout_at int64 `json:"logout_at"`
 }
 
 type RegisterRequest struct {
@@ -52,11 +108,25 @@ type RegisterResponse struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+type UpdateAddressRequest struct {
+	RecipientName   string `json:"recipient_name"`
+	PhoneNumber     string `json:"phone_number"`
+	Province        string `json:"province"`
+	City            string `json:"city"`
+	DetailedAddress string `json:"detailed_address"`
+	IsDefault       bool   `json:"is_default"`
+	AddressID       int32  `json:"address_id"`
+}
+
+type UpdateAddressResponse struct {
+	Data AddressData `json:"data"`
+}
+
 type UpdateRequest struct {
 	UserName string `json:"user_name"`
 }
 
 type UpdateResponse struct {
+	UserId   int64  `json:"user_id"`
 	UserName string `json:"user_name"`
-	UpdateAt int64  `json:"update_at"`
 }

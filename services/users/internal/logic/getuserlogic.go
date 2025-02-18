@@ -34,7 +34,7 @@ func (l *GetUserLogic) GetUser(in *users.GetUserRequest) (*users.GetUserResponse
 	user, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Infow(code.UserNotFoundMsg, logx.Field("err", err),
+			logx.Infow("get user failed, user not found", logx.Field("err", err),
 				logx.Field("user id", in.UserId))
 
 			return users_biz.HandleGetUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
@@ -44,10 +44,10 @@ func (l *GetUserLogic) GetUser(in *users.GetUserRequest) (*users.GetUserResponse
 	}
 
 	if user.UserDeleted {
-		logx.Infow(code.UserInfoRetrievalFailedMsg, logx.Field("user_id", in.UserId))
+		logx.Infow("you have deleted this user, please contact the administrator", logx.Field("user_id", in.UserId))
 
 		return users_biz.HandleGetUsererror(code.UserInfoRetrievalFailedMsg, code.UserDeleted, nil)
 	}
 
-	return users_biz.HandleGetUserResp(code.UserInfoRetrievedMsg, code.UserInfoRetrieved, uint32(user.UserId), user.Username.String, user.Email.String)
+	return users_biz.HandleGetUserResp(code.UserInfoRetrievedMsg, code.UserInfoRetrieved, uint32(user.UserId), user.Username.String, user.Email.String, user.CreatedAt.Format("2006-01-02 15:04:05"), user.UpdatedAt.Format("2006-01-02 15:04:05"), user.LogoutAt.Time.Format("2006-01-02 15:04:05"), user.AvatarUrl.String)
 }
