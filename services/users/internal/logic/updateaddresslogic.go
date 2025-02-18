@@ -101,7 +101,7 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 			}, nil
 		}
 	} else {
-		_, err = l.svcCtx.AddressModel.Update(l.ctx, &user_address.UserAddresses{
+		err = l.svcCtx.AddressModel.Update(l.ctx, &user_address.UserAddresses{
 
 			AddressId:     int64(in.AddressId),
 			RecipientName: in.RecipientName,
@@ -126,7 +126,7 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 
 	}
 
-	addressData, err := l.svcCtx.AddressModel.FindOne(l.ctx, in.AddressId)
+	addressData, err := l.svcCtx.AddressModel.FindOne(l.ctx, int64(in.AddressId))
 	if err != nil {
 		if err == sql.ErrNoRows {
 			l.Logger.Infow("update address is not default, but address not found", logx.Field("address_id", in.AddressId), logx.Field("err", err))

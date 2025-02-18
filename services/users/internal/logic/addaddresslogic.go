@@ -41,8 +41,15 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 	//查找用户是否已经存在默认地址
 	defaultAddress, err := l.svcCtx.AddressModel.FindDefaultByUserId(l.ctx, int32(in.UserId))
 	if err != nil {
-		l.Logger.Infow("find default address failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
 
+		l.Logger.Infow("find default address failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
+		if err != sqlx.ErrNotFound {
+			l.Logger.Errorw("find default address failed  server error", logx.Field("user_id", in.UserId), logx.Field("err", err))
+			return &users.AddAddressResponse{
+				StatusMsg:  code.ServerErrorMsg,
+				StatusCode: code.ServerError,
+			}, err
+		}
 	}
 
 	if defaultAddress != nil {
