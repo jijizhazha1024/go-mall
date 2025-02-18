@@ -29,14 +29,14 @@ func NewListCouponsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListC
 // ListCoupons 获取优惠券列表
 func (l *ListCouponsLogic) ListCoupons(in *coupons.ListCouponsReq) (*coupons.ListCouponsResp, error) {
 	// param check
-	if in.Pagination.Limit <= 0 || in.Pagination.Limit > biz.MaxPageSize {
-		in.Pagination.Limit = biz.MaxPageSize
+	if in.Pagination.Size <= 0 || in.Pagination.Size > biz.MaxPageSize {
+		in.Pagination.Page = biz.MaxPageSize
 	}
 	if in.Pagination.Page <= 0 {
 		in.Pagination.Page = 1
 	}
 	res := &coupons.ListCouponsResp{}
-	queryCoupons, err := l.svcCtx.CouponsModel.QueryCoupons(l.ctx, in.Pagination.Page, in.Pagination.Limit, in.Type)
+	queryCoupons, err := l.svcCtx.CouponsModel.QueryCoupons(l.ctx, in.Pagination.Page, in.Pagination.Size, in.Type)
 	if err != nil {
 		if errors.Is(err, sqlc.ErrNotFound) {
 			return res, nil

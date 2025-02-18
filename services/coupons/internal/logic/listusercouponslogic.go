@@ -28,14 +28,14 @@ func NewListUserCouponsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *L
 func (l *ListUserCouponsLogic) ListUserCoupons(in *coupons.ListUserCouponsReq) (*coupons.ListUserCouponsResp, error) {
 
 	// param check
-	if in.Pagination.Limit <= 0 || in.Pagination.Limit > biz.MaxPageSize {
-		in.Pagination.Limit = biz.MaxPageSize
+	if in.Pagination.Size <= 0 || in.Pagination.Page > biz.MaxPageSize {
+		in.Pagination.Size = biz.MaxPageSize
 	}
 	if in.Pagination.Page <= 0 {
 		in.Pagination.Page = 1
 	}
 	res := &coupons.ListUserCouponsResp{}
-	userCoupons, err := l.svcCtx.UserCouponsModel.QueryUserCoupons(l.ctx, in.UserId, in.Pagination.Page, in.Pagination.Limit)
+	userCoupons, err := l.svcCtx.UserCouponsModel.QueryUserCoupons(l.ctx, in.UserId, in.Pagination.Page, in.Pagination.Size)
 	if err != nil {
 		logx.Errorw("query user coupons error", logx.Field("err", err))
 		return nil, err

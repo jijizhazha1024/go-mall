@@ -11,8 +11,8 @@ import (
 func Test_ListUserCouponsLogic_ListUserCoupons(t *testing.T) {
 	userCoupons, err := couponsClient.ListUserCoupons(context.Background(), &coupons.ListUserCouponsReq{
 		Pagination: &coupons.PaginationReq{
-			Limit: 10,
-			Page:  1,
+			Size: 10,
+			Page: 1,
 		},
 		UserId: 1,
 	})
@@ -84,8 +84,8 @@ func Test_ClaimCouponLogic_ClaimCoupon_Rollback(t *testing.T) {
 func Test_ListCouponUsagesLogic_ListCouponUsages(t *testing.T) {
 	couponUsages, err := couponsClient.ListCouponUsages(context.Background(), &coupons.ListCouponUsagesReq{
 		Pagination: &coupons.PaginationReq{
-			Limit: 10,
-			Page:  1,
+			Size: 10,
+			Page: 1,
 		},
 		UserId: 1,
 	})

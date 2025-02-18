@@ -2,9 +2,6 @@ package logic
 
 import (
 	"context"
-	"database/sql"
-	"errors"
-	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/coupons/coupons"
 	"jijizhazha1024/go-mall/services/coupons/internal/svc"
 
@@ -29,17 +26,6 @@ func NewCalculateCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *C
 func (l *CalculateCouponLogic) CalculateCoupon(in *coupons.CalculateCouponReq) (*coupons.CalculateCouponResp, error) {
 
 	res := &coupons.CalculateCouponResp{}
-
-	coupon, err := l.svcCtx.CouponsModel.FindOne(l.ctx, in.OrderId)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			res.StatusCode = code.CouponsNotExist
-			res.StatusMsg = code.CouponsNotExistMsg
-			return res, errors.New(code.ServerErrorMsg)
-		}
-		logx.Errorw("query coupons by id error", logx.Field("err", err), logx.Field("order_id", in.OrderId))
-		return nil, err
-	}
-	logx.Debug(coupon)
+	// 用户是否有改优惠券
 	return res, nil
 }

@@ -24,3 +24,10 @@ Log:
 
 MysqlConfig:
   datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+
+
+RedisConf:
+  Host: 124.71.72.124:6379
+  Type: node
+  Pass: jjzzchtt # 如果有密码则填写
+  Tls: false

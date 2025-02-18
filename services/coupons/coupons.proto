@@ -88,7 +88,7 @@ message GetCouponResp {
   string status_msg = 2;
   Coupon coupon = 3;
 }
-
+/*
 // 创建优惠券请求
 message CreateCouponReq {
   Coupon coupon = 1;
@@ -125,6 +125,8 @@ message DeleteCouponResp {
   string status_msg = 2;
 }
 
+
+ */
 // 获取用户优惠券列表请求
 message ListUserCouponsReq {
   int32 user_id = 1; // 用户ID
@@ -154,11 +156,16 @@ message ClaimCouponResp {
 
 }
 
+message Items {
+  int32 product_id = 1;
+  int32 quantity = 2;
+}
 // 计算优惠券请求
 message CalculateCouponReq {
   int32 user_id = 1; // 用户ID
   string coupon_id = 2; // 优惠券ID
-  string pre_order_id = 3; // 订单ID
+  int64 amount = 3;
+
 }
 
 // 计算优惠券响应
@@ -225,12 +232,15 @@ service Coupons {
   rpc ListCoupons(ListCouponsReq) returns(ListCouponsResp);
   //  GetCoupon 获取单个优惠券
   rpc GetCoupon(GetCouponReq) returns(GetCouponResp);
-  //  CreateCoupon 创建优惠券
+  /*
+  //  //  CreateCoupon 创建优惠券
   rpc CreateCoupon(CreateCouponReq) returns(CreateCouponResp);
-  //  UpdateCoupon 更新优惠券
+  //  //  UpdateCoupon 更新优惠券
   rpc UpdateCoupon(UpdateCouponReq) returns(UpdateCouponResp);
-  //  DeleteCoupon 删除优惠券
+  //  //  DeleteCoupon 删除优惠券
   rpc DeleteCoupon(DeleteCouponReq) returns(DeleteCouponResp);
+
+   */
   //  ClaimCoupon 用户领取优惠券
   rpc ClaimCoupon(ClaimCouponReq) returns(ClaimCouponResp);
 

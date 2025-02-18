@@ -9,23 +9,23 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type UpdateCouponLogic struct {
+type UseCouponLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 	logx.Logger
 }
 
-func NewUpdateCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateCouponLogic {
-	return &UpdateCouponLogic{
+func NewUseCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UseCouponLogic {
+	return &UseCouponLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
 		Logger: logx.WithContext(ctx),
 	}
 }
 
-// UpdateCoupon 更新优惠券
-func (l *UpdateCouponLogic) UpdateCoupon(in *coupons.UpdateCouponReq) (*coupons.UpdateCouponResp, error) {
+// UseCoupon 使用优惠券（支付成功确认）
+func (l *UseCouponLogic) UseCoupon(in *coupons.UseCouponReq) (*coupons.EmptyResp, error) {
 	// todo: add your logic here and delete this line
 
-	return &coupons.UpdateCouponResp{}, nil
+	return &coupons.EmptyResp{}, nil
 }

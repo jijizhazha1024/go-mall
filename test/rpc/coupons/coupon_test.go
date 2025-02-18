@@ -12,8 +12,8 @@ func Test_ListCouponsLogic_ListCoupons(t *testing.T) {
 
 	resp, err := couponsClient.ListCoupons(context.Background(), &coupons.ListCouponsReq{
 		Pagination: &coupons.PaginationReq{
-			Page:  1,
-			Limit: 10,
+			Page: 1,
+			Size: 10,
 		},
 	})
 	if err != nil {
