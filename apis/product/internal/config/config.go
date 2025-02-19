@@ -11,6 +11,5 @@ type Config struct {
 	Consul         consul.Conf
 	ProductRpc     zrpc.RpcClientConf
 	AuthsRpc       zrpc.RpcClientConf
-	WhitePathList  []string `json:",optional"`
-	OptionPathList []string `json:",optional"`
+	OptionPathList []string
 }
