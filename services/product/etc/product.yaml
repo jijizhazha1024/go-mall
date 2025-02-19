@@ -1,19 +1,37 @@
 Name: products.rpc
 ListenOn: 0.0.0.0:10002
 Mode: dev
-# 服务发现
+
+# 服务发现配置
 Consul:
-  Host: 124.71.72.124:8500 # consul endpoint
+  Host: 124.71.72.124:8500
   Key: products.rpc
   Meta:
     Protocol: grpc
 
-# redis
-CacheConf:
-  - NodeConf:
-    Host: 124.71.72.124:6379
-    Pass: jjzzchtt
+InventoryRpc:
+  Target: consul://124.71.72.124:8500/inventory.rpc?wait=14s
+  NonBlock: true
 
+# MySQL 配置
 MysqlConfig:
+#  datasource: "root:123@tcp(127.0.0.1:3306)/douyinmall?charset=utf8mb4&parseTime=True&loc=Local"
   datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
   conntimeout: 5
+RedisConf:
+  Host: 124.71.72.124:6379
+  Type: node
+  Pass: jjzzchtt # 如果有密码则填写
+  Tls: false
+# Elasticsearch 配置
+ElasticsearchConfig:
+  addresses:
+    - 113.45.32.164:9200
+  max_idle_conns_per_host: 10
+  response_header_timeout: 30s
+#七牛云
+QiNiu:
+  accessKey: $QINIU_ACCESSKEY
+  secretKey: ${QINIU_SECRETKEY}
+  bucket: ${QINIU_BUCKET}
+  domain: ${QINIU_DOMAIN}

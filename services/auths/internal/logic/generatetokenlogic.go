@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"jijizhazha1024/go-mall/common/consts/biz"
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/common/utils/token"
 	"jijizhazha1024/go-mall/services/auths/auths"
 	"jijizhazha1024/go-mall/services/auths/internal/svc"
@@ -26,23 +27,37 @@ func NewGenerateTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Gen
 
 // GenerateToken 生成toke
 func (l *GenerateTokenLogic) GenerateToken(in *auths.AuthGenReq) (*auths.AuthGenRes, error) {
-	accessToken, err := token.GenerateJWT(in.UserId, in.Username, biz.TokenExpire)
+	res := new(auths.AuthGenRes)
+	clientIP := in.GetClientIp()
+	if clientIP == "" {
+		res.StatusCode = code.NotWithClientIP
+		res.StatusMsg = code.NotWithClientIPMsg
+		l.Logger.Infow("client ip is empty", logx.Field("user_id", in.UserId))
+		return res, nil
+	}
+	// 生成access token
+	accessToken, err := token.GenerateJWT(in.UserId, in.Username, clientIP, biz.TokenExpire)
 	if err != nil {
 		l.Logger.Errorw("access token generate failed",
 			logx.Field("err", err),
+			logx.Field("client_ip", clientIP),
 			logx.Field("user_id", in.UserId))
 		return nil, err
 	}
-	refreshToken, err := token.GenerateJWT(in.UserId, in.Username, biz.TokenRenewalExpire)
+	// 生成refresh token
+	refreshToken, err := token.GenerateJWT(in.UserId, in.Username, clientIP, biz.TokenRenewalExpire)
 	if err != nil {
 		l.Logger.Errorw("refresh token generate failed",
 			logx.Field("err", err),
+			logx.Field("client_ip", clientIP),
 			logx.Field("user_id", in.UserId))
 		return nil, err
 	}
 	// 返回access token和refresh token
-	return &auths.AuthGenRes{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}, nil
+	l.Logger.Infow("tokens generated successfully",
+		logx.Field("user_id", in.UserId),
+		logx.Field("client_ip", clientIP))
+	res.AccessToken = accessToken
+	res.RefreshToken = refreshToken
+	return res, nil
 }

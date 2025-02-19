@@ -9,10 +9,8 @@ type (
 	}
 	// 用户注册响应
 	RegisterResponse {
-		Code    int64  `json:"code"`
-		Message string `json:"message"`
-		UserId  int64  `json:"userId"`
-		Token   string `json:"token"`
+		AccessToken  string `json:"access_token"`
+		RefreshToken string `json:"refresh_token"`
 	}
 	// 用户登录请求
 	LoginRequest {
@@ -21,63 +19,117 @@ type (
 	}
 	// 用户登录响应
 	LoginResponse {
-		Code    int64  `json:"code"`
-		Message string `json:"message"`
-		UserId  int64  `json:"userId"`
-		Token   string `json:"token"`
+		AccessToken  string `json:"access_token"`
+		RefreshToken string `json:"refresh_token"`
 	}
 	// 用户登出请求
-	LogoutRequest {
-		UserId int64  `json:"userId"`
-		Token  string `json:"token"`
-	}
+	LogoutRequest  {}
 	// 用户登出响应
 	LogoutResponse {
-		Code    int64  `json:"code"`
-		Message string `json:"message"`
+		logout_at int64 `json:"logout_at"`
 	}
 	// 删除用户请求
-	DeleteRequest {
-		UserId int64 `json:"userId"`
-	}
+	DeleteRequest  {}
 	// 删除用户响应
-	DeleteResponse {
-		Code    int64  `json:"code"`
-		Message string `json:"message"`
-	}
+	DeleteResponse  {}
 	// 更新用户请求
 	UpdateRequest {
-		UserId   int64  `json:"userId"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		UserName string `json:"user_name"`
 	}
 	// 更新用户响应
 	UpdateResponse {
-		Code     int64  `json:"code"`
-		Message  string `json:"message"`
-		UserId   int64  `json:"userId"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		UserId   int64  `json:"user_id"`
+		UserName string `json:"user_name"`
 	}
 	// 获取用户信息请求
-	GetInfoRequest {
-		UserId int64  `json:"userId"`
-		Token  string `json:"token"`
-	}
+	GetInfoRequest  {}
 	// 获取用户信息响应
 	GetInfoResponse {
-		Code    int64  `json:"code"`
-		Message string `json:"message"`
-		UserId  int64  `json:"userId"`
-		Email   string `json:"email"`
-		Name    string `json:"name"`
+		UserId    int64  `json:"user_id"`
+		LogoutAt  string `json:"logout_at"`
+		CreatedAt string `json:"created_at"`
+		UpdateAt  string `json:"update_at"`
+		Email     string `json:"email"`
+		UserName  string `json:"user_name"`
+	}
+	//  通用地址结构
+	AddressResponse {
+		ID              string `json:"id"`
+		RecipientName   string `json:"recipient_name"`
+		PhoneNumber     string `json:"phone_number"`
+		Province        string `json:"province"`
+		City            string `json:"city"`
+		DetailedAddress string `json:"detailed_address"`
+		IsDefault       string `json:"is_default"`
+		CreatedAt       string `json:"created_at"`
+		UpdatedAt       string `json:"updated_at"`
+	}
+	// 添加新地址的请求消息
+	AddAddressRequest {
+		RecipientName   string `json:"recipient_name"`
+		PhoneNumber     string `json:"phone_number"`
+		Province        string `json:"province"`
+		City            string `json:"city"`
+		DetailedAddress string `json:"detailed_address"`
+		IsDefault       bool   `json:"is_default"`
+	}
+	// 添加新地址的响应消息
+	AddAddressResponse {
+		Data AddressData `json:"data"`
+	}
+	// 请求删除地址的消息
+	DeleteAddressRequest {
+		AddressID int32 `json:"address_id"`
+	}
+	// 删除地址的响应消息
+	DeleteAddressResponse  {}
+	// 请求修改地址的消息
+	UpdateAddressRequest {
+		RecipientName   string `json:"recipient_name"`
+		PhoneNumber     string `json:"phone_number"`
+		Province        string `json:"province"`
+		City            string `json:"city"`
+		DetailedAddress string `json:"detailed_address"`
+		IsDefault       bool   `json:"is_default"`
+		AddressID       int32  `json:"address_id"`
+	}
+	// 修改地址的响应消息
+	UpdateAddressResponse {
+		Data AddressData `json:"data"`
+	}
+	// 获取所有地址的响应消息中的地址数据列表
+	AddressListResponse {
+		Data []AddressData `json:"data"`
+	}
+	// 获取单个地址的响应消息
+	GetAddressResponse {
+		Data AddressData `json:"data"`
+	}
+	// 地址数据消息
+	AddressData {
+		AddressID       int32  `json:"address_id"`
+		RecipientName   string `json:"recipient_name"`
+		PhoneNumber     string `json:"phone_number"`
+		Province        string `json:"province"`
+		City            string `json:"city"`
+		DetailedAddress string `json:"detailed_address"`
+		IsDefault       bool   `json:"is_default"`
+		CreatedAt       string `json:"created_at"` // ISO8601 时间转换为时间戳
+		UpdatedAt       string `json:"updated_at"` // ISO8601 时间转换为时间戳
+	}
+	// 获取所有地址的请求消息
+	AllAddressListRequest  {}
+	// 获取单个地址的请求消息
+	GetAddressRequest {
+		AddressID int32 `json:"address_id"`
 	}
 )
 
 @server (
 	// 代表当前 service 代码块下的路由生成代码时都会被放到 auth 目录下
 	// 定义路由前缀为
-	prefix: /douyin/users
+	middleware: WithClientMiddleware,WrapperAuthMiddleware
+	prefix:     /douyin/user
 )
 service user-api {
 	@handler RegisterHandler
@@ -97,5 +149,20 @@ service user-api {
 
 	@handler GetInfoHandler
 	get /info (GetInfoRequest) returns (GetInfoResponse)
+
+	@handler AddAddressHandler
+	post /address (AddAddressRequest) returns (AddAddressResponse)
+
+	@handler DeleteAddressHandler
+	delete /address (DeleteAddressRequest) returns (DeleteAddressResponse)
+
+	@handler UpdateAddressHandler
+	put /address (UpdateAddressRequest) returns (UpdateAddressResponse)
+
+	@handler AllAddressListHandler
+	get /address/list (AllAddressListRequest) returns (AddressListResponse)
+
+	@handler GetAddressHandler
+	get /address (GetAddressRequest) returns (GetAddressResponse)
 }
 

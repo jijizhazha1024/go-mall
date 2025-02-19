@@ -1,4 +1,4 @@
-package rpc
+package find
 
 import (
 	"context"
@@ -35,6 +35,6 @@ func TestCartsRpc(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fmt.Println("CartItemList response:", rsp)
-	t.Log("CartItemList success", rsp.Total, rsp.Data)
+	fmt.Println("CartItemList response:", rsp.StatusCode)
+	t.Log("CartItemList success", rsp)
 }

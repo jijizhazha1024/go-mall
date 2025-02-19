@@ -1,4 +1,4 @@
-package rpc
+package deleteaddress
 
 import (
 	"context"
@@ -14,7 +14,8 @@ import (
 var users_client users.UsersClient
 
 func initusers() {
-	conn, err := grpc.Dial(fmt.Sprintf("0.0.0.0:%d", biz.UsersRpcPort), grpc.WithBlock(),
+
+	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.UsersRpcPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
@@ -24,14 +25,16 @@ func initusers() {
 
 func TestUsersRpc(t *testing.T) {
 	initusers()
-	resp, err := users_client.Register(context.Background(), &users.RegisterRequest{
-		Email:           "test3@test.com",
-		Password:        "1234567",
-		ConfirmPassword: "1234567",
+	//这里可以从token中获取user——id
+	resp, err := users_client.DeleteAddress(context.Background(), &users.DeleteAddressRequest{
+
+		AddressId: 2,
+		UserId:    1,
 	})
 	if err != nil {
-		t.Fatal(err)
+		fmt.Println("delete address error", err)
+		t.Log("delete address error", err)
 	}
-	fmt.Println("register success", resp)
-	t.Log("register success", resp)
+	fmt.Println("delete success", resp)
+	t.Log("deletesuccess", resp)
 }

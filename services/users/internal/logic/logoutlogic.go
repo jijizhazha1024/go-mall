@@ -2,7 +2,11 @@ package logic
 
 import (
 	"context"
+	"errors"
+	"time"
 
+	"jijizhazha1024/go-mall/common/consts/code"
+	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -25,7 +29,37 @@ func NewLogoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LogoutLogi
 
 // 登出方法
 func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, error) {
-	// todo: add your logic here and delete this line
 
-	return &users.LogoutResponse{}, nil
+	// 在数据库中加入登出时间（这部分假设已经完成）
+	logoutTime := time.Now()
+
+	err := l.svcCtx.UsersModel.UpdateLogoutTime(l.ctx, int64(in.UserId), logoutTime)
+	if err != nil {
+		if errors.Is(err, user.ErrNotFound) {
+			logx.Infow("logout failed, user not found", logx.Field("err", err),
+				logx.Field("user_id", in.UserId))
+			// 用户不存在
+			return &users.LogoutResponse{
+				StatusCode: code.UserNotFound,
+				StatusMsg:  code.UserNotFoundMsg,
+			}, nil
+
+		}
+		// 处理错误
+		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_id", in.UserId))
+		return &users.LogoutResponse{}, err
+
+	}
+	logtoutime, err := l.svcCtx.UsersModel.GetLogoutTime(l.ctx, int64(in.UserId))
+	if err != nil {
+
+		// 处理错误
+		logx.Errorw("get logout time failed  query failed", logx.Field("err", err), logx.Field("user_id", in.UserId))
+		return &users.LogoutResponse{}, err
+	}
+	return &users.LogoutResponse{
+
+		LogoutTime: logtoutime.Unix(),
+	}, nil
+
 }
