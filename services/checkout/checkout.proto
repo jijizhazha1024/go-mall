@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+package checkout;
+option go_package = "./checkout";
+
+// 状态枚举
+enum CheckoutStatus {
+  RESERVING = 0;   // 预占中
+  CONFIRMED = 1;   // 已确认
+  CANCELLED = 2;   // 已取消
+  EXPIRED = 3;     // 已过期
+}
+
+message CheckoutItem {
+  int64 product_id = 1;      // 商品ID
+  int32 quantity = 2;        // 购买数量
+  ProductSnapshot snapshot = 3; // 商品快照
+}
+message CheckoutOrder {
+  string pre_order_id = 1;         // 预订单ID
+  int64 user_id = 2;               // 用户ID
+  string coupon_id = 3;             // 使用优惠券ID
+  int64 original_amount = 4;       // 原始金额（分）
+  int64 final_amount = 5;          // 实际支付金额（分）
+  CheckoutStatus status = 6;       // 订单状态
+  int32 address_id = 7;
+  int64 expire_time = 8;           // 过期时间戳（秒）
+  string created_at = 9;           // 创建时间
+  string updated_at = 10;
+  repeated CheckoutItem items = 11; // 商品明细
+}
+// 商品信息快照
+message ProductSnapshot {
+  string name = 1;         // 商品名称
+  string description = 2; // 规格描述
+  int64 price = 3;        // 下单时价格（分）
+}
+
+// --------------- request ---------------
+
+message CheckoutDetailReq {
+  string checkout_token = 1;
+}
+message UpdateCheckoutStatusReq {
+  string checkout_token = 1;
+  CheckoutStatus status = 2; // 状态码
+}
+message CheckoutListReq{
+  uint32 user_id = 1;
+  int32 page = 2;       // 从1开始计数
+  int32 page_size = 3;  // 业务层校验最大值
+}
+message CheckoutReq{
+  message OrderItem {
+    int32 product_id = 1;
+    int32 quantity = 2;
+  }
+  uint32 user_id = 1;
+  string coupon_id = 2; //
+  repeated OrderItem order_items = 3; // 新增：直接传商品信息
+  int32 address_id = 4;
+}
+
+// --------------- response ---------------
+
+// 分页响应结构
+message CheckoutListResp {
+  int32 status_code = 1;
+  int32 status_msg = 2;
+  int64 total = 3;
+  repeated CheckoutOrder data = 4; // 订单数据列表
+}
+message CheckoutResp {
+  int32 status_code = 1;
+  string status_msg = 2;
+
+  int64 expire_time = 3;        // 预占库存有效期（如30分钟）
+  string checkout_token = 4;    // 结算令牌（用于后续提交）也就是pre_order_id
+  repeated int64  pay_method = 5;// 支付方式 （如：微信支付：1、支付宝支付：2）
+}
+message CheckoutDetailResp {
+  int32 status_code = 1;
+  string status_msg = 2;
+  CheckoutOrder data = 3;
+}
+
+
+service CheckoutService {
+  // 预结算（生成预订单）
+  rpc PrepareCheckout (CheckoutReq) returns (CheckoutResp);
+  rpc GetCheckoutList (CheckoutListReq) returns (CheckoutListResp);
+  rpc GetCheckoutDetail (CheckoutDetailReq) returns (CheckoutDetailResp);
+  rpc ReleaseCheckout (ReleaseReq) returns (ReleaseResp); // 释放预订单，释放库存，返还优惠券
+
+}
+message ReleaseReq {
+  string pre_order_id = 1;
+  bool restore_stock = 2; // 是否恢复库存
+  bool return_coupon = 3; // 是否返还优惠券
+}
+message ReleaseResp {
+  int32 status_code = 1;
+  string status_msg = 2;
+}
