@@ -12,7 +12,6 @@ import (
 	"jijizhazha1024/go-mall/common/consts/code"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
 	pc "jijizhazha1024/go-mall/dal/model/products/product_categories"
-	"jijizhazha1024/go-mall/services/inventory/inventory"
 	"jijizhazha1024/go-mall/services/product/internal/svc"
 	"jijizhazha1024/go-mall/services/product/product"
 	"strconv"
@@ -43,7 +42,10 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 	if err := l.checkSensitiveWords(in.Name); err != nil {
 		l.Logger.Errorw("product sensitive word failed",
 			logx.Field("err", err))
-		return nil, err
+		return &product.CreateProductResp{
+			StatusCode: uint32(code.ProductSensitiveWordFailed),
+			StatusMsg:  code.ProductSensitiveWordFailedMsg,
+		}, err
 	}
 	var product_Id int64
 	var picture_url string
@@ -58,7 +60,6 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 		if err != nil {
 			return err
 		}
-
 		// 创建 Products 结构体实例
 		productRes := &product2.Products{
 			Name:        in.Name,
@@ -105,15 +106,9 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 		return &product.CreateProductResp{
 			StatusCode: uint32(code.ProductCreationFailed),
 			StatusMsg:  code.ProductCreationFailedMsg,
-		}, nil
+		}, err
 	}
-	_, err = l.svcCtx.InventoryRpc.UpdateInventory(l.ctx, &inventory.InventoryReq{
-		ProductId: int32(product_Id),
-		Quantity:  int32(in.Stock),
-	})
-	if err != nil {
-		return nil, err
-	}
+
 	// 5. 将商品信息添加到 ES
 	esDoc := map[string]interface{}{
 		"id":          product_Id,
@@ -127,7 +122,10 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 	if newBody, err = mustJSON(esDoc); err != nil {
 		l.Logger.Errorw("mustJSON err",
 			logx.Field("err", err))
-		return nil, err
+		return &product.CreateProductResp{
+			StatusCode: uint32(code.ProductCreationFailed),
+			StatusMsg:  code.ProductCreationFailedMsg,
+		}, err
 	}
 	req := esapi.IndexRequest{
 		Index:      biz.ProductEsIndexName, // ES 索引名，
@@ -140,7 +138,10 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 	if err != nil {
 		l.Logger.Errorw("product es creation failed",
 			logx.Field("err", err))
-		return nil, err
+		return &product.CreateProductResp{
+			StatusCode: uint32(code.EsFailed),
+			StatusMsg:  code.EsFailedMag,
+		}, err
 	}
 	defer res.Body.Close()
 	// 检查响应是否包含错误
@@ -151,7 +152,10 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 		} else {
 			l.Logger.Errorf("创建 Elasticsearch 记录时返回错误响应: %s", string(body))
 		}
-		return nil, err
+		return &product.CreateProductResp{
+			StatusCode: uint32(code.EsFailed),
+			StatusMsg:  code.EsFailedMag,
+		}, err
 
 	}
 	return &product.CreateProductResp{

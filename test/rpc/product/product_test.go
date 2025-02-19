@@ -27,22 +27,7 @@ func initproduct() {
 	}
 	product_client = product.NewProductCatalogServiceClient(conn)
 }
-func TestGetallProduct(t *testing.T) {
-	initproduct()
-	resp, err := product_client.GetAllProduct(context.Background(), &product.GetAllProductsReq{
-		Page:     1,
-		PageSize: 2,
-	})
-	if err != nil {
-		return
-	}
-	if err != nil {
-		t.Fatal(err)
 
-	}
-	fmt.Println(" success", resp)
-	t.Log(" success", resp)
-}
 func TestProductsCreateRpc(t *testing.T) {
 	initproduct()
 	resp, err := product_client.CreateProduct(context.Background(), &product.CreateProductReq{

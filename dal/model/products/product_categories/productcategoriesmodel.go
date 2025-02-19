@@ -15,7 +15,6 @@ type (
 		productCategoriesModel
 		WithSession(session sqlx.Session) ProductCategoriesModel
 		DeleteByProductId(ctx context.Context, productId int64) error
-		FindCategoriesByIds(ctx context.Context, productId int64) ([]string, error)
 	}
 
 	customProductCategoriesModel struct {
@@ -37,18 +36,4 @@ func (m *customProductCategoriesModel) DeleteByProductId(ctx context.Context, pr
 	query := fmt.Sprintf("delete from %s where `product_id` = ?", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, productId)
 	return err
-}
-func (m *customProductCategoriesModel) FindCategoriesByIds(ctx context.Context, productId int64) ([]string, error) {
-	query := fmt.Sprintf("select `category_id` from %s where `product_id` = ?", m.table)
-
-	// 定义一个切片用于存储查询结果
-	var categoryIds []string
-
-	// 使用 QueryRowsCtx 执行查询
-	err := m.conn.QueryRowsCtx(ctx, &categoryIds, query, productId)
-	if err != nil {
-		return nil, err // 如果查询失败，返回错误
-	}
-
-	return categoryIds, nil // 返回分类 ID 切片
 }

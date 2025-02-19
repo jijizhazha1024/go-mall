@@ -13,10 +13,6 @@ service ProductCatalogService {
   rpc UpdateProduct(UpdateProductReq) returns (UpdateProductResp) {}
   // 删除商品
   rpc DeleteProduct(DeleteProductReq) returns (DeleteProductResp) {}
-  // 分页得到全部商品
-  rpc GetAllProduct(GetAllProductsReq) returns (GetAllProductsResp){}
-  // 判断商品是否存在
-  rpc IsExistProduct(IsExistProductReq) returns(IsExistProductResp){}
 }
 
 
@@ -30,24 +26,7 @@ message Product {
   int64 stock = 6;
   repeated string categories = 7;
 }
-message IsExistProductReq{
-  int64 id = 1 ; //商品id
-}
-message IsExistProductResp{
-  uint32 status_code = 1; // 状态码
-  string status_msg = 2; // 状态描述
-  bool exist = 3;
-}
-message GetAllProductsReq{
-  int64 page = 1;
-  int64 pageSize = 2;
-}
-message GetAllProductsResp {
-  int64 total = 1;
-  repeated Product products = 2;
-  int64 page = 3;
-  int64 pageSize = 4;
-}
+
 
 message GetProductReq {
   uint32 id = 1;

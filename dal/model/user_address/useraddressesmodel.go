@@ -16,6 +16,7 @@ type (
 	// and implement the added methods in customUserAddressesModel.
 	UserAddressesModel interface {
 		userAddressesModel
+		GetUserAddressExistsByIdAndUserId(ctx context.Context, addressId int32, userId int32) (bool, error)
 		WithSession(session sqlx.Session) UserAddressesModel
 		GetUserAddress(ctx context.Context, userId int32) (*UserAddresses, error)
 		FindAllByUserId(ctx context.Context, userId int32) ([]*UserAddresses, error)
@@ -108,6 +109,26 @@ func (m *customUserAddressesModel) DeleteByAddressIdandUserId(ctx context.Contex
 	}, keys...)
 
 	return err
+}
+func (m *customUserAddressesModel) GetUserAddressExistsByIdAndUserId(ctx context.Context, addressId int32, userId int32) (bool, error) {
+	cacheKey := fmt.Sprintf("userAddressExists:%d:%d", userId, addressId)
+	var exists int8
+
+	// 使用联合主键缓存
+	err := m.CachedConn.QueryRowCtx(ctx, &exists, cacheKey, func(ctx context.Context, conn sqlx.SqlConn, v any) error {
+		query := fmt.Sprintf("select exists(select 1 from %s where `address_id` = ? and `user_id` = ?)",
+			m.table)
+		return conn.QueryRowCtx(ctx, v, query, addressId, userId)
+	})
+
+	switch err {
+	case nil:
+		return exists == 1, nil
+	case sqlx.ErrNotFound:
+		return false, ErrNotFound
+	default:
+		return false, err
+	}
 }
 func (m *customUserAddressesModel) GetUserAddressbyIdAndUserId(ctx context.Context, addressId int32, userId int32) (*UserAddresses, error) {
 	cacheKey := fmt.Sprintf("userAddress:%d:%d", userId, addressId)

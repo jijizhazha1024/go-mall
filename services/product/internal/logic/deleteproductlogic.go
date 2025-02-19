@@ -46,14 +46,20 @@ func (l *DeleteProductLogic) DeleteProduct(in *product.DeleteProductReq) (*produ
 		l.Logger.Errorw("从 Redis 哈希表中删除商品失败",
 			logx.Field("productId", productID),
 			logx.Field("err", err))
-		return nil, err
+		return &product.DeleteProductResp{
+			StatusCode: uint32(code.ProductPVCacheFailed),
+			StatusMsg:  code.ProductPVCacheFailedMsg,
+		}, err
 	}
 	// 1. 第一次删除缓存
 	if _, err := l.svcCtx.RedisClient.Del(cacheKey); err != nil {
 		l.Logger.Errorw("product delete cache failed",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Id))
-		return nil, err
+		return &product.DeleteProductResp{
+			StatusCode: uint32(code.ProductCacheFailed),
+			StatusMsg:  code.ProductCacheFailedMsg,
+		}, err
 	}
 
 	// 2. 使用 Transact 开启事务
@@ -80,7 +86,7 @@ func (l *DeleteProductLogic) DeleteProduct(in *product.DeleteProductReq) (*produ
 		return &product.DeleteProductResp{
 			StatusCode: uint32(code.ProductDeletionFailed),
 			StatusMsg:  code.ProductDeletionFailedMsg,
-		}, nil
+		}, err
 	}
 
 	// 6. 删除es记录
@@ -100,7 +106,10 @@ func (l *DeleteProductLogic) DeleteProduct(in *product.DeleteProductReq) (*produ
 		l.Logger.Errorw("product es delete  failed",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Id))
-		return nil, err
+		return &product.DeleteProductResp{
+			StatusCode: uint32(code.EsFailed),
+			StatusMsg:  code.EsFailedMag,
+		}, err
 	}
 	if res != nil {
 		defer res.Body.Close()
@@ -116,7 +125,10 @@ func (l *DeleteProductLogic) DeleteProduct(in *product.DeleteProductReq) (*produ
 		l.Logger.Errorw("product es resp read failed",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Id))
-		return nil, err
+		return &product.DeleteProductResp{
+			StatusCode: uint32(code.EsFailed),
+			StatusMsg:  code.EsFailedMag,
+		}, err
 	}
 
 	// 7. 延迟第二次删除缓存

@@ -14,19 +14,15 @@ import (
 )
 
 type (
-	CreateProductReq   = product.CreateProductReq
-	CreateProductResp  = product.CreateProductResp
-	DeleteProductReq   = product.DeleteProductReq
-	DeleteProductResp  = product.DeleteProductResp
-	GetAllProductsReq  = product.GetAllProductsReq
-	GetAllProductsResp = product.GetAllProductsResp
-	GetProductReq      = product.GetProductReq
-	GetProductResp     = product.GetProductResp
-	IsExistProductReq  = product.IsExistProductReq
-	IsExistProductResp = product.IsExistProductResp
-	Product            = product.Product
-	UpdateProductReq   = product.UpdateProductReq
-	UpdateProductResp  = product.UpdateProductResp
+	CreateProductReq  = product.CreateProductReq
+	CreateProductResp = product.CreateProductResp
+	DeleteProductReq  = product.DeleteProductReq
+	DeleteProductResp = product.DeleteProductResp
+	GetProductReq     = product.GetProductReq
+	GetProductResp    = product.GetProductResp
+	Product           = product.Product
+	UpdateProductReq  = product.UpdateProductReq
+	UpdateProductResp = product.UpdateProductResp
 
 	ProductCatalogService interface {
 		// 根据商品id得到商品详细信息
@@ -37,10 +33,6 @@ type (
 		UpdateProduct(ctx context.Context, in *UpdateProductReq, opts ...grpc.CallOption) (*UpdateProductResp, error)
 		// 删除商品
 		DeleteProduct(ctx context.Context, in *DeleteProductReq, opts ...grpc.CallOption) (*DeleteProductResp, error)
-		// 分页得到全部商品
-		GetAllProduct(ctx context.Context, in *GetAllProductsReq, opts ...grpc.CallOption) (*GetAllProductsResp, error)
-		// 判断商品是否存在
-		IsExistProduct(ctx context.Context, in *IsExistProductReq, opts ...grpc.CallOption) (*IsExistProductResp, error)
 	}
 
 	defaultProductCatalogService struct {
@@ -76,16 +68,4 @@ func (m *defaultProductCatalogService) UpdateProduct(ctx context.Context, in *Up
 func (m *defaultProductCatalogService) DeleteProduct(ctx context.Context, in *DeleteProductReq, opts ...grpc.CallOption) (*DeleteProductResp, error) {
 	client := product.NewProductCatalogServiceClient(m.cli.Conn())
 	return client.DeleteProduct(ctx, in, opts...)
-}
-
-// 分页得到全部商品
-func (m *defaultProductCatalogService) GetAllProduct(ctx context.Context, in *GetAllProductsReq, opts ...grpc.CallOption) (*GetAllProductsResp, error) {
-	client := product.NewProductCatalogServiceClient(m.cli.Conn())
-	return client.GetAllProduct(ctx, in, opts...)
-}
-
-// 判断商品是否存在
-func (m *defaultProductCatalogService) IsExistProduct(ctx context.Context, in *IsExistProductReq, opts ...grpc.CallOption) (*IsExistProductResp, error) {
-	client := product.NewProductCatalogServiceClient(m.cli.Conn())
-	return client.IsExistProduct(ctx, in, opts...)
 }
