@@ -32,32 +32,31 @@ func (l *GetProductListLogic) GetProductList(req *types.GetProductListReq) (resp
 		Page:     req.Page,
 		PageSize: req.PageSize,
 	})
-
 	// 处理 RPC 调用失败
 	if err != nil {
-		l.Logger.Errorw("failed to call GetProductList RPC",
+		l.Logger.Errorw("call rpc ProductRpc.GetAllProduct failed",
 			logx.Field("err", err),
 			logx.Field("page", req.Page),
 			logx.Field("page_size", req.PageSize))
-		return nil, errors.New(code.ServerError, "RPC call failed")
+		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	}
-
-	// 处理 RPC 返回结果为空的情况
-	if res == nil {
-		l.Logger.Errorw("RPC GetProductList returned nil response",
-			logx.Field("page", req.Page),
-			logx.Field("page_size", req.PageSize))
-		return nil, errors.New(code.ServerError, "RPC response is nil")
+	if res.StatusCode != code.Success {
+		// 可以记录日志
+		return nil, errors.New(int(res.StatusCode), res.StatusMsg)
 	}
 
 	// 将 RPC 响应转换为 HTTP 响应
 	products := make([]*types.Product, len(res.Products))
 	for i, p := range res.Products {
 		products[i] = &types.Product{
-			ID:    int64(p.Id),
-			Name:  p.Name,
-			Stock: p.Stock,
-			Price: float64(p.Price),
+			ID:          int64(p.Id),
+			Name:        p.Name,
+			Stock:       p.Stock,
+			Price:       p.Price,
+			Picture:     p.Picture,
+			Description: p.Description,
+			Categories:  p.Categories,
+			Sold:        p.Sold,
 		}
 	}
 

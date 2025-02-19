@@ -6,6 +6,7 @@ import (
 	"github.com/zeromicro/x/errors"
 	"jijizhazha1024/go-mall/apis/product/internal/svc"
 	"jijizhazha1024/go-mall/apis/product/internal/types"
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/product/product"
 )
 
@@ -24,22 +25,26 @@ func NewGetProductByIDLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GetProductByIDLogic) GetProductByID(req *types.GetProductByIDReq) (resp *types.GetProductByIDResp, err error) {
-	// todo: add your logic here and delete this line
 	res, err := l.svcCtx.ProductRpc.GetProduct(l.ctx, &product.GetProductReq{
 		Id: uint32(req.ID),
 	})
 	if err != nil {
-		l.Logger.Errorf("rpc get product detail  failed", logx.Field("err", err))
+		l.Logger.Errorf("call rpc ProductRpc.GetProduct failed", logx.Field("err", err))
 		return nil, errors.New(int(res.StatusCode), res.StatusMsg)
 	}
-	resp = &types.GetProductByIDResp{
+	if res.StatusCode != code.Success {
+		// 提示用户
+		return nil, errors.New(int(res.StatusCode), res.StatusMsg)
+	}
 
+	resp = &types.GetProductByIDResp{
 		ID:          int64(res.Product.Id),
 		Name:        res.Product.Name,
 		Description: res.Product.Description,
 		Picture:     res.Product.Picture,
 		Stock:       res.Product.Stock,
-		Price:       float64(res.Product.Price),
+		Price:       res.Product.Price,
+		Sold:        res.Product.Sold,
 		Categories:  res.Product.Categories,
 	}
 
