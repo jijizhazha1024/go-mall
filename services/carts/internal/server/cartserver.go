@@ -32,6 +32,10 @@ func (s *CartServer) CreateCartItem(ctx context.Context, in *carts.CartItemReque
 	l := logic.NewCreateCartItemLogic(ctx, s.svcCtx)
 	return l.CreateCartItem(in)
 }
+func (s *CartServer) SubCartItem(ctx context.Context, in *carts.CartItemRequest) (*carts.SubCartResponse, error) {
+	l := logic.NewSubCartItemLogic(ctx, s.svcCtx)
+	return l.SubCartItem(in)
+}
 
 func (s *CartServer) DeleteCartItem(ctx context.Context, in *carts.CartItemRequest) (*carts.EmptyCartResponse, error) {
 	l := logic.NewDeleteCartItemLogic(ctx, s.svcCtx)
