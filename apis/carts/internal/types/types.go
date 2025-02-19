@@ -4,11 +4,11 @@
 package types
 
 type CartInfoResponse struct {
-	Id        int32 `json:"id"`
-	UserId    int32 `json:"user_id"`
-	ProductId int32 `json:"product_id"`
-	Quantity  int32 `json:"quantity"`
-	Checked   bool  `json:"checked"`
+	Id        int32         `json:"id"`
+	UserId    int32         `json:"user_id"`
+	ProductId int32         `json:"product_id"`
+	Quantity  int32         `json:"quantity"`
+	Product   []interface{} `json:"product"`
 }
 
 type CartItemListResp struct {
@@ -17,13 +17,7 @@ type CartItemListResp struct {
 }
 
 type CreateCartReq struct {
-	UserId       int32   `json:"user_id"`
-	ProductId    int32   `json:"product_id"`
-	ProductName  string  `json:"product_name"`
-	ProuctImage  string  `json:"prouct_image"`
-	ProductPrice float32 `json:"product_price"`
-	Quantity     int32   `json:"quantity"`
-	Checked      bool    `json:"checked"`
+	ProductId int32 `json:"product_id"`
 }
 
 type CreateCartResp struct {
@@ -31,20 +25,20 @@ type CreateCartResp struct {
 }
 
 type DeleteCartReq struct {
-	Id           int32   `json:"id"`
-	UserId       int32   `json:"user_id"`
-	ProductId    int32   `json:"product_id"`
-	ProductName  string  `json:"product_name"`
-	ProuctImage  string  `json:"prouct_image"`
-	ProductPrice float32 `json:"product_price"`
-	Quantity     int32   `json:"quantity"`
-	Checked      bool    `json:"checked"`
+	ProductId int32 `json:"product_id"`
 }
 
 type DeleteCartResp struct {
 	Success bool `json:"success"`
 }
 
+type SubCartReq struct {
+	ProductId int32 `json:"product_id"`
+}
+
+type SubCartResp struct {
+	Id int32 `json:"id"`
+}
+
 type UserInfo struct {
-	Id int32
 }

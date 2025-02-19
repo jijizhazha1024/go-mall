@@ -18,18 +18,23 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Route{
 				{
 					Method:  http.MethodPost,
-					Path:    "/",
+					Path:    "/add",
 					Handler: CreateCartItemHandler(serverCtx),
 				},
 				{
+					Method:  http.MethodDelete,
+					Path:    "/delete",
+					Handler: DeleteCartItemHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodGet,
-					Path:    "/:id",
+					Path:    "/list",
 					Handler: CartItemListHandler(serverCtx),
 				},
 				{
-					Method:  http.MethodDelete,
-					Path:    "/:id",
-					Handler: DeleteCartItemHandler(serverCtx),
+					Method:  http.MethodPost,
+					Path:    "/sub",
+					Handler: SubCartItemHandler(serverCtx),
 				},
 			}...,
 		),
