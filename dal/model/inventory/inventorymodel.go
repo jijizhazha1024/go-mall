@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"jijizhazha1024/go-mall/common/consts/biz"
+
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 var _ InventoryModel = (*customInventoryModel)(nil)
@@ -15,6 +16,7 @@ type (
 	// and implement the added methods in customInventoryModel.
 	InventoryModel interface {
 		inventoryModel
+		FindAll(ctx context.Context) ([]*Inventory, error)
 		WithSession(session sqlx.Session) InventoryModel
 		UpdateOrCreate(ctx context.Context, inventory Inventory) error
 		DecreaseInventoryAtom(ctx context.Context, productId int32, quantity int32) (cnt int64, err error)
@@ -102,6 +104,16 @@ func (m *customInventoryModel) DecreaseInventoryAtom(ctx context.Context, produc
 		return 0, err
 	}
 	return cnt, nil
+}
+func (m *customInventoryModel) FindAll(ctx context.Context) ([]*Inventory, error) {
+	// 1. 构建 SQL 查询语
+	var inventorys []*Inventory
+	query := fmt.Sprintf("select * from %s ", m.table)
+	err := m.conn.QueryRowsCtx(ctx, &inventorys, query)
+	if err != nil {
+		return nil, err
+	}
+	return inventorys, nil
 }
 
 // NewInventoryModel returns a model for the database table.
