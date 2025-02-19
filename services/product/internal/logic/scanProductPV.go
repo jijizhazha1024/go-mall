@@ -45,7 +45,8 @@ func ScanHotProducts(svcCtx *svc.ServiceContext, ctx context.Context) (err error
 			Name:        productData.Name,
 			Description: productData.Description.String,
 			Picture:     productData.Picture.String,
-			Price:       productData.Price,
+			Price:       float32(productData.Price),
+			Stock:       productData.Stock,
 			Categories:  nil,
 		}
 

@@ -4,8 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"log"
 	"time"
@@ -60,11 +58,6 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
-	// 注册服务
-	if err := consul.RegisterService(c.ListenOn, c.Consul); err != nil {
-		logx.Errorw("register service error", logx.Field("err", err))
-		panic(err)
-	}
 	defer s.Stop()
 	// 在服务停止时调用 cancel 函数，通知定时任务退出
 	defer cancel()

@@ -28,9 +28,8 @@ func NewListAddressesLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Lis
 
 // 获取所有收货地址
 func (l *ListAddressesLogic) ListAddresses(in *users.AllAddressLitstRequest) (*users.AddressListResponse, error) {
-	// todo: add your logic here and delete this line
 
-	allusers, err := l.svcCtx.AddressModel.FindAllByUserId(l.ctx, int32(in.UserId))
+	alladdress, err := l.svcCtx.AddressModel.FindAllByUserId(l.ctx, int32(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Infow("address list user address not found", logx.Field("user_id", in.UserId))
@@ -43,17 +42,17 @@ func (l *ListAddressesLogic) ListAddresses(in *users.AllAddressLitstRequest) (*u
 		return &users.AddressListResponse{}, err
 	}
 	addresslist := make([]*users.AddressData, 0)
-	for _, user := range allusers {
+	for _, address := range alladdress {
 		addresslist = append(addresslist, &users.AddressData{
-			AddressId:       int32(user.AddressId),
-			DetailedAddress: user.DetailedAddress,
-			City:            user.City,
-			Province:        user.Province.String,
-			IsDefault:       user.IsDefault,
-			RecipientName:   user.RecipientName,
-			PhoneNumber:     user.PhoneNumber.String,
-			CreatedAt:       user.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt:       user.UpdatedAt.Format("2006-01-02 15:04:05"),
+			AddressId:       int32(address.AddressId),
+			DetailedAddress: address.DetailedAddress,
+			City:            address.City,
+			Province:        address.Province.String,
+			IsDefault:       address.IsDefault,
+			RecipientName:   address.RecipientName,
+			PhoneNumber:     address.PhoneNumber.String,
+			CreatedAt:       address.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:       address.UpdatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 

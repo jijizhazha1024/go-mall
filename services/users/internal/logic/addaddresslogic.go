@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/dal/model/user_address"
@@ -43,7 +44,7 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 		var err error
 		addresses, err = l.svcCtx.AddressModel.FindAllByUserId(l.ctx, int32(in.UserId))
 		if err != nil {
-			if err == sql.ErrNoRows {
+			if errors.Is(err, sql.ErrNoRows) {
 				l.Logger.Infow("update address is default, but user has no address", logx.Field("user_id", in.UserId))
 				return &users.AddAddressResponse{
 					StatusMsg:  code.UserAddressNotFoundMsg,
