@@ -46,11 +46,9 @@ func (l *UpdateLogic) Update(req *types.UpdateRequest) (resp *types.UpdateRespon
 
 		l.Logger.Errorf("call rpc update failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
-	} else {
-		if updateresp.StatusMsg != "" {
-			l.Logger.Errorf("update failed", logx.Field("status_code", updateresp.StatusCode), logx.Field("status_msg", updateresp.StatusMsg))
-			return nil, errors.New(int(updateresp.StatusCode), updateresp.StatusMsg)
-		}
+	} else if updateresp.StatusMsg != "" {
+		l.Logger.Errorf("update failed", logx.Field("status_code", updateresp.StatusCode), logx.Field("status_msg", updateresp.StatusMsg))
+		return nil, errors.New(int(updateresp.StatusCode), updateresp.StatusMsg)
 
 	}
 

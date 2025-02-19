@@ -51,11 +51,10 @@ func (l *UpdateAddressLogic) UpdateAddress(req *types.UpdateAddressRequest) (res
 
 		l.Logger.Errorf("call rpc updateaddress failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
-	} else {
-		if updateAddressresp.StatusMsg != "" {
-			l.Logger.Errorf("updeteaddress rpc failed", logx.Field("status_code", updateAddressresp.StatusCode), logx.Field("status_msg", updateAddressresp.StatusMsg))
-			return nil, errors.New(int(updateAddressresp.StatusCode), updateAddressresp.StatusMsg)
-		}
+	} else if updateAddressresp.StatusMsg != "" {
+		l.Logger.Errorf("updeteaddress rpc failed", logx.Field("status_code", updateAddressresp.StatusCode), logx.Field("status_msg", updateAddressresp.StatusMsg))
+		return nil, errors.New(int(updateAddressresp.StatusCode), updateAddressresp.StatusMsg)
+
 	}
 
 	resp = &types.UpdateAddressResponse{
