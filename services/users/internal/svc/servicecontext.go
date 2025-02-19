@@ -23,7 +23,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Bf:           bloom_filter.NewBloomFilter(1000000, 0.00001),
 		Model:        sqlx.NewMysql(c.MysqlConfig.DataSource),
 		UsersModel:   user.NewUsersModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
-		AddressModel: user_address.NewUserAddressesModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
+		AddressModel: user_address.NewUserAddressesModel(sqlx.NewMysql(c.MysqlConfig.DataSource), c.Cache),
 		Config:       c,
 	}
 }

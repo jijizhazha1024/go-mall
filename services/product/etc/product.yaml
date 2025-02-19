@@ -9,9 +9,13 @@ Consul:
   Meta:
     Protocol: grpc
 
+InventoryRpc:
+  Target: consul://124.71.72.124:8500/inventory.rpc?wait=14s
+  NonBlock: true
+
 # MySQL 配置
 MysqlConfig:
-  #datasource: "root:123@tcp(127.0.0.1:3306)/douyinmall?charset=utf8mb4&parseTime=True&loc=Local"
+#  datasource: "root:123@tcp(127.0.0.1:3306)/douyinmall?charset=utf8mb4&parseTime=True&loc=Local"
   datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
   conntimeout: 5
 RedisConf:

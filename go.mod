@@ -6,7 +6,7 @@ require (
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/qiniu/go-sdk/v7 v7.25.2
-	github.com/shopspring/decimal v1.4.0
+	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.10.0
 	github.com/zeromicro/go-zero v1.7.6
 	github.com/zeromicro/x v0.0.0-20240408115609-8224c482b07e
@@ -75,7 +75,6 @@ require (
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/redis/go-redis/v9 v9.7.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
-	github.com/zeromicro/x v0.0.0-20240408115609-8224c482b07e
 	go.etcd.io/etcd/api/v3 v3.5.15 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.15 // indirect
 	go.etcd.io/etcd/client/v3 v3.5.15 // indirect
