@@ -64,8 +64,7 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 			Name:        in.Name,
 			Description: sql.NullString{String: in.Description, Valid: in.Description != ""},
 			Picture:     sql.NullString{String: picture_url, Valid: picture_url != ""},
-			Price:       float64(in.Price), // 注意类型转换
-			Stock:       in.Stock,
+			Price:       in.Price, // 注意类型转换
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),
 		}

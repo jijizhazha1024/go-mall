@@ -3,11 +3,11 @@ syntax = "v1"
 // 请求结构体
 type (
 	GetProductListReq {
-		Page     int64 `json:"page"` // 当前页码，默认为1
-		PageSize int64 `json:"pageSize"` // 每页大小，默认为10
+		Page     int64 `json:"page,default=1"` // 当前页码，默认为1
+		PageSize int64 `json:"size,default=10"` // 每页大小，默认为10
 	}
 	GetProductByIDReq {
-		ID int64 `form:"id" json:"id"` // 商品ID（路径参数）
+		ID int64 `json:"id"` // 商品ID（路径参数）
 	}
 )
 
@@ -25,18 +25,27 @@ type (
 		Description string   `json:"description"` // 商品描述
 		Picture     string   `json:"picture"` // 商品图片URL
 		Stock       int64    `json:"stock"` // 商品库存
-		Price       float64  `json:"price"` // 商品价格
+		Sold        int64    `json:"sold"`
+		Price       int64    `json:"price"` // 商品价格
 		Categories  []string `json:"categories"` // 商品分类
+		CreatedAt   string   `json:"createdAt"`
+		UpdatedAt   string   `json:"updatedAt"`
 	}
 )
 
 // 商品结构体（简略信息）
 type (
 	Product {
-		ID    int64   `json:"id"` // 商品ID
-		Name  string  `json:"name"` // 商品名称
-		Stock int64   `json:"stock"` // 商品库存
-		Price float64 `json:"price"` // 商品价格
+		ID          int64    `json:"id"` // 商品ID
+		Name        string   `json:"name"` // 商品名称
+		Stock       int64    `json:"stock"` // 商品库存
+		Price       int64    `json:"price"` // 商品价格
+		Sold        int64    `json:"sold"`
+		Picture     string   `json:"picture"`
+		Categories  []string `json:"categories"`
+		CreatedAt   string   `json:"createdAt"`
+		UpdatedAt   string   `json:"updatedAt"`
+		Description string   `json:"description"`
 	}
 )
 
