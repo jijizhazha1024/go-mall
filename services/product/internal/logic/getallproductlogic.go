@@ -51,7 +51,6 @@ func (l *GetAllProductLogic) GetAllProduct(in *product.GetAllProductsReq) (*prod
 		defer wg.Done()
 		total, queryErr = productModel.Count(l.ctx)
 	}()
-
 	wg.Wait()
 
 	// 统一错误处理
@@ -59,6 +58,7 @@ func (l *GetAllProductLogic) GetAllProduct(in *product.GetAllProductsReq) (*prod
 		if errors.Is(queryErr, sqlx.ErrNotFound) {
 			// 也可以记录info日志
 			// 返回空，可能是由于用户的过滤条件导致没有匹配到数据
+
 			return &product.GetAllProductsResp{}, nil
 		}
 		l.Logger.Errorw("query products failed",
@@ -68,12 +68,21 @@ func (l *GetAllProductLogic) GetAllProduct(in *product.GetAllProductsReq) (*prod
 		return nil, queryErr
 	}
 
+	// TODO 这里可能需要使用 协程池优化
 	// 预分配切片容量
 	var wgStock sync.WaitGroup
+	var wgCategories sync.WaitGroup
 	result := make([]*product.Product, len(products))
+	wgStock.Add(len(products))
+	wgCategories.Add(len(products))
 	for i, p := range products {
-		wgStock.Add(1)
-		// TODO 这里可能需要使用 协程池优化
+		result[i] = &product.Product{
+			Id:          uint32(p.Id),
+			Name:        p.Name,
+			Description: p.Description.String,
+			Picture:     p.Picture.String,
+			Price:       p.Price,
+		}
 		go func(index int, productId int64) {
 			defer wgStock.Done()
 			// 调用库存服务
@@ -88,9 +97,23 @@ func (l *GetAllProductLogic) GetAllProduct(in *product.GetAllProductsReq) (*prod
 			result[index].Stock = inventoryResp.Inventory
 			result[index].Sold = inventoryResp.SoldCount
 		}(i, p.Id) // 注意这里要显式传递参数
+
+		go func(index int, productId int64) {
+			defer wgCategories.Done()
+			categories, err := l.svcCtx.CategoriesModel.FindCategoryNameByProductID(l.ctx, productId)
+			if err != nil {
+				l.Logger.Errorw("Failed to find product_category from database",
+					logx.Field("err", err),
+					logx.Field("product_id", productId))
+				// 因为查询不完整，所以不需要写入缓存了，直接返回
+				return
+			}
+			result[index].Categories = categories
+		}(i, p.Id)
 	}
 	// 等待所有goroutine完成
 	wgStock.Wait()
+	wgCategories.Wait()
 	return &product.GetAllProductsResp{
 		Products: result,
 		Total:    total,

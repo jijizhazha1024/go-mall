@@ -10,7 +10,6 @@ import (
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
-	"jijizhazha1024/go-mall/dal/model/products/product_categories"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
 	"jijizhazha1024/go-mall/services/product/internal/svc"
 	"jijizhazha1024/go-mall/services/product/product"
@@ -100,10 +99,7 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 	}
 
 	// 在这里创建连接，懒惰创建连接。
-	categoriesModel := product_categories.NewProductCategoriesModel(l.svcCtx.Mysql)
-	ids, err := categoriesModel.FindCategoriesByIds(l.ctx, int64(in.Id))
-	// 构造响应
-	resp.Product.Categories = ids
+	categories, err := l.svcCtx.CategoriesModel.FindCategoryNameByProductID(l.ctx, int64(in.Id))
 	if err != nil {
 		l.Logger.Errorw("Failed to find product_category from database",
 			logx.Field("err", err),
@@ -112,6 +108,7 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 		return resp, nil
 	}
 
+	resp.Product.Categories = categories
 	// 到这里就说明数据是完整的，将数据缓存到Redis中
 	data, err := json.Marshal(resp.Product)
 	cacheData = string(data)
