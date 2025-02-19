@@ -29,7 +29,11 @@ type (
 		FindOne(ctx context.Context, id int64) (*Carts, error)
 		Update(ctx context.Context, data *Carts) error
 		Delete(ctx context.Context, id int64) error
-	}
+		FindByUserID(ctx context.Context, userID int64) ([]Carts, error)
+		CheckCartItemExists(ctx context.Context, userId int32, productId int32) (int32 ,bool, error)
+		GetQuantityByUserIdAndProductId(ctx context.Context, userId int32, productId int32) (int32, error)
+		DeleteCartItem(ctx context.Context, userId int32, productId int32) error
+}
 
 	defaultCartsModel struct {
 		conn  sqlx.SqlConn
@@ -39,7 +43,6 @@ type (
 		Id        int64         `db:"id" json:"id"`         // 主键 自增
 		CreatedAt time.Time     `db:"created_at" json:"created_at"` // 创建时间
 		UpdatedAt time.Time     `db:"updated_at" json:"updated_at"` // 更新时间
-		DeletedAt sql.NullTime  `db:"deleted_at" json:"deleted_at"` // 删除时间
 		UserId    sql.NullInt64 `db:"user_id" json:"user_id"`    // 用户ID
 		ProductId sql.NullInt64 `db:"product_id" json:"product_id"` // 商品ID
 		Quantity  sql.NullInt64 `db:"quantity" json:"quantity"`   // 商品数量
@@ -73,17 +76,95 @@ func (m *defaultCartsModel) FindOne(ctx context.Context, id int64) (*Carts, erro
 		return nil, err
 	}
 }
+func (m *defaultCartsModel) FindByUserID(ctx context.Context, userID int64) ([]Carts, error) {
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE `user_id` = ?", cartsRows, m.table)
+	var results []Carts
+
+	err := m.conn.QueryRowsCtx(ctx, &results, query, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
 
 func (m *defaultCartsModel) Insert(ctx context.Context, data *Carts) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?)", m.table, cartsRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.DeletedAt, data.UserId, data.ProductId, data.Quantity, data.Checked)
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?)", m.table, cartsRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.ProductId, data.Quantity, data.Checked)
 	return ret, err
 }
 
 func (m *defaultCartsModel) Update(ctx context.Context, data *Carts) error {
 	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, cartsRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, data.DeletedAt, data.UserId, data.ProductId, data.Quantity, data.Checked, data.Id)
+	_, err := m.conn.ExecCtx(ctx, query, data.UserId, data.ProductId, data.Quantity, data.Checked, data.Id)
 	return err
+}
+
+func (m *defaultCartsModel) CheckCartItemExists(ctx context.Context, userId int32, productId int32) (int32 ,bool, error) {
+	// 定义一个变量来存储查询结果
+	var existingCart struct {
+		Id int32 `db:"id"`
+	}
+
+	// 使用 sqlx 查询购物车中是否存在该 user_id 和 product_id 的记录
+	query := fmt.Sprintf("SELECT id FROM %s WHERE user_id = ? AND product_id = ? LIMIT 1", m.table)
+	err := m.conn.QueryRowCtx(ctx, &existingCart, query, userId, productId)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// 如果没有找到记录，返回 false
+			return 0, false, nil
+		}
+		// 查询出错时，返回错误
+		return 0, false, err
+	}
+
+	// 如果存在记录，返回 true
+	return existingCart.Id, true, nil
+}
+func (m *defaultCartsModel) GetQuantityByUserIdAndProductId(ctx context.Context, userId int32, productId int32) (int32, error) {
+	var quantity int32
+
+	// 编写查询语句，查询特定用户和商品的 quantity
+	query := fmt.Sprintf("SELECT quantity FROM %s WHERE user_id = ? AND product_id = ? LIMIT 1", m.table)
+
+	// 执行查询并将结果存储到 quantity 变量中
+	err := m.conn.QueryRowCtx(ctx, &quantity, query, userId, productId)
+	if err != nil {
+		if err == sqlx.ErrNotFound {
+			// 如果没有找到结果，返回 0 和 ErrNotFound
+			return 0, fmt.Errorf("cart item not found for user_id: %d, product_id: %d", userId, productId)
+		}
+		return 0, err // 如果发生其他错误，返回错误
+	}
+
+	// 返回查询到的 quantity
+	return quantity, nil
+}
+
+func (m *defaultCartsModel) DeleteCartItem(ctx context.Context, userId int32, productId int32) error {
+	// 删除特定用户和商品的购物车记录
+	query := fmt.Sprintf("DELETE FROM %s WHERE user_id = ? AND product_id = ?", m.table)
+
+	// 执行删除操作，并获取执行结果
+	result, err := m.conn.ExecCtx(ctx, query, userId, productId)
+	if err != nil {
+		return fmt.Errorf("failed to delete cart item for user_id: %d, product_id: %d, error: %v", userId, productId, err)
+	}
+
+	// 获取影响的行数
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected for user_id: %d, product_id: %d, error: %v", userId, productId, err)
+	}
+
+	// 如果影响行数为 0，说明购物车里没有这个商品
+	if rowsAffected == 0 {
+		return fmt.Errorf("cart item not found for user_id: %d, product_id: %d", userId, productId)
+	}
+
+	// 删除成功
+	return nil
 }
 
 func (m *defaultCartsModel) tableName() string {

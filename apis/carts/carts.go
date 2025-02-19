@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-
+	_ "github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 	"jijizhazha1024/go-mall/apis/carts/internal/config"
 	"jijizhazha1024/go-mall/apis/carts/internal/handler"
 	"jijizhazha1024/go-mall/apis/carts/internal/svc"
@@ -18,7 +18,7 @@ func main() {
 	flag.Parse()
 
 	var c config.Config
-	conf.MustLoad(*configFile, &c)
+	conf.MustLoad(*configFile, &c, conf.UseEnv())
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()

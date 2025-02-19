@@ -9,6 +9,10 @@ import (
 type Config struct {
 	rest.RestConf
 
-	UserRpc zrpc.RpcClientConf
-	Consul  consul.Conf
+	AuthsRpc zrpc.RpcClientConf
+
+	UserRpc        zrpc.RpcClientConf
+	Consul         consul.Conf
+	WhitePathList  []string
+	OptionPathList []string
 }

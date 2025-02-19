@@ -24,7 +24,7 @@ func main() {
 	flag.Parse()
 
 	var c config.Config
-	conf.MustLoad(*configFile, &c)
+	conf.MustLoad(*configFile, &c, conf.UseEnv())
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
@@ -40,6 +40,12 @@ func main() {
 		panic(err)
 	}
 	defer s.Stop()
+
+	emails, _ := ctx.UsersModel.FindAllEmails()
+
+	for _, email := range emails {
+		ctx.Bf.Add(email)
+	}
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()

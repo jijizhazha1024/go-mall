@@ -16,14 +16,16 @@ import (
 type (
 	CartInfoResponse     = carts.CartInfoResponse
 	CartItemListResponse = carts.CartItemListResponse
+	CreateCartResponse = carts.CreateCartResponse
+	SubCartResponse = carts.SubCartResponse
 	CartItemRequest      = carts.CartItemRequest
 	EmptyCartResponse    = carts.EmptyCartResponse
 	UserInfo             = carts.UserInfo
 
 	Cart interface {
 		CartItemList(ctx context.Context, in *UserInfo, opts ...grpc.CallOption) (*CartItemListResponse, error)
-		CreateCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*CartInfoResponse, error)
-		UpdateCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*EmptyCartResponse, error)
+		CreateCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*CreateCartResponse, error)
+		SubCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*SubCartResponse, error)
 		DeleteCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*EmptyCartResponse, error)
 	}
 
@@ -43,14 +45,13 @@ func (m *defaultCart) CartItemList(ctx context.Context, in *UserInfo, opts ...gr
 	return client.CartItemList(ctx, in, opts...)
 }
 
-func (m *defaultCart) CreateCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*CartInfoResponse, error) {
+func (m *defaultCart) CreateCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*CreateCartResponse, error) {
 	client := carts.NewCartClient(m.cli.Conn())
 	return client.CreateCartItem(ctx, in, opts...)
 }
-
-func (m *defaultCart) UpdateCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*EmptyCartResponse, error) {
+func (m *defaultCart) SubCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*SubCartResponse, error) {
 	client := carts.NewCartClient(m.cli.Conn())
-	return client.UpdateCartItem(ctx, in, opts...)
+	return client.SubCartItem(ctx, in, opts...)
 }
 
 func (m *defaultCart) DeleteCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*EmptyCartResponse, error) {

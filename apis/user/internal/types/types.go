@@ -3,26 +3,81 @@
 
 package types
 
+type AddAddressRequest struct {
+	RecipientName   string `json:"recipient_name"`
+	PhoneNumber     string `json:"phone_number"`
+	Province        string `json:"province"`
+	City            string `json:"city"`
+	DetailedAddress string `json:"detailed_address"`
+	IsDefault       bool   `json:"is_default"`
+}
+
+type AddAddressResponse struct {
+	Data AddressData `json:"data"`
+}
+
+type AddressData struct {
+	AddressID       int32  `json:"address_id"`
+	RecipientName   string `json:"recipient_name"`
+	PhoneNumber     string `json:"phone_number"`
+	Province        string `json:"province"`
+	City            string `json:"city"`
+	DetailedAddress string `json:"detailed_address"`
+	IsDefault       bool   `json:"is_default"`
+	CreatedAt       string `json:"created_at"` // ISO8601 时间转换为时间戳
+	UpdatedAt       string `json:"updated_at"` // ISO8601 时间转换为时间戳
+}
+
+type AddressListResponse struct {
+	Data []AddressData `json:"data"`
+}
+
+type AddressResponse struct {
+	ID              string `json:"id"`
+	RecipientName   string `json:"recipient_name"`
+	PhoneNumber     string `json:"phone_number"`
+	Province        string `json:"province"`
+	City            string `json:"city"`
+	DetailedAddress string `json:"detailed_address"`
+	IsDefault       string `json:"is_default"`
+	CreatedAt       string `json:"created_at"`
+	UpdatedAt       string `json:"updated_at"`
+}
+
+type AllAddressListRequest struct {
+}
+
+type DeleteAddressRequest struct {
+	AddressID int32 `json:"address_id"`
+}
+
+type DeleteAddressResponse struct {
+}
+
 type DeleteRequest struct {
-	UserId int64 `json:"userId"`
 }
 
 type DeleteResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
+}
+
+type GetAddressRequest struct {
+	AddressID int32 `json:"address_id"`
+}
+
+type GetAddressResponse struct {
+	Data AddressData `json:"data"`
 }
 
 type GetInfoRequest struct {
-	UserId int64  `json:"userId"`
-	Token  string `json:"token"`
 }
 
 type GetInfoResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
-	UserId  int64  `json:"userId"`
-	Email   string `json:"email"`
-	Name    string `json:"name"`
+	UserId    int64  `json:"user_id"`
+	LogoutAt  string `json:"logout_at"`
+	CreatedAt string `json:"created_at"`
+	UpdateAt  string `json:"update_at"`
+	Email     string `json:"email"`
+	UserName  string `json:"user_name"`
 }
 
 type LoginRequest struct {
@@ -31,20 +86,15 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
-	UserId  int64  `json:"userId"`
-	Token   string `json:"token"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type LogoutRequest struct {
-	UserId int64  `json:"userId"`
-	Token  string `json:"token"`
 }
 
 type LogoutResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
+	Logout_at int64 `json:"logout_at"`
 }
 
 type RegisterRequest struct {
@@ -54,22 +104,29 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	Code    int64  `json:"code"`
-	Message string `json:"message"`
-	UserId  int64  `json:"userId"`
-	Token   string `json:"token"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+type UpdateAddressRequest struct {
+	RecipientName   string `json:"recipient_name"`
+	PhoneNumber     string `json:"phone_number"`
+	Province        string `json:"province"`
+	City            string `json:"city"`
+	DetailedAddress string `json:"detailed_address"`
+	IsDefault       bool   `json:"is_default"`
+	AddressID       int32  `json:"address_id"`
+}
+
+type UpdateAddressResponse struct {
+	Data AddressData `json:"data"`
 }
 
 type UpdateRequest struct {
-	UserId   int64  `json:"userId"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	UserName string `json:"user_name"`
 }
 
 type UpdateResponse struct {
-	Code     int64  `json:"code"`
-	Message  string `json:"message"`
-	UserId   int64  `json:"userId"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	UserId   int64  `json:"user_id"`
+	UserName string `json:"user_name"`
 }

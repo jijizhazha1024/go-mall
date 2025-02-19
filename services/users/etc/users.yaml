@@ -1,6 +1,7 @@
 Name: users.rpc
 ListenOn: 0.0.0.0:10001
 Mode: dev
+
 # 服务发现
 Consul:
   Host: 124.71.72.124:8500 # consul endpoint
@@ -8,12 +9,19 @@ Consul:
   Meta:
     Protocol: grpc
 
-# redis
-CacheConf:
-  - NodeConf:
-    Host: 124.71.72.124:6379
-    Pass: jjzzchtt
+# 链路追踪
+Telemetry:
+  Name: users.rpc
+  Endpoint: http://124.71.72.124:14268/api/traces
+  Batcher: jaeger
+  Sampler: 1.0
+
+Log:
+  ServiceName: "users-rpc"
+  Mode: 'console'
+  Encoding: "json"
+  Path: "./logs/users-rpc"
 
 MysqlConfig:
   datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
-  conntimeout: 5
+  Conntimeout: 5

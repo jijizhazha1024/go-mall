@@ -28,14 +28,13 @@ func (s *CartServer) CartItemList(ctx context.Context, in *carts.UserInfo) (*car
 	return l.CartItemList(in)
 }
 
-func (s *CartServer) CreateCartItem(ctx context.Context, in *carts.CartItemRequest) (*carts.CartInfoResponse, error) {
+func (s *CartServer) CreateCartItem(ctx context.Context, in *carts.CartItemRequest) (*carts.CreateCartResponse, error) {
 	l := logic.NewCreateCartItemLogic(ctx, s.svcCtx)
 	return l.CreateCartItem(in)
 }
-
-func (s *CartServer) UpdateCartItem(ctx context.Context, in *carts.CartItemRequest) (*carts.EmptyCartResponse, error) {
-	l := logic.NewUpdateCartItemLogic(ctx, s.svcCtx)
-	return l.UpdateCartItem(in)
+func (s *CartServer) SubCartItem(ctx context.Context, in *carts.CartItemRequest) (*carts.SubCartResponse, error) {
+	l := logic.NewSubCartItemLogic(ctx, s.svcCtx)
+	return l.SubCartItem(in)
 }
 
 func (s *CartServer) DeleteCartItem(ctx context.Context, in *carts.CartItemRequest) (*carts.EmptyCartResponse, error) {
