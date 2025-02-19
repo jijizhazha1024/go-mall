@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	inventory2 "jijizhazha1024/go-mall/dal/model/inventory"
 	"jijizhazha1024/go-mall/services/inventory/internal/svc"
@@ -31,6 +32,13 @@ func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.InventoryReq) (*inv
 		l.Logger.Infow("quantity must be greater than 0", logx.Field("quantity", in.Quantity), logx.Field("product_id", in.ProductId))
 		return nil, biz.InvalidInventoryErr
 	}
+
+	err := l.svcCtx.Rdb.Hset(fmt.Sprintf("inventory:%d", in.ProductId), "total", string(in.Quantity))
+	if err != nil {
+		l.Logger.Errorw("update inventory failed", logx.Field("product_id", in.ProductId), logx.Field("err", err))
+		return nil, err
+	}
+	//执行sql
 	if err := l.svcCtx.InventoryModel.UpdateOrCreate(l.ctx, inventory2.Inventory{
 		ProductId: int64(in.ProductId),
 		Total:     int64(in.Quantity),
@@ -38,5 +46,8 @@ func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.InventoryReq) (*inv
 		l.Logger.Errorw("update inventory error", logx.Field("error", err.Error()), logx.Field("product_id", in.ProductId))
 		return nil, err
 	}
-	return &inventory.InventoryResp{}, nil
+	return &inventory.InventoryResp{
+
+		Inventory: int64(in.Quantity),
+	}, nil
 }

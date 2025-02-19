@@ -3,14 +3,15 @@ package inventory
 import (
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
 	"sync"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var invClient inventory.InventoryClient
@@ -41,14 +42,16 @@ func TestInventoryService(t *testing.T) {
 			Quantity:  100,
 		})
 		assert.NoError(t, err)
-		assert.Equal(t, int32(0), initResp.StatusCode)
+		fmt.Println("err-----------------------", err)
+		fmt.Println("resp-----------------------", initResp)
+		assert.Equal(t, int64(100), initResp.Inventory)
 
 		// 2. 查询库存
 		getResp, err := invClient.GetInventory(ctx, &inventory.GetInventoryReq{
 			ProductId: testProductID,
 		})
 		assert.NoError(t, err)
-		assert.Equal(t, int32(0), getResp.StatusCode)
+
 		assert.Equal(t, int64(100), getResp.Inventory)
 
 		// 3. 扣减库存
@@ -57,16 +60,16 @@ func TestInventoryService(t *testing.T) {
 			Quantity:  20,
 		})
 		assert.NoError(t, err)
-		assert.Equal(t, int32(0), decResp.StatusCode)
+
 		assert.Equal(t, int64(80), decResp.Inventory)
 
 		// 4. 归还库存
-		retResp, err := invClient.ReturnInventory(ctx, &inventory.InventoryReq{
+		retResp, err := invClient.ReturnPreInventory(ctx, &inventory.InventoryReq{
 			ProductId: testProductID,
 			Quantity:  10,
 		})
 		assert.NoError(t, err)
-		assert.Equal(t, int32(0), retResp.StatusCode)
+
 		assert.Equal(t, int64(90), retResp.Inventory)
 	})
 
@@ -127,7 +130,7 @@ func TestReturnInventory_InvalidParam(t *testing.T) {
 	setupInventoryClient(t)
 
 	// 测试负数参数
-	_, err := invClient.ReturnInventory(context.Background(), &inventory.InventoryReq{
+	_, err := invClient.ReturnPreInventory(context.Background(), &inventory.InventoryReq{
 		ProductId: 1001,
 		Quantity:  -10,
 	})

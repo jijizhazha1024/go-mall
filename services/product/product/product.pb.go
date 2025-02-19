@@ -21,7 +21,20 @@ const (
 )
 
 type Product struct {
+<<<<<<< HEAD
 	state         protoimpl.MessageState
+=======
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            uint32                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Picture       string                 `protobuf:"bytes,4,opt,name=picture,proto3" json:"picture,omitempty"`
+	Price         int64                  `protobuf:"varint,5,opt,name=price,proto3" json:"price,omitempty"` // 使用分作为单位，方便计算，避免精度丢失
+	Stock         int64                  `protobuf:"varint,6,opt,name=stock,proto3" json:"stock,omitempty"`
+	Sold          int64                  `protobuf:"varint,7,opt,name=sold,proto3" json:"sold,omitempty"`
+	Categories    []string               `protobuf:"bytes,8,rep,name=categories,proto3" json:"categories,omitempty"`
+	unknownFields protoimpl.UnknownFields
+>>>>>>> dev
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
@@ -289,7 +302,18 @@ func (x *GetAllProductsReq) GetPageSize() int64 {
 }
 
 type GetAllProductsResp struct {
+<<<<<<< HEAD
 	state         protoimpl.MessageState
+=======
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	StatusCode    uint32                 `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"` // 状态码
+	StatusMsg     string                 `protobuf:"bytes,2,opt,name=status_msg,json=statusMsg,proto3" json:"status_msg,omitempty"`     // 状态描述
+	Total         int64                  `protobuf:"varint,3,opt,name=total,proto3" json:"total,omitempty"`
+	Products      []*Product             `protobuf:"bytes,4,rep,name=products,proto3" json:"products,omitempty"`
+	Page          int64                  `protobuf:"varint,5,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,6,opt,name=pageSize,proto3" json:"pageSize,omitempty"`
+	unknownFields protoimpl.UnknownFields
+>>>>>>> dev
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
@@ -486,7 +510,18 @@ func (x *GetProductResp) GetProduct() *Product {
 }
 
 type CreateProductReq struct {
+<<<<<<< HEAD
 	state         protoimpl.MessageState
+=======
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Picture       string                 `protobuf:"bytes,3,opt,name=picture,proto3" json:"picture,omitempty"`
+	Price         int64                  `protobuf:"varint,4,opt,name=price,proto3" json:"price,omitempty"`
+	Stock         int64                  `protobuf:"varint,5,opt,name=stock,proto3" json:"stock,omitempty"`
+	Categories    []string               `protobuf:"bytes,6,rep,name=categories,proto3" json:"categories,omitempty"`
+	unknownFields protoimpl.UnknownFields
+>>>>>>> dev
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 

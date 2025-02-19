@@ -17,6 +17,7 @@ type (
 	CartInfoResponse     = carts.CartInfoResponse
 	CartItemListResponse = carts.CartItemListResponse
 	CreateCartResponse = carts.CreateCartResponse
+	SubCartResponse = carts.SubCartResponse
 	CartItemRequest      = carts.CartItemRequest
 	EmptyCartResponse    = carts.EmptyCartResponse
 	UserInfo             = carts.UserInfo
@@ -24,6 +25,7 @@ type (
 	Cart interface {
 		CartItemList(ctx context.Context, in *UserInfo, opts ...grpc.CallOption) (*CartItemListResponse, error)
 		CreateCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*CreateCartResponse, error)
+		SubCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*SubCartResponse, error)
 		DeleteCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*EmptyCartResponse, error)
 	}
 
@@ -46,6 +48,10 @@ func (m *defaultCart) CartItemList(ctx context.Context, in *UserInfo, opts ...gr
 func (m *defaultCart) CreateCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*CreateCartResponse, error) {
 	client := carts.NewCartClient(m.cli.Conn())
 	return client.CreateCartItem(ctx, in, opts...)
+}
+func (m *defaultCart) SubCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*SubCartResponse, error) {
+	client := carts.NewCartClient(m.cli.Conn())
+	return client.SubCartItem(ctx, in, opts...)
 }
 
 func (m *defaultCart) DeleteCartItem(ctx context.Context, in *CartItemRequest, opts ...grpc.CallOption) (*EmptyCartResponse, error) {

@@ -143,13 +143,24 @@ func (m *defaultCartsModel) GetQuantityByUserIdAndProductId(ctx context.Context,
 }
 
 func (m *defaultCartsModel) DeleteCartItem(ctx context.Context, userId int32, productId int32) error {
-	// 编写删除语句，删除特定用户和商品的购物车记录
+	// 删除特定用户和商品的购物车记录
 	query := fmt.Sprintf("DELETE FROM %s WHERE user_id = ? AND product_id = ?", m.table)
 
-	// 执行删除操作
-	_, err := m.conn.ExecCtx(ctx, query, userId, productId)
+	// 执行删除操作，并获取执行结果
+	result, err := m.conn.ExecCtx(ctx, query, userId, productId)
 	if err != nil {
 		return fmt.Errorf("failed to delete cart item for user_id: %d, product_id: %d, error: %v", userId, productId, err)
+	}
+
+	// 获取影响的行数
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected for user_id: %d, product_id: %d, error: %v", userId, productId, err)
+	}
+
+	// 如果影响行数为 0，说明购物车里没有这个商品
+	if rowsAffected == 0 {
+		return fmt.Errorf("cart item not found for user_id: %d, product_id: %d", userId, productId)
 	}
 
 	// 删除成功

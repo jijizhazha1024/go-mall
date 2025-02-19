@@ -4,10 +4,6 @@ Port: 8003
 Mode: pro
 Verbose: false # 关闭详细日志
 
-# 服务发现
-Consul:
-  Host: ${CONSUL_HOST}
-  Key: carts-api # 与服务名称保持一致
 
 # rpc服务
 AuthsRpc:

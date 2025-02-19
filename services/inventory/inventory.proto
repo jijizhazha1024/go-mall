@@ -24,12 +24,14 @@ message GetInventoryResp{
   int64 sold_count = 4;
 }
 service Inventory {
-  //  GetInventory 查询库存
+  //  GetInventory 查询库存，缓存不在，再去数据库查
   rpc GetInventory (GetInventoryReq) returns (GetInventoryResp);
-  // UpdateInventory 增加库存
+  // UpdateInventory 增加库存，修改库存数量（直接修改）
   rpc UpdateInventory (InventoryReq) returns (InventoryResp);
-  //  DecreaseInventory 扣减库存
+  //  DecreaseInventory 预扣减库存，此时并非真实扣除库存，而是在缓存进行--操作
+  rpc DecreasePreInventory (InventoryReq) returns (InventoryResp);
+  //  DecreaseInventory 真实扣减库存（支付成功时）
   rpc DecreaseInventory (InventoryReq) returns (InventoryResp);
-  //  ReturnInventory 归还库存
-  rpc ReturnInventory (InventoryReq) returns (InventoryResp);
+  // ReturnPreInventory 退还预扣减的库存（）
+  rpc ReturnPreInventory (InventoryReq) returns (InventoryResp);
 }
