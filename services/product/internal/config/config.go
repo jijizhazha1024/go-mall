@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/zrpc"
+	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 	"time"
 )
 
@@ -13,6 +14,8 @@ type Config struct {
 	RedisConf           redis.RedisConf
 	ElasticsearchConfig ElasticsearchConfig
 	QiNiu               QiNiu
+	Consul              consul.Conf
+	InventoryRpc        zrpc.RpcClientConf
 }
 type MysqlConfig struct {
 	DataSource  string

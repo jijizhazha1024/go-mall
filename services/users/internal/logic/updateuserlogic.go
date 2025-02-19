@@ -7,7 +7,6 @@ import (
 
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
-	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -36,32 +35,48 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 		if errors.Is(err, sql.ErrNoRows) {
 			logx.Infow("update user not found", logx.Field("err", err),
 				logx.Field("user_id", in.UserId))
+			return &users.UpdateUserResponse{
+				StatusCode: code.UserNotFound,
+				StatusMsg:  code.UserNotFoundMsg,
+			}, nil
 
-			return users_biz.HandleUpdateUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
 		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_id", in.UserId))
+		return &users.UpdateUserResponse{}, nil
 
-		return users_biz.HandleUpdateUsererror(code.ServerErrorMsg, code.ServerError, err)
 	}
 
 	if update_user.UserDeleted {
 
 		logx.Infow(" update user have deleted", logx.Field("user_id", in.UserId), logx.Field("user_id", in.UserId))
 
-		return users_biz.HandleUpdateUsererror(code.UserHaveDeletedMsg, code.UserNotFound, nil)
+		return &users.UpdateUserResponse{
+			StatusCode: code.UserHaveDeleted,
+			StatusMsg:  code.UserHaveDeletedMsg,
+		}, nil
 	}
 
 	err = l.svcCtx.UsersModel.UpdateUserName(l.ctx, int64(in.UserId), in.UsrName)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Infow("upate user not found",
+			logx.Infow("upate user not found", logx.Field("err", err),
 				logx.Field("user_id", in.UserId))
 
-			return users_biz.HandleUpdateUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
+			return &users.UpdateUserResponse{
+				StatusCode: code.UserNotFound,
+				StatusMsg:  code.UserNotFoundMsg,
+			}, nil
+
 		}
-		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user id", in.UserId))
-		return users_biz.HandleUpdateUsererror(code.ServerErrorMsg, code.ServerError, err)
+		return &users.UpdateUserResponse{}, err
+
 	}
-	return users_biz.HandleUpdateUserResp(code.UserUpdatedMsg, code.UserUpdated, in.UserId, in.UsrName) // 调用HandleUpdateUserResp方法返回响)
+
+	return &users.UpdateUserResponse{
+
+		UserId: in.UserId,
+
+		UserName: in.UsrName,
+	}, nil
 
 }

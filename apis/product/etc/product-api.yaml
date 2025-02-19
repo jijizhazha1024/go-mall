@@ -1,0 +1,19 @@
+Name: product-api
+Host: 0.0.0.0
+Port: 8002
+
+Consul:
+  Host: 124.71.72.124:8500
+  Key: products.rpc
+
+ProductRpc:
+  Target: consul://124.71.72.124:8500/products.rpc?wait=14s
+  NonBlock: true
+
+AuthsRpc:
+  Target: consul://124.71.72.124:8500/auths.rpc?wait=14s
+  NonBlock: true
+
+OptionPathList:
+  - /douyin/product/list
+  - /douyin/product
