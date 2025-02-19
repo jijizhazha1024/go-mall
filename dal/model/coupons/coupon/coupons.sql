@@ -1,7 +1,7 @@
 -- 优惠券主表
 CREATE TABLE `coupons`
 (
-    `id`              varchar(32)  NOT NULL COMMENT '优惠券ID',
+    `id`              varchar(36)  NOT NULL COMMENT '优惠券ID',
     `name`            varchar(100) NOT NULL COMMENT '券名称',
     `type`            tinyint      NOT NULL COMMENT '类型：1-满减 2-折扣 3-立减',
     `value`           BIGINT       NOT NULL COMMENT '优惠值（根据类型：分/百分比）', -- 满减立减通用,折扣通用（例如：满200减50存50，8折存80）
