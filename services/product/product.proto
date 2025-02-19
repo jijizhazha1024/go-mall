@@ -26,9 +26,10 @@ message Product {
   string name = 2;
   string description = 3;
   string picture = 4;
-  float price = 5;
+  int64 price = 5; // 使用分作为单位，方便计算，避免精度丢失
   int64 stock = 6;
-  repeated string categories = 7;
+  int64 sold = 7;
+  repeated string categories = 8;
 }
 message IsExistProductReq{
   int64 id = 1 ; //商品id
@@ -43,10 +44,13 @@ message GetAllProductsReq{
   int64 pageSize = 2;
 }
 message GetAllProductsResp {
-  int64 total = 1;
-  repeated Product products = 2;
-  int64 page = 3;
-  int64 pageSize = 4;
+  uint32 status_code = 1; // 状态码
+  string status_msg = 2; // 状态描述
+  int64 total = 3;
+  repeated Product products = 4;
+  int64 page = 5;
+  int64 pageSize = 6;
+
 }
 
 message GetProductReq {
