@@ -29,6 +29,8 @@ func NewDeleteCartItemLogic(ctx context.Context, svcCtx *svc.ServiceContext) *De
 
 func (l *DeleteCartItemLogic) DeleteCartItem(req *types.DeleteCartReq) (resp *types.DeleteCartResp, err error) {
 	userId := l.ctx.Value(biz.UserIDKey).(uint32)
+
+	// 调用 DeleteCartItem RPC
 	res, err := l.svcCtx.CartsRpc.DeleteCartItem(l.ctx, &carts.CartItemRequest{
 		UserId:    int32(userId),
 		ProductId: req.ProductId,
@@ -43,11 +45,21 @@ func (l *DeleteCartItemLogic) DeleteCartItem(req *types.DeleteCartReq) (resp *ty
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	}
 
-	// 处理业务错误（RPC 可能返回非成功状态）
+	// 处理 RPC 返回 nil 的情况
 	if res == nil {
 		l.Logger.Errorw("rpc DeleteCartItem returned nil response")
 		return nil, errors.New(code.ServerError, "RPC response is nil")
 	}
+
+	// 处理 "商品不存在" 的业务错误
+	if res.StatusCode == code.CartItemNotFound {
+		l.Logger.Errorw("Cart item not found",
+			logx.Field("user_id", userId),
+			logx.Field("product_id", req.ProductId))
+		return &types.DeleteCartResp{Success: false}, nil
+	}
+
+	// 处理其他业务错误
 	if res.StatusCode != code.Success {
 		l.Logger.Debugw("rpc DeleteCartItem returned business error",
 			logx.Field("status_code", res.StatusCode),
@@ -55,7 +67,7 @@ func (l *DeleteCartItemLogic) DeleteCartItem(req *types.DeleteCartReq) (resp *ty
 		return nil, errors.New(int(res.StatusCode), res.StatusMsg)
 	}
 
-	// 操作成功
+	// 删除成功
 	l.Logger.Infow("Cart item deleted successfully",
 		logx.Field("user_id", userId),
 		logx.Field("product_id", req.ProductId))

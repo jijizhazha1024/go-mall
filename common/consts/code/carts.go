@@ -14,6 +14,7 @@ const (
 	CartProductInfoRetrievalFailed = 40009
 	CartProductQuantityInfoFailed  = 40010
 	InsufficientInventoryOfProduct = 40011
+	CartItemNotFound               = 40012
 )
 const (
 	CartCreatedMsg                    = "购物车商品增加成功"
@@ -27,4 +28,5 @@ const (
 	CartProductInfoRetrievalFailedMsg = "购物车商品不存在"
 	CartProductQuantityInfoFailedMsg  = "购物车商品数量获取失败"
 	InsufficientInventoryOfProductMsg = "商品库存不足"
+	CartItemNotFoundMsg               = "购物车商品不存在"
 )
