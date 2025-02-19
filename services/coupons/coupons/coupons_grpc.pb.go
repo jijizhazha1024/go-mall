@@ -46,6 +46,7 @@ type CouponsClient interface {
 	ListUserCoupons(ctx context.Context, in *ListUserCouponsReq, opts ...grpc.CallOption) (*ListUserCouponsResp, error)
 	// CalculateCoupon 计算优惠券
 	CalculateCoupon(ctx context.Context, in *CalculateCouponReq, opts ...grpc.CallOption) (*CalculateCouponResp, error)
+	// CalculateCouponByItems 计算优惠券通过商品列表。
 	// ListCouponUsages 获取优惠券使用记录
 	ListCouponUsages(ctx context.Context, in *ListCouponUsagesReq, opts ...grpc.CallOption) (*ListCouponUsagesResp, error)
 	// --------------- 使用优惠券 --------------- pre_order_id来进行使用
@@ -171,6 +172,7 @@ type CouponsServer interface {
 	ListUserCoupons(context.Context, *ListUserCouponsReq) (*ListUserCouponsResp, error)
 	// CalculateCoupon 计算优惠券
 	CalculateCoupon(context.Context, *CalculateCouponReq) (*CalculateCouponResp, error)
+	// CalculateCouponByItems 计算优惠券通过商品列表。
 	// ListCouponUsages 获取优惠券使用记录
 	ListCouponUsages(context.Context, *ListCouponUsagesReq) (*ListCouponUsagesResp, error)
 	// --------------- 使用优惠券 --------------- pre_order_id来进行使用

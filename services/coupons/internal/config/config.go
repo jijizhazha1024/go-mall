@@ -12,4 +12,5 @@ type Config struct {
 	Consul      consul.Conf
 	MysqlConfig config.MysqlConfig
 	RedisConf   redis.RedisConf
+	ProductRpc  zrpc.RpcClientConf
 }

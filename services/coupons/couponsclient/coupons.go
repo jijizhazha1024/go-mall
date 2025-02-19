@@ -46,7 +46,7 @@ type (
 		ListUserCoupons(ctx context.Context, in *ListUserCouponsReq, opts ...grpc.CallOption) (*ListUserCouponsResp, error)
 		// CalculateCoupon 计算优惠券
 		CalculateCoupon(ctx context.Context, in *CalculateCouponReq, opts ...grpc.CallOption) (*CalculateCouponResp, error)
-		// ListCouponUsages 获取优惠券使用记录
+		// CalculateCouponByItems 计算优惠券通过商品列表。
 		ListCouponUsages(ctx context.Context, in *ListCouponUsagesReq, opts ...grpc.CallOption) (*ListCouponUsagesResp, error)
 		// --------------- 使用优惠券 --------------- pre_order_id来进行使用
 		LockCoupon(ctx context.Context, in *LockCouponReq, opts ...grpc.CallOption) (*EmptyResp, error)
@@ -97,7 +97,7 @@ func (m *defaultCoupons) CalculateCoupon(ctx context.Context, in *CalculateCoupo
 	return client.CalculateCoupon(ctx, in, opts...)
 }
 
-// ListCouponUsages 获取优惠券使用记录
+// CalculateCouponByItems 计算优惠券通过商品列表。
 func (m *defaultCoupons) ListCouponUsages(ctx context.Context, in *ListCouponUsagesReq, opts ...grpc.CallOption) (*ListCouponUsagesResp, error) {
 	client := coupons.NewCouponsClient(m.cli.Conn())
 	return client.ListCouponUsages(ctx, in, opts...)

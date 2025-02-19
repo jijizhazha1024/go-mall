@@ -164,7 +164,7 @@ message Items {
 message CalculateCouponReq {
   int32 user_id = 1; // 用户ID
   string coupon_id = 2; // 优惠券ID
-  int64 amount = 3;
+  repeated Items items = 3;
 
 }
 
@@ -251,6 +251,7 @@ service Coupons {
   rpc ListUserCoupons(ListUserCouponsReq) returns(ListUserCouponsResp);
   //  CalculateCoupon 计算优惠券
   rpc CalculateCoupon(CalculateCouponReq) returns(CalculateCouponResp);
+  //  CalculateCouponByItems 计算优惠券通过商品列表。
   //  ListCouponUsages 获取优惠券使用记录
   rpc ListCouponUsages(ListCouponUsagesReq) returns(ListCouponUsagesResp);
 

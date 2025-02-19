@@ -59,7 +59,6 @@ func (l *LockCouponLogic) LockCoupon(in *coupons.LockCouponReq) (*coupons.EmptyR
 	if resultInt == 1 {
 		return nil, status.Error(codes.FailedPrecondition, "优惠券已被锁定")
 	}
-	logx.Infow("user lock coupon success",
-		logx.Field("user_id", in.UserId), logx.Field("user_coupon_id", in.UserCouponId), logx.Field("pre_order_id", in.PreOrderId))
+
 	return &coupons.EmptyResp{}, nil
 }

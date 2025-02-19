@@ -52,7 +52,7 @@ func (s *CouponsServer) CalculateCoupon(ctx context.Context, in *coupons.Calcula
 	return l.CalculateCoupon(in)
 }
 
-// ListCouponUsages 获取优惠券使用记录
+// CalculateCouponByItems 计算优惠券通过商品列表。
 func (s *CouponsServer) ListCouponUsages(ctx context.Context, in *coupons.ListCouponUsagesReq) (*coupons.ListCouponUsagesResp, error) {
 	l := logic.NewListCouponUsagesLogic(ctx, s.svcCtx)
 	return l.ListCouponUsages(in)
