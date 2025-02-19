@@ -61,8 +61,7 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 			Name:        in.Product.Name,
 			Description: sql.NullString{String: in.Product.Description, Valid: in.Product.Description != ""},
 			Picture:     sql.NullString{String: picture_url, Valid: picture_url != ""},
-			Price:       float64(in.Product.Price),
-			Stock:       in.Product.Stock,
+			Price:       (in.Product.Price),
 			UpdatedAt:   time.Time{},
 		})
 		if err != nil {

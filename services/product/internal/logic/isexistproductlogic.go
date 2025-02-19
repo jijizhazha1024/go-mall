@@ -2,6 +2,8 @@ package logic
 
 import (
 	"context"
+	"errors"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"jijizhazha1024/go-mall/common/consts/code"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
 
@@ -32,14 +34,19 @@ func (l *IsExistProductLogic) IsExistProduct(in *product.IsExistProductReq) (*pr
 	productModel := product2.NewProductsModel(l.svcCtx.Mysql)
 	exist, err := productModel.FindProductIsExist(l.ctx, product_id)
 	if err != nil {
+		if errors.Is(err, sqlx.ErrNotFound) {
+			// 不存在并不属于错误，所以这里不需要返回错误，由调用端返回信息
+			return &product.IsExistProductResp{
+				StatusCode: uint32(code.ProductNotFoundInventory),
+				StatusMsg:  code.ProductNotFoundInventoryMsg,
+			}, nil
+		}
 		l.Logger.Errorw("Failed to select data",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Id))
 		return nil, err
 	}
 	return &product.IsExistProductResp{
-		StatusCode: uint32(code.ProductInfoRetrieved),
-		StatusMsg:  code.ProductInfoRetrievedMsg,
-		Exist:      exist,
+		Exist: exist,
 	}, nil
 }
