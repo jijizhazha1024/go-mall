@@ -37,13 +37,10 @@ func (l *ListAddressesLogic) ListAddresses(in *users.AllAddressLitstRequest) (*u
 			return &users.AddressListResponse{
 				StatusMsg:  code.UserAddressNotFoundMsg,
 				StatusCode: code.UserAddressNotFound,
-			}, err
+			}, nil
 		}
 		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))
-		return &users.AddressListResponse{
-			StatusMsg:  code.ServerErrorMsg,
-			StatusCode: code.ServerError,
-		}, err
+		return &users.AddressListResponse{}, err
 	}
 	addresslist := make([]*users.AddressData, 0)
 	for _, user := range allusers {
@@ -61,8 +58,7 @@ func (l *ListAddressesLogic) ListAddresses(in *users.AllAddressLitstRequest) (*u
 	}
 
 	return &users.AddressListResponse{
-		StatusMsg:  code.GetUserAddressSuccessMsg,
-		StatusCode: code.GetUserAddressSuccess,
-		Data:       addresslist,
+
+		Data: addresslist,
 	}, nil
 }

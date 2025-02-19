@@ -37,11 +37,10 @@ func (l *DeleteAddressLogic) DeleteAddress(req *types.DeleteAddressRequest) (res
 	if err != nil {
 		l.Logger.Errorf("调用 rpc 删除地址失败", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
-	} else {
-		if DeleteAddResp.StatusCode != code.DeleteUserAddressSuccess {
-			l.Logger.Errorf("调用 rpc 删除地址失败", logx.Field("status_code", DeleteAddResp.StatusCode), logx.Field("status_msg", DeleteAddResp.StatusMsg))
-			return nil, errors.New(int(DeleteAddResp.StatusCode), DeleteAddResp.StatusMsg)
-		}
+	} else if DeleteAddResp.StatusMsg != "" {
+		l.Logger.Errorf("调用 rpc 删除地址失败", logx.Field("status_code", DeleteAddResp.StatusCode), logx.Field("status_msg", DeleteAddResp.StatusMsg))
+		return nil, errors.New(int(DeleteAddResp.StatusCode), DeleteAddResp.StatusMsg)
+
 	}
 
 	return
