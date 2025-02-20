@@ -20,5 +20,5 @@ jobs:
         with:
           version: v1.57.2
           args:
-            - --concurrency 8
             - --timeout 10m
+
