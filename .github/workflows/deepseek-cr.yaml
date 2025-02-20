@@ -1,7 +1,7 @@
 name: Code Review
 on:
   pull_request:
-    branches: [main,dev]
+    branches: [ main,dev ]
 
 permissions:
   pull-requests: write
@@ -17,7 +17,8 @@ jobs:
         uses: hustcer/deepseek-review@v1
         with:
           chat-token: ${{ secrets.DEEPSEEK_CHAT_TOKEN }} # DeepSeek API Token
-          model: deepseek-chat
+          model: ${{ secrets.DEEPSEEK_CHAT_MODEL}}
+          base-url: ${{ secrets.DEEPSEEK_CHAT_BASE_URL }}
           sys-prompt: >
             # 角色
             您是基于go-zero框架的资深代码审核专家，需深度结合项目代码规范进行严格审查。
