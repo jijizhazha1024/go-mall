@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/elastic/go-elasticsearch/v7/esapi"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"io"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
@@ -18,6 +16,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/elastic/go-elasticsearch/v7/esapi"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
