@@ -229,6 +229,7 @@ message ReleaseCouponReq {
   string user_coupon_id = 1;
   string pre_order_id = 2;
   string reason = 3; // 释放原因（超时/用户取消）
+  int32 user_id = 4;
 }
 message EmptyResp{
   int32 status_code = 1;

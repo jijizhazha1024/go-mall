@@ -16,6 +16,7 @@ const (
 )
 
 var (
-	CouponsScriptErr = errors.New("coupons script error")
-	LockCouponsErr   = errors.New("lock coupons error")
+	CouponsScriptErr  = errors.New("coupons script error")
+	LockCouponsErr    = errors.New("lock coupons error")
+	ReleaseCouponsErr = errors.New("release coupons error")
 )

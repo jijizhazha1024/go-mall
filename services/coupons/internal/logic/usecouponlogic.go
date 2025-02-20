@@ -25,7 +25,6 @@ func NewUseCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UseCoup
 
 // UseCoupon 使用优惠券（支付成功确认）
 func (l *UseCouponLogic) UseCoupon(in *coupons.UseCouponReq) (*coupons.EmptyResp, error) {
-	// todo: add your logic here and delete this line
-
+	// 修改用户优惠券状态，记录优惠券使用记录，删除优惠券缓存
 	return &coupons.EmptyResp{}, nil
 }

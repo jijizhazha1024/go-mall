@@ -22,7 +22,7 @@ func Test_LockCouponLogic_LockCoupon(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		assert.Equal(t, res.StatusCode, int32(code.Success))
+		assert.Equal(t, int32(code.Success), res.StatusCode)
 	})
 	t.Run("优惠卷已经锁定", func(t *testing.T) {
 		res, err := couponsClient.LockCoupon(context.Background(), &coupons.LockCouponReq{
@@ -44,10 +44,48 @@ func Test_LockCouponLogic_LockCoupon(t *testing.T) {
 			t.Error(err)
 			return
 		}
-		assert.Equal(t, lock.StatusCode, int32(code.CouponsAlreadyLocked))
+		assert.Equal(t, int32(code.CouponsAlreadyLocked), lock.StatusCode)
 
 	})
+}
 
+func Test_UnlockCouponLogic_UnlockCoupon(t *testing.T) {
+	uci := uuid.New().String()[:8]
+	pid := uuid.New().String()[:8]
+	t.Run("正常情况", func(t *testing.T) {
+		res, err := couponsClient.LockCoupon(context.Background(), &coupons.LockCouponReq{
+			UserId:       1,
+			UserCouponId: uci,
+			PreOrderId:   pid,
+		})
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		assert.Equal(t, int32(code.Success), res.StatusCode)
+		unlock, err := couponsClient.ReleaseCoupon(context.Background(), &coupons.ReleaseCouponReq{
+			UserId:       1,
+			UserCouponId: uci,
+			PreOrderId:   pid,
+		})
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		assert.Equal(t, int32(code.Success), unlock.StatusCode)
+	})
+	t.Run("优惠卷已经释放", func(t *testing.T) {
+		res, err := couponsClient.ReleaseCoupon(context.Background(), &coupons.ReleaseCouponReq{
+			UserId:       1,
+			UserCouponId: uci,
+			PreOrderId:   pid,
+		})
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		assert.Equal(t, int32(code.CouponsAlreadyReleased), res.StatusCode)
+	})
 }
 
 // 用户优惠券使用情况
