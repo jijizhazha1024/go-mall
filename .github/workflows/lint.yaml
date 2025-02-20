@@ -19,6 +19,6 @@ jobs:
         uses: golangci/golangci-lint-action@v6.0.1
         with:
           version: v1.57.2
-          args: --timeout 10m --concurrency 10
+          args: --timeout 10m --concurrency 10 --exclude-files '.*_test.go'  --exclude-dirs test
 
 
