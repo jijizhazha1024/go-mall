@@ -19,4 +19,6 @@ jobs:
         uses: golangci/golangci-lint-action@v6.0.1
         with:
           version: v1.57.2
-          args: --timeout 10m --concurrency 8
+          args:
+            - --concurrency 8
+            - --timeout 10m
