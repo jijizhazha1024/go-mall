@@ -22,6 +22,3 @@ jobs:
           args:
             - --concurrency 8
             - --timeout 10m
-            - --exclude-dirs=test          # 排除 test 目录
-            - --exclude-files='.*_test.go' # 排除所有 _test.go 文件
-            - --tests=false
