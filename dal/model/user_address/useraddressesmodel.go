@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
@@ -15,6 +16,7 @@ type (
 	// and implement the added methods in customUserAddressesModel.
 	UserAddressesModel interface {
 		userAddressesModel
+		GetUserAddressExistsByIdAndUserId(ctx context.Context, addressId int32, userId int32) (bool, error)
 		WithSession(session sqlx.Session) UserAddressesModel
 		GetUserAddress(ctx context.Context, userId int32) (*UserAddresses, error)
 		FindAllByUserId(ctx context.Context, userId int32) ([]*UserAddresses, error)
@@ -27,25 +29,37 @@ type (
 	}
 
 	customUserAddressesModel struct {
+		cacheConf cache.CacheConf
 		*defaultUserAddressesModel
 	}
 )
 
 // NewUserAddressesModel returns a model for the database table.
-func NewUserAddressesModel(conn sqlx.SqlConn) UserAddressesModel {
+func NewUserAddressesModel(conn sqlx.SqlConn, c cache.CacheConf) UserAddressesModel {
 	return &customUserAddressesModel{
-		defaultUserAddressesModel: newUserAddressesModel(conn),
+		defaultUserAddressesModel: newUserAddressesModel(conn, c),
+		cacheConf:                 c,
 	}
 }
 
+// 修改WithSession方法（原代码存在未定义的c变量）
 func (m *customUserAddressesModel) WithSession(session sqlx.Session) UserAddressesModel {
-	return NewUserAddressesModel(sqlx.NewSqlConnFromSession(session))
+	return NewUserAddressesModel(
+		sqlx.NewSqlConnFromSession(session),
+		m.cacheConf, // 使用保存的缓存配置
+	)
 }
 func (m *customUserAddressesModel) GetUserAddress(ctx context.Context, userId int32) (*UserAddresses, error) {
-	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `is_default` = true limit 1", userAddressesRows, m.table)
-
+	cacheKey := fmt.Sprintf("userAddress:default:%d", userId)
 	var resp UserAddresses
-	err := m.conn.QueryRowCtx(ctx, &resp, query, userId)
+
+	// 尝试从缓存读取
+	err := m.QueryRowCtx(ctx, &resp, cacheKey, func(ctx context.Context, conn sqlx.SqlConn, v any) error {
+		query := fmt.Sprintf("select %s from %s where `user_id` = ? and `is_default` = true limit 1",
+			userAddressesRows, m.table)
+		return conn.QueryRowCtx(ctx, v, query, userId)
+	})
+
 	switch err {
 	case nil:
 		return &resp, nil
@@ -57,36 +71,76 @@ func (m *customUserAddressesModel) GetUserAddress(ctx context.Context, userId in
 }
 
 func (m *customUserAddressesModel) FindAllByUserId(ctx context.Context, userId int32) ([]*UserAddresses, error) {
-	query := fmt.Sprintf("select * from %s where `user_id` = ?", m.table)
 	var resp []*UserAddresses
 
-	err := m.conn.QueryRows(&resp, query, userId)
-	return resp, err
-}
-func (m *customUserAddressesModel) FindDefaultByUserId(ctx context.Context, userId int32) (*UserAddresses, error) {
-	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `is_default` = true limit 1", userAddressesRows, m.table)
+	// 直接使用原始数据库连接（不走缓存）
+	err := m.defaultUserAddressesModel.CachedConn.QueryRowsNoCacheCtx(
+		ctx,
+		&resp,
+		"SELECT "+userAddressesRows+" FROM "+m.table+" WHERE `user_id` = ?",
+		userId,
+	)
 
-	var resp UserAddresses
-	err := m.conn.QueryRowCtx(ctx, &resp, query, userId)
-	switch err {
-	case nil:
-		return &resp, nil
-	case sqlx.ErrNotFound:
+	switch {
+	case err == nil:
+		return resp, nil
+	case err == sqlx.ErrNotFound:
 		return nil, ErrNotFound
 	default:
 		return nil, err
 	}
+}
+
+func (m *customUserAddressesModel) FindDefaultByUserId(ctx context.Context, userId int32) (*UserAddresses, error) {
+	return m.GetUserAddress(ctx, userId)
 }
 func (m *customUserAddressesModel) DeleteByAddressIdandUserId(ctx context.Context, addressId int32, userId int32) error {
-	query := fmt.Sprintf("delete from %s where `address_id` = ? and `user_id` = ?", m.table)
-	_, err := m.conn.ExecCtx(ctx, query, addressId, userId)
+	// 添加全量缓存清除
+	keys := []string{
+		fmt.Sprintf("userAddress:%d:%d", userId, addressId), // 主键缓存
+		fmt.Sprintf("userAddress:default:%d", userId),       // 默认地址
+		fmt.Sprintf("userAddress:all:%d", userId),           // 用户所有地址
+	}
+
+	// 带缓存的删除操作
+	_, err := m.CachedConn.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (sql.Result, error) {
+		query := fmt.Sprintf("delete from %s where `address_id` = ? and `user_id` = ?", m.table)
+		return conn.ExecCtx(ctx, query, addressId, userId)
+	}, keys...)
+
 	return err
 }
-func (m *customUserAddressesModel) GetUserAddressbyIdAndUserId(ctx context.Context, addressId int32, userId int32) (*UserAddresses, error) {
-	query := fmt.Sprintf("select %s from %s where `address_id` = ? and `user_id` = ?", userAddressesRows, m.table)
+func (m *customUserAddressesModel) GetUserAddressExistsByIdAndUserId(ctx context.Context, addressId int32, userId int32) (bool, error) {
+	cacheKey := fmt.Sprintf("userAddressExists:%d:%d", userId, addressId)
+	var exists int8
 
+	// 使用联合主键缓存
+	err := m.CachedConn.QueryRowCtx(ctx, &exists, cacheKey, func(ctx context.Context, conn sqlx.SqlConn, v any) error {
+		query := fmt.Sprintf("select exists(select 1 from %s where `address_id` = ? and `user_id` = ?)",
+			m.table)
+		return conn.QueryRowCtx(ctx, v, query, addressId, userId)
+	})
+
+	switch err {
+	case nil:
+		return exists == 1, nil
+	case sqlx.ErrNotFound:
+		return false, ErrNotFound
+	default:
+		return false, err
+	}
+}
+func (m *customUserAddressesModel) GetUserAddressbyIdAndUserId(ctx context.Context, addressId int32, userId int32) (*UserAddresses, error) {
+	cacheKey := fmt.Sprintf("userAddress:%d:%d", userId, addressId)
 	var resp UserAddresses
-	err := m.conn.QueryRowCtx(ctx, &resp, query, addressId, userId)
+
+	// 使用联合主键缓存
+	err := m.CachedConn.QueryRowCtx(ctx, &resp, cacheKey, func(ctx context.Context, conn sqlx.SqlConn, v any) error {
+		query := fmt.Sprintf("select %s from %s where `address_id` = ? and `user_id` = ?",
+			userAddressesRows, m.table)
+		return conn.QueryRowCtx(ctx, v, query, addressId, userId)
+	})
+
 	switch err {
 	case nil:
 		return &resp, nil
@@ -96,6 +150,7 @@ func (m *customUserAddressesModel) GetUserAddressbyIdAndUserId(ctx context.Conte
 		return nil, err
 	}
 }
+
 func (m *customUserAddressesModel) BatchUpdateDeFaultWithSession(ctx context.Context, session sqlx.Session, data []*UserAddresses) error {
 	for _, userAddress := range data {
 		query := fmt.Sprintf("update %s set `is_default` = false where `user_id` = ?", m.table)

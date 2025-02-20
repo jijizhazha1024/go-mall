@@ -7,6 +7,7 @@ import (
 	inventory2 "jijizhazha1024/go-mall/dal/model/inventory"
 	"jijizhazha1024/go-mall/services/inventory/internal/svc"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
+	"strconv"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -32,8 +33,8 @@ func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.InventoryReq) (*inv
 		l.Logger.Infow("quantity must be greater than 0", logx.Field("quantity", in.Quantity), logx.Field("product_id", in.ProductId))
 		return nil, biz.InvalidInventoryErr
 	}
-
-	err := l.svcCtx.Rdb.Hset(fmt.Sprintf("inventory:%d", in.ProductId), "total", string(in.Quantity))
+	tostr := strconv.Itoa(int(in.Quantity))
+	err := l.svcCtx.Rdb.Hset(fmt.Sprintf("inventory:%d", in.ProductId), "total", tostr)
 	if err != nil {
 		l.Logger.Errorw("update inventory failed", logx.Field("product_id", in.ProductId), logx.Field("err", err))
 		return nil, err

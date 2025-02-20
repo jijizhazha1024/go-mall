@@ -8,7 +8,6 @@ import (
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
-	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -39,21 +38,28 @@ func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, er
 		if errors.Is(err, user.ErrNotFound) {
 			logx.Infow("logout failed, user not found", logx.Field("err", err),
 				logx.Field("user_id", in.UserId))
-
 			// 用户不存在
-			return users_biz.HandleLogoutUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
+			return &users.LogoutResponse{
+				StatusCode: code.UserNotFound,
+				StatusMsg:  code.UserNotFoundMsg,
+			}, nil
+
 		}
 		// 处理错误
 		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_id", in.UserId))
-		return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError, err)
+		return &users.LogoutResponse{}, err
+
 	}
 	logtoutime, err := l.svcCtx.UsersModel.GetLogoutTime(l.ctx, int64(in.UserId))
 	if err != nil {
-		logx.Infow("get logout time failed  query failed", logx.Field("err", err))
-		// 处理错误
-		return users_biz.HandleLogoutUsererror(code.ServerErrorMsg, code.ServerError, err)
-	}
 
-	return users_biz.HandleLogoutUserResp(code.LogoutSuccessMsg, code.LogoutSuccess, logtoutime)
+		// 处理错误
+		logx.Errorw("get logout time failed  query failed", logx.Field("err", err), logx.Field("user_id", in.UserId))
+		return &users.LogoutResponse{}, err
+	}
+	return &users.LogoutResponse{
+
+		LogoutTime: logtoutime.Unix(),
+	}, nil
 
 }

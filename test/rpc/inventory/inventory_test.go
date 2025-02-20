@@ -33,7 +33,7 @@ func setupInventoryClient(t *testing.T) {
 func TestInventoryService(t *testing.T) {
 	setupInventoryClient(t)
 	ctx := context.Background()
-	testProductID := int32(1001) // 测试用商品ID
+	testProductID := int32(1000) // 测试用商品ID
 
 	t.Run("基本库存操作流程", func(t *testing.T) {
 		// 1. 初始化库存
