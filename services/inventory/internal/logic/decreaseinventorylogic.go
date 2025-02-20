@@ -52,5 +52,5 @@ func (l *DecreaseInventoryLogic) DecreaseInventory(in *inventory.InventoryReq) (
 	// }
 	// res.Inventory = cnt
 	// return res, nil
-	return nil, nil
+	return &inventory.InventoryResp{}, nil
 }

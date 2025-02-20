@@ -85,5 +85,5 @@ func (l *DecreasePreInventoryLogic) DecreasePreInventory(in *inventory.Inventory
 
 	// res.Inventory = int64(newTotal)
 	// return res, nil
-	return nil, nil
+	return &inventory.InventoryResp{}, nil
 }

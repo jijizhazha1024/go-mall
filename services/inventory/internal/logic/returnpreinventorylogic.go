@@ -70,6 +70,6 @@ func (l *ReturnPreInventoryLogic) ReturnPreInventory(in *inventory.InventoryReq)
 	// 	return nil, err
 	// }
 
-	return nil, nil
+	return &inventory.InventoryResp{}, nil
 
 }

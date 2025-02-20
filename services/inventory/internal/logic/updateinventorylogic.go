@@ -47,5 +47,5 @@ func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.InventoryReq) (*inv
 
 	// 		Inventory: int64(in.Quantity),
 	// 	}, nil
-	return nil, nil
+	return &inventory.InventoryResp{}, nil
 }
