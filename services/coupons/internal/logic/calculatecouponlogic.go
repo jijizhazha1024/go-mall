@@ -78,8 +78,13 @@ func (l *CalculateCouponLogic) CalculateCoupon(in *coupons.CalculateCouponReq) (
 		res.CouponType = "满减券"
 	// 折扣券
 	case coupons.CouponType_COUPON_TYPE_DISCOUNT:
-		// one.Value 最大值 100，百分比记录
-		discountAmount = totalPrice * one.Value / 100
+		// 优惠券无效
+		if one.Value <= 0 || one.Value >= 100 {
+			res.IsUsable = false
+			res.UnusableReason = "无效的折扣率"
+			return res, nil
+		}
+		discountAmount = totalPrice * (100 - one.Value) / 100
 		res.CouponType = "折扣券"
 	//	立减券
 	case coupons.CouponType_COUPON_TYPE_FIXED_AMOUNT:
