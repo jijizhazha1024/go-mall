@@ -1,0 +1,33 @@
+Name: order.rpc
+ListenOn: 0.0.0.0:10004
+Mode: dev
+
+# 服务发现
+Consul:
+  Host: 124.71.72.124:8500 # consul endpoint
+  Key: order.rpc
+  Meta:
+    Protocol: grpc
+
+# 链路追踪
+Telemetry:
+  Name: order.rpc
+  Endpoint: http://124.71.72.124:14268/api/traces
+  Batcher: jaeger
+  Sampler: 1.0
+
+Log:
+  ServiceName: "order-rpc"
+  Mode: 'console'
+  Encoding: "json"
+  Path: "./logs/order-rpc"
+
+MysqlConfig:
+  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  Conntimeout: 5
+
+
+Cache:
+  - Host: 124.71.72.124:6379 #缓存地址
+    Pass: jjzzchtt
+    Type: node      
