@@ -12,8 +12,6 @@ import (
 	"time"
 
 	"github.com/zeromicro/go-zero/core/stores/builder"
-	"github.com/zeromicro/go-zero/core/stores/cache"
-	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/core/stringx"
 )
@@ -23,8 +21,6 @@ var (
 	orderAddressesRows                = strings.Join(orderAddressesFieldNames, ",")
 	orderAddressesRowsExpectAutoSet   = strings.Join(stringx.Remove(orderAddressesFieldNames, "`address_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
 	orderAddressesRowsWithPlaceHolder = strings.Join(stringx.Remove(orderAddressesFieldNames, "`address_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
-
-	cacheOrderAddressesAddressIdPrefix = "cache:orderAddresses:addressId:"
 )
 
 type (
@@ -36,7 +32,7 @@ type (
 	}
 
 	defaultOrderAddressesModel struct {
-		sqlc.CachedConn
+		conn  sqlx.SqlConn
 		table string
 	}
 
@@ -52,33 +48,27 @@ type (
 	}
 )
 
-func newOrderAddressesModel(conn sqlx.SqlConn, c cache.CacheConf, opts ...cache.Option) *defaultOrderAddressesModel {
+func newOrderAddressesModel(conn sqlx.SqlConn) *defaultOrderAddressesModel {
 	return &defaultOrderAddressesModel{
-		CachedConn: sqlc.NewConn(conn, c, opts...),
-		table:      "`order_addresses`",
+		conn:  conn,
+		table: "`order_addresses`",
 	}
 }
 
 func (m *defaultOrderAddressesModel) Delete(ctx context.Context, addressId uint64) error {
-	orderAddressesAddressIdKey := fmt.Sprintf("%s%v", cacheOrderAddressesAddressIdPrefix, addressId)
-	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("delete from %s where `address_id` = ?", m.table)
-		return conn.ExecCtx(ctx, query, addressId)
-	}, orderAddressesAddressIdKey)
+	query := fmt.Sprintf("delete from %s where `address_id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, addressId)
 	return err
 }
 
 func (m *defaultOrderAddressesModel) FindOne(ctx context.Context, addressId uint64) (*OrderAddresses, error) {
-	orderAddressesAddressIdKey := fmt.Sprintf("%s%v", cacheOrderAddressesAddressIdPrefix, addressId)
+	query := fmt.Sprintf("select %s from %s where `address_id` = ? limit 1", orderAddressesRows, m.table)
 	var resp OrderAddresses
-	err := m.QueryRowCtx(ctx, &resp, orderAddressesAddressIdKey, func(ctx context.Context, conn sqlx.SqlConn, v any) error {
-		query := fmt.Sprintf("select %s from %s where `address_id` = ? limit 1", orderAddressesRows, m.table)
-		return conn.QueryRowCtx(ctx, v, query, addressId)
-	})
+	err := m.conn.QueryRowCtx(ctx, &resp, query, addressId)
 	switch err {
 	case nil:
 		return &resp, nil
-	case sqlc.ErrNotFound:
+	case sqlx.ErrNotFound:
 		return nil, ErrNotFound
 	default:
 		return nil, err
@@ -86,30 +76,15 @@ func (m *defaultOrderAddressesModel) FindOne(ctx context.Context, addressId uint
 }
 
 func (m *defaultOrderAddressesModel) Insert(ctx context.Context, data *OrderAddresses) (sql.Result, error) {
-	orderAddressesAddressIdKey := fmt.Sprintf("%s%v", cacheOrderAddressesAddressIdPrefix, data.AddressId)
-	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?)", m.table, orderAddressesRowsExpectAutoSet)
-		return conn.ExecCtx(ctx, query, data.RecipientName, data.PhoneNumber, data.Province, data.City, data.DetailedAddress)
-	}, orderAddressesAddressIdKey)
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?)", m.table, orderAddressesRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.RecipientName, data.PhoneNumber, data.Province, data.City, data.DetailedAddress)
 	return ret, err
 }
 
 func (m *defaultOrderAddressesModel) Update(ctx context.Context, data *OrderAddresses) error {
-	orderAddressesAddressIdKey := fmt.Sprintf("%s%v", cacheOrderAddressesAddressIdPrefix, data.AddressId)
-	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("update %s set %s where `address_id` = ?", m.table, orderAddressesRowsWithPlaceHolder)
-		return conn.ExecCtx(ctx, query, data.RecipientName, data.PhoneNumber, data.Province, data.City, data.DetailedAddress, data.AddressId)
-	}, orderAddressesAddressIdKey)
+	query := fmt.Sprintf("update %s set %s where `address_id` = ?", m.table, orderAddressesRowsWithPlaceHolder)
+	_, err := m.conn.ExecCtx(ctx, query, data.RecipientName, data.PhoneNumber, data.Province, data.City, data.DetailedAddress, data.AddressId)
 	return err
-}
-
-func (m *defaultOrderAddressesModel) formatPrimary(primary any) string {
-	return fmt.Sprintf("%s%v", cacheOrderAddressesAddressIdPrefix, primary)
-}
-
-func (m *defaultOrderAddressesModel) queryPrimary(ctx context.Context, conn sqlx.SqlConn, v, primary any) error {
-	query := fmt.Sprintf("select %s from %s where `address_id` = ? limit 1", orderAddressesRows, m.table)
-	return conn.QueryRowCtx(ctx, v, query, primary)
 }
 
 func (m *defaultOrderAddressesModel) tableName() string {
