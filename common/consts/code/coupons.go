@@ -10,6 +10,7 @@ const (
 	CouponsExpired
 	CouponsAlreadyUsed
 	CouponsNotStart
+	CouponsAlreadyLocked
 )
 
 const (
@@ -22,4 +23,5 @@ const (
 	CouponsExpiredMsg        = "优惠券已过期"
 	CouponsAlreadyUsedMsg    = "优惠券已被使用"
 	CouponsNotStartMsg       = "优惠券未到使用时间"
+	CouponsAlreadyLockedMsg  = "优惠券已被锁定"
 )

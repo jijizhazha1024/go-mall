@@ -16,8 +16,8 @@ type (
 		userCouponsModel
 		WithSession(session sqlx.Session) UserCouponsModel
 		QueryUserCoupons(ctx context.Context, userId, page, pageSize int32) ([]*UserCoupons, error)
-		CheckUserCouponExistWithSession(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (bool, error)
-		GetUserCouponByUserIdCouponIdLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (*UserCoupons, error)
+		CheckUserCouponExistWithLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (bool, error)
+		GetUserCouponByUserIdCouponIdWithLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (*UserCoupons, error)
 	}
 
 	customUserCouponsModel struct {
@@ -25,7 +25,7 @@ type (
 	}
 )
 
-func (m *customUserCouponsModel) GetUserCouponByUserIdCouponIdLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (*UserCoupons, error) {
+func (m *customUserCouponsModel) GetUserCouponByUserIdCouponIdWithLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (*UserCoupons, error) {
 	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `coupon_id` = ? limit 1 for update", userCouponsRows, m.table)
 	var resp UserCoupons
 	err := m.conn.QueryRowCtx(ctx, &resp, query, userId, couponId)
@@ -39,22 +39,20 @@ func (m *customUserCouponsModel) GetUserCouponByUserIdCouponIdLock(ctx context.C
 	}
 }
 
-func (m *customUserCouponsModel) CheckUserCouponExistWithSession(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (bool, error) {
+func (m *customUserCouponsModel) CheckUserCouponExistWithLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (bool, error) {
 	var cnt int64
-	query := fmt.Sprintf("select count(*) from %s where `user_id` = ? and `coupon_id` = ?", m.table)
+	query := fmt.Sprintf("select count(*) from %s where `user_id` = ? and `coupon_id` = ? LIMIT 1 FOR SHARE ", m.table)
 	err := session.QueryRowCtx(ctx, &cnt, query, userId, couponId)
 	switch {
 	case err == nil:
 		return cnt > 0, nil
-	case errors.Is(err, sqlx.ErrNotFound):
-		return false, nil
 	default:
 		return false, err
 	}
 }
 
 func (m *customUserCouponsModel) QueryUserCoupons(ctx context.Context, userId, page, pageSize int32) ([]*UserCoupons, error) {
-	query := fmt.Sprintf("select %s from %s where `user_id` = ? limit ?,?", userCouponsRows, m.table)
+	query := fmt.Sprintf("select %s from %s where `user_id` = ? order by `created_at` desc limit ?,?", userCouponsRows, m.table)
 	var resp []*UserCoupons
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId, (page-1)*pageSize, pageSize)
 	switch {

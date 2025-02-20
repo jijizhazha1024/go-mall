@@ -3,7 +3,6 @@ package coupons
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"jijizhazha1024/go-mall/services/coupons/coupons"
 	"testing"
@@ -57,24 +56,31 @@ func Test_GetCouponLogic_GetCoupon(t *testing.T) {
 }
 
 func Test_CalculateCouponLogic_CalculateCoupon(t *testing.T) {
+	var price = 299900
+	productID := 3
 
-	calRes, err := couponsClient.CalculateCoupon(context.Background(), &coupons.CalculateCouponReq{
-		CouponId: "LJ20250214001",
-		Items: []*coupons.Items{
-			{
-				ProductId: 1,
-				Quantity:  1,
+	t.Run("折扣优惠券", func(t *testing.T) {
+		disCount := 80
+		quanity := 2
+		discountAmount := price * quanity * (100 - disCount) / 100
+		final := price*quanity - discountAmount
+		//	ZK20250214001
+		coupon, err2 := couponsClient.CalculateCoupon(context.Background(), &coupons.CalculateCouponReq{
+			CouponId: "ZK20250214001",
+			UserId:   1,
+			Items: []*coupons.Items{
+				{
+					ProductId: int32(productID),
+					Quantity:  int32(quanity),
+				},
 			},
-		},
-		UserId: 1,
+		})
+		if err2 != nil {
+			t.Error(err2)
+			return
+		}
+		assert.Equal(t, uint32(0), coupon.StatusCode)
+		assert.Equal(t, final, coupon.FinalAmount)
+
 	})
-	if err != nil {
-		t.Error(err)
-	}
-	if calRes.StatusCode != 0 {
-		t.Logf("code：%d, msg:%s", calRes.StatusCode, calRes.StatusMsg)
-		return
-	}
-	assert.Equal(t, uint32(0), calRes.StatusCode)
-	fmt.Println(calRes)
 }

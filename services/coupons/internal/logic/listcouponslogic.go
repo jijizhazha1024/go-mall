@@ -39,6 +39,7 @@ func (l *ListCouponsLogic) ListCoupons(in *coupons.ListCouponsReq) (*coupons.Lis
 	queryCoupons, err := l.svcCtx.CouponsModel.QueryCoupons(l.ctx, in.Pagination.Page, in.Pagination.Size, in.Type)
 	if err != nil {
 		if errors.Is(err, sqlc.ErrNotFound) {
+			//直接返回空列表，代表没有数据
 			return res, nil
 		}
 		logx.Errorw("query coupons error", logx.Field("err", err))

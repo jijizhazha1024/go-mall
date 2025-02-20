@@ -32,7 +32,7 @@ func Test_ListUserCouponsLogic_ListUserCoupons(t *testing.T) {
 func Test_ClaimCouponLogic_ClaimCoupon(t *testing.T) {
 	res, err := couponsClient.ClaimCoupon(context.Background(), &coupons.ClaimCouponReq{
 		UserId:   1,
-		CouponId: "67756077ea7111ef86d80242ac120005",
+		CouponId: "ZK20250214001",
 	})
 	if err != nil {
 		t.Error(err)

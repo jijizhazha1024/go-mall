@@ -58,5 +58,5 @@ func (l *ListCouponUsagesLogic) ListCouponUsages(in *coupons.ListCouponUsagesReq
 	}
 	res.TotalCount = int32(len(couponsUsageList))
 
-	return &coupons.ListCouponUsagesResp{}, nil
+	return res, nil
 }

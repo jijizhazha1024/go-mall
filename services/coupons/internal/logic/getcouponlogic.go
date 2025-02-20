@@ -50,8 +50,8 @@ func (l *GetCouponLogic) GetCoupon(in *coupons.GetCouponReq) (*coupons.GetCoupon
 
 	// check status
 	if one.Status == 0 {
-		res.StatusCode = code.CouponsNotExist
-		res.StatusMsg = code.CouponsNotExistMsg
+		res.StatusCode = code.CouponsExpired
+		res.StatusMsg = code.CouponsExpiredMsg
 		return res, nil
 	}
 	res.Coupon = convertCoupon2Resp(one)

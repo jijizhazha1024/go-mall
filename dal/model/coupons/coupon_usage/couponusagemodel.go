@@ -2,6 +2,7 @@ package coupon_usage
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -24,18 +25,22 @@ type (
 )
 
 func (m *customCouponUsageModel) QueryUsageListByUserId(ctx context.Context, userId uint64, page, size int32) ([]*CouponUsage, error) {
-	query := fmt.Sprintf("SELECT %s FROM %s WHERE user_id = ? LIMIT ? OFFSET ?", couponUsageRows, m.table)
-	resp := make([]*CouponUsage, 0)
-	//pageSize, (page-1)*pageSize
-	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId, size, (page-1)*size)
-	switch {
-	case err == nil:
-		return resp, nil
-	case errors.Is(err, sqlx.ErrNotFound):
-		return resp, nil
-	default:
+
+	offset := (page - 1) * size
+
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE user_id = ? ORDER BY `applied_at` DESC LIMIT ? OFFSET ?",
+		couponUsageRows, m.table)
+
+	var resp []*CouponUsage
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId, size, offset)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return make([]*CouponUsage, 0), nil
+		}
 		return nil, err
 	}
+	return resp, nil
 }
 
 // NewCouponUsageModel returns a model for the database table.
