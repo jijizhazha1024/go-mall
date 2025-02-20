@@ -4,10 +4,10 @@ import (
 	"flag"
 	"fmt"
 
-	"jijizhazha1024/go-mall/services/users/internal/config"
-	"jijizhazha1024/go-mall/services/users/internal/server"
-	"jijizhazha1024/go-mall/services/users/internal/svc"
-	"jijizhazha1024/go-mall/services/users/users"
+	"jijizhazha1024/go-mall/services/order/internal/config"
+	"jijizhazha1024/go-mall/services/order/internal/server"
+	"jijizhazha1024/go-mall/services/order/internal/svc"
+	"jijizhazha1024/go-mall/services/order/order"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -18,7 +18,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var configFile = flag.String("f", "etc/users.yaml", "the config file")
+var configFile = flag.String("f", "etc/order.yaml", "the config file")
 
 func main() {
 	flag.Parse()
@@ -28,13 +28,12 @@ func main() {
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-		users.RegisterUsersServer(grpcServer, server.NewUsersServer(ctx))
+		order.RegisterOrderServiceServer(grpcServer, server.NewOrderServiceServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)
 		}
 	})
-
 	if err := consul.RegisterService(c.ListenOn, c.Consul); err != nil {
 		logx.Errorw("register service error", logx.Field("err", err))
 		panic(err)
