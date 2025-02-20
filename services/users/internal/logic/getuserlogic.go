@@ -7,7 +7,6 @@ import (
 
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
-	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -37,17 +36,33 @@ func (l *GetUserLogic) GetUser(in *users.GetUserRequest) (*users.GetUserResponse
 			logx.Infow("get user failed, user not found", logx.Field("err", err),
 				logx.Field("user id", in.UserId))
 
-			return users_biz.HandleGetUsererror(code.UserNotFoundMsg, code.UserNotFound, nil)
+			return &users.GetUserResponse{
+				StatusCode: code.UserNotFound,
+				StatusMsg:  code.UserNotFoundMsg,
+			}, nil
 		}
 		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_id", in.UserId))
-		return users_biz.HandleGetUsererror(code.ServerErrorMsg, code.ServerError, err)
+		return &users.GetUserResponse{}, err
+
 	}
 
 	if user.UserDeleted {
 		logx.Infow("you have deleted this user, please contact the administrator", logx.Field("user_id", in.UserId))
+		return &users.GetUserResponse{
+			StatusCode: code.UserInfoRetrievalFailed,
+			StatusMsg:  code.UserInfoRetrievalFailedMsg,
+		}, nil
 
-		return users_biz.HandleGetUsererror(code.UserInfoRetrievalFailedMsg, code.UserDeleted, nil)
 	}
+	return &users.GetUserResponse{
 
-	return users_biz.HandleGetUserResp(code.UserInfoRetrievedMsg, code.UserInfoRetrieved, uint32(user.UserId), user.Username.String, user.Email.String, user.CreatedAt.Format("2006-01-02 15:04:05"), user.UpdatedAt.Format("2006-01-02 15:04:05"), user.LogoutAt.Time.Format("2006-01-02 15:04:05"), user.AvatarUrl.String)
+		UserId:    uint32(user.UserId),
+		UserName:  user.Username.String,
+		Email:     user.Email.String,
+		CreatedAt: user.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt: user.UpdatedAt.Format("2006-01-02 15:04:05"),
+		LogoutAt:  user.LogoutAt.Time.Format("2006-01-02 15:04:05"),
+		AvatarUrl: user.AvatarUrl.String,
+	}, nil
+
 }
