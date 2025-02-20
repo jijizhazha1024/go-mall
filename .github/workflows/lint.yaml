@@ -20,5 +20,9 @@ jobs:
         with:
           version: v1.57.2
           args:
-            - --concurrency 8
-            - --timeout 10m
+            - --config=.golangci.yml
+#            - --concurrency 8
+#            - --timeout 10m
+#            - --exclude-dirs=test          # 排除 test 目录
+#            - --exclude-files='.*_test.go' # 排除所有 _test.go 文件
+#            - --tests=false
