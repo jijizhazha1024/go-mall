@@ -12,6 +12,7 @@ const (
 	CouponsNotStart
 	CouponsAlreadyLocked
 	CouponsAlreadyReleased
+	CouponStatusInvalid
 )
 
 const (
@@ -26,4 +27,5 @@ const (
 	CouponsNotStartMsg        = "优惠券未到使用时间"
 	CouponsAlreadyLockedMsg   = "优惠券已被锁定"
 	CouponsAlreadyReleasedMsg = "优惠券已被释放"
+	CouponStatusInvalidMsg    = "优惠券状态无效"
 )

@@ -18,12 +18,21 @@ type (
 		QueryCoupons(ctx context.Context, page, pageSize, ctype int32) ([]*Coupons, error)
 		FindOneWithLock(ctx context.Context, session sqlx.Session, id string) (*Coupons, error)
 		DecreaseStockWithSession(ctx context.Context, session sqlx.Session, id string, num int) error
+		GetCouponTypeByID(ctx context.Context, session sqlx.Session, id string) (int64, error)
 	}
 
 	customCouponsModel struct {
 		*defaultCouponsModel
 	}
 )
+
+func (m *customCouponsModel) GetCouponTypeByID(ctx context.Context, session sqlx.Session, id string) (int64, error) {
+	var ctp int64
+	query := fmt.Sprintf("select `type` from %s where id = ? limit 1", m.table)
+	err := session.QueryRowCtx(ctx, &ctp, query, id)
+	return ctp, err
+
+}
 
 func (m *customCouponsModel) FindOneWithLock(ctx context.Context, session sqlx.Session, id string) (*Coupons, error) {
 	query := fmt.Sprintf("SELECT %s FROM %s WHERE `id` = ? FOR SHARE", couponsRows, m.table)

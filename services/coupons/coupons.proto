@@ -8,8 +8,26 @@ enum CouponType {
   COUPON_TYPE_DISCOUNT = 2; // 折扣券
   COUPON_TYPE_FIXED_AMOUNT = 3; // 立减券
 }
+enum CouponStatus {
+  COUPON_STATUS_UNSPECIFIED = 0; // 未指定或默认状态
+  COUPON_STATUS_AVAILABLE = 1; // 用户领取优惠券后，可正常使用
+  COUPON_STATUS_LOCKED = 2; // 用户点击结算时锁定，锁定期间其他订单不可重复使用
+  COUPON_STATUS_USED = 3; // 支付成功确认，标记为已消耗
+  COUPON_STATUS_EXPIRED = 4; // 超过有效期未使用，自动失效
+  COUPON_STATUS_REVOKED = 5; // 管理员手动作废，强制失效（如活动终止）
+}
 
+enum CouponUsageStatus{
+  // 未使用
+  COUPON_USAGE_STATUS_UNUSED = 0 ;
+  // 占用  下单成功时标记
+  COUPON_USAGE_STATUS_LOCKED = 1;
+  // 已使用 优惠券被使用，订单完成时标记
+  COUPON_USAGE_STATUS_USED = 2;
+  // 已过期 当属于未使用状态才可改变过期
+  COUPON_USAGE_STATUS_EXPIRED = 3;
 
+}
 
 // 优惠券信息
 message Coupon {
@@ -25,14 +43,7 @@ message Coupon {
   string created_at = 11; // 创建时间
   string updated_at = 12; // 更新时间
 }
-enum CouponStatus {
-  COUPON_STATUS_UNSPECIFIED = 0; // 未指定或默认状态
-  COUPON_STATUS_AVAILABLE = 1; // 用户领取优惠券后，可正常使用
-  COUPON_STATUS_LOCKED = 2; // 用户点击结算时锁定，锁定期间其他订单不可重复使用
-  COUPON_STATUS_USED = 3; // 支付成功确认，标记为已消耗
-  COUPON_STATUS_EXPIRED = 4; // 超过有效期未使用，自动失效
-  COUPON_STATUS_REVOKED = 5; // 管理员手动作废，强制失效（如活动终止）
-}
+
 
 // 用户优惠券信息
 message UserCoupon {
@@ -220,9 +231,12 @@ message LockCouponReq {
 }
 
 message UseCouponReq {
-  string user_coupon_id = 1;
+  int32 user_id = 1;
   string pre_order_id = 2;
   string order_id = 3;
+  string coupon_id = 4;
+  int64 discount_amount = 5;
+  int64 origin_amount = 6;
 }
 
 message ReleaseCouponReq {
@@ -277,6 +291,6 @@ service Coupons {
   rpc LockCoupon(LockCouponReq) returns (EmptyResp);
   // 释放优惠券（订单取消/超时释放）
   rpc ReleaseCoupon(ReleaseCouponReq) returns (EmptyResp);
-  // 使用优惠券（支付成功确认）
+  // 使用优惠券（支付成功确认后）
   rpc UseCoupon(UseCouponReq) returns (EmptyResp);
 }

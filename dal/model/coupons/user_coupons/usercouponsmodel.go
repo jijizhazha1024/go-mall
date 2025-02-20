@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"jijizhazha1024/go-mall/services/coupons/coupons"
 )
 
 var _ UserCouponsModel = (*customUserCouponsModel)(nil)
@@ -18,12 +19,34 @@ type (
 		QueryUserCoupons(ctx context.Context, userId, page, pageSize int32) ([]*UserCoupons, error)
 		CheckUserCouponExistWithLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (bool, error)
 		GetUserCouponByUserIdCouponIdWithLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (*UserCoupons, error)
+		GetStatusByUserIdCouponId(ctx context.Context, userid int32, couponId string) (*Status, error)
+		UpdateStatusOrderById(ctx context.Context, orderId string, id int, status coupons.CouponUsageStatus) error
 	}
 
 	customUserCouponsModel struct {
 		*defaultUserCouponsModel
 	}
 )
+
+func (m *customUserCouponsModel) UpdateStatusOrderById(ctx context.Context, orderId string, id int, used coupons.CouponUsageStatus) error {
+	query := fmt.Sprintf("update %s set `status` = ?, `order_id` = ?,used_at = now() where `id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, used, orderId, id)
+	return err
+}
+
+func (m *customUserCouponsModel) GetStatusByUserIdCouponId(ctx context.Context, userid int32, couponId string) (*Status, error) {
+	var status Status
+	query := fmt.Sprintf("select `id`,`status` from %s where `user_id` = ? and `coupon_id` = ? limit 1", m.table)
+	err := m.conn.QueryRowCtx(ctx, &status, query, userid, couponId)
+	switch {
+	case err == nil:
+		return &status, nil
+	case errors.Is(err, sqlx.ErrNotFound):
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
 
 func (m *customUserCouponsModel) GetUserCouponByUserIdCouponIdWithLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (*UserCoupons, error) {
 	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `coupon_id` = ? limit 1 for update", userCouponsRows, m.table)
