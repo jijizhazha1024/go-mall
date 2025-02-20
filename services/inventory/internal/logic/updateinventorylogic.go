@@ -2,12 +2,8 @@ package logic
 
 import (
 	"context"
-	"fmt"
-	"jijizhazha1024/go-mall/common/consts/biz"
-	inventory2 "jijizhazha1024/go-mall/dal/model/inventory"
 	"jijizhazha1024/go-mall/services/inventory/internal/svc"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
-	"strconv"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,26 +25,27 @@ func NewUpdateInventoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *U
 // UpdateInventory 更新库存，进行修改库存数量
 func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.InventoryReq) (*inventory.InventoryResp, error) {
 
-	if in.Quantity <= 0 {
-		l.Logger.Infow("quantity must be greater than 0", logx.Field("quantity", in.Quantity), logx.Field("product_id", in.ProductId))
-		return nil, biz.InvalidInventoryErr
-	}
-	tostr := strconv.Itoa(int(in.Quantity))
-	err := l.svcCtx.Rdb.Hset(fmt.Sprintf("inventory:%d", in.ProductId), "total", tostr)
-	if err != nil {
-		l.Logger.Errorw("update inventory failed", logx.Field("product_id", in.ProductId), logx.Field("err", err))
-		return nil, err
-	}
-	//执行sql
-	if err := l.svcCtx.InventoryModel.UpdateOrCreate(l.ctx, inventory2.Inventory{
-		ProductId: int64(in.ProductId),
-		Total:     int64(in.Quantity),
-	}); err != nil {
-		l.Logger.Errorw("update inventory error", logx.Field("error", err.Error()), logx.Field("product_id", in.ProductId))
-		return nil, err
-	}
-	return &inventory.InventoryResp{
+	// 	if in.Quantity <= 0 {
+	// 		l.Logger.Infow("quantity must be greater than 0", logx.Field("quantity", in.Quantity), logx.Field("product_id", in.ProductId))
+	// 		return nil, biz.InvalidInventoryErr
+	// 	}
+	// 	tostr := strconv.Itoa(int(in.Quantity))
+	// 	err := l.svcCtx.Rdb.Hset(fmt.Sprintf("inventory:%d", in.ProductId), "total", tostr)
+	// 	if err != nil {
+	// 		l.Logger.Errorw("update inventory failed", logx.Field("product_id", in.ProductId), logx.Field("err", err))
+	// 		return nil, err
+	// 	}
+	// 	//执行sql
+	// 	if err := l.svcCtx.InventoryModel.UpdateOrCreate(l.ctx, inventory2.Inventory{
+	// 		ProductId: int64(in.ProductId),
+	// 		Total:     int64(in.Quantity),
+	// 	}); err != nil {
+	// 		l.Logger.Errorw("update inventory error", logx.Field("error", err.Error()), logx.Field("product_id", in.ProductId))
+	// 		return nil, err
+	// 	}
+	// 	return &inventory.InventoryResp{
 
-		Inventory: int64(in.Quantity),
-	}, nil
+	// 		Inventory: int64(in.Quantity),
+	// 	}, nil
+	return nil, nil
 }

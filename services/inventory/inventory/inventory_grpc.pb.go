@@ -20,10 +20,12 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	Inventory_GetInventory_FullMethodName         = "/inventory.Inventory/GetInventory"
+	Inventory_GetPreInventory_FullMethodName      = "/inventory.Inventory/GetPreInventory"
 	Inventory_UpdateInventory_FullMethodName      = "/inventory.Inventory/UpdateInventory"
 	Inventory_DecreasePreInventory_FullMethodName = "/inventory.Inventory/DecreasePreInventory"
 	Inventory_DecreaseInventory_FullMethodName    = "/inventory.Inventory/DecreaseInventory"
 	Inventory_ReturnPreInventory_FullMethodName   = "/inventory.Inventory/ReturnPreInventory"
+	Inventory_ReturnInventory_FullMethodName      = "/inventory.Inventory/ReturnInventory"
 )
 
 // InventoryClient is the client API for Inventory service.
@@ -32,6 +34,7 @@ const (
 type InventoryClient interface {
 	// GetInventory 查询库存，缓存不在，再去数据库查
 	GetInventory(ctx context.Context, in *GetInventoryReq, opts ...grpc.CallOption) (*GetInventoryResp, error)
+	GetPreInventory(ctx context.Context, in *GetPreInventoryReq, opts ...grpc.CallOption) (*GetPreInventoryResp, error)
 	// UpdateInventory 增加库存，修改库存数量（直接修改）
 	UpdateInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error)
 	// DecreaseInventory 预扣减库存，此时并非真实扣除库存，而是在缓存进行--操作
@@ -40,6 +43,8 @@ type InventoryClient interface {
 	DecreaseInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error)
 	// ReturnPreInventory 退还预扣减的库存（）
 	ReturnPreInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error)
+	// ReturnInventory 退还库存（支付失败时）
+	ReturnInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error)
 }
 
 type inventoryClient struct {
@@ -54,6 +59,16 @@ func (c *inventoryClient) GetInventory(ctx context.Context, in *GetInventoryReq,
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetInventoryResp)
 	err := c.cc.Invoke(ctx, Inventory_GetInventory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *inventoryClient) GetPreInventory(ctx context.Context, in *GetPreInventoryReq, opts ...grpc.CallOption) (*GetPreInventoryResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPreInventoryResp)
+	err := c.cc.Invoke(ctx, Inventory_GetPreInventory_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -100,12 +115,23 @@ func (c *inventoryClient) ReturnPreInventory(ctx context.Context, in *InventoryR
 	return out, nil
 }
 
+func (c *inventoryClient) ReturnInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(InventoryResp)
+	err := c.cc.Invoke(ctx, Inventory_ReturnInventory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // InventoryServer is the server API for Inventory service.
 // All implementations must embed UnimplementedInventoryServer
 // for forward compatibility.
 type InventoryServer interface {
 	// GetInventory 查询库存，缓存不在，再去数据库查
 	GetInventory(context.Context, *GetInventoryReq) (*GetInventoryResp, error)
+	GetPreInventory(context.Context, *GetPreInventoryReq) (*GetPreInventoryResp, error)
 	// UpdateInventory 增加库存，修改库存数量（直接修改）
 	UpdateInventory(context.Context, *InventoryReq) (*InventoryResp, error)
 	// DecreaseInventory 预扣减库存，此时并非真实扣除库存，而是在缓存进行--操作
@@ -114,6 +140,8 @@ type InventoryServer interface {
 	DecreaseInventory(context.Context, *InventoryReq) (*InventoryResp, error)
 	// ReturnPreInventory 退还预扣减的库存（）
 	ReturnPreInventory(context.Context, *InventoryReq) (*InventoryResp, error)
+	// ReturnInventory 退还库存（支付失败时）
+	ReturnInventory(context.Context, *InventoryReq) (*InventoryResp, error)
 	mustEmbedUnimplementedInventoryServer()
 }
 
@@ -127,6 +155,9 @@ type UnimplementedInventoryServer struct{}
 func (UnimplementedInventoryServer) GetInventory(context.Context, *GetInventoryReq) (*GetInventoryResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetInventory not implemented")
 }
+func (UnimplementedInventoryServer) GetPreInventory(context.Context, *GetPreInventoryReq) (*GetPreInventoryResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPreInventory not implemented")
+}
 func (UnimplementedInventoryServer) UpdateInventory(context.Context, *InventoryReq) (*InventoryResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateInventory not implemented")
 }
@@ -138,6 +169,9 @@ func (UnimplementedInventoryServer) DecreaseInventory(context.Context, *Inventor
 }
 func (UnimplementedInventoryServer) ReturnPreInventory(context.Context, *InventoryReq) (*InventoryResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReturnPreInventory not implemented")
+}
+func (UnimplementedInventoryServer) ReturnInventory(context.Context, *InventoryReq) (*InventoryResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReturnInventory not implemented")
 }
 func (UnimplementedInventoryServer) mustEmbedUnimplementedInventoryServer() {}
 func (UnimplementedInventoryServer) testEmbeddedByValue()                   {}
@@ -174,6 +208,24 @@ func _Inventory_GetInventory_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(InventoryServer).GetInventory(ctx, req.(*GetInventoryReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Inventory_GetPreInventory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPreInventoryReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InventoryServer).GetPreInventory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Inventory_GetPreInventory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InventoryServer).GetPreInventory(ctx, req.(*GetPreInventoryReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -250,6 +302,24 @@ func _Inventory_ReturnPreInventory_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Inventory_ReturnInventory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InventoryReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InventoryServer).ReturnInventory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Inventory_ReturnInventory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InventoryServer).ReturnInventory(ctx, req.(*InventoryReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Inventory_ServiceDesc is the grpc.ServiceDesc for Inventory service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -260,6 +330,10 @@ var Inventory_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetInventory",
 			Handler:    _Inventory_GetInventory_Handler,
+		},
+		{
+			MethodName: "GetPreInventory",
+			Handler:    _Inventory_GetPreInventory_Handler,
 		},
 		{
 			MethodName: "UpdateInventory",
@@ -276,6 +350,10 @@ var Inventory_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReturnPreInventory",
 			Handler:    _Inventory_ReturnPreInventory_Handler,
+		},
+		{
+			MethodName: "ReturnInventory",
+			Handler:    _Inventory_ReturnInventory_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

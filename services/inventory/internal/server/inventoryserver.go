@@ -29,6 +29,11 @@ func (s *InventoryServer) GetInventory(ctx context.Context, in *inventory.GetInv
 	return l.GetInventory(in)
 }
 
+func (s *InventoryServer) GetPreInventory(ctx context.Context, in *inventory.GetPreInventoryReq) (*inventory.GetPreInventoryResp, error) {
+	l := logic.NewGetPreInventoryLogic(ctx, s.svcCtx)
+	return l.GetPreInventory(in)
+}
+
 // UpdateInventory 增加库存，修改库存数量（直接修改）
 func (s *InventoryServer) UpdateInventory(ctx context.Context, in *inventory.InventoryReq) (*inventory.InventoryResp, error) {
 	l := logic.NewUpdateInventoryLogic(ctx, s.svcCtx)
@@ -51,4 +56,10 @@ func (s *InventoryServer) DecreaseInventory(ctx context.Context, in *inventory.I
 func (s *InventoryServer) ReturnPreInventory(ctx context.Context, in *inventory.InventoryReq) (*inventory.InventoryResp, error) {
 	l := logic.NewReturnPreInventoryLogic(ctx, s.svcCtx)
 	return l.ReturnPreInventory(in)
+}
+
+// ReturnInventory 退还库存（支付失败时）
+func (s *InventoryServer) ReturnInventory(ctx context.Context, in *inventory.InventoryReq) (*inventory.InventoryResp, error) {
+	l := logic.NewReturnInventoryLogic(ctx, s.svcCtx)
+	return l.ReturnInventory(in)
 }
