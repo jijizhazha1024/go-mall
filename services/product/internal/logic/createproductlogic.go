@@ -108,8 +108,8 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 		}, nil
 	}
 	_, err = l.svcCtx.InventoryRpc.UpdateInventory(l.ctx, &inventory.InventoryReq{
-		ProductId: int32(product_Id),
-		Quantity:  int32(in.Stock),
+		/*ProductId: int32(product_Id),
+		Quantity:  int32(in.Stock),*/
 	})
 	if err != nil {
 		return nil, err
