@@ -14,26 +14,29 @@ import (
 )
 
 type (
-	CheckoutDetailReq       = checkout.CheckoutDetailReq
-	CheckoutDetailResp      = checkout.CheckoutDetailResp
-	CheckoutItem            = checkout.CheckoutItem
-	CheckoutListReq         = checkout.CheckoutListReq
-	CheckoutListResp        = checkout.CheckoutListResp
-	CheckoutOrder           = checkout.CheckoutOrder
-	CheckoutReq             = checkout.CheckoutReq
-	CheckoutReq_OrderItem   = checkout.CheckoutReq_OrderItem
-	CheckoutResp            = checkout.CheckoutResp
-	ProductSnapshot         = checkout.ProductSnapshot
-	ReleaseReq              = checkout.ReleaseReq
-	ReleaseResp             = checkout.ReleaseResp
-	UpdateCheckoutStatusReq = checkout.UpdateCheckoutStatusReq
+	CheckoutDetailReq        = checkout.CheckoutDetailReq
+	CheckoutDetailResp       = checkout.CheckoutDetailResp
+	CheckoutItem             = checkout.CheckoutItem
+	CheckoutListReq          = checkout.CheckoutListReq
+	CheckoutListResp         = checkout.CheckoutListResp
+	CheckoutOrder            = checkout.CheckoutOrder
+	CheckoutReq              = checkout.CheckoutReq
+	CheckoutReq_OrderItem    = checkout.CheckoutReq_OrderItem
+	CheckoutResp             = checkout.CheckoutResp
+	ProductSnapshot          = checkout.ProductSnapshot
+	ReleaseReq               = checkout.ReleaseReq
+	ReleaseResp              = checkout.ReleaseResp
+	UpdateCheckoutStatusReq  = checkout.UpdateCheckoutStatusReq
+	UpdateCheckoutStatusResp = checkout.UpdateCheckoutStatusResp
 
 	CheckoutService interface {
 		// 预结算（生成预订单）
 		PrepareCheckout(ctx context.Context, in *CheckoutReq, opts ...grpc.CallOption) (*CheckoutResp, error)
+		// 由订单服务触发
+		ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*ReleaseResp, error)
+		UpdateCheckoutStatus2Success(ctx context.Context, in *UpdateCheckoutStatusReq, opts ...grpc.CallOption) (*UpdateCheckoutStatusResp, error)
 		GetCheckoutList(ctx context.Context, in *CheckoutListReq, opts ...grpc.CallOption) (*CheckoutListResp, error)
 		GetCheckoutDetail(ctx context.Context, in *CheckoutDetailReq, opts ...grpc.CallOption) (*CheckoutDetailResp, error)
-		ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*ReleaseResp, error)
 	}
 
 	defaultCheckoutService struct {
@@ -53,6 +56,17 @@ func (m *defaultCheckoutService) PrepareCheckout(ctx context.Context, in *Checko
 	return client.PrepareCheckout(ctx, in, opts...)
 }
 
+// 由订单服务触发
+func (m *defaultCheckoutService) ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*ReleaseResp, error) {
+	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
+	return client.ReleaseCheckout(ctx, in, opts...)
+}
+
+func (m *defaultCheckoutService) UpdateCheckoutStatus2Success(ctx context.Context, in *UpdateCheckoutStatusReq, opts ...grpc.CallOption) (*UpdateCheckoutStatusResp, error) {
+	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
+	return client.UpdateCheckoutStatus2Success(ctx, in, opts...)
+}
+
 func (m *defaultCheckoutService) GetCheckoutList(ctx context.Context, in *CheckoutListReq, opts ...grpc.CallOption) (*CheckoutListResp, error) {
 	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
 	return client.GetCheckoutList(ctx, in, opts...)
@@ -61,9 +75,4 @@ func (m *defaultCheckoutService) GetCheckoutList(ctx context.Context, in *Checko
 func (m *defaultCheckoutService) GetCheckoutDetail(ctx context.Context, in *CheckoutDetailReq, opts ...grpc.CallOption) (*CheckoutDetailResp, error) {
 	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
 	return client.GetCheckoutDetail(ctx, in, opts...)
-}
-
-func (m *defaultCheckoutService) ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*ReleaseResp, error) {
-	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
-	return client.ReleaseCheckout(ctx, in, opts...)
 }

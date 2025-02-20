@@ -19,10 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CheckoutService_PrepareCheckout_FullMethodName   = "/checkout.CheckoutService/PrepareCheckout"
-	CheckoutService_GetCheckoutList_FullMethodName   = "/checkout.CheckoutService/GetCheckoutList"
-	CheckoutService_GetCheckoutDetail_FullMethodName = "/checkout.CheckoutService/GetCheckoutDetail"
-	CheckoutService_ReleaseCheckout_FullMethodName   = "/checkout.CheckoutService/ReleaseCheckout"
+	CheckoutService_PrepareCheckout_FullMethodName              = "/checkout.CheckoutService/PrepareCheckout"
+	CheckoutService_ReleaseCheckout_FullMethodName              = "/checkout.CheckoutService/ReleaseCheckout"
+	CheckoutService_UpdateCheckoutStatus2Success_FullMethodName = "/checkout.CheckoutService/UpdateCheckoutStatus2Success"
+	CheckoutService_GetCheckoutList_FullMethodName              = "/checkout.CheckoutService/GetCheckoutList"
+	CheckoutService_GetCheckoutDetail_FullMethodName            = "/checkout.CheckoutService/GetCheckoutDetail"
 )
 
 // CheckoutServiceClient is the client API for CheckoutService service.
@@ -31,9 +32,11 @@ const (
 type CheckoutServiceClient interface {
 	// 预结算（生成预订单）
 	PrepareCheckout(ctx context.Context, in *CheckoutReq, opts ...grpc.CallOption) (*CheckoutResp, error)
+	// 由订单服务触发
+	ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*ReleaseResp, error)
+	UpdateCheckoutStatus2Success(ctx context.Context, in *UpdateCheckoutStatusReq, opts ...grpc.CallOption) (*UpdateCheckoutStatusResp, error)
 	GetCheckoutList(ctx context.Context, in *CheckoutListReq, opts ...grpc.CallOption) (*CheckoutListResp, error)
 	GetCheckoutDetail(ctx context.Context, in *CheckoutDetailReq, opts ...grpc.CallOption) (*CheckoutDetailResp, error)
-	ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*ReleaseResp, error)
 }
 
 type checkoutServiceClient struct {
@@ -48,6 +51,26 @@ func (c *checkoutServiceClient) PrepareCheckout(ctx context.Context, in *Checkou
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CheckoutResp)
 	err := c.cc.Invoke(ctx, CheckoutService_PrepareCheckout_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *checkoutServiceClient) ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*ReleaseResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ReleaseResp)
+	err := c.cc.Invoke(ctx, CheckoutService_ReleaseCheckout_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *checkoutServiceClient) UpdateCheckoutStatus2Success(ctx context.Context, in *UpdateCheckoutStatusReq, opts ...grpc.CallOption) (*UpdateCheckoutStatusResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateCheckoutStatusResp)
+	err := c.cc.Invoke(ctx, CheckoutService_UpdateCheckoutStatus2Success_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -74,25 +97,17 @@ func (c *checkoutServiceClient) GetCheckoutDetail(ctx context.Context, in *Check
 	return out, nil
 }
 
-func (c *checkoutServiceClient) ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*ReleaseResp, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ReleaseResp)
-	err := c.cc.Invoke(ctx, CheckoutService_ReleaseCheckout_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // CheckoutServiceServer is the server API for CheckoutService service.
 // All implementations must embed UnimplementedCheckoutServiceServer
 // for forward compatibility.
 type CheckoutServiceServer interface {
 	// 预结算（生成预订单）
 	PrepareCheckout(context.Context, *CheckoutReq) (*CheckoutResp, error)
+	// 由订单服务触发
+	ReleaseCheckout(context.Context, *ReleaseReq) (*ReleaseResp, error)
+	UpdateCheckoutStatus2Success(context.Context, *UpdateCheckoutStatusReq) (*UpdateCheckoutStatusResp, error)
 	GetCheckoutList(context.Context, *CheckoutListReq) (*CheckoutListResp, error)
 	GetCheckoutDetail(context.Context, *CheckoutDetailReq) (*CheckoutDetailResp, error)
-	ReleaseCheckout(context.Context, *ReleaseReq) (*ReleaseResp, error)
 	mustEmbedUnimplementedCheckoutServiceServer()
 }
 
@@ -106,14 +121,17 @@ type UnimplementedCheckoutServiceServer struct{}
 func (UnimplementedCheckoutServiceServer) PrepareCheckout(context.Context, *CheckoutReq) (*CheckoutResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PrepareCheckout not implemented")
 }
+func (UnimplementedCheckoutServiceServer) ReleaseCheckout(context.Context, *ReleaseReq) (*ReleaseResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReleaseCheckout not implemented")
+}
+func (UnimplementedCheckoutServiceServer) UpdateCheckoutStatus2Success(context.Context, *UpdateCheckoutStatusReq) (*UpdateCheckoutStatusResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCheckoutStatus2Success not implemented")
+}
 func (UnimplementedCheckoutServiceServer) GetCheckoutList(context.Context, *CheckoutListReq) (*CheckoutListResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCheckoutList not implemented")
 }
 func (UnimplementedCheckoutServiceServer) GetCheckoutDetail(context.Context, *CheckoutDetailReq) (*CheckoutDetailResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCheckoutDetail not implemented")
-}
-func (UnimplementedCheckoutServiceServer) ReleaseCheckout(context.Context, *ReleaseReq) (*ReleaseResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReleaseCheckout not implemented")
 }
 func (UnimplementedCheckoutServiceServer) mustEmbedUnimplementedCheckoutServiceServer() {}
 func (UnimplementedCheckoutServiceServer) testEmbeddedByValue()                         {}
@@ -154,6 +172,42 @@ func _CheckoutService_PrepareCheckout_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CheckoutService_ReleaseCheckout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReleaseReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CheckoutServiceServer).ReleaseCheckout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CheckoutService_ReleaseCheckout_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CheckoutServiceServer).ReleaseCheckout(ctx, req.(*ReleaseReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CheckoutService_UpdateCheckoutStatus2Success_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCheckoutStatusReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CheckoutServiceServer).UpdateCheckoutStatus2Success(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CheckoutService_UpdateCheckoutStatus2Success_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CheckoutServiceServer).UpdateCheckoutStatus2Success(ctx, req.(*UpdateCheckoutStatusReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CheckoutService_GetCheckoutList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CheckoutListReq)
 	if err := dec(in); err != nil {
@@ -190,24 +244,6 @@ func _CheckoutService_GetCheckoutDetail_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CheckoutService_ReleaseCheckout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReleaseReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CheckoutServiceServer).ReleaseCheckout(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: CheckoutService_ReleaseCheckout_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CheckoutServiceServer).ReleaseCheckout(ctx, req.(*ReleaseReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // CheckoutService_ServiceDesc is the grpc.ServiceDesc for CheckoutService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -220,16 +256,20 @@ var CheckoutService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _CheckoutService_PrepareCheckout_Handler,
 		},
 		{
+			MethodName: "ReleaseCheckout",
+			Handler:    _CheckoutService_ReleaseCheckout_Handler,
+		},
+		{
+			MethodName: "UpdateCheckoutStatus2Success",
+			Handler:    _CheckoutService_UpdateCheckoutStatus2Success_Handler,
+		},
+		{
 			MethodName: "GetCheckoutList",
 			Handler:    _CheckoutService_GetCheckoutList_Handler,
 		},
 		{
 			MethodName: "GetCheckoutDetail",
 			Handler:    _CheckoutService_GetCheckoutDetail_Handler,
-		},
-		{
-			MethodName: "ReleaseCheckout",
-			Handler:    _CheckoutService_ReleaseCheckout_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

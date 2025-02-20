@@ -39,10 +39,10 @@ message ProductSnapshot {
 // --------------- request ---------------
 
 message CheckoutDetailReq {
-  string checkout_token = 1;
+  string pre_order_id = 1;
 }
 message UpdateCheckoutStatusReq {
-  string checkout_token = 1;
+  string pre_order_id = 1;
   CheckoutStatus status = 2; // 状态码
 }
 message CheckoutListReq{
@@ -75,7 +75,7 @@ message CheckoutResp {
   string status_msg = 2;
 
   int64 expire_time = 3;        // 预占库存有效期（如30分钟）
-  string checkout_token = 4;    // 结算令牌（用于后续提交）也就是pre_order_id
+  string pre_order_id = 4;    // 结算令牌（用于后续提交）也就是pre_order_id（幂等控制）
   repeated int64  pay_method = 5;// 支付方式 （如：微信支付：1、支付宝支付：2）
 }
 message CheckoutDetailResp {
@@ -85,14 +85,7 @@ message CheckoutDetailResp {
 }
 
 
-service CheckoutService {
-  // 预结算（生成预订单）
-  rpc PrepareCheckout (CheckoutReq) returns (CheckoutResp);
-  rpc GetCheckoutList (CheckoutListReq) returns (CheckoutListResp);
-  rpc GetCheckoutDetail (CheckoutDetailReq) returns (CheckoutDetailResp);
-  rpc ReleaseCheckout (ReleaseReq) returns (ReleaseResp); // 释放预订单，释放库存，返还优惠券
 
-}
 message ReleaseReq {
   string pre_order_id = 1;
   bool restore_stock = 2; // 是否恢复库存
@@ -101,4 +94,21 @@ message ReleaseReq {
 message ReleaseResp {
   int32 status_code = 1;
   string status_msg = 2;
+}
+
+message UpdateCheckoutStatusResp {
+  int32 status_code = 1;
+  string status_msg = 2;
+}
+
+service CheckoutService {
+  // 预结算（生成预订单）
+  rpc PrepareCheckout (CheckoutReq) returns (CheckoutResp);
+  //  由订单服务触发
+  rpc ReleaseCheckout (ReleaseReq) returns (ReleaseResp); // 释放预订单，释放库存，返还优惠券
+  rpc UpdateCheckoutStatus2Success (UpdateCheckoutStatusReq) returns (UpdateCheckoutStatusResp); // 结算状态改为成功，通知库存服务最终扣减，通知优惠券服务记录已使用
+  rpc GetCheckoutList (CheckoutListReq) returns (CheckoutListResp);
+  rpc GetCheckoutDetail (CheckoutDetailReq) returns (CheckoutDetailResp);
+
+
 }

@@ -29,6 +29,17 @@ func (s *CheckoutServiceServer) PrepareCheckout(ctx context.Context, in *checkou
 	return l.PrepareCheckout(in)
 }
 
+// 由订单服务触发
+func (s *CheckoutServiceServer) ReleaseCheckout(ctx context.Context, in *checkout.ReleaseReq) (*checkout.ReleaseResp, error) {
+	l := logic.NewReleaseCheckoutLogic(ctx, s.svcCtx)
+	return l.ReleaseCheckout(in)
+}
+
+func (s *CheckoutServiceServer) UpdateCheckoutStatus2Success(ctx context.Context, in *checkout.UpdateCheckoutStatusReq) (*checkout.UpdateCheckoutStatusResp, error) {
+	l := logic.NewUpdateCheckoutStatus2SuccessLogic(ctx, s.svcCtx)
+	return l.UpdateCheckoutStatus2Success(in)
+}
+
 func (s *CheckoutServiceServer) GetCheckoutList(ctx context.Context, in *checkout.CheckoutListReq) (*checkout.CheckoutListResp, error) {
 	l := logic.NewGetCheckoutListLogic(ctx, s.svcCtx)
 	return l.GetCheckoutList(in)
@@ -37,9 +48,4 @@ func (s *CheckoutServiceServer) GetCheckoutList(ctx context.Context, in *checkou
 func (s *CheckoutServiceServer) GetCheckoutDetail(ctx context.Context, in *checkout.CheckoutDetailReq) (*checkout.CheckoutDetailResp, error) {
 	l := logic.NewGetCheckoutDetailLogic(ctx, s.svcCtx)
 	return l.GetCheckoutDetail(in)
-}
-
-func (s *CheckoutServiceServer) ReleaseCheckout(ctx context.Context, in *checkout.ReleaseReq) (*checkout.ReleaseResp, error) {
-	l := logic.NewReleaseCheckoutLogic(ctx, s.svcCtx)
-	return l.ReleaseCheckout(in)
 }
