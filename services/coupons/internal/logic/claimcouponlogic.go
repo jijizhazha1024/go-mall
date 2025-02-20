@@ -43,7 +43,7 @@ func (l *ClaimCouponLogic) ClaimCoupon(in *coupons.ClaimCouponReq) (*coupons.Cla
 
 		// --------------- check ---------------
 		//  check user already claimed
-		exist, err := l.svcCtx.UserCouponsModel.CheckUserCouponExistWithSession(ctx, session, uint64(in.UserId), in.CouponId)
+		exist, err := l.svcCtx.UserCouponsModel.CheckUserCouponExistWithLock(ctx, session, uint64(in.UserId), in.CouponId)
 		if err != nil {
 			logx.Errorw("query user coupons error", logx.Field("err", err))
 			return err
