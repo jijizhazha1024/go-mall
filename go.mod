@@ -8,6 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/qiniu/go-sdk/v7 v7.25.2
 	github.com/smartwalle/alipay/v3 v3.2.24
+	github.com/shopspring/decimal v1.4.0
 	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.10.0
 	github.com/zeromicro/go-zero v1.7.6
