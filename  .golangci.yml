@@ -1,10 +1,10 @@
 run:
-  timeout: 3s                  # 大型微服务建议适当延长超时
+  timeout: 10m                  # 大型微服务建议适当延长超时
   go: '1.21'
-  concurrency: 1
+  concurrency: 8
   modules-download-mode: readonly
-
 
 linters-settings:
   gocyclo:
     min-complexity: 15  # 超过 15 的复杂度会报错
+
