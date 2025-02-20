@@ -13,11 +13,11 @@ type ServiceContext struct {
 	CheckoutModel checkout.CheckoutsModel
 }
 
-func NewServiceContext(c config.Config) (*ServiceContext, error) {
+func NewServiceContext(c config.Config) *ServiceContext {
 	mysql := db.NewMysql(c.MysqlConfig)
 	return &ServiceContext{
 		Config:        c,
 		Mysql:         mysql,
 		CheckoutModel: checkout.NewCheckoutsModel(mysql),
-	}, nil
+	}
 }
