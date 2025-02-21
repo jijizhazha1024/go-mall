@@ -42,12 +42,13 @@ func (l *GetInventoryLogic) GetInventory(in *inventory.GetInventoryReq) (*invent
 		l.Logger.Errorw("product inventory get failed", logx.Field("product_id", in.ProductId))
 		return nil, err
 	}
-	inventoryCnt := inventoryResp.Total - inventoryResp.Sold
-	res.SoldCount = inventoryResp.Total
+
 	// 存在库存
-	if inventoryCnt > 0 {
-		res.Inventory = inventoryCnt
+	if inventoryResp.Total > 0 {
+		res.Inventory = inventoryResp.Total
 		res.SoldCount = inventoryResp.Sold
+	} else {
+		return nil, errors.New("库存不足")
 	}
 	return res, nil
 }

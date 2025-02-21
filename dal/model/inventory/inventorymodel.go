@@ -5,6 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"jijizhazha1024/go-mall/common/consts/biz"
+	"strings"
+
+	sqlx1 "github.com/jmoiron/sqlx"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
@@ -19,8 +22,12 @@ type (
 		FindAll(ctx context.Context) ([]*Inventory, error)
 		WithSession(session sqlx.Session) InventoryModel
 		UpdateOrCreate(ctx context.Context, inventory Inventory) error
+		BatchReturn(ctx context.Context, session sqlx.Session, productIDs []int32, quantities []int32) error
 		DecreaseInventoryAtom(ctx context.Context, productId int32, quantity int32) (cnt int64, err error)
+		Batchdecrease(ctx context.Context, session sqlx.Session, productIDs []int32, quantities []int32) error
+		BatchReturnInventoryAtom(ctx context.Context, productIDs []int32, quantities []int32) error
 		ReturnInventory(ctx context.Context, id int32, quantity int32) (cnt int64, err error)
+		BatchDecreaseInventoryAtom(ctx context.Context, productId []int32, quantity []int32) error
 	}
 
 	customInventoryModel struct {
@@ -28,6 +35,87 @@ type (
 	}
 )
 
+func (m *customInventoryModel) BatchReturnInventoryAtom(ctx context.Context, productIDs []int32, quantities []int32) error {
+
+	// 参数校验
+	if len(productIDs) != len(quantities) {
+		return errors.New("productIDs与quantities长度不一致")
+	}
+
+	err := m.conn.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
+		// 阶段1: 批量锁定库存记录
+		query := fmt.Sprintf(`
+            SELECT product_id, total, sold 
+            FROM %s 
+            WHERE product_id IN (?)
+            FOR UPDATE  -- 行级锁
+        `, m.table)
+		query, args, err := sqlx1.In(query, productIDs)
+		if err != nil {
+			return err
+		}
+
+		var inventories []*Inventory
+		if err := session.QueryRowsCtx(ctx, &inventories, query, args...); err != nil {
+			return err
+		}
+		// 批量归还
+		err = m.BatchReturn(ctx, session, productIDs, quantities)
+		if err != nil {
+			return err
+		}
+
+		return nil
+
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+func (m *customInventoryModel) BatchReturn(ctx context.Context, session sqlx.Session, productIDs []int32, quantities []int32) error {
+
+	// 阶段3: 批量更新
+	var updateBuilder strings.Builder
+	updateBuilder.WriteString(fmt.Sprintf("UPDATE %s SET ", m.table))
+	updateBuilder.WriteString("sold = CASE product_id ")
+
+	// 构建WHEN条件
+	whenCases := make([]string, len(productIDs))
+	for i, pid := range productIDs {
+		whenCases[i] = fmt.Sprintf("WHEN %d THEN sold - %d", pid, quantities[i])
+	}
+	updateBuilder.WriteString(strings.Join(whenCases, " "))
+	updateBuilder.WriteString(" END, total = CASE product_id ")
+
+	whenCases = whenCases[:0]
+	for i, pid := range productIDs {
+		whenCases = append(whenCases, fmt.Sprintf("WHEN %d THEN total + %d", pid, quantities[i]))
+	}
+	updateBuilder.WriteString(strings.Join(whenCases, " "))
+	updateBuilder.WriteString(" END WHERE product_id IN (?)")
+
+	// 执行更新
+	updateQuery, updateArgs, err := sqlx1.In(updateBuilder.String(), productIDs)
+	if err != nil {
+		return err
+	}
+
+	res, err := session.ExecCtx(ctx, updateQuery, updateArgs...)
+	if err != nil {
+		return biz.InventoryDecreaseFailedErr
+	}
+
+	// 验证影响行数
+	if affected, _ := res.RowsAffected(); affected != int64(len(productIDs)) {
+		return biz.InventoryDecreaseFailedErr
+	}
+
+	return nil
+
+}
 func (m *customInventoryModel) ReturnInventory(ctx context.Context, productId int32, quantity int32) (cnt int64, err error) {
 	var inventory Inventory
 	query := fmt.Sprintf("select * from %s where `product_id` = ? for update", m.table)
@@ -69,7 +157,102 @@ func (m *customInventoryModel) UpdateOrCreate(ctx context.Context, inventory Inv
 
 	return m.Update(ctx, &inventory)
 }
+func (m *customInventoryModel) BatchDecreaseInventoryAtom(ctx context.Context, productIDs []int32, quantities []int32,
+) error {
+	// 参数校验
+	if len(productIDs) != len(quantities) {
+		return errors.New("productIDs与quantities长度不一致")
+	}
 
+	err := m.conn.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
+		// 阶段1: 批量锁定库存记录
+		query := fmt.Sprintf(`
+            SELECT product_id, total, sold 
+            FROM %s 
+            WHERE product_id IN (?)
+            FOR UPDATE  -- 行级锁
+        `, m.table)
+
+		query, args, err := sqlx1.In(query, productIDs)
+		if err != nil {
+			return err
+		}
+
+		var inventories []*Inventory
+		if err := session.QueryRowsCtx(ctx, &inventories, query, args...); err != nil {
+			return err
+		}
+
+		// 转换为map便于查找
+		inventoryMap := make(map[int32]*Inventory)
+		for _, inv := range inventories {
+			inventoryMap[int32(inv.ProductId)] = inv
+		}
+
+		// 阶段2: 预检查库存
+		for i, pid := range productIDs {
+			inv, exists := inventoryMap[pid]
+			if !exists {
+				return sqlx.ErrNotFound
+			}
+			if inv.Total-inv.Sold < int64(quantities[i]) {
+				return biz.InventoryNotEnoughErr
+			}
+		}
+
+		//阶段3：批量更新
+		err = m.Batchdecrease(ctx, session, productIDs, quantities)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+func (m *customInventoryModel) Batchdecrease(ctx context.Context, session sqlx.Session, productIDs []int32, quantities []int32) error {
+	// 阶段3: 批量更新
+	var updateBuilder strings.Builder
+	updateBuilder.WriteString(fmt.Sprintf("UPDATE %s SET ", m.table))
+	updateBuilder.WriteString("sold = CASE product_id ")
+
+	// 构建WHEN条件
+	whenCases := make([]string, len(productIDs))
+	for i, pid := range productIDs {
+		whenCases[i] = fmt.Sprintf("WHEN %d THEN sold + %d", pid, quantities[i])
+	}
+	updateBuilder.WriteString(strings.Join(whenCases, " "))
+	updateBuilder.WriteString(" END, total = CASE product_id ")
+
+	whenCases = whenCases[:0]
+	for i, pid := range productIDs {
+		whenCases = append(whenCases, fmt.Sprintf("WHEN %d THEN total - %d", pid, quantities[i]))
+	}
+	updateBuilder.WriteString(strings.Join(whenCases, " "))
+	updateBuilder.WriteString(" END WHERE product_id IN (?)")
+
+	// 执行更新
+	updateQuery, updateArgs, err := sqlx1.In(updateBuilder.String(), productIDs)
+	if err != nil {
+		return err
+	}
+
+	res, err := session.ExecCtx(ctx, updateQuery, updateArgs...)
+	if err != nil {
+		return biz.InventoryDecreaseFailedErr
+	}
+
+	// 验证影响行数
+	if affected, _ := res.RowsAffected(); affected != int64(len(productIDs)) {
+		return biz.InventoryDecreaseFailedErr
+	}
+
+	return nil
+}
 func (m *customInventoryModel) DecreaseInventoryAtom(ctx context.Context, productId int32, quantity int32) (int64, error) {
 	var cnt int64
 	if err := m.conn.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {

@@ -55,11 +55,10 @@ func (l *ReturnPreInventoryLogic) ReturnPreInventory(in *inventory.InventoryReq)
             return 1
         end
         
-     
         
         -- 归还库存
         for i=2, #KEYS do
-            redis.call("INCRBY", KEYS[i], tonumber(ARGV[i-1]))
+            redis.call("INCRBY", KEYS[i], tonumber(ARGV[i]))
         end
         
         -- 设置处理标记（30分钟过期）
@@ -97,7 +96,5 @@ func (l *ReturnPreInventoryLogic) ReturnPreInventory(in *inventory.InventoryReq)
 			logx.Field("result", result))
 		return nil, status.Error(codes.Internal, "系统异常")
 	}
-
-	return &inventory.InventoryResp{}, nil
 
 }
