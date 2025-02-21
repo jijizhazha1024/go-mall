@@ -24,7 +24,7 @@ func NewGetPreInventoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 }
 
 func (l *GetPreInventoryLogic) GetPreInventory(in *inventory.GetPreInventoryReq) (*inventory.GetPreInventoryResp, error) {
-	// todo: add your logic here and delete this line
+	//从缓存中查找库存
 
 	return &inventory.GetPreInventoryResp{}, nil
 }

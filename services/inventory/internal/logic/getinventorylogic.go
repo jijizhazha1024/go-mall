@@ -3,8 +3,9 @@ package logic
 import (
 	"context"
 	"errors"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"jijizhazha1024/go-mall/common/consts/code"
+
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"jijizhazha1024/go-mall/services/inventory/internal/svc"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
@@ -28,6 +29,7 @@ func NewGetInventoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetI
 
 // GetInventory 查询库存
 func (l *GetInventoryLogic) GetInventory(in *inventory.GetInventoryReq) (*inventory.GetInventoryResp, error) {
+
 	inventoryResp, err := l.svcCtx.InventoryModel.FindOne(l.ctx, int64(in.ProductId))
 	res := new(inventory.GetInventoryResp)
 	if err != nil {
