@@ -23,7 +23,7 @@ func NewUpdateOrder2PaymentSuccessLogic(ctx context.Context, svcCtx *svc.Service
 	}
 }
 
-// UpdateOrder2PaymentSuccess 支付成功时（进行修改订单状态）
+// 修改订单状态为支付成功
 func (l *UpdateOrder2PaymentSuccessLogic) UpdateOrder2PaymentSuccess(in *order.UpdateOrder2PaymentSuccessRequest) (*order.EmptyRes, error) {
 	// todo: add your logic here and delete this line
 

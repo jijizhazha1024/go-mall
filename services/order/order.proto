@@ -1,6 +1,6 @@
 syntax = "proto3";
 package order;
-option go_package="./order";
+option go_package = "./order";
 
 
 // ================== 状态枚举定义 ==================
@@ -80,16 +80,24 @@ message EmptyRes {
 }
 // ================== 服务接口定义 ==================
 service OrderService {
-  // CreateOrder 创建订单（需预先生成预订单）
+  //  CreateOrder 创建订单（需预先生成预订单）
   rpc CreateOrder(CreateOrderRequest) returns (OrderResponse);
+  //  CreateOrderRollback 补偿操作
+  rpc CreateOrderRollback(CreateOrderRequest) returns (EmptyRes);
 
-  // CancelOrder 取消订单
+  //  CancelOrder 取消订单 由用户发起
   rpc CancelOrder(CancelOrderRequest) returns (EmptyRes);
 
-  //  UpdateOrder2Payment 更新订单（支付服务回调使用）
-  rpc UpdateOrder2Payment(UpdateOrder2PaymentRequest) returns (EmptyRes);
+  //  UpdateOrder2Payment 更新订单（支付服务回调使用） 更新为支付中
+  rpc UpdateOrder2PaymentStatus(UpdateOrder2PaymentRequest) returns (EmptyRes);
+  //  UpdateOrder2PaymentStatusRollback 补偿操作 更新订单（支付服务回调使用） 创建状态
+  rpc UpdateOrder2PaymentStatusRollback(UpdateOrder2PaymentRequest) returns (EmptyRes);
+
+  //  修改订单状态为支付成功
   //  UpdateOrder2PaymentSuccess 支付成功时（进行修改订单状态）
   rpc UpdateOrder2PaymentSuccess(UpdateOrder2PaymentSuccessRequest) returns (EmptyRes);
+  //  UpdateOrder2PaymentSuccessRollback 支付失败的补充操作
+  rpc UpdateOrder2PaymentSuccessRollback(UpdateOrder2PaymentSuccessRequest) returns (EmptyRes);
 
   // GetOrder 获取订单详情
   rpc GetOrder(GetOrderRequest) returns (OrderDetailResponse);
@@ -102,6 +110,7 @@ service OrderService {
 message CreateOrderRequest {
   string pre_order_id = 1;       // 必须有效的预订单ID
   uint32 user_id = 2;            // 用户身份验证
+  string coupon_id = 3;
 }
 
 message OrderResponse {
@@ -124,7 +133,6 @@ message CancelOrderRequest {
 message UpdateOrder2PaymentRequest {
   string order_id = 1;
   int32 user_id = 2;
-  OrderStatus order_status = 3;
 }
 
 message PaymentResult {

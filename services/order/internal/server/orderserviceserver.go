@@ -28,22 +28,40 @@ func (s *OrderServiceServer) CreateOrder(ctx context.Context, in *order.CreateOr
 	return l.CreateOrder(in)
 }
 
-// CancelOrder 取消订单
+// CreateOrderRollback 补偿操作
+func (s *OrderServiceServer) CreateOrderRollback(ctx context.Context, in *order.CreateOrderRequest) (*order.EmptyRes, error) {
+	l := logic.NewCreateOrderRollbackLogic(ctx, s.svcCtx)
+	return l.CreateOrderRollback(in)
+}
+
+// CancelOrder 取消订单 由用户发起
 func (s *OrderServiceServer) CancelOrder(ctx context.Context, in *order.CancelOrderRequest) (*order.EmptyRes, error) {
 	l := logic.NewCancelOrderLogic(ctx, s.svcCtx)
 	return l.CancelOrder(in)
 }
 
-// UpdateOrder2Payment 更新订单（支付服务回调使用）
-func (s *OrderServiceServer) UpdateOrder2Payment(ctx context.Context, in *order.UpdateOrder2PaymentRequest) (*order.EmptyRes, error) {
-	l := logic.NewUpdateOrder2PaymentLogic(ctx, s.svcCtx)
-	return l.UpdateOrder2Payment(in)
+// UpdateOrder2Payment 更新订单（支付服务回调使用） 更新为支付中
+func (s *OrderServiceServer) UpdateOrder2PaymentStatus(ctx context.Context, in *order.UpdateOrder2PaymentRequest) (*order.EmptyRes, error) {
+	l := logic.NewUpdateOrder2PaymentStatusLogic(ctx, s.svcCtx)
+	return l.UpdateOrder2PaymentStatus(in)
 }
 
-// UpdateOrder2PaymentSuccess 支付成功时（进行修改订单状态）
+// UpdateOrder2PaymentStatusRollback 补偿操作 更新订单（支付服务回调使用） 创建状态
+func (s *OrderServiceServer) UpdateOrder2PaymentStatusRollback(ctx context.Context, in *order.UpdateOrder2PaymentRequest) (*order.EmptyRes, error) {
+	l := logic.NewUpdateOrder2PaymentStatusRollbackLogic(ctx, s.svcCtx)
+	return l.UpdateOrder2PaymentStatusRollback(in)
+}
+
+// 修改订单状态为支付成功
 func (s *OrderServiceServer) UpdateOrder2PaymentSuccess(ctx context.Context, in *order.UpdateOrder2PaymentSuccessRequest) (*order.EmptyRes, error) {
 	l := logic.NewUpdateOrder2PaymentSuccessLogic(ctx, s.svcCtx)
 	return l.UpdateOrder2PaymentSuccess(in)
+}
+
+// UpdateOrder2PaymentSuccessRollback 支付失败的补充操作
+func (s *OrderServiceServer) UpdateOrder2PaymentSuccessRollback(ctx context.Context, in *order.UpdateOrder2PaymentSuccessRequest) (*order.EmptyRes, error) {
+	l := logic.NewUpdateOrder2PaymentSuccessRollbackLogic(ctx, s.svcCtx)
+	return l.UpdateOrder2PaymentSuccessRollback(in)
 }
 
 // GetOrder 获取订单详情
