@@ -3,12 +3,9 @@ package logic
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/dal/model/coupons/coupon_usage"
-	"jijizhazha1024/go-mall/services/coupons/internal/lua"
 	"time"
 
 	"jijizhazha1024/go-mall/services/coupons/coupons"
@@ -53,7 +50,7 @@ func (l *UseCouponLogic) UseCoupon(in *coupons.UseCouponReq) (*coupons.EmptyResp
 			return err
 		}
 		// 2. 状态校验
-		if coupons.CouponUsageStatus(status.Status) != coupons.CouponUsageStatus_COUPON_USAGE_STATUS_LOCKED {
+		if coupons.CouponStatus(status.Status) != coupons.CouponStatus_COUPON_STATUS_LOCKED {
 			res.StatusCode = code.CouponStatusInvalid
 			res.StatusMsg = code.CouponStatusInvalidMsg
 			l.Logger.Infow("coupon status invalid", logx.Field("user_id", in.UserId),
@@ -80,7 +77,7 @@ func (l *UseCouponLogic) UseCoupon(in *coupons.UseCouponReq) (*coupons.EmptyResp
 		// --------------- update and record ---------------
 		// update
 		if err := l.svcCtx.UserCouponsModel.WithSession(session).UpdateStatusOrderById(ctx,
-			in.OrderId, int(status.ID), coupons.CouponUsageStatus_COUPON_USAGE_STATUS_USED); err != nil {
+			in.OrderId, int(status.ID), coupons.CouponStatus_COUPON_STATUS_USED); err != nil {
 			l.Logger.Errorw("update user coupon status error", logx.Field("err", err),
 				logx.Field("user_id", in.UserId), logx.Field("coupon_id", in.CouponId),
 				logx.Field("order_id", in.OrderId), logx.Field("pre_order_id", in.PreOrderId))
@@ -91,7 +88,7 @@ func (l *UseCouponLogic) UseCoupon(in *coupons.UseCouponReq) (*coupons.EmptyResp
 			OrderId:        in.OrderId,
 			CouponId:       in.CouponId,
 			UserId:         uint64(in.UserId),
-			CouponType:     int64(tp),
+			CouponType:     tp,
 			DiscountAmount: in.DiscountAmount,
 			OriginValue:    in.OriginAmount,
 			AppliedAt:      time.Now(),
@@ -109,31 +106,7 @@ func (l *UseCouponLogic) UseCoupon(in *coupons.UseCouponReq) (*coupons.EmptyResp
 		return nil, err
 	}
 
-	// 尝试删除缓存记录，尝试去清理缓存，即使失败缓存也是存在过期的，最终校验还是需要通过db
-	if err := l.tryClearCatch(in.UserId, in.CouponId, in.PreOrderId); err != nil {
-		l.Logger.Errorw("try clear catch failed", logx.Field("user_id", in.UserId), logx.Field("coupon_id", in.CouponId),
-			logx.Field("order_id", in.OrderId), logx.Field("pre_order_id", in.PreOrderId), logx.Field("err", err))
-	}
 	l.Logger.Infow("use coupon success", logx.Field("user_id", in.UserId), logx.Field("coupon_id", in.CouponId),
 		logx.Field("order_id", in.OrderId), logx.Field("pre_order_id", in.PreOrderId))
 	return res, nil
-}
-func (l *UseCouponLogic) tryClearCatch(uid int32, cid, preOrderID string) error {
-	// 构造Redis参数
-	keys := []string{
-		fmt.Sprintf(biz.UserCouponKey, uid, cid),
-		fmt.Sprintf(biz.PreOrderCouponKey, preOrderID),
-	}
-	args := []interface{}{uid}
-	// 执行脚本
-	result, err := l.svcCtx.Rdb.EvalCtx(l.ctx, lua.UnlockCouponScript, keys, args)
-	if err != nil {
-		return biz.ReleaseCouponsErr
-	}
-	// 处理结果
-	resultInt, ok := result.(int64)
-	if !ok || resultInt == 1 {
-		return biz.ReleaseCouponsErr
-	}
-	return nil
 }

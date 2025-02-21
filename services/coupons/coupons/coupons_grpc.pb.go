@@ -54,7 +54,7 @@ type CouponsClient interface {
 	LockCoupon(ctx context.Context, in *LockCouponReq, opts ...grpc.CallOption) (*EmptyResp, error)
 	// 释放优惠券（订单取消/超时释放）
 	ReleaseCoupon(ctx context.Context, in *ReleaseCouponReq, opts ...grpc.CallOption) (*EmptyResp, error)
-	// 使用优惠券（支付成功确认）
+	// 使用优惠券（支付成功确认后）
 	UseCoupon(ctx context.Context, in *UseCouponReq, opts ...grpc.CallOption) (*EmptyResp, error)
 }
 
@@ -180,7 +180,7 @@ type CouponsServer interface {
 	LockCoupon(context.Context, *LockCouponReq) (*EmptyResp, error)
 	// 释放优惠券（订单取消/超时释放）
 	ReleaseCoupon(context.Context, *ReleaseCouponReq) (*EmptyResp, error)
-	// 使用优惠券（支付成功确认）
+	// 使用优惠券（支付成功确认后）
 	UseCoupon(context.Context, *UseCouponReq) (*EmptyResp, error)
 	mustEmbedUnimplementedCouponsServer()
 }
