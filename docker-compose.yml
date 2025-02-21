@@ -29,7 +29,7 @@ services:
     command: ./user-service  # 启动用户服务的二进制文件
     ports:
       - "8001:8101"  # api 端口
-      - "10001:11 001"  # rpc 端口
+      - "10001:11001"  # rpc 端口
     volumes:
       - ./logs/apis:/app/apis/logs
     env_file:
