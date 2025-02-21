@@ -20,7 +20,9 @@ type (
 		CheckUserCouponExistWithLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (bool, error)
 		GetUserCouponByUserIdCouponIdWithLock(ctx context.Context, session sqlx.Session, userId uint64, couponId string) (*UserCoupons, error)
 		GetStatusByUserIdCouponId(ctx context.Context, userid int32, couponId string) (*Status, error)
-		UpdateStatusOrderById(ctx context.Context, orderId string, id int, status coupons.CouponUsageStatus) error
+		UpdateStatusOrderById(ctx context.Context, orderId string, id int, status coupons.CouponStatus) error
+		LockUserCoupon(ctx context.Context, session sqlx.Session, uCouponID uint64) error
+		CheckUserCouponStatus(ctx context.Context, session sqlx.Session, u uint64, id string) (int64, error)
 	}
 
 	customUserCouponsModel struct {
@@ -28,7 +30,27 @@ type (
 	}
 )
 
-func (m *customUserCouponsModel) UpdateStatusOrderById(ctx context.Context, orderId string, id int, used coupons.CouponUsageStatus) error {
+func (m *customUserCouponsModel) CheckUserCouponStatus(ctx context.Context, session sqlx.Session, u uint64, id string) (int64, error) {
+	var status int64
+	query := fmt.Sprintf("select `status` from %s where `user_id` = ? and `coupon_id` = ? limit 1", m.table)
+	err := session.QueryRowCtx(ctx, &status, query, u, id)
+	switch {
+	case err == nil:
+		return status, nil
+	case errors.Is(err, sqlx.ErrNotFound):
+		return 0, sqlx.ErrNotFound
+	default:
+		return 0, err
+	}
+}
+
+func (m *customUserCouponsModel) LockUserCoupon(ctx context.Context, session sqlx.Session, uCouponID uint64) error {
+	query := fmt.Sprintf("update %s set `status` = ? where `id` = ?", m.table)
+	_, err := session.ExecCtx(ctx, query, coupons.CouponStatus_COUPON_STATUS_LOCKED, uCouponID)
+	return err
+}
+
+func (m *customUserCouponsModel) UpdateStatusOrderById(ctx context.Context, orderId string, id int, used coupons.CouponStatus) error {
 	query := fmt.Sprintf("update %s set `status` = ?, `order_id` = ?,used_at = now() where `id` = ?", m.table)
 	_, err := m.conn.ExecCtx(ctx, query, used, orderId, id)
 	return err
