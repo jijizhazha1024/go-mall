@@ -2,6 +2,12 @@ package logic
 
 import (
 	"context"
+	"errors"
+
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"jijizhazha1024/go-mall/common/consts/code"
 
 	"jijizhazha1024/go-mall/services/order/internal/svc"
 	"jijizhazha1024/go-mall/services/order/order"
@@ -23,9 +29,58 @@ func NewUpdateOrder2PaymentStatusRollbackLogic(ctx context.Context, svcCtx *svc.
 	}
 }
 
-// UpdateOrder2PaymentStatusRollback 补偿操作 更新订单（支付服务回调使用） 创建状态
+// UpdateOrder2PaymentStatusRollback 补偿操作：回滚订单状态到CREATED
 func (l *UpdateOrder2PaymentStatusRollbackLogic) UpdateOrder2PaymentStatusRollback(in *order.UpdateOrder2PaymentRequest) (*order.EmptyRes, error) {
-	// todo: add your logic here and delete this line
+	res := &order.EmptyRes{}
 
+	if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
+		// --------------- 校验当前状态 ---------------
+		currentStatus, err := l.svcCtx.OrderModel.WithSession(session).
+			GetOrderStatusByOrderIDAndUserIDWithLock(ctx, in.OrderId, in.UserId)
+		if err != nil {
+			if errors.Is(err, sqlx.ErrNotFound) {
+				res.StatusCode = code.OrderNotExist
+				res.StatusMsg = code.OrderNotExistMsg
+				l.Logger.Infow("order not found",
+					logx.Field("order_id", in.OrderId),
+					logx.Field("user_id", in.UserId))
+				return nil
+			}
+			return err
+		}
+
+		// 只允许回滚PENDING_PAYMENT状态的订单
+		if order.OrderStatus(currentStatus) != order.OrderStatus_ORDER_STATUS_PENDING_PAYMENT {
+			res.StatusCode = code.OrderStatusInvalid
+			res.StatusMsg = code.OrderStatusInvalidMsg
+			l.Logger.Infow("invalid status for rollback",
+				logx.Field("current_status", currentStatus),
+				logx.Field("order_id", in.OrderId))
+			return nil
+		}
+
+		// --------------- 执行状态回滚 ---------------
+		if err := l.svcCtx.OrderModel.WithSession(session).
+			UpdateOrderStatusByOrderIDAndUserID(ctx,
+				in.OrderId,
+				in.UserId,
+				order.OrderStatus_ORDER_STATUS_CREATED); err != nil {
+			l.Logger.Errorw("rollback order status failed",
+				logx.Field("error", err),
+				logx.Field("order_id", in.OrderId))
+			return err
+		}
+
+		// --------------- 记录补偿日志（可选）---------------
+		return nil
+	}); err != nil {
+		l.Logger.Errorw("transaction failed",
+			logx.Field("error", err),
+			logx.Field("order_id", in.OrderId))
+		return nil, status.Error(codes.Internal, "补偿操作失败")
+	}
+	if res.StatusCode != code.Success {
+		return nil, status.Error(codes.Aborted, res.StatusMsg)
+	}
 	return &order.EmptyRes{}, nil
 }
