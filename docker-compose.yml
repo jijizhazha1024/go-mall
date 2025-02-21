@@ -1,65 +1,88 @@
 version: '3.8'
 
 services:
-  # APIs 服务
-  user-api:
+  # 认证相关服务
+  auth-service:
     image: go-mall:latest
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: go-mall-user-api
-    working_dir: /project/go-mall/apis
-    command: ./apis
+    container_name: go-mall-auth-service
+    working_dir: /app/apis
+    command: ./auth-service  # 启动认证服务的二进制文件
     ports:
-      - "8001:8001"  # user-api 端口
+      
+      - "10000:11000"  # rpc 端口
     volumes:
-      - ./logs/apis:/project/go-mall/apis/logs
+      - ./logs/apis:/app/apis/logs
     env_file:
       - .env
     networks:
       - go-mall
     restart: always
 
-  carts-api:
+  # 用户服务
+  user-service:
     image: go-mall:latest
-    container_name: go-mall-carts-api
-    working_dir: /project/go-mall/apis
-    command: ./apis
+    container_name: go-mall-user-service
+    working_dir: /app/apis
+    command: ./user-service  # 启动用户服务的二进制文件
     ports:
-      - "8003:8003"  # carts-api 端口
+      - "8001:8101"  # api 端口
+      - "10001:11 001"  # rpc 端口
     volumes:
-      - ./logs/apis:/project/go-mall/apis/logs
+      - ./logs/apis:/app/apis/logs
     env_file:
       - .env
     networks:
       - go-mall
     restart: always
 
-  # Services 服务
-  auths-service:
+  # 商品服务
+  product-service:
     image: go-mall:latest
-    container_name: go-mall-auths-service
-    working_dir: /project/go-mall/services
-    command: ./services
+    container_name: go-mall-product-service
+    working_dir: /app/apis
+    command: ./product-service  # 启动商品服务的二进制文件
     ports:
-      - "10000:10000"  # auths-service 端口
+      - "8002:8102"  # api 端口
+      - "10002:10002"  # rpc 端口
     volumes:
-      - ./logs/services:/project/go-mall/services/logs
+      - ./logs/apis:/app/apis/logs
     env_file:
       - .env
     networks:
       - go-mall
     restart: always
 
-  carts-service:
+  # 购物车服务
+  cart-service:
     image: go-mall:latest
-    container_name: go-mall-carts-service
-    working_dir: /project/go-mall/services
-    command: ./services
+    container_name: go-mall-cart-service
+    working_dir: /app/apis
+    command: ./cart-service  # 启动购物车服务的二进制文件
     ports:
-      - "10003:10003"  # carts-service 端口
+      - "800:8103"  # api 端口
+      - "10003:11003"  # rpc 端口
     volumes:
-      - ./logs/services:/project/go-mall/services/logs
+      - ./logs/apis:/app/apis/logs
+    env_file:
+      - .env
+    networks:
+      - go-mall
+    restart: always
+
+  # 订单服务
+  order-service:
+    image: go-mall:latest
+    container_name: go-mall-order-service
+    working_dir: /app/apis
+    command: ./order-service  # 启动订单服务的二进制文件
+    ports:
+      - "8004:8104"  # api 端口
+      - "10004:11004"  # rpc 端口
+    volumes:
+      - ./logs/apis:/app/apis/logs
     env_file:
       - .env
     networks:
@@ -68,4 +91,4 @@ services:
 
 networks:
   go-mall:
-    external: true 
+    external: true
