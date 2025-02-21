@@ -70,7 +70,7 @@ func (s *CouponsServer) ReleaseCoupon(ctx context.Context, in *coupons.ReleaseCo
 	return l.ReleaseCoupon(in)
 }
 
-// 使用优惠券（支付成功确认）
+// 使用优惠券（支付成功确认后）
 func (s *CouponsServer) UseCoupon(ctx context.Context, in *coupons.UseCouponReq) (*coupons.EmptyResp, error) {
 	l := logic.NewUseCouponLogic(ctx, s.svcCtx)
 	return l.UseCoupon(in)

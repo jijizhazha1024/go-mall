@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"errors"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"google.golang.org/grpc/codes"
@@ -41,6 +42,11 @@ func (l *LockCouponLogic) LockCoupon(in *coupons.LockCouponReq) (*coupons.EmptyR
 		// 1.检查优惠券状态
 		expired, err := l.svcCtx.CouponsModel.CheckExpirationAndStatus(l.ctx, session, in.UserCouponId)
 		if err != nil {
+			if errors.Is(err, sqlx.ErrNotFound) {
+				res.StatusCode = code.CouponsNotExist
+				res.StatusMsg = code.CouponsNotExistMsg
+				return nil
+			}
 			logx.Errorw("check coupon status error", logx.Field("err", err))
 			return err
 		}
@@ -49,18 +55,25 @@ func (l *LockCouponLogic) LockCoupon(in *coupons.LockCouponReq) (*coupons.EmptyR
 			res.StatusMsg = code.CouponsExpiredMsg
 			return nil
 		}
-		// 2. 用户是否有该优惠券
-		exist, err := l.svcCtx.UserCouponsModel.CheckUserCouponExistWithLock(l.ctx, session, uint64(in.UserId), in.UserCouponId)
+		// 2. 校验用户优惠券状态
+		userCoupon, err := l.svcCtx.UserCouponsModel.GetUserCouponByUserIdCouponIdWithLock(l.ctx, session, uint64(in.UserId), in.UserCouponId)
 		if err != nil {
-			logx.Errorw("check user coupon exist error", logx.Field("err", err))
+			if errors.Is(err, sqlx.ErrNotFound) {
+				res.StatusCode = code.CouponsNotExist
+				res.StatusMsg = code.CouponsNotExistMsg
+				return nil
+			}
+			logx.Errorw("check user coupon status error", logx.Field("err", err))
 			return err
 		}
-		if !exist {
-			res.StatusCode = code.UserNotHaveCoupons
-			res.StatusMsg = code.UserNotHaveCouponsMsg
+		// 校验优惠券状态是否可用
+		if coupons.CouponStatus(userCoupon.Status) != coupons.CouponStatus_COUPON_STATUS_AVAILABLE {
+			res.StatusCode = code.CouponStatusInvalid
+			res.StatusMsg = code.CouponStatusInvalidMsg
 			return nil
 		}
-		if err := l.svcCtx.UserCouponsModel.LockUserCoupon(l.ctx, session, uint64(in.UserId), in.UserCouponId); err != nil {
+
+		if err := l.svcCtx.UserCouponsModel.LockUserCoupon(l.ctx, session, userCoupon.Id); err != nil {
 			logx.Errorw("update coupon status error", logx.Field("err", err))
 			return err
 		}

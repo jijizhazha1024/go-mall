@@ -50,7 +50,7 @@ func (l *UseCouponLogic) UseCoupon(in *coupons.UseCouponReq) (*coupons.EmptyResp
 			return err
 		}
 		// 2. 状态校验
-		if coupons.CouponUsageStatus(status.Status) != coupons.CouponUsageStatus_COUPON_USAGE_STATUS_LOCKED {
+		if coupons.CouponStatus(status.Status) != coupons.CouponStatus_COUPON_STATUS_LOCKED {
 			res.StatusCode = code.CouponStatusInvalid
 			res.StatusMsg = code.CouponStatusInvalidMsg
 			l.Logger.Infow("coupon status invalid", logx.Field("user_id", in.UserId),
@@ -77,7 +77,7 @@ func (l *UseCouponLogic) UseCoupon(in *coupons.UseCouponReq) (*coupons.EmptyResp
 		// --------------- update and record ---------------
 		// update
 		if err := l.svcCtx.UserCouponsModel.WithSession(session).UpdateStatusOrderById(ctx,
-			in.OrderId, int(status.ID), coupons.CouponUsageStatus_COUPON_USAGE_STATUS_USED); err != nil {
+			in.OrderId, int(status.ID), coupons.CouponStatus_COUPON_STATUS_USED); err != nil {
 			l.Logger.Errorw("update user coupon status error", logx.Field("err", err),
 				logx.Field("user_id", in.UserId), logx.Field("coupon_id", in.CouponId),
 				logx.Field("order_id", in.OrderId), logx.Field("pre_order_id", in.PreOrderId))

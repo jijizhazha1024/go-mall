@@ -28,11 +28,14 @@ func NewReleaseCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Rel
 
 // ReleaseCoupon 释放优惠券（Saga补偿操作）
 func (l *ReleaseCouponLogic) ReleaseCoupon(in *coupons.ReleaseCouponReq) (*coupons.EmptyResp, error) {
-	// --------------- 参数校验 ---------------
-	if in.UserId <= 0 || len(in.UserCouponId) != 36 || len(in.PreOrderId) != 36 {
-		return nil, status.Error(codes.Aborted, "参数格式异常") // 触发补偿
-	}
+
 	res := &coupons.EmptyResp{}
+	// --------------- check ---------------
+	if in.UserId == 0 || len(in.UserCouponId) == 0 || len(in.PreOrderId) == 0 {
+		res.StatusCode = code.NotWithParam
+		res.StatusMsg = code.NotWithParamMsg
+		return nil, status.Error(codes.Aborted, code.NotWithParamMsg)
+	}
 	// --------------- 事务操作 ---------------
 	if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
 		// 1. 检查优惠券锁定状态与订单匹配
@@ -43,7 +46,7 @@ func (l *ReleaseCouponLogic) ReleaseCoupon(in *coupons.ReleaseCouponReq) (*coupo
 		}
 
 		// 2. 状态校验（幂等性保障）
-		if coupons.CouponUsageStatus(state) != coupons.CouponUsageStatus_COUPON_USAGE_STATUS_LOCKED {
+		if coupons.CouponStatus(state) != coupons.CouponStatus_COUPON_STATUS_LOCKED {
 			l.Logger.Infow("coupon status is not locked", logx.Field("userId", in.UserId), logx.Field("couponId", in.UserCouponId))
 			res.StatusCode = code.CouponStatusInvalid
 			res.StatusMsg = code.CouponStatusInvalidMsg
@@ -55,7 +58,7 @@ func (l *ReleaseCouponLogic) ReleaseCoupon(in *coupons.ReleaseCouponReq) (*coupo
 			l.ctx,
 			"", // 清空ID
 			int(in.UserId),
-			coupons.CouponUsageStatus_COUPON_USAGE_STATUS_UNUSED,
+			coupons.CouponStatus_COUPON_STATUS_AVAILABLE,
 		); err != nil {
 			l.Logger.Errorw("update coupon status failed", logx.Field("error", err))
 			return err
