@@ -21,12 +21,28 @@ type (
 		UpdateOrder2Payment(context.Context, string, int32, *order.PaymentResult, order.OrderStatus, order.PaymentStatus) error
 		UpdateOrder2PaymentRollback(context.Context, string, int32) error
 		UpdateOrderStatusByOrderIDAndUserID(context.Context, string, int32, order.OrderStatus, order.PaymentStatus) error
+		CheckOrderExistByPreOrderId(context.Context, string, int32) (bool, error)
 	}
 
 	customOrdersModel struct {
 		*defaultOrdersModel
 	}
 )
+
+func (m *customOrdersModel) CheckOrderExistByPreOrderId(ctx context.Context, preOrderId string, userID int32) (bool, error) {
+	query := fmt.Sprintf("select count(*) from %s where `pre_order_id` = ? and `user_id` = ? limit 1 for share", m.table)
+	var cnt int8
+	err := m.conn.QueryRowCtx(ctx, &cnt, query, preOrderId, userID)
+	switch {
+	case err == nil:
+		return cnt > 0, nil
+	case errors.Is(err, sqlx.ErrNotFound):
+		return false, nil
+	default:
+		return false, err
+	}
+
+}
 
 func (m *customOrdersModel) UpdateOrder2Payment(ctx context.Context, orderID string, userId int32,
 	paymentResult *order.PaymentResult, orderStatus order.OrderStatus, paymentStatus order.PaymentStatus) error {
