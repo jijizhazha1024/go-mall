@@ -30,7 +30,7 @@ func NewReturnPreInventoryLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 func (l *ReturnPreInventoryLogic) ReturnPreInventory(in *inventory.InventoryReq) (*inventory.InventoryResp, error) {
 
 	// 构建幂等锁Key（用户ID+预订单ID）
-	lockKey := fmt.Sprintf("inventory:return:lock:%d:%s", in.UserId, in.PreOrderId)
+	lockKey := fmt.Sprintf("inventory:deduct:lock:%d:%s", in.UserId, in.PreOrderId)
 
 	// 准备Lua脚本参数
 	keys := []string{lockKey}
@@ -69,7 +69,7 @@ func (l *ReturnPreInventoryLogic) ReturnPreInventory(in *inventory.InventoryReq)
 	case 0: // 归还成功
 		return &inventory.InventoryResp{}, nil
 	case 1: // 已处理过
-		return &inventory.InventoryResp{}, status.Error(codes.AlreadyExists, "订单已处理")
+		return &inventory.InventoryResp{}, status.Error(codes.AlreadyExists, "订单没有进行预扣除")
 
 	default:
 		l.Logger.Errorw("未知返回码",

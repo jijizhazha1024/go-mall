@@ -37,30 +37,9 @@ type (
 
 func (m *customInventoryModel) BatchReturnInventoryAtom(ctx context.Context, productIDs []int32, quantities []int32) error {
 
-	// 参数校验
-	if len(productIDs) != len(quantities) {
-		return errors.New("productIDs与quantities长度不一致")
-	}
-
 	err := m.conn.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
-		// 阶段1: 批量锁定库存记录
-		query := fmt.Sprintf(`
-            SELECT product_id, total, sold 
-            FROM %s 
-            WHERE product_id IN (?)
-            FOR UPDATE  -- 行级锁
-        `, m.table)
-		query, args, err := sqlx1.In(query, productIDs)
-		if err != nil {
-			return err
-		}
 
-		var inventories []*Inventory
-		if err := session.QueryRowsCtx(ctx, &inventories, query, args...); err != nil {
-			return err
-		}
-		// 批量归还
-		err = m.BatchReturn(ctx, session, productIDs, quantities)
+		err := m.BatchReturn(ctx, session, productIDs, quantities)
 		if err != nil {
 			return err
 		}
@@ -170,7 +149,7 @@ func (m *customInventoryModel) BatchDecreaseInventoryAtom(ctx context.Context, p
             SELECT product_id, total, sold 
             FROM %s 
             WHERE product_id IN (?)
-            FOR UPDATE  -- 行级锁
+            FOR SHARE  -- 行级锁
         `, m.table)
 
 		query, args, err := sqlx1.In(query, productIDs)
