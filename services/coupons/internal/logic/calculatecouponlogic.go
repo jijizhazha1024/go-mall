@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/coupons/coupons"
 	"jijizhazha1024/go-mall/services/coupons/internal/svc"
@@ -75,7 +76,7 @@ func (l *CalculateCouponLogic) CalculateCoupon(in *coupons.CalculateCouponReq) (
 			return res, nil
 		}
 		discountAmount = one.Value
-		res.CouponType = "满减券"
+		res.CouponType = biz.CouponTypeFullReduction
 	// 折扣券
 	case coupons.CouponType_COUPON_TYPE_DISCOUNT:
 		// 优惠券无效
@@ -85,15 +86,15 @@ func (l *CalculateCouponLogic) CalculateCoupon(in *coupons.CalculateCouponReq) (
 			return res, nil
 		}
 		discountAmount = totalPrice * (100 - one.Value) / 100
-		res.CouponType = "折扣券"
+		res.CouponType = biz.CouponTypeDiscount
 	//	立减券
 	case coupons.CouponType_COUPON_TYPE_FIXED_AMOUNT:
 		discountAmount = one.Value
-		res.CouponType = "立减券"
+		res.CouponType = biz.CouponTypeNoThreshold
 	}
-	res.DiscountAmount = convertToYuan(discountAmount)
-	res.FinalAmount = convertToYuan(totalPrice - discountAmount)
-	res.OriginAmount = convertToYuan(totalPrice)
+	res.DiscountAmount = discountAmount
+	res.FinalAmount = totalPrice - discountAmount
+	res.OriginAmount = totalPrice
 
 	// 用户是否有改优惠券
 	return res, nil
