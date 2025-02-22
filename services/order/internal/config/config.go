@@ -12,4 +12,5 @@ type Config struct {
 	Consul      consul.Conf
 	CheckoutRpc zrpc.RpcClientConf
 	CouponRpc   zrpc.RpcClientConf
+	UserRpc     zrpc.RpcClientConf
 }

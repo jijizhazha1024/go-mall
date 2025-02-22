@@ -111,7 +111,8 @@ message CreateOrderRequest {
   string pre_order_id = 1;       // 必须有效的预订单ID
   uint32 user_id = 2;            // 用户身份验证
   string coupon_id = 3;
-  PaymentMethod payment_method = 4;
+  int32 address_id = 4;
+  PaymentMethod payment_method = 5;
 }
 
 message OrderResponse {

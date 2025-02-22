@@ -9,7 +9,7 @@ type (
 	// and implement the added methods in customOrderItemsModel.
 	OrderItemsModel interface {
 		orderItemsModel
-		withSession(session sqlx.Session) OrderItemsModel
+		WithSession(session sqlx.Session) OrderItemsModel
 	}
 
 	customOrderItemsModel struct {
@@ -24,6 +24,6 @@ func NewOrderItemsModel(conn sqlx.SqlConn) OrderItemsModel {
 	}
 }
 
-func (m *customOrderItemsModel) withSession(session sqlx.Session) OrderItemsModel {
+func (m *customOrderItemsModel) WithSession(session sqlx.Session) OrderItemsModel {
 	return NewOrderItemsModel(sqlx.NewSqlConnFromSession(session))
 }
