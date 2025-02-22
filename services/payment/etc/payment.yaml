@@ -1,0 +1,37 @@
+Name: payment.rpc
+ListenOn: 0.0.0.0:10006
+Mode: dev
+
+# 服务发现
+Consul:
+  Host: 124.71.72.124:8500
+  Key: payment.rpc
+  Meta:
+    Protocol: grpc
+
+Telemetry:
+  Name: payment.rpc
+  Endpoint: http://124.71.72.124:14268/api/traces
+  Batcher: jaeger
+  Sampler: 1.0
+
+Log:
+  ServiceName: payment-rpc
+  Mode: console
+  Encoding: json
+  Path: ./logs/payment-rpc
+
+MysqlConfig:
+  datasource: jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local
+
+RedisConf:
+  Host: 124.71.72.124:6379
+  Pass: jjzzchtt
+  Tls: false
+
+Alipay:
+  AppId: 9021000144642851
+  PrivateKey: your-private-key
+  AlipayPublicKey: alipay-public-key
+  NotifyURL:
+  ReturnURL:

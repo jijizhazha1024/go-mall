@@ -52,17 +52,19 @@ func (m *customInventoryModel) ReturnInventory(ctx context.Context, productId in
 }
 
 func (m *customInventoryModel) UpdateOrCreate(ctx context.Context, inventory Inventory) error {
-	var cnt int64
-	query := fmt.Sprintf("select count(*) from %s where `product_id` = ?", m.table)
-	err := m.conn.QueryRowCtx(ctx, &cnt, query, inventory.ProductId)
+	var exists bool
+	query := fmt.Sprintf("select exists(select 1 from %s where `product_id` = ?)", m.table)
+	err := m.conn.QueryRowCtx(ctx, &exists, query, inventory.ProductId)
 	if err != nil {
-		if errors.Is(err, sqlx.ErrNotFound) {
-			_, err := m.Insert(ctx, &inventory)
-			if err != nil {
-				return err
-			}
-		}
 		return err
+	}
+
+	if !exists {
+		_, err := m.Insert(ctx, &inventory)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
 
 	return m.Update(ctx, &inventory)
