@@ -33,7 +33,7 @@ func (l *UpdateOrder2PaymentStatusLogic) UpdateOrder2PaymentStatus(in *order.Upd
 	res := &order.EmptyRes{}
 	if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
 		// --------------- 校验订单状态  ---------------
-		s, err := l.svcCtx.OrderModel.WithSession(session).GetOrderStatusByOrderIDAndUserIDWithLock(ctx, in.OrderId, in.UserId)
+		orderRes, err := l.svcCtx.OrderModel.WithSession(session).GetOrderByOrderIDAndUserIDWithLock(ctx, in.OrderId, in.UserId)
 		if err != nil {
 			if errors.Is(err, sqlx.ErrNotFound) {
 				res.StatusCode = code.OrderNotExist
@@ -41,17 +41,22 @@ func (l *UpdateOrder2PaymentStatusLogic) UpdateOrder2PaymentStatus(in *order.Upd
 				l.Logger.Infow("order not found", logx.Field("order_id", in.OrderId), logx.Field("user_id", in.UserId))
 				return nil
 			}
+			l.Logger.Errorw("get order status error", logx.Field("err", err),
+				logx.Field("order_id", in.OrderId), logx.Field("user_id", in.UserId))
 			return err
 		}
-		if order.OrderStatus(s) != order.OrderStatus_ORDER_STATUS_CREATED {
+		if order.OrderStatus(orderRes.OrderStatus) != order.OrderStatus_ORDER_STATUS_CREATED ||
+			order.PaymentStatus(orderRes.PaymentStatus) != order.PaymentStatus_PAYMENT_STATUS_NOT_PAID {
 			res.StatusCode = code.OrderStatusInvalid
 			res.StatusMsg = code.OrderStatusInvalidMsg
-			l.Logger.Infow("order status error", logx.Field("order_id", in.OrderId), logx.Field("user_id", in.UserId), logx.Field("order_status", s))
+			l.Logger.Infow("order status error", logx.Field("order_id", in.OrderId),
+				logx.Field("user_id", in.UserId), logx.Field("order_status", orderRes.OrderStatus),
+				logx.Field("payment_status", orderRes.PaymentStatus))
 			return nil
 		}
-		// 修改为待支付
+		// 修改为订单和支付为待支付
 		if err := l.svcCtx.OrderModel.WithSession(session).UpdateOrderStatusByOrderIDAndUserID(ctx,
-			in.OrderId, in.UserId, order.OrderStatus_ORDER_STATUS_PENDING_PAYMENT); err != nil {
+			in.OrderId, in.UserId, order.OrderStatus_ORDER_STATUS_PENDING_PAYMENT, order.PaymentStatus_PAYMENT_STATUS_PAYING); err != nil {
 			l.Logger.Errorw("update order status error", logx.Field("err", err),
 				logx.Field("order_id", in.OrderId), logx.Field("user_id", in.UserId))
 			return err
@@ -63,6 +68,8 @@ func (l *UpdateOrder2PaymentStatusLogic) UpdateOrder2PaymentStatus(in *order.Upd
 		return nil, status.Error(codes.Internal, "更新订单状态失败")
 	}
 	if res.StatusCode != code.Success {
+		l.Logger.Infow("UpdateOrder2PaymentStatus process aborted",
+			logx.Field("order_id", in.OrderId), logx.Field("user_id", in.UserId))
 
 		return nil, status.Error(codes.Aborted, res.StatusMsg)
 	}

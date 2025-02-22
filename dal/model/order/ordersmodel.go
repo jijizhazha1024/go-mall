@@ -17,7 +17,10 @@ type (
 		ordersModel
 		WithSession(session sqlx.Session) OrdersModel
 		GetOrderStatusByOrderIDAndUserIDWithLock(ctx context.Context, orderId string, userId int32) (int64, error)
-		UpdateOrderStatusByOrderIDAndUserID(ctx context.Context, orderId string, userId int32, payment order.OrderStatus) error
+		GetOrderByOrderIDAndUserIDWithLock(ctx context.Context, orderId string, userId int32) (*Orders, error)
+		UpdateOrder2Payment(context.Context, string, int32, *order.PaymentResult, order.OrderStatus, order.PaymentStatus) error
+		UpdateOrder2PaymentRollback(context.Context, string, int32) error
+		UpdateOrderStatusByOrderIDAndUserID(context.Context, string, int32, order.OrderStatus, order.PaymentStatus) error
 	}
 
 	customOrdersModel struct {
@@ -25,9 +28,32 @@ type (
 	}
 )
 
-func (m *customOrdersModel) UpdateOrderStatusByOrderIDAndUserID(ctx context.Context, orderId string, userId int32, payment order.OrderStatus) error {
-	query := fmt.Sprintf("update %s set `order_status` = ? where `order_id` = ? and `user_id` = ?", m.table)
-	_, err := m.conn.ExecCtx(ctx, query, payment, orderId, userId)
+func (m *customOrdersModel) UpdateOrder2Payment(ctx context.Context, orderID string, userId int32,
+	paymentResult *order.PaymentResult, orderStatus order.OrderStatus, paymentStatus order.PaymentStatus) error {
+	query := fmt.Sprintf("update %s set `order_status` = ? , `payment_status` = ? ,`transaction_id` = ?, `paid_amount` = ?, `paid_at` = ? where `order_id` = ? and `user_id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, orderStatus,
+		paymentStatus,
+		paymentResult.TransactionId, paymentResult.PaidAmount,
+		paymentResult.PaidAt, orderID, userId)
+	return err
+}
+func (m *customOrdersModel) UpdateOrder2PaymentRollback(ctx context.Context, orderID string, userId int32) error {
+	query := fmt.Sprintf("update %s set `order_status` = ? , `payment_status` = ? where `order_id` = ? and `user_id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, order.OrderStatus_ORDER_STATUS_PENDING_PAYMENT, order.PaymentStatus_PAYMENT_STATUS_PAYING, orderID, userId)
+	return err
+}
+func (m *customOrdersModel) GetOrderByOrderIDAndUserIDWithLock(ctx context.Context, orderId string, userId int32) (*Orders, error) {
+	var resp Orders
+	query := fmt.Sprintf("select %s from %s where `order_id` = ? and `user_id` = ? LIMIT 1 FOR SHARE ",
+		ordersRows, m.table)
+	err := m.conn.QueryRowCtx(ctx, &resp, query, orderId, userId)
+	return &resp, err
+}
+
+func (m *customOrdersModel) UpdateOrderStatusByOrderIDAndUserID(ctx context.Context, orderId string,
+	userId int32, orderStatus order.OrderStatus, paymentStatus order.PaymentStatus) error {
+	query := fmt.Sprintf("update %s set `order_status` = ?,`payment_status` = ? where `order_id` = ? and `user_id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, orderStatus, paymentStatus, orderId, userId)
 	return err
 }
 

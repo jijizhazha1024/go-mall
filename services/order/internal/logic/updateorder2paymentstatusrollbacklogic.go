@@ -35,8 +35,8 @@ func (l *UpdateOrder2PaymentStatusRollbackLogic) UpdateOrder2PaymentStatusRollba
 
 	if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
 		// --------------- 校验当前状态 ---------------
-		currentStatus, err := l.svcCtx.OrderModel.WithSession(session).
-			GetOrderStatusByOrderIDAndUserIDWithLock(ctx, in.OrderId, in.UserId)
+		orderRes, err := l.svcCtx.OrderModel.WithSession(session).
+			GetOrderByOrderIDAndUserIDWithLock(ctx, in.OrderId, in.UserId)
 		if err != nil {
 			if errors.Is(err, sqlx.ErrNotFound) {
 				res.StatusCode = code.OrderNotExist
@@ -46,15 +46,19 @@ func (l *UpdateOrder2PaymentStatusRollbackLogic) UpdateOrder2PaymentStatusRollba
 					logx.Field("user_id", in.UserId))
 				return nil
 			}
+			l.Logger.Errorw("query order status failed", logx.Field("err", err),
+				logx.Field("order_id", in.OrderId), logx.Field("user_id", in.UserId))
 			return err
 		}
 
 		// 只允许回滚PENDING_PAYMENT状态的订单
-		if order.OrderStatus(currentStatus) != order.OrderStatus_ORDER_STATUS_PENDING_PAYMENT {
+		if order.OrderStatus(orderRes.OrderStatus) != order.OrderStatus_ORDER_STATUS_PENDING_PAYMENT ||
+			order.PaymentStatus(orderRes.PaymentStatus) != order.PaymentStatus_PAYMENT_STATUS_PAYING {
 			res.StatusCode = code.OrderStatusInvalid
 			res.StatusMsg = code.OrderStatusInvalidMsg
 			l.Logger.Infow("invalid status for rollback",
-				logx.Field("current_status", currentStatus),
+				logx.Field("order_status", orderRes.OrderStatus),
+				logx.Field("payment_status", orderRes.PaymentStatus),
 				logx.Field("order_id", in.OrderId))
 			return nil
 		}
@@ -64,7 +68,7 @@ func (l *UpdateOrder2PaymentStatusRollbackLogic) UpdateOrder2PaymentStatusRollba
 			UpdateOrderStatusByOrderIDAndUserID(ctx,
 				in.OrderId,
 				in.UserId,
-				order.OrderStatus_ORDER_STATUS_CREATED); err != nil {
+				order.OrderStatus_ORDER_STATUS_CREATED, order.PaymentStatus_PAYMENT_STATUS_NOT_PAID); err != nil {
 			l.Logger.Errorw("rollback order status failed",
 				logx.Field("error", err),
 				logx.Field("order_id", in.OrderId))
