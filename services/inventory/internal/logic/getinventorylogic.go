@@ -42,6 +42,10 @@ func (l *GetInventoryLogic) GetInventory(in *inventory.GetInventoryReq) (*invent
 		l.Logger.Errorw("product inventory get failed", logx.Field("product_id", in.ProductId))
 		return nil, err
 	}
+	if inventoryResp.Sold < 0 {
+
+		return nil, errors.New("归还失败 sold<0")
+	}
 
 	// 存在库存
 	if inventoryResp.Total > 0 {

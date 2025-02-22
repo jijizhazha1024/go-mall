@@ -32,11 +32,11 @@ func (l *DecreaseInventoryLogic) DecreaseInventory(in *inventory.InventoryReq) (
 	var res = new(inventory.InventoryResp)
 
 	//将id和数量分别存入数组
-	productId := make([]int32, 0)
-	quantity := make([]int32, 0)
-	for _, item := range in.Items {
-		productId = append(productId, item.ProductId)
-		quantity = append(quantity, item.Quantity)
+	productId := make([]int32, len(in.Items))
+	quantity := make([]int32, len(in.Items))
+	for i, item := range in.Items {
+		productId[i] = item.ProductId
+		quantity[i] = item.Quantity
 	}
 
 	// 事务

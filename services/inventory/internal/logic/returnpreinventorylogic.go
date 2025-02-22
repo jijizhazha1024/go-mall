@@ -35,7 +35,6 @@ func (l *ReturnPreInventoryLogic) ReturnPreInventory(in *inventory.InventoryReq)
 	// 准备Lua脚本参数
 	keys := []string{lockKey}
 	args := []interface{}{in.PreOrderId}
-	productKeys := make([]string, 0, len(in.Items))
 
 	// 构造库存Key列表
 	for _, item := range in.Items {
@@ -43,31 +42,12 @@ func (l *ReturnPreInventoryLogic) ReturnPreInventory(in *inventory.InventoryReq)
 			return nil, status.Error(codes.InvalidArgument, "商品数量不合法")
 		}
 		productKey := fmt.Sprintf("inventory:product:%d", item.ProductId)
-		productKeys = append(productKeys, productKey)
+		keys = append(keys, productKey)
 		args = append(args, item.Quantity)
 	}
-	keys = append(keys, productKeys...)
 
-	// 组装Lua脚本
-	luaScript := `
-        -- 幂等性检查
-        if redis.call("EXISTS", KEYS[1]) == 1 then
-            return 1
-        end
-        
-        
-        -- 归还库存
-        for i=2, #KEYS do
-            redis.call("INCRBY", KEYS[i], tonumber(ARGV[i]))
-        end
-        
-        -- 设置处理标记（30分钟过期）
-        redis.call("SET", KEYS[1], ARGV[1], "EX", 1800)
-        return 0
-    `
-
-	// 执行Lua脚本（使用go-zero的Eval方法）
-	val, err := l.svcCtx.Rdb.Eval(luaScript, keys, args)
+	// 执行Lua脚本（使用go-zero的Evalsah方法）
+	val, err := l.svcCtx.Rdb.EvalSha(l.svcCtx.ReturnInventoryShal, keys, args)
 	if err != nil {
 		l.Logger.Errorw("LUA脚本执行失败",
 			logx.Field("error", err),
