@@ -10,4 +10,6 @@ type Config struct {
 	zrpc.RpcServerConf
 	MysqlConfig config.MysqlConfig
 	Consul      consul.Conf
+	CheckoutRpc zrpc.RpcClientConf
+	CouponRpc   zrpc.RpcClientConf
 }
