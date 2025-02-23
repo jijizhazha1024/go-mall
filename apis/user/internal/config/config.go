@@ -11,6 +11,8 @@ type Config struct {
 
 	AuthsRpc zrpc.RpcClientConf
 
-	UserRpc zrpc.RpcClientConf
-	Consul  consul.Conf
+	UserRpc        zrpc.RpcClientConf
+	Consul         consul.Conf
+	WhitePathList  []string
+	OptionPathList []string
 }

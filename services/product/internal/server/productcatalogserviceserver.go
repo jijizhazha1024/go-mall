@@ -46,3 +46,15 @@ func (s *ProductCatalogServiceServer) DeleteProduct(ctx context.Context, in *pro
 	l := logic.NewDeleteProductLogic(ctx, s.svcCtx)
 	return l.DeleteProduct(in)
 }
+
+// 分页得到全部商品
+func (s *ProductCatalogServiceServer) GetAllProduct(ctx context.Context, in *product.GetAllProductsReq) (*product.GetAllProductsResp, error) {
+	l := logic.NewGetAllProductLogic(ctx, s.svcCtx)
+	return l.GetAllProduct(in)
+}
+
+// 判断商品是否存在
+func (s *ProductCatalogServiceServer) IsExistProduct(ctx context.Context, in *product.IsExistProductReq) (*product.IsExistProductResp, error) {
+	l := logic.NewIsExistProductLogic(ctx, s.svcCtx)
+	return l.IsExistProduct(in)
+}

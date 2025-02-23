@@ -4,15 +4,20 @@ import (
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"github.com/zeromicro/go-zero/zrpc"
+	"jijizhazha1024/go-mall/dal/model/products/categories"
+	"jijizhazha1024/go-mall/services/inventory/inventoryclient"
 	"jijizhazha1024/go-mall/services/product/internal/config"
 	"net/http"
 )
 
 type ServiceContext struct {
-	Config      config.Config
-	Mysql       sqlx.SqlConn
-	RedisClient *redis.Redis
-	Es          *elasticsearch.Client
+	Config          config.Config
+	Mysql           sqlx.SqlConn
+	RedisClient     *redis.Redis
+	CategoriesModel categories.CategoriesModel
+	Es              *elasticsearch.Client
+	InventoryRpc    inventoryclient.Inventory
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -28,9 +33,11 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		},
 	})
 	return &ServiceContext{
-		Config:      c,
-		RedisClient: redisconf,
-		Mysql:       mysql,
-		Es:          es,
+		Config:          c,
+		Mysql:           mysql,
+		RedisClient:     redisconf,
+		Es:              es,
+		InventoryRpc:    inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
+		CategoriesModel: categories.NewCategoriesModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
 	}
 }

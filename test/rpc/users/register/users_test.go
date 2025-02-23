@@ -26,12 +26,12 @@ func initusers() {
 func TestUsersRpc(t *testing.T) {
 	initusers()
 	resp, err := users_client.Register(context.Background(), &users.RegisterRequest{
-		Email:           "test9@test.com",
-		Password:        "1234567",
-		ConfirmPassword: "1234567",
+		Email:           "djj2@example.com",
+		Password:        "password123",
+		ConfirmPassword: "password123",
 	})
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	fmt.Println("register success", resp)
 	t.Log("register success", resp)

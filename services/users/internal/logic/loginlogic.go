@@ -4,15 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
 	"jijizhazha1024/go-mall/common/consts/code"
+	"jijizhazha1024/go-mall/common/utils/cryptx"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
-	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type LoginLogic struct {
@@ -33,63 +31,53 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error) {
 	// todo: add your logic here and delete this line
 
-	// 1. 校验参数
-	if in.Email == "" || in.Password == "" {
-		return users_biz.HandleLoginerror("email or password is empty", 400, errors.New("email or password is empty"))
-	}
 	email := sql.NullString{
 		String: in.Email,
 		Valid:  true,
 	}
-	// 新增：布隆过滤器预检
-	if !l.svcCtx.Bf.Contains(in.Email) {
-		return users_biz.HandleLoginerror(code.UserNotFoundMsg, code.UserNotFound, nil)
-	}
+
 	// 2. 查询用户信息
 	user, err := l.svcCtx.UsersModel.FindOneByEmail(l.ctx, email)
 	if err != nil {
 
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Infow(code.UserNotFoundMsg, logx.Field("err", err),
-				logx.Field("user_id", in.Email))
+			logx.Infow("login failed, user not found", logx.Field("err", err),
+				logx.Field("email", in.Email))
+			return &users.LoginResponse{
+				StatusCode: code.UserNotFound,
+				StatusMsg:  code.UserNotFoundMsg,
+			}, nil
 
-			return users_biz.HandleLoginerror(code.UserNotFoundMsg, code.UserNotFound, nil)
 		}
-		logx.Errorw("数据库查询失败",
+		logx.Errorw("login failed, database query failed",
 			logx.Field("err", err),
 			logx.Field("user email", in.Email),
 		)
-
-		return users_biz.HandleLoginerror(code.ServerErrorMsg, code.ServerError, err)
+		return &users.LoginResponse{}, err
 	}
 	if user.UserDeleted {
-		logx.Infow(code.UserHaveDeletedMsg, logx.Field("email", user.Email))
+		logx.Infow("login failed, user have deleted", logx.Field("email", user.Email))
 
-		return users_biz.HandleLoginerror(code.UserHaveDeletedMsg, code.UserHaveDeleted, nil)
+		return &users.LoginResponse{
+			StatusCode: code.UserHaveDeleted,
+			StatusMsg:  code.UserHaveDeletedMsg,
+		}, nil
 	}
 
 	// 3. 校验密码
+	if !cryptx.PasswordVerify(in.Password, user.PasswordHash.String) {
+		logx.Infow("login failed, password not match")
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash.String), []byte(in.Password))
-	if err != nil {
-
-		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			logx.Infow(code.LoginFailedMsg)
-			return users_biz.HandleLoginerror("password error", 400, nil)
-
-		}
-		logx.Errorw(code.LoginFailedMsg, logx.Field("user_email", user.Email))
-		return nil, err
+		return &users.LoginResponse{
+			StatusCode: code.PasswordNotMatch,
+			StatusMsg:  code.PasswordNotMatchMsg,
+		}, nil
 	}
+	return &users.LoginResponse{
 
-	//4、更新登陆时间
-	err = l.svcCtx.UsersModel.UpdateLoginTime(l.ctx, user.UserId, time.Now())
-	if err != nil {
-		logx.Errorw("数据库查询失败",
-			logx.Field("err", err),
-			logx.Field("user_email", in.Email),
-		)
-	}
+		UserId: uint32(user.UserId),
 
-	return users_biz.HandleLoginResp(code.LoginSuccessMsg, code.LoginSuccess, uint32(user.UserId), "", user.Username.String)
+		UserName: user.Username.String,
+	}, nil
+
 }

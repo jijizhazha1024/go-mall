@@ -5,6 +5,7 @@ const (
 	EsFailed                   = 30010
 	ProductCacheFailed         = 30011
 	ProductPVCacheFailed       = 30012
+	NoProductFromDataBase      = 30013
 )
 
 const (
@@ -12,4 +13,5 @@ const (
 	EsFailedMag                   = "Es操作失败"
 	ProductCacheFailedMsg         = "缓存操作失败"
 	ProductPVCacheFailedMsg       = "商品缓存PV操作失败"
+	NoProductFromDataBaseMsg      = "数据库中没有该商品"
 )

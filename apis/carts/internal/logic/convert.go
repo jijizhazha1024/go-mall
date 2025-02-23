@@ -13,7 +13,6 @@ func ConvertCartInfoResponse(res []*carts.CartInfoResponse) []*types.CartInfoRes
 			UserId:    item.UserId,
 			ProductId: item.ProductId,
 			Quantity:  item.Quantity,
-			Checked:   item.Checked,
 		})
 	}
 	return result
