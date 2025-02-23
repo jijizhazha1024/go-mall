@@ -9,6 +9,7 @@ import (
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	order2 "jijizhazha1024/go-mall/dal/model/order"
 	"jijizhazha1024/go-mall/services/checkout/checkout"
@@ -51,93 +52,53 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (*order.Ord
 	if err := l.validateRequest(in); err != nil {
 		return nil, err
 	}
-
 	// --------------- 绑定数据 ---------------
 	dto, err := l.collectOrderData(in)
 	if err != nil {
-		l.Logger.Errorw("collect order data failed", logx.Field("user_id", in.UserId),
-			logx.Field("pre_order_id", in.PreOrderId), logx.Field("err", err))
+		l.Logger.Errorw("collect order data failed")
 		return nil, err
 	}
-
-	var uid uuid.UUID
-	uid, err = uuid.NewV7()
-	if err != nil {
-		uid = uuid.New()
-	}
-	OrderID := uid.String()
-
+	dto.OrderID = l.generateOrderID() // 生成订单ID
+	orderValue := dto.ToOrderModel()
 	res := &order.OrderResponse{}
-	expireTime := time.Minute * 30
-	orderValue := &order2.Orders{
-		OrderId:        OrderID,
-		PreOrderId:     in.PreOrderId,
-		UserId:         uint64(in.UserId),
-		PaymentMethod:  sql.NullInt64{Int64: int64(in.PaymentMethod), Valid: true},
-		OriginalAmount: dto.Amounts.OriginAmount,
-		DiscountAmount: dto.Amounts.DiscountAmount,
-		PayableAmount:  dto.Amounts.FinalAmount,
-		OrderStatus:    int64(order.OrderStatus_ORDER_STATUS_CREATED),
-		PaymentStatus:  int64(order.PaymentStatus_PAYMENT_STATUS_NOT_PAID),
-		ExpireTime:     time.Now().Add(expireTime).Unix(),
-	}
-
 	if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
-
+		orderSession := l.svcCtx.OrderModel.WithSession(session)
 		// --------------- check ---------------
-		// 订单是否存在，通过 pre_order_id 查询
-		orderRes, err := l.svcCtx.OrderModel.WithSession(session).CheckOrderExistByPreOrderId(ctx, in.PreOrderId, int32(in.UserId))
+		orderRes, err := orderSession.CheckOrderExistByPreOrderId(ctx, dto.PreOrderID, int32(dto.UserID))
 		if err != nil {
-			l.Logger.Errorw("check order exist failed", logx.Field("user_id", in.UserId),
-				logx.Field("pre_order_id", in.PreOrderId), logx.Field("err", err))
+			l.Logger.Errorw("check order exist failed", append(l.logContext(dto), logx.Field("err", err))...)
 			return err
 		}
 		if orderRes {
-			l.Logger.Infow("transaction aborted", logx.Field("user_id", in.UserId), logx.Field("pre_order_id", in.PreOrderId))
 			res.StatusCode = code.OrderExist
 			res.StatusMsg = code.OrderExistMsg
 			return nil
 		}
-
 		// --------------- insert ---------------
-		// 插入订单
-		_, err = l.svcCtx.OrderModel.WithSession(session).Insert(l.ctx, orderValue)
-		if err != nil {
-			l.Logger.Errorw("insert order failed", logx.Field("user_id", in.UserId),
-				logx.Field("pre_order_id", in.PreOrderId), logx.Field("err", err))
+		if _, err = orderSession.Insert(l.ctx, orderValue); err != nil {
+			l.Logger.Errorw("insert order failed", append(l.logContext(dto), logx.Field("err", err))...)
 			return err
 		}
 		// 插入订单项关联商品
-		for _, item := range dto.Items {
-			orderItem := &order2.OrderItems{
-				OrderId:   OrderID,
-				ProductId: uint64(item.ProductId),
-				Quantity:  uint64(item.Quantity),
-			}
-			if _, err = l.svcCtx.OrderItemModel.WithSession(session).Insert(l.ctx, orderItem); err != nil {
-				l.Logger.Errorw("insert order item failed", logx.Field("user_id", in.UserId),
-					logx.Field("pre_order_id", in.PreOrderId), logx.Field("err", err))
-				return err
-			}
+		if err := l.svcCtx.OrderItemModel.BulkInsert(session, convertToOrderItems(dto.OrderID, dto.Items)); err != nil {
+			l.Logger.Errorw("insert order items failed", append(l.logContext(dto), logx.Field("err", err))...)
+			return err
 		}
 		// 插入订单地址
-		dto.Address.OrderId = OrderID
+		dto.Address.OrderId = dto.OrderID
 		if _, err := l.svcCtx.OrderAddress.Insert(l.ctx, dto.Address); err != nil {
-			l.Logger.Errorw("insert order address failed", logx.Field("user_id", in.UserId),
-				logx.Field("pre_order_id", in.PreOrderId),
-			)
+			l.Logger.Errorw("insert order address failed", append(l.logContext(dto), logx.Field("err", err))...)
+			return err
 		}
 		return nil
 	}); err != nil {
-		l.Logger.Errorw("insert order failed", logx.Field("user_id", in.UserId),
-			logx.Field("pre_order_id", in.PreOrderId), logx.Field("err", err))
 		return nil, status.Error(codes.Aborted, dtmcli.ResultFailure)
 	}
 	if res.StatusCode != code.Success {
-		l.Logger.Infow("transaction aborted", logx.Field("user_id", in.UserId), logx.Field("pre_order_id", in.PreOrderId))
+		l.Logger.Infow("transaction aborted", l.logContext(dto)...)
 		return nil, status.Error(codes.Aborted, res.StatusMsg)
 	}
-	return &order.OrderResponse{}, nil
+	return res, nil
 }
 func (l *CreateOrderLogic) validateRequest(in *order.CreateOrderRequest) error {
 	if in.PreOrderId == "" || in.UserId == 0 || in.AddressId == 0 || in.CouponId == "" || in.PaymentMethod == 0 {
@@ -158,16 +119,11 @@ func (l *CreateOrderLogic) collectOrderData(in *order.CreateOrderRequest) (*orde
 			PreOrderId: in.PreOrderId,
 		})
 		if err != nil {
-			logx.Errorw("call rpc GetCheckoutDetail failed", logx.Field("user_id", in.UserId),
-				logx.Field("pre_order_id", in.PreOrderId), logx.Field("err", err))
-			return err
+			logx.Errorw("call rpc GetCheckoutDetail failed", append(l.logContext(dto), logx.Field("err", err))...)
+			return status.Error(codes.Aborted, err.Error())
 		}
 		if checkoutDetail.StatusCode != code.Success {
-			logx.Errorw("call rpc GetCheckoutDetail failed", logx.Field("user_id", in.UserId),
-				logx.Field("pre_order_id", in.PreOrderId), logx.Field("err", err),
-			)
 			return status.Error(codes.Aborted, checkoutDetail.StatusMsg)
-
 		}
 		// 计算优惠价格
 		couponResp, err := l.svcCtx.CouponRpc.CalculateCoupon(ctx, &coupons.CalculateCouponReq{
@@ -176,15 +132,10 @@ func (l *CreateOrderLogic) collectOrderData(in *order.CreateOrderRequest) (*orde
 			Items:    convertToCouponItems(checkoutDetail.Data.Items),
 		})
 		if err != nil {
-			logx.Errorw("call rpc CalculateCoupon failed", logx.Field("user_id", in.UserId),
-				logx.Field("pre_order_id", in.PreOrderId), logx.Field("err", err),
-			)
-			return err
+			logx.Errorw("call rpc CalculateCoupon failed", append(l.logContext(dto), logx.Field("err", err))...)
+			return status.Error(codes.Aborted, err.Error())
 		}
 		if couponResp.StatusCode != code.Success {
-			logx.Errorw("call rpc CalculateCoupon failed", logx.Field("user_id", in.UserId),
-				logx.Field("pre_order_id", in.PreOrderId), logx.Field("err", err),
-			)
 			return status.Error(codes.Aborted, couponResp.StatusMsg)
 		}
 		dto.Amounts = &coupons.CalculateCouponResp{
@@ -200,14 +151,11 @@ func (l *CreateOrderLogic) collectOrderData(in *order.CreateOrderRequest) (*orde
 			AddressId: in.AddressId,
 		})
 		if err != nil {
-			l.Logger.Errorw("call rpc GetAddress failed", logx.Field("user_id", in.UserId),
-				logx.Field("pre_order_id", in.PreOrderId), logx.Field("err", err))
-			return err
+			l.Logger.Errorw("call rpc GetAddress failed", append(l.logContext(dto), logx.Field("err", err))...)
+			return status.Error(codes.Aborted, err.Error())
 		}
 		if addressResp.StatusCode != code.Success {
-			l.Logger.Infow("transaction aborted", logx.Field("user_id", in.UserId), logx.Field("pre_order_id", in.PreOrderId))
 			return status.Error(codes.Aborted, addressResp.StatusMsg)
-
 		}
 		dto.Address = &order2.OrderAddresses{
 			AddressId:       uint64(in.AddressId),
@@ -225,13 +173,34 @@ func (l *CreateOrderLogic) collectOrderData(in *order.CreateOrderRequest) (*orde
 	return dto, nil
 
 }
-func convertToCouponItems(items []*checkout.CheckoutItem) []*coupons.Items {
-	couponItems := make([]*coupons.Items, 0, len(items))
-	for _, item := range items {
-		couponItems = append(couponItems, &coupons.Items{
-			ProductId: int32(item.ProductId),
-			Quantity:  item.Quantity,
-		})
+func (d *orderCreateDTO) ToOrderModel() *order2.Orders {
+	return &order2.Orders{
+		OrderId:        d.OrderID,
+		PreOrderId:     d.PreOrderID,
+		UserId:         uint64(d.UserID),
+		PaymentMethod:  sql.NullInt64{Int64: int64(d.PaymentMethod), Valid: true},
+		OriginalAmount: d.Amounts.OriginAmount,
+		DiscountAmount: d.Amounts.DiscountAmount,
+		PayableAmount:  d.Amounts.FinalAmount,
+		OrderStatus:    int64(order.OrderStatus_ORDER_STATUS_CREATED),
+		PaymentStatus:  int64(order.PaymentStatus_PAYMENT_STATUS_NOT_PAID),
+		ExpireTime:     time.Now().Add(biz.OrderExpireTime).Unix(),
 	}
-	return couponItems
+}
+func (l *CreateOrderLogic) generateOrderID() string {
+	var uid uuid.UUID
+	uid, err := uuid.NewV7()
+	if err != nil {
+		l.Logger.Infow("uuid generate failed", logx.Field("err", err))
+		uid = uuid.New()
+	}
+	OrderID := uid.String()
+	return OrderID
+}
+func (l *CreateOrderLogic) logContext(dto *orderCreateDTO) []logx.LogField {
+	return []logx.LogField{
+		logx.Field("user_id", dto.UserID),
+		logx.Field("pre_order_id", dto.PreOrderID),
+		logx.Field("order_id", dto.OrderID),
+	}
 }
