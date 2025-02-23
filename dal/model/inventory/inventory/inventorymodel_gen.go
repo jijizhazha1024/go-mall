@@ -33,7 +33,8 @@ type (
 	defaultInventoryModel struct {
 		conn  sqlx.SqlConn
 		table string
-		localtable string
+		lockdecreasetable string
+		lockreturntable string
 	}
 
 	Inventory struct {
@@ -47,7 +48,8 @@ func newInventoryModel(conn sqlx.SqlConn) *defaultInventoryModel {
 	return &defaultInventoryModel{
 		conn:  conn,
 		table: "`inventory`",
-		localtable:      "inventory_lock",  
+		lockdecreasetable:      "inventory_lock",  
+		lockreturntable:       "return_lock",  
 	}
 }
 

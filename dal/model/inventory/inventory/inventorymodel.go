@@ -20,14 +20,14 @@ type (
 	InventoryModel interface {
 		inventoryModel
 		FindAll(ctx context.Context) ([]*Inventory, error)
-		FindLockOrder(ctx context.Context, session sqlx.Session, order_id string, user_id int64) (bool, error)
-		LockOrder(ctx context.Context, session sqlx.Session, order_id string, user_id int64) error
+		FindLockOrder(ctx context.Context, session sqlx.Session, order_id string, user_id int64, table string) (bool, error)
+		LockOrder(ctx context.Context, session sqlx.Session, order_id string, user_id int64, table string) error
 		WithSession(session sqlx.Session) InventoryModel
 		UpdateOrCreate(ctx context.Context, inventory Inventory) error
 		BatchReturn(ctx context.Context, session sqlx.Session, productIDs []int32, quantities []int32) error
 		DecreaseInventoryAtom(ctx context.Context, productId int32, quantity int32) (cnt int64, err error)
 		Batchdecrease(ctx context.Context, session sqlx.Session, productIDs []int32, quantities []int32) error
-		BatchReturnInventoryAtom(ctx context.Context, productIDs []int32, quantities []int32) error
+		BatchReturnInventoryAtom(ctx context.Context, productIDs []int32, quantities []int32, orderID string, userID int64) error
 		ReturnInventory(ctx context.Context, id int32, quantity int32) (cnt int64, err error)
 		BatchDecreaseInventoryAtom(ctx context.Context, productId []int32, quantity []int32, user_id int64, order_id string) error
 	}
@@ -37,11 +37,26 @@ type (
 	}
 )
 
-func (m *customInventoryModel) BatchReturnInventoryAtom(ctx context.Context, productIDs []int32, quantities []int32) error {
+func (m *customInventoryModel) BatchReturnInventoryAtom(ctx context.Context, productIDs []int32, quantities []int32, orderID string, userID int64) error {
 
 	err := m.conn.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
 
-		// 阶段1: 批量锁定库存记录
+		// 阶段1: 幂等检查
+		isLocked, err := m.FindLockOrder(ctx, session, orderID, userID, m.lockreturntable)
+		if err != nil {
+			return err
+		}
+		if isLocked {
+
+			return fmt.Errorf("订单 %s 已被锁定", orderID)
+		}
+
+		// 阶段2: 创建锁记录（30分钟有效期）
+		if err := m.LockOrder(ctx, session, orderID, userID, m.lockreturntable); err != nil {
+			return fmt.Errorf("创建锁失败: %w", err)
+		}
+
+		// 阶段3: 批量锁定库存记录
 		query := fmt.Sprintf(`
 		SELECT product_id, total, sold 
 		FROM %s 
@@ -58,7 +73,7 @@ func (m *customInventoryModel) BatchReturnInventoryAtom(ctx context.Context, pro
 		if err := session.QueryRowsCtx(ctx, &inventories, query, args...); err != nil {
 			return err
 		}
-		//阶段2 ：批量更新库存
+		//阶段4 ：批量更新库存
 		err = m.BatchReturn(ctx, session, productIDs, quantities)
 		if err != nil {
 			return err
@@ -162,11 +177,16 @@ func (m *customInventoryModel) LockOrder(
 	session sqlx.Session,
 	orderID string,
 	userID int64,
+	table string,
 ) error {
-	query := "INSERT INTO inventory_lock (order_id, user_id) VALUES (?, ?)"
-	_, err := session.ExecCtx(ctx, query, orderID, userID)
 
-	return err
+	query := fmt.Sprintf("INSERT INTO  %s  (order_id, user_id) VALUES (?, ?)", table)
+	_, err := session.ExecCtx(ctx, query, orderID, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // FindLockOrder 幂等性检查
@@ -175,6 +195,7 @@ func (m *customInventoryModel) FindLockOrder(
 	session sqlx.Session,
 	orderID string,
 	userID int64,
+	table string,
 ) (bool, error) {
 	// 构建 SQL 查询语
 	query := fmt.Sprintf(`
@@ -183,7 +204,7 @@ func (m *customInventoryModel) FindLockOrder(
         WHERE order_id = ? AND user_id = ? 
         LIMIT 1 
         FOR UPDATE`,
-		m.localtable)
+		table)
 
 	var exists int
 	err := session.QueryRowCtx(ctx, &exists, query, orderID, userID)
@@ -208,7 +229,7 @@ func (m *customInventoryModel) BatchDecreaseInventoryAtom(
 
 	return m.conn.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
 		// 阶段1: 幂等检查
-		isLocked, err := m.FindLockOrder(ctx, session, orderID, userID)
+		isLocked, err := m.FindLockOrder(ctx, session, orderID, userID, m.lockdecreasetable)
 		if err != nil {
 			return err
 		}
@@ -217,7 +238,7 @@ func (m *customInventoryModel) BatchDecreaseInventoryAtom(
 		}
 
 		// 阶段2: 创建锁记录（30分钟有效期）
-		if err := m.LockOrder(ctx, session, orderID, userID); err != nil {
+		if err := m.LockOrder(ctx, session, orderID, userID, m.lockdecreasetable); err != nil {
 			return fmt.Errorf("创建锁失败: %w", err)
 		}
 

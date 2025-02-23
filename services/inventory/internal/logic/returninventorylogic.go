@@ -40,7 +40,7 @@ func (l *ReturnInventoryLogic) ReturnInventory(in *inventory.InventoryReq) (*inv
 	}
 
 	// 事务
-	err := l.svcCtx.InventoryModel.BatchReturnInventoryAtom(l.ctx, productId, quantity)
+	err := l.svcCtx.InventoryModel.BatchReturnInventoryAtom(l.ctx, productId, quantity, in.PreOrderId, int64(in.UserId))
 
 	switch {
 	case errors.Is(err, sqlx.ErrNotFound):
