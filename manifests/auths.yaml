@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auths-service
+  namespace: go-mall
+  labels:
+    app: auths-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auths-service
+  template:
+    metadata:
+      name: auths-service
+      labels:
+        app: auths-service
+    spec:
+      containers:
+        - name: auths-service
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall
+          imagePullPolicy: IfNotPresent
+          command:
+            - ./services/AuthsApi
+          ports:
+            - name: service-10000
+              containerPort: 10000
+              protocol: TCP
+          volumeMounts:
+            - name: project-etc-volume
+              mountPath: /app/etc
+            - name: project-logs-volume
+              mountPath: /app/logs
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+      volumes:
+        - name: project-etc-volume
+          hostPath:
+            path: /data/etc
+            type: DirectoryOrCreate
+        - name: project-logs-volume
+          hostPath:
+            path: /data/logs
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

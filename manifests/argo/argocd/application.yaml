@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: go-mall
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/jijizhazha1024/go-mall.git # 仓库地址
+    targetRevision: main
+    path: manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: go-mall
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true
