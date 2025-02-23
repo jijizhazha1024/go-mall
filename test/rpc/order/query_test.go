@@ -95,4 +95,4 @@ func TestGetOrder(t *testing.T) {
 		t.Logf("orderDetail: %+v", orderDetail.Order)
 	})
 
-} .
+}
