@@ -14,6 +14,10 @@ Consul:
 MysqlConfig:
   datasource: ${MYSQL_DATA_SOURCE}
   Conntimeout: 5
+Cache:
+- Host: ${REDIS_HOST} #缓存地址
+  Pass: ${REDIS_PASSWORD}
+  Type: node   
 
 Log:
   ServiceName: "users-rpc"
