@@ -69,6 +69,8 @@ func (l *ReturnPreInventoryLogic) ReturnPreInventory(in *inventory.InventoryReq)
 	case 0: // 归还成功
 		return &inventory.InventoryResp{}, nil
 	case 1: // 已处理过
+		l.Logger.Infow("订单没有进行预扣除",
+			logx.Field("pre_order_id", in.PreOrderId))
 		return &inventory.InventoryResp{}, status.Error(codes.AlreadyExists, "订单没有进行预扣除")
 
 	default:

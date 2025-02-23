@@ -4,7 +4,7 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
-	"jijizhazha1024/go-mall/dal/model/inventory"
+	"jijizhazha1024/go-mall/dal/model/inventory/inventory"
 	"jijizhazha1024/go-mall/services/inventory/internal/config"
 	"jijizhazha1024/go-mall/services/inventory/internal/decreaselua"
 	"jijizhazha1024/go-mall/services/inventory/internal/returnlua"

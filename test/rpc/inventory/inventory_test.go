@@ -32,9 +32,9 @@ func setupInventoryClient(t *testing.T) {
 func TestInventoryService(t *testing.T) {
 	setupInventoryClient(t)
 	ctx := context.Background()
-	testProductID := int32(4567)       // 测试用商品ID
-	testPreOrderID := "PRE_ORDER_4567" // 测试用预订单ID
-	testuserID := int32(4567)          // 测试用用户ID
+	testProductID := int32(113)       // 测试用商品ID
+	testPreOrderID := "PRE_ORDER_113" // 测试用预订单ID
+	testuserID := int32(113)          // 测试用用户ID
 	t.Run("预扣库存全流程", func(t *testing.T) {
 		// 初始化库存
 		_, err := invClient.UpdateInventory(ctx, &inventory.InventoryReq{
@@ -56,12 +56,13 @@ func TestInventoryService(t *testing.T) {
 		fmt.Println("err---------------------------------------", err)
 		fmt.Println("preDecResp-", preDecResp)
 
-		// 真实扣减
+		//真实扣减
 		realDecResp, err := invClient.DecreaseInventory(ctx, &inventory.InventoryReq{
 			Items: []*inventory.InventoryReq_Items{
 				{ProductId: testProductID, Quantity: 30},
 			},
 			PreOrderId: testPreOrderID,
+			UserId:     testuserID,
 		})
 		assert.NoError(t, err)
 		fmt.Println("err-", err)

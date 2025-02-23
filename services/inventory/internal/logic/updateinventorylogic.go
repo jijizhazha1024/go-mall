@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"jijizhazha1024/go-mall/common/consts/biz"
-	inventory2 "jijizhazha1024/go-mall/dal/model/inventory"
+	inventory2 "jijizhazha1024/go-mall/dal/model/inventory/inventory"
 	"jijizhazha1024/go-mall/services/inventory/internal/svc"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
 

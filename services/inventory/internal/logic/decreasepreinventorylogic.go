@@ -39,6 +39,8 @@ func (l *DecreasePreInventoryLogic) DecreasePreInventory(in *inventory.Inventory
 	// 构造库存Key列表
 	for _, item := range in.Items {
 		if item.Quantity <= 0 {
+			l.Logger.Errorw("商品数量不合法",
+				logx.Field("product_id", item.ProductId))
 			return nil, status.Error(codes.InvalidArgument, "商品数量不合法")
 		}
 		productKey := fmt.Sprintf("inventory:product:%d", item.ProductId)
@@ -69,6 +71,8 @@ func (l *DecreasePreInventoryLogic) DecreasePreInventory(in *inventory.Inventory
 	case 0: // 扣减成功
 		return &inventory.InventoryResp{}, nil
 	case 1: // 已处理过
+		l.Logger.Infow("订单已处理",
+			logx.Field("pre_order_id", in.PreOrderId))
 		return &inventory.InventoryResp{}, status.Error(codes.AlreadyExists, "订单已处理")
 	case 2: // 库存不足
 

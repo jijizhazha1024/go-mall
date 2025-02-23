@@ -40,7 +40,7 @@ func (l *DecreaseInventoryLogic) DecreaseInventory(in *inventory.InventoryReq) (
 	}
 
 	// 事务
-	err := l.svcCtx.InventoryModel.BatchDecreaseInventoryAtom(l.ctx, productId, quantity)
+	err := l.svcCtx.InventoryModel.BatchDecreaseInventoryAtom(l.ctx, productId, quantity, int64(in.UserId), in.PreOrderId)
 
 	switch {
 	case errors.Is(err, sqlx.ErrNotFound):
