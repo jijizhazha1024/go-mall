@@ -2,12 +2,11 @@ package logic
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
-	"fmt"
-	"github.com/zeromicro/go-zero/core/logx"
+
 	"jijizhazha1024/go-mall/services/checkout/checkout"
 	"jijizhazha1024/go-mall/services/checkout/internal/svc"
+
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type PrepareCheckoutLogic struct {
@@ -24,13 +23,9 @@ func NewPrepareCheckoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *P
 	}
 }
 
-// 生成商品幂等哈希值
-func generateItemHash(productId int32, quantity int32) string {
-	hash := md5.New()
-	hash.Write([]byte(fmt.Sprintf("%d:%d", productId, quantity)))
-	return hex.EncodeToString(hash.Sum(nil))
-}
-
+// PrepareCheckout 预结算)生成预订单）
 func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*checkout.CheckoutResp, error) {
+	// todo: add your logic here and delete this line
+
 	return &checkout.CheckoutResp{}, nil
 }
