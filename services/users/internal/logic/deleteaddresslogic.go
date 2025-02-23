@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
@@ -29,9 +30,9 @@ func NewDeleteAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*users.DeleteAddressResponse, error) {
 	//判断address——id和user——id是否存在
 
-	_, err := l.svcCtx.AddressModel.GetUserAddressbyIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
+	_, err := l.svcCtx.AddressModel.GetUserAddressExistsByIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Infow("delete address not found", logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId))
 			return &users.DeleteAddressResponse{
 				StatusMsg:  code.UserAddressNotFoundMsg,
@@ -39,15 +40,12 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 			}, nil
 		}
 		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
-		return &users.DeleteAddressResponse{
-			StatusMsg:  code.ServerErrorMsg,
-			StatusCode: code.ServerError,
-		}, err
+		return &users.DeleteAddressResponse{}, err
 	}
 
 	err = l.svcCtx.AddressModel.DeleteByAddressIdandUserId(l.ctx, in.AddressId, int32(in.UserId))
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Infow("deleteaddress address not found", logx.Field("err", err), logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId))
 			return &users.DeleteAddressResponse{
 
@@ -56,14 +54,8 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 			}, nil
 		}
 		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
-		return &users.DeleteAddressResponse{
-			StatusCode: code.ServerError,
-			StatusMsg:  code.ServerErrorMsg,
-		}, err
+		return &users.DeleteAddressResponse{}, err
 	}
 
-	return &users.DeleteAddressResponse{
-		StatusCode: code.DeleteUserAddressSuccess,
-		StatusMsg:  code.DeleteUserAddressSuccessMsg,
-	}, nil
+	return &users.DeleteAddressResponse{}, nil
 }
