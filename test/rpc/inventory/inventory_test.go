@@ -7,6 +7,7 @@ import (
 	"jijizhazha1024/go-mall/services/inventory/inventory"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
@@ -30,13 +31,14 @@ func setupInventoryClient(t *testing.T) {
 }
 
 func TestInventoryService(t *testing.T) {
-	setupInventoryClient(t)
-	ctx := context.Background()
-	testProductID := int32(127)       // 测试用商品ID
-	testPreOrderID := "PRE_ORDER_127" // 测试用预订单ID
-	testuserID := int32(127)          // 测试用用户ID
+
 	t.Run("预扣库存全流程", func(t *testing.T) {
-		// 初始化库存
+		setupInventoryClient(t)
+		ctx := context.Background()
+		testProductID := int32(1231)       // 测试用商品ID
+		testPreOrderID := "PRE_ORDER_1231" // 测试用预订单ID
+		testuserID := int32(1231)          // 测试用用户ID
+		//	初始化库存1
 		_, err := invClient.UpdateInventory(ctx, &inventory.InventoryReq{
 			Items: []*inventory.InventoryReq_Items{
 				{ProductId: testProductID, Quantity: 200},
@@ -44,17 +46,17 @@ func TestInventoryService(t *testing.T) {
 		})
 		assert.NoError(t, err)
 
-		// // 预扣库存
-		// preDecResp, err := invClient.DecreasePreInventory(ctx, &inventory.InventoryReq{
-		// 	Items: []*inventory.InventoryReq_Items{
-		// 		{ProductId: testProductID, Quantity: 30},
-		// 	},
-		// 	PreOrderId: testPreOrderID,
-		// 	UserId:     testuserID,
-		// })
-		// assert.NoError(t, err)
-		// fmt.Println("err---------------------------------------", err)
-		// fmt.Println("preDecResp-", preDecResp)
+		// 预扣库存
+		preDecResp, err := invClient.DecreasePreInventory(ctx, &inventory.InventoryReq{
+			Items: []*inventory.InventoryReq_Items{
+				{ProductId: testProductID, Quantity: 30},
+			},
+			PreOrderId: testPreOrderID,
+			UserId:     testuserID,
+		})
+		assert.NoError(t, err)
+		fmt.Println("err---------------------------------------", err)
+		fmt.Println("preDecResp-", preDecResp)
 
 		//真实扣减
 		realDecResp, err := invClient.DecreaseInventory(ctx, &inventory.InventoryReq{
@@ -67,29 +69,51 @@ func TestInventoryService(t *testing.T) {
 		assert.NoError(t, err)
 		fmt.Println("err-------------------", err)
 		fmt.Println("realDecResp-", realDecResp)
+		//第二次真实扣减
+		realDecResp, err = invClient.DecreaseInventory(ctx, &inventory.InventoryReq{
+			Items: []*inventory.InventoryReq_Items{
+				{ProductId: testProductID, Quantity: 30},
+			},
+			PreOrderId: testPreOrderID,
+			UserId:     testuserID,
+		})
+		assert.NoError(t, err)
+		fmt.Println("err-------------------", err)
+		fmt.Println("realDecResp-", realDecResp)
 
-		// //归还缓存库存
-		// retResp, err := invClient.ReturnPreInventory(ctx, &inventory.InventoryReq{
-		// 	Items: []*inventory.InventoryReq_Items{
-		// 		{ProductId: testProductID, Quantity: 30},
-		// 	},
-		// 	PreOrderId: testPreOrderID,
-		// 	UserId:     testuserID,
-		// })
-		// assert.NoError(t, err)
-		// fmt.Println("err-", err)
-		// fmt.Println("retResp-", retResp)
+		//归还缓存库存
+		retResp, err := invClient.ReturnPreInventory(ctx, &inventory.InventoryReq{
+			Items: []*inventory.InventoryReq_Items{
+				{ProductId: testProductID, Quantity: 30},
+			},
+			PreOrderId: testPreOrderID,
+			UserId:     testuserID,
+		})
+		assert.NoError(t, err)
+		fmt.Println("err-", err)
+		fmt.Println("retResp-", retResp)
 		//归还真实库存
-		// retResp, err := invClient.ReturnInventory(ctx, &inventory.InventoryReq{
-		// 	Items: []*inventory.InventoryReq_Items{
-		// 		{ProductId: testProductID, Quantity: 30},
-		// 	},
-		// 	PreOrderId: testPreOrderID,
-		// 	UserId:     testuserID,
-		// })
-		// assert.NoError(t, err)
-		// fmt.Println("err-", err)
-		// fmt.Println("retResp-", retResp)
+		retResp, err = invClient.ReturnInventory(ctx, &inventory.InventoryReq{
+			Items: []*inventory.InventoryReq_Items{
+				{ProductId: testProductID, Quantity: 30},
+			},
+			PreOrderId: testPreOrderID,
+			UserId:     testuserID,
+		})
+		assert.NoError(t, err)
+		fmt.Println("err-", err)
+		fmt.Println("retResp-", retResp)
+		//第二次归还真实库存
+		retResp, err = invClient.ReturnInventory(ctx, &inventory.InventoryReq{
+			Items: []*inventory.InventoryReq_Items{
+				{ProductId: testProductID, Quantity: 30},
+			},
+			PreOrderId: testPreOrderID,
+			UserId:     testuserID,
+		})
+		assert.NoError(t, err)
+		fmt.Println("err-", err)
+		fmt.Println("retResp-", retResp)
 
 		// 验证最终库存
 		getResp, err := invClient.GetInventory(ctx, &inventory.GetInventoryReq{
@@ -225,4 +249,100 @@ func TestInventoryService(t *testing.T) {
 	// // 	})
 	// // 	assert.Error(t, err)
 	// // 	assert.Contains(t, err.Error(), "invalid inventory")
+}
+func TestInventoryService_HighConcurrency(t *testing.T) {
+	setupInventoryClient(t)
+	ctx := context.Background()
+
+	// 测试商品参数
+	testProductID := int32(9999)
+	initialStock := int32(1000)    // 初始库存
+	concurrentUsers := 100         // 并发用户数
+	deductPerUser := int32(10)     // 每个用户扣减量
+	expectedFinalStock := int32(0) // 预期最终库存
+
+	// 初始化库存
+	_, err := invClient.UpdateInventory(ctx, &inventory.InventoryReq{
+		Items: []*inventory.InventoryReq_Items{
+			{ProductId: testProductID, Quantity: initialStock},
+		},
+	})
+	assert.NoError(t, err, "初始化库存失败")
+
+	var wg sync.WaitGroup
+	wg.Add(concurrentUsers)
+
+	// 模拟并发请求
+	for i := 0; i < concurrentUsers; i++ {
+		go func(userID int32) {
+			defer wg.Done()
+
+			// 生成唯一预订单ID
+			preOrderID := fmt.Sprintf("PRE_ORDER_%d_%d", userID, time.Now().UnixNano())
+
+			// 步骤1: 预扣库存
+			_, preErr := invClient.DecreasePreInventory(ctx, &inventory.InventoryReq{
+				Items: []*inventory.InventoryReq_Items{
+					{ProductId: testProductID, Quantity: deductPerUser},
+				},
+				PreOrderId: preOrderID,
+				UserId:     userID,
+			})
+			if preErr != nil {
+				t.Logf("用户 %d 预扣失败: %v", userID, preErr)
+				return
+			}
+
+			// 步骤2: 真实扣减
+			_, decErr := invClient.DecreaseInventory(ctx, &inventory.InventoryReq{
+				Items: []*inventory.InventoryReq_Items{
+					{ProductId: testProductID, Quantity: deductPerUser},
+				},
+				PreOrderId: preOrderID,
+				UserId:     userID,
+			})
+			if decErr != nil {
+				t.Logf("用户 %d 扣减失败: %v", userID, decErr)
+				// 失败后归还预扣库存
+				_, retErr := invClient.ReturnPreInventory(ctx, &inventory.InventoryReq{
+					Items: []*inventory.InventoryReq_Items{
+						{ProductId: testProductID, Quantity: deductPerUser},
+					},
+					PreOrderId: preOrderID,
+					UserId:     userID,
+				})
+				assert.NoError(t, retErr, "预扣库存归还失败")
+			}
+		}(int32(i + 400)) // 生成唯一用户ID
+	}
+
+	// 等待所有请求完成
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	// 设置超时时间
+	select {
+	case <-done:
+		t.Log("所有并发请求完成")
+	case <-time.After(50 * time.Second):
+		t.Fatal("测试超时：50秒未完成")
+	}
+
+	// 验证最终库存
+	finalStockResp, err := invClient.GetInventory(ctx, &inventory.GetInventoryReq{
+		ProductId: testProductID,
+	})
+	assert.NoError(t, err, "获取最终库存失败")
+
+	t.Logf("预期库存: %d, 实际库存: %d",
+		expectedFinalStock, finalStockResp.Inventory)
+
+	assert.Equal(t, expectedFinalStock, finalStockResp.Inventory,
+		"最终库存不一致，可能存在并发问题")
+
+	// 验证总扣减次数（可选）
+	// 可通过日志系统或监控指标验证实际扣减次数是否为 concurrentUsers
 }

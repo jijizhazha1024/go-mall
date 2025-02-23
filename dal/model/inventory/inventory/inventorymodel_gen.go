@@ -48,8 +48,8 @@ func newInventoryModel(conn sqlx.SqlConn) *defaultInventoryModel {
 	return &defaultInventoryModel{
 		conn:  conn,
 		table: "`inventory`",
-		lockdecreasetable:      "inventory_lock",  
-		lockreturntable:       "return_lock",  
+		lockdecreasetable:      "`inventory_lock`",  
+		lockreturntable:       "`return_lock`",  
 	}
 }
 

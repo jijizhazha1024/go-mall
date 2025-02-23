@@ -53,7 +53,7 @@ func (m *customInventoryModel) BatchReturnInventoryAtom(ctx context.Context, pro
 
 		// 阶段2: 创建锁记录（30分钟有效期）
 		if err := m.LockOrder(ctx, session, orderID, userID, m.lockreturntable); err != nil {
-			return fmt.Errorf("创建锁失败: %w", err)
+			return nil
 		}
 
 		// 阶段3: 批量锁定库存记录
@@ -199,25 +199,24 @@ func (m *customInventoryModel) FindLockOrder(
 ) (bool, error) {
 	// 构建 SQL 查询语
 	query := fmt.Sprintf(`
-        SELECT 1 
-        FROM %s 
-        WHERE order_id = ? AND user_id = ? 
-        LIMIT 1 
-        FOR UPDATE`,
+	SELECT COUNT(*) 
+	FROM %s 
+	WHERE order_id = ? AND user_id = ? 
+	FOR UPDATE`,
 		table)
 
-	var exists int
-	err := session.QueryRowCtx(ctx, &exists, query, orderID, userID)
-
-	switch {
-	case err == sqlx.ErrNotFound:
-		return false, nil // 无锁定记录
-	case err != nil:
-
-		return false, fmt.Errorf("数据库查询错误: %w", err)
-	default:
-		return true, nil // 存在有效记录
+	var count int
+	err := session.QueryRowCtx(ctx, &count, query, orderID, userID)
+	if err != nil {
+		return false, err
 	}
+
+	if count > 0 {
+		return true, nil
+	}
+
+	return false, nil
+
 }
 func (m *customInventoryModel) BatchDecreaseInventoryAtom(
 	ctx context.Context,
@@ -234,7 +233,7 @@ func (m *customInventoryModel) BatchDecreaseInventoryAtom(
 			return err
 		}
 		if isLocked {
-			return fmt.Errorf("订单 %s 已被锁定", orderID)
+			return nil
 		}
 
 		// 阶段2: 创建锁记录（30分钟有效期）
