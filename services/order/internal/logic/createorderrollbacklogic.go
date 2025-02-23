@@ -9,22 +9,22 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type UpdateOrder2PaymentLogic struct {
+type CreateOrderRollbackLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 	logx.Logger
 }
 
-func NewUpdateOrder2PaymentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateOrder2PaymentLogic {
-	return &UpdateOrder2PaymentLogic{
+func NewCreateOrderRollbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CreateOrderRollbackLogic {
+	return &CreateOrderRollbackLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
 		Logger: logx.WithContext(ctx),
 	}
 }
 
-// UpdateOrder2Payment 更新订单（支付服务回调使用）
-func (l *UpdateOrder2PaymentLogic) UpdateOrder2Payment(in *order.UpdateOrder2PaymentRequest) (*order.EmptyRes, error) {
+// CreateOrderRollback 补偿操作
+func (l *CreateOrderRollbackLogic) CreateOrderRollback(in *order.CreateOrderRequest) (*order.EmptyRes, error) {
 	// todo: add your logic here and delete this line
 
 	return &order.EmptyRes{}, nil

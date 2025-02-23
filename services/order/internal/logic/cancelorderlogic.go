@@ -23,9 +23,8 @@ func NewCancelOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cance
 	}
 }
 
-// CancelOrder 取消订单
+// CancelOrder 取消订单 由用户发起
 func (l *CancelOrderLogic) CancelOrder(in *order.CancelOrderRequest) (*order.EmptyRes, error) {
-	// todo: add your logic here and delete this line
 
 	return &order.EmptyRes{}, nil
 }

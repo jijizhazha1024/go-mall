@@ -25,6 +25,7 @@ type (
 	orderAddressesModel interface {
 		Insert(ctx context.Context, data *OrderAddresses) (sql.Result, error)
 		FindOne(ctx context.Context, addressId uint64) (*OrderAddresses, error)
+		FindOneByOrderId(ctx context.Context, orderId string) (*OrderAddresses, error)
 		Update(ctx context.Context, data *OrderAddresses) error
 		Delete(ctx context.Context, addressId uint64) error
 	}
@@ -35,6 +36,7 @@ type (
 	}
 
 	OrderAddresses struct {
+		OrderId         string         `db:"order_id"` // 订单ID
 		AddressId       uint64         `db:"address_id"`
 		RecipientName   string         `db:"recipient_name"`   // 收件人姓名
 		PhoneNumber     sql.NullString `db:"phone_number"`     // 联系电话
@@ -73,15 +75,29 @@ func (m *defaultOrderAddressesModel) FindOne(ctx context.Context, addressId uint
 	}
 }
 
+func (m *defaultOrderAddressesModel) FindOneByOrderId(ctx context.Context, orderId string) (*OrderAddresses, error) {
+	var resp OrderAddresses
+	query := fmt.Sprintf("select %s from %s where `order_id` = ? limit 1", orderAddressesRows, m.table)
+	err := m.conn.QueryRowCtx(ctx, &resp, query, orderId)
+	switch err {
+	case nil:
+		return &resp, nil
+	case sqlx.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
 func (m *defaultOrderAddressesModel) Insert(ctx context.Context, data *OrderAddresses) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?)", m.table, orderAddressesRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.RecipientName, data.PhoneNumber, data.Province, data.City, data.DetailedAddress)
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?)", m.table, orderAddressesRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.OrderId, data.RecipientName, data.PhoneNumber, data.Province, data.City, data.DetailedAddress)
 	return ret, err
 }
 
-func (m *defaultOrderAddressesModel) Update(ctx context.Context, data *OrderAddresses) error {
+func (m *defaultOrderAddressesModel) Update(ctx context.Context, newData *OrderAddresses) error {
 	query := fmt.Sprintf("update %s set %s where `address_id` = ?", m.table, orderAddressesRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, data.RecipientName, data.PhoneNumber, data.Province, data.City, data.DetailedAddress, data.AddressId)
+	_, err := m.conn.ExecCtx(ctx, query, newData.OrderId, newData.RecipientName, newData.PhoneNumber, newData.Province, newData.City, newData.DetailedAddress, newData.AddressId)
 	return err
 }
 

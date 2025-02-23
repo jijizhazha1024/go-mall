@@ -23,26 +23,33 @@ type (
 	ListOrdersResponse                  = order.ListOrdersResponse
 	Order                               = order.Order
 	OrderAddress                        = order.OrderAddress
+	OrderDetail2PaymentResponse         = order.OrderDetail2PaymentResponse
 	OrderDetailResponse                 = order.OrderDetailResponse
 	OrderItem                           = order.OrderItem
-	OrderResponse                       = order.OrderResponse
 	PaymentResult                       = order.PaymentResult
 	UpdateOrder2PaymentRequest          = order.UpdateOrder2PaymentRequest
 	UpdateOrder2PaymentSuccessRequest   = order.UpdateOrder2PaymentSuccessRequest
 
 	OrderService interface {
 		// CreateOrder 创建订单（需预先生成预订单）
-		CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*OrderResponse, error)
-		// CancelOrder 取消订单
+		CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*OrderDetailResponse, error)
+		// CreateOrderRollback 补偿操作
+		CreateOrderRollback(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*EmptyRes, error)
+		// CancelOrder 取消订单 由用户发起
 		CancelOrder(ctx context.Context, in *CancelOrderRequest, opts ...grpc.CallOption) (*EmptyRes, error)
-		// UpdateOrder2Payment 更新订单（支付服务回调使用）
-		UpdateOrder2Payment(ctx context.Context, in *UpdateOrder2PaymentRequest, opts ...grpc.CallOption) (*EmptyRes, error)
-		// UpdateOrder2PaymentSuccess 支付成功时（进行修改订单状态）
-		UpdateOrder2PaymentSuccess(ctx context.Context, in *UpdateOrder2PaymentSuccessRequest, opts ...grpc.CallOption) (*EmptyRes, error)
 		// GetOrder 获取订单详情
 		GetOrder(ctx context.Context, in *GetOrderRequest, opts ...grpc.CallOption) (*OrderDetailResponse, error)
 		// ListOrders 分页查询订单列表
 		ListOrders(ctx context.Context, in *ListOrdersRequest, opts ...grpc.CallOption) (*ListOrdersResponse, error)
+		// --------------- 支付服务内部接口 ---------------
+		UpdateOrder2PaymentSuccess(ctx context.Context, in *UpdateOrder2PaymentSuccessRequest, opts ...grpc.CallOption) (*EmptyRes, error)
+		// UpdateOrder2PaymentSuccessRollback 支付失败的补充操作
+		UpdateOrder2PaymentSuccessRollback(ctx context.Context, in *UpdateOrder2PaymentSuccessRequest, opts ...grpc.CallOption) (*EmptyRes, error)
+		// UpdateOrder2Payment 更新订单（支付服务回调使用） 更新为支付中
+		UpdateOrder2PaymentStatus(ctx context.Context, in *UpdateOrder2PaymentRequest, opts ...grpc.CallOption) (*EmptyRes, error)
+		// UpdateOrder2PaymentStatusRollback 补偿操作 更新订单（支付服务回调使用） 创建状态
+		UpdateOrder2PaymentStatusRollback(ctx context.Context, in *UpdateOrder2PaymentRequest, opts ...grpc.CallOption) (*EmptyRes, error)
+		GetOrder2Payment(ctx context.Context, in *GetOrderRequest, opts ...grpc.CallOption) (*OrderDetail2PaymentResponse, error)
 	}
 
 	defaultOrderService struct {
@@ -57,27 +64,21 @@ func NewOrderService(cli zrpc.Client) OrderService {
 }
 
 // CreateOrder 创建订单（需预先生成预订单）
-func (m *defaultOrderService) CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*OrderResponse, error) {
+func (m *defaultOrderService) CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*OrderDetailResponse, error) {
 	client := order.NewOrderServiceClient(m.cli.Conn())
 	return client.CreateOrder(ctx, in, opts...)
 }
 
-// CancelOrder 取消订单
+// CreateOrderRollback 补偿操作
+func (m *defaultOrderService) CreateOrderRollback(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*EmptyRes, error) {
+	client := order.NewOrderServiceClient(m.cli.Conn())
+	return client.CreateOrderRollback(ctx, in, opts...)
+}
+
+// CancelOrder 取消订单 由用户发起
 func (m *defaultOrderService) CancelOrder(ctx context.Context, in *CancelOrderRequest, opts ...grpc.CallOption) (*EmptyRes, error) {
 	client := order.NewOrderServiceClient(m.cli.Conn())
 	return client.CancelOrder(ctx, in, opts...)
-}
-
-// UpdateOrder2Payment 更新订单（支付服务回调使用）
-func (m *defaultOrderService) UpdateOrder2Payment(ctx context.Context, in *UpdateOrder2PaymentRequest, opts ...grpc.CallOption) (*EmptyRes, error) {
-	client := order.NewOrderServiceClient(m.cli.Conn())
-	return client.UpdateOrder2Payment(ctx, in, opts...)
-}
-
-// UpdateOrder2PaymentSuccess 支付成功时（进行修改订单状态）
-func (m *defaultOrderService) UpdateOrder2PaymentSuccess(ctx context.Context, in *UpdateOrder2PaymentSuccessRequest, opts ...grpc.CallOption) (*EmptyRes, error) {
-	client := order.NewOrderServiceClient(m.cli.Conn())
-	return client.UpdateOrder2PaymentSuccess(ctx, in, opts...)
 }
 
 // GetOrder 获取订单详情
@@ -90,4 +91,33 @@ func (m *defaultOrderService) GetOrder(ctx context.Context, in *GetOrderRequest,
 func (m *defaultOrderService) ListOrders(ctx context.Context, in *ListOrdersRequest, opts ...grpc.CallOption) (*ListOrdersResponse, error) {
 	client := order.NewOrderServiceClient(m.cli.Conn())
 	return client.ListOrders(ctx, in, opts...)
+}
+
+// --------------- 支付服务内部接口 ---------------
+func (m *defaultOrderService) UpdateOrder2PaymentSuccess(ctx context.Context, in *UpdateOrder2PaymentSuccessRequest, opts ...grpc.CallOption) (*EmptyRes, error) {
+	client := order.NewOrderServiceClient(m.cli.Conn())
+	return client.UpdateOrder2PaymentSuccess(ctx, in, opts...)
+}
+
+// UpdateOrder2PaymentSuccessRollback 支付失败的补充操作
+func (m *defaultOrderService) UpdateOrder2PaymentSuccessRollback(ctx context.Context, in *UpdateOrder2PaymentSuccessRequest, opts ...grpc.CallOption) (*EmptyRes, error) {
+	client := order.NewOrderServiceClient(m.cli.Conn())
+	return client.UpdateOrder2PaymentSuccessRollback(ctx, in, opts...)
+}
+
+// UpdateOrder2Payment 更新订单（支付服务回调使用） 更新为支付中
+func (m *defaultOrderService) UpdateOrder2PaymentStatus(ctx context.Context, in *UpdateOrder2PaymentRequest, opts ...grpc.CallOption) (*EmptyRes, error) {
+	client := order.NewOrderServiceClient(m.cli.Conn())
+	return client.UpdateOrder2PaymentStatus(ctx, in, opts...)
+}
+
+// UpdateOrder2PaymentStatusRollback 补偿操作 更新订单（支付服务回调使用） 创建状态
+func (m *defaultOrderService) UpdateOrder2PaymentStatusRollback(ctx context.Context, in *UpdateOrder2PaymentRequest, opts ...grpc.CallOption) (*EmptyRes, error) {
+	client := order.NewOrderServiceClient(m.cli.Conn())
+	return client.UpdateOrder2PaymentStatusRollback(ctx, in, opts...)
+}
+
+func (m *defaultOrderService) GetOrder2Payment(ctx context.Context, in *GetOrderRequest, opts ...grpc.CallOption) (*OrderDetail2PaymentResponse, error) {
+	client := order.NewOrderServiceClient(m.cli.Conn())
+	return client.GetOrder2Payment(ctx, in, opts...)
 }

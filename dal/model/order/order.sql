@@ -32,23 +32,20 @@ CREATE TABLE orders
 
 CREATE TABLE order_items
 (
-    item_id      BIGINT UNSIGNED AUTO_INCREMENT ,
-    order_id     VARCHAR(64)  NOT NULL COMMENT '关联订单号',
-
-    -- 商品快照
-    product_id   INT          NOT NULL COMMENT '商品ID',
-    quantity     INT          NOT NULL COMMENT '购买数量',
+    order_id     VARCHAR(36)  NOT NULL COMMENT '预订单ID',
+    product_id   INT UNSIGNED NOT NULL COMMENT '商品ID',
+    quantity     INT UNSIGNED NOT NULL COMMENT '数量',
+    price        BIGINT       NOT NULL COMMENT '当时单价（分）',
     product_name VARCHAR(255) NOT NULL COMMENT '商品名称',
-    product_desc TEXT COMMENT '规格描述',
-    unit_price   BIGINT       NOT NULL COMMENT '单价(分)',
-    PRIMARY KEY (item_id),
-    FOREIGN KEY (order_id) REFERENCES orders (order_id),
-    INDEX idx_order_product (order_id, product_id)
+    product_desc VARCHAR(255) NOT NULL COMMENT '商品描述',
+    created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (order_id),
+    INDEX idx_product (product_id)
 ) COMMENT ='订单商品快照';
-
 # 用户下单地址快照
 CREATE TABLE order_addresses
 (
+    order_id         VARCHAR(36)  NOT NULL COMMENT '订单ID',
     address_id       BIGINT UNSIGNED AUTO_INCREMENT,
     recipient_name   VARCHAR(100) NOT NULL COMMENT '收件人姓名',
     phone_number     VARCHAR(50)  DEFAULT NULL COMMENT '联系电话',
@@ -58,5 +55,6 @@ CREATE TABLE order_addresses
     created_at       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (address_id),
+    UNIQUE KEY idx_order_address (order_id),
     INDEX idx_recipient_name (recipient_name)
 )
