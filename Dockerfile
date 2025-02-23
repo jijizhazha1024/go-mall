@@ -31,7 +31,6 @@ ENV TZ=Asia/Shanghai
 
 # 创建必要的目录
 WORKDIR /app
-RUN mkdir -p apis/logs services/logs
 
 # 从构建阶段复制编译好的文件
 COPY --from=builder /app /app/ 

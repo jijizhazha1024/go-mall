@@ -1,71 +1,102 @@
-version: '3.8'
-
+x-common: &common
+  image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+  env_file: .env
+  networks:
+    - go-mall
+  restart: unless-stopped
+  volumes:
+    - /app/logs:/app/logs
+  deploy:
+    resources:
+      limits:
+        cpus: '0.5'
+        memory: 512M
+x-healthcheck: &healthcheck
+  healthcheck:
+    test: [ "CMD-SHELL", "curl -f http://localhost:$${HEALTHCHECK_PORT}/health || exit 1" ]
+    interval: 30s
+    timeout: 10s
+    retries: 3
 services:
-  # APIs 服务
-  user-api:
-    image: go-mall:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: go-mall-user-api
-    working_dir: /project/go-mall/apis
-    command: ./apis
-    ports:
-      - "8001:8001"  # user-api 端口
-    volumes:
-      - ./logs/apis:/project/go-mall/apis/logs
-    env_file:
-      - .env
-    networks:
-      - go-mall
-    restart: always
-
-  carts-api:
-    image: go-mall:latest
-    container_name: go-mall-carts-api
-    working_dir: /project/go-mall/apis
-    command: ./apis
-    ports:
-      - "8003:8003"  # carts-api 端口
-    volumes:
-      - ./logs/apis:/project/go-mall/apis/logs
-    env_file:
-      - .env
-    networks:
-      - go-mall
-    restart: always
-
-  # Services 服务
   auths-service:
-    image: go-mall:latest
+    <<: [ *common,*healthcheck ]
     container_name: go-mall-auths-service
-    working_dir: /project/go-mall/services
-    command: ./services
+    command: [ "/app/services/Auths", "-f", "/app/etc/auths.prod.yaml" ]
     ports:
-      - "10000:10000"  # auths-service 端口
-    volumes:
-      - ./logs/services:/project/go-mall/services/logs
-    env_file:
-      - .env
-    networks:
-      - go-mall
-    restart: always
+      - "10000:10000"
+      - "11000:11000"
+    environment:
+      HEALTHCHECK_PORT: "11000"
+
+  users-service:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-users-service
+    command: [ "/app/services/Users", "-f", "/app/etc/users.prod.yaml" ]
+    ports:
+      - "10001:10001"
+      - "11001:11001"
+    environment:
+      HEALTHCHECK_PORT: "11001"
+
+  products-service:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-products-service
+    command: [ "/app/services/Product", "-f", "/app/etc/users.prod.yaml" ]
+    ports:
+      - "10002:10002"
+      - "11002:11002"
+    environment:
+      HEALTHCHECK_PORT: "11002"
 
   carts-service:
-    image: go-mall:latest
+    <<: [ *common,*healthcheck ]
     container_name: go-mall-carts-service
-    working_dir: /project/go-mall/services
-    command: ./services
+    command: [ "/app/services/Carts", "-f", "/app/etc/carts.prod.yaml" ]
     ports:
-      - "10003:10003"  # carts-service 端口
-    volumes:
-      - ./logs/services:/project/go-mall/services/logs
+      - "10003:10003"
+      - "11003:11003"
+    environment:
+      HEALTHCHECK_PORT: "11003"
+
+  inventory-service:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-inventory-service
+    command: [ "/app/services/Inventory", "-f", "/app/etc/inventory.prod.yaml" ]
+    ports:
+      - "10011:10011"  # RPC服务端口
+      - "11011:11011"  # 指标监控端口
+    environment:
+      HEALTHCHECK_PORT: "11011"
+  user-api:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-users-api
+    command: [ "/app/apis/User", "-f", "/app/etc/user-api.prod.yaml" ]
+    ports:
+      - "8001:8001"
+      - "8101:8101"
+    environment:
+      HEALTHCHECK_PORT: "8101"
+  product-api:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-product-api
+    command: [ "/app/apis/Product", "-f", "/app/etc/product-api.prod.yaml" ]
+    ports:
+      - "8002:8002"  # API服务端口
+      - "8102:8102"  # 指标监控端口（按Port+100规则）
     env_file:
       - .env
-    networks:
-      - go-mall
-    restart: always
+    environment:
+      HEALTHCHECK_PORT: "8102"
+
+  carts-api:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-carts-api
+    command: [ "/app/apis/Carts", "-f", "/app/etc/carts-api.prod.yaml" ]
+    ports:
+      - "8003:8003"  # API服务端口
+      - "8103:8103"  # 指标监控端口（Port+100）
+    environment:
+      HEALTHCHECK_PORT: "8103"
 
 networks:
   go-mall:
-    external: true 
