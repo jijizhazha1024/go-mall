@@ -51,27 +51,34 @@ message Order {
   // 状态信息
   OrderStatus order_status = 11;
   PaymentStatus payment_status = 12;
+  string Reason = 13;
 
   // 时间信息
-  int64 expire_time = 13;
-  int64 created_at = 14;
-  int64 updated_at = 15;
+  string expire_time = 14;
+  string created_at = 15;
+  string updated_at = 16;
 }
 
 message OrderItem {
   string item_id = 1;
-  string product_id = 2;
-  int32 quantity = 3;
+  uint64 product_id = 2;
+  uint64 quantity = 3;
   string product_name = 4;
   string product_desc = 5;
   int64 unit_price = 6;  // 单位：分
 }
 
 message OrderAddress {
-  string address_id = 1;
+  uint64 address_id = 1;
   string recipient_name = 2;
   string phone_number = 3;
-  string full_address = 4;
+  string province = 4;
+  string city = 5;
+  string detailed_address = 6;
+  string created_at = 7;
+  string updated_at = 8;
+  string order_id = 9;
+
 }
 message EmptyRes {
   int32 status_code = 1;
@@ -81,29 +88,28 @@ message EmptyRes {
 // ================== 服务接口定义 ==================
 service OrderService {
   //  CreateOrder 创建订单（需预先生成预订单）
-  rpc CreateOrder(CreateOrderRequest) returns (OrderResponse);
+  rpc CreateOrder(CreateOrderRequest) returns (OrderDetailResponse);
   //  CreateOrderRollback 补偿操作
   rpc CreateOrderRollback(CreateOrderRequest) returns (EmptyRes);
 
   //  CancelOrder 取消订单 由用户发起
   rpc CancelOrder(CancelOrderRequest) returns (EmptyRes);
-
-  //  UpdateOrder2Payment 更新订单（支付服务回调使用） 更新为支付中
-  rpc UpdateOrder2PaymentStatus(UpdateOrder2PaymentRequest) returns (EmptyRes);
-  //  UpdateOrder2PaymentStatusRollback 补偿操作 更新订单（支付服务回调使用） 创建状态
-  rpc UpdateOrder2PaymentStatusRollback(UpdateOrder2PaymentRequest) returns (EmptyRes);
-
+  // GetOrder 获取订单详情
+  rpc GetOrder(GetOrderRequest) returns (OrderDetailResponse);
+  // ListOrders 分页查询订单列表
+  rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse);
+  // --------------- 支付服务内部接口 ---------------
   //  修改订单状态为支付成功
   //  UpdateOrder2PaymentSuccess 支付成功时（进行修改订单状态）
   rpc UpdateOrder2PaymentSuccess(UpdateOrder2PaymentSuccessRequest) returns (EmptyRes);
   //  UpdateOrder2PaymentSuccessRollback 支付失败的补充操作
   rpc UpdateOrder2PaymentSuccessRollback(UpdateOrder2PaymentSuccessRequest) returns (EmptyRes);
+  //  UpdateOrder2Payment 更新订单（支付服务回调使用） 更新为支付中
+  rpc UpdateOrder2PaymentStatus(UpdateOrder2PaymentRequest) returns (EmptyRes);
+  //  UpdateOrder2PaymentStatusRollback 补偿操作 更新订单（支付服务回调使用） 创建状态
+  rpc UpdateOrder2PaymentStatusRollback(UpdateOrder2PaymentRequest) returns (EmptyRes);
+  rpc GetOrder2Payment(GetOrderRequest) returns (OrderDetail2PaymentResponse);
 
-  // GetOrder 获取订单详情
-  rpc GetOrder(GetOrderRequest) returns (OrderDetailResponse);
-
-  // ListOrders 分页查询订单列表
-  rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse);
 }
 
 // ================== 请求/响应结构 ==================
@@ -114,17 +120,12 @@ message CreateOrderRequest {
   int32 address_id = 4;
   PaymentMethod payment_method = 5;
 }
-
-message OrderResponse {
+message OrderDetail2PaymentResponse {
   int32 status_code = 1;
   string status_msg = 2;
-
   Order order = 3;
-  repeated OrderItem items = 4;
-  OrderAddress address = 5; // 订单地址
-
-
 }
+
 
 message CancelOrderRequest {
   string order_id = 1;
@@ -148,8 +149,6 @@ message UpdateOrder2PaymentSuccessRequest {
   int32 user_id = 3;
 }
 
-
-
 message GetOrderRequest {
   string order_id = 1;
   uint32 user_id = 2;            // 普通用户传实际ID，管理端传0
@@ -158,7 +157,6 @@ message GetOrderRequest {
 message OrderDetailResponse {
   int32 status_code = 1;
   string status_msg = 2;
-
   Order order = 3;
   repeated OrderItem items = 4;
   OrderAddress address = 5;
@@ -182,9 +180,5 @@ message ListOrdersRequest {
 message ListOrdersResponse {
   int32 status_code = 1;
   string status_msg = 2;
-
   repeated Order orders = 3;
-  int32 total_pages = 4;
-  int64 total_items = 5;
-  int32 current_page = 6;
 }

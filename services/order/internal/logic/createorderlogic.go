@@ -47,7 +47,7 @@ func NewCreateOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Creat
 }
 
 // CreateOrder 创建订单
-func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (*order.OrderResponse, error) {
+func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (*order.OrderDetailResponse, error) {
 	// --------------- 参数校验 ---------------
 	if err := l.validateRequest(in); err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (*order.Ord
 	}
 	dto.OrderID = l.generateOrderID() // 生成订单ID
 	orderValue := dto.ToOrderModel()
-	res := &order.OrderResponse{}
+	res := &order.OrderDetailResponse{}
 	if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
 		orderSession := l.svcCtx.OrderModel.WithSession(session)
 		// --------------- check ---------------

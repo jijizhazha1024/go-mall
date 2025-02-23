@@ -18,6 +18,7 @@ type (
 		WithSession(session sqlx.Session) OrdersModel
 		GetOrderStatusByOrderIDAndUserIDWithLock(ctx context.Context, orderId string, userId int32) (int64, error)
 		GetOrderByOrderIDAndUserIDWithLock(ctx context.Context, orderId string, userId int32) (*Orders, error)
+		GetOrdersByUserID(ctx context.Context, userId, page, size int32) ([]*Orders, error)
 		UpdateOrder2Payment(context.Context, string, int32, *order.PaymentResult, order.OrderStatus, order.PaymentStatus) error
 		UpdateOrder2PaymentRollback(context.Context, string, int32) error
 		UpdateOrderStatusByOrderIDAndUserID(context.Context, string, int32, order.OrderStatus, order.PaymentStatus) error
@@ -28,6 +29,20 @@ type (
 		*defaultOrdersModel
 	}
 )
+
+func (m *customOrdersModel) GetOrdersByUserID(ctx context.Context, userId int32, page, size int32) ([]*Orders, error) {
+	query := fmt.Sprintf("select %s from %s where `user_id` = ?", ordersRows, m.table)
+	var resp []*Orders
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId)
+	switch {
+	case err == nil:
+		return resp, nil
+	case errors.Is(err, sqlx.ErrNotFound):
+		return resp, nil
+	default:
+		return nil, err
+	}
+}
 
 func (m *customOrdersModel) CheckOrderExistByPreOrderId(ctx context.Context, preOrderId string, userID int32) (bool, error) {
 	query := fmt.Sprintf("select count(*) from %s where `pre_order_id` = ? and `user_id` = ? limit 1 for share", m.table)

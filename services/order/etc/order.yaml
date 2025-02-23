@@ -25,3 +25,18 @@ Log:
 MysqlConfig:
   datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
 
+#  CheckoutRpc zrpc.RpcClientConf
+#  CouponRpc   zrpc.RpcClientConf
+#  UserRpc     zrpc.RpcClientConf
+
+CheckoutRpc:
+  Target: consul://124.71.72.124:8500/checkout.rpc?wait=14s
+  NonBlock: true
+
+CouponRpc:
+  Target: consul://124.71.72.124:8500/coupons.rpc?wait=14s
+  NonBlock: true
+
+UserRpc:
+  Target: consul://124.71.72.124:8500/users.rpc?wait=14s
+  NonBlock: true
