@@ -2,9 +2,6 @@ package logic
 
 import (
 	"context"
-	"crypto/md5"
-	"fmt"
-
 	"jijizhazha1024/go-mall/services/checkout/checkout"
 	"jijizhazha1024/go-mall/services/checkout/internal/svc"
 
@@ -23,13 +20,6 @@ func NewPrepareCheckoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *P
 		svcCtx: svcCtx,
 		Logger: logx.WithContext(ctx),
 	}
-}
-
-// 生成用于幂等性的唯一哈希
-func generateHash(productId int32, quantity int32) string {
-	hashString := fmt.Sprintf("%d:%d", productId, quantity)
-	hashBytes := md5.Sum([]byte(hashString))
-	return fmt.Sprintf("%x", hashBytes)
 }
 
 // PrepareCheckout 预结算)生成预订单）
