@@ -2,9 +2,11 @@ package coupon
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"strings"
+	"time"
 )
 
 var _ CouponsModel = (*customCouponsModel)(nil)
@@ -19,12 +21,29 @@ type (
 		FindOneWithLock(ctx context.Context, session sqlx.Session, id string) (*Coupons, error)
 		DecreaseStockWithSession(ctx context.Context, session sqlx.Session, id string, num int) error
 		GetCouponTypeByID(ctx context.Context, session sqlx.Session, id string) (int64, error)
+		CheckExpirationAndStatus(ctx context.Context, session sqlx.Session, id string) (bool, error)
 	}
 
 	customCouponsModel struct {
 		*defaultCouponsModel
 	}
 )
+
+func (m *customCouponsModel) CheckExpirationAndStatus(ctx context.Context, session sqlx.Session, id string) (bool, error) {
+	var status CStatus
+	query := fmt.Sprintf("select `status`, `end_time` from %s where id = ? limit 1", m.table)
+	err := session.QueryRowCtx(ctx, &status, query, id)
+	fmt.Println(status.Status)
+	fmt.Println(status.EndTime)
+	switch {
+	case err == nil:
+		return status.Status == 1 && status.EndTime.Before(time.Now()), nil
+	case errors.Is(err, sqlx.ErrNotFound):
+		return false, err
+	default:
+		return false, err
+	}
+}
 
 func (m *customCouponsModel) GetCouponTypeByID(ctx context.Context, session sqlx.Session, id string) (int64, error) {
 	var ctp int64
