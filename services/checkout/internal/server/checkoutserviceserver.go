@@ -23,29 +23,38 @@ func NewCheckoutServiceServer(svcCtx *svc.ServiceContext) *CheckoutServiceServer
 	}
 }
 
-// 预结算（生成预订单）
+// PrepareCheckout 预结算)生成预订单）
 func (s *CheckoutServiceServer) PrepareCheckout(ctx context.Context, in *checkout.CheckoutReq) (*checkout.CheckoutResp, error) {
 	l := logic.NewPrepareCheckoutLogic(ctx, s.svcCtx)
 	return l.PrepareCheckout(in)
 }
 
-// 由订单服务触发
-func (s *CheckoutServiceServer) ReleaseCheckout(ctx context.Context, in *checkout.ReleaseReq) (*checkout.ReleaseResp, error) {
+// UpdateCheckoutStatus2Success 当订单超时，支付超时，支付退款
+func (s *CheckoutServiceServer) ReleaseCheckout(ctx context.Context, in *checkout.ReleaseReq) (*checkout.EmptyResp, error) {
 	l := logic.NewReleaseCheckoutLogic(ctx, s.svcCtx)
 	return l.ReleaseCheckout(in)
 }
 
-func (s *CheckoutServiceServer) UpdateCheckoutStatus2Success(ctx context.Context, in *checkout.UpdateCheckoutStatusReq) (*checkout.UpdateCheckoutStatusResp, error) {
-	l := logic.NewUpdateCheckoutStatus2SuccessLogic(ctx, s.svcCtx)
-	return l.UpdateCheckoutStatus2Success(in)
-}
-
+// GetCheckoutList 获取结算列表
 func (s *CheckoutServiceServer) GetCheckoutList(ctx context.Context, in *checkout.CheckoutListReq) (*checkout.CheckoutListResp, error) {
 	l := logic.NewGetCheckoutListLogic(ctx, s.svcCtx)
 	return l.GetCheckoutList(in)
 }
 
+// GetCheckoutDetail 获取结算详情
 func (s *CheckoutServiceServer) GetCheckoutDetail(ctx context.Context, in *checkout.CheckoutDetailReq) (*checkout.CheckoutDetailResp, error) {
 	l := logic.NewGetCheckoutDetailLogic(ctx, s.svcCtx)
 	return l.GetCheckoutDetail(in)
+}
+
+// UpdateStatus2Order 由订单服务调用，更新结算状态为已确认
+func (s *CheckoutServiceServer) UpdateStatus2Order(ctx context.Context, in *checkout.UpdateStatusReq) (*checkout.EmptyResp, error) {
+	l := logic.NewUpdateStatus2OrderLogic(ctx, s.svcCtx)
+	return l.UpdateStatus2Order(in)
+}
+
+// UpdateStatus2OrderRollback 补偿操作
+func (s *CheckoutServiceServer) UpdateStatus2OrderRollback(ctx context.Context, in *checkout.UpdateStatusReq) (*checkout.EmptyResp, error) {
+	l := logic.NewUpdateStatus2OrderRollbackLogic(ctx, s.svcCtx)
+	return l.UpdateStatus2OrderRollback(in)
 }
