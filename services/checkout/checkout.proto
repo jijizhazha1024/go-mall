@@ -12,7 +12,7 @@ enum CheckoutStatus {
 }
 
 message CheckoutItem {
-  string product_id = 1;
+  int32 product_id = 1;
   int32 quantity = 2;
   string product_name = 3;
   string product_desc = 4;
