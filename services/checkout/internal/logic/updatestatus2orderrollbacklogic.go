@@ -9,22 +9,22 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type ReleaseCheckoutLogic struct {
+type UpdateStatus2OrderRollbackLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 	logx.Logger
 }
 
-func NewReleaseCheckoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ReleaseCheckoutLogic {
-	return &ReleaseCheckoutLogic{
+func NewUpdateStatus2OrderRollbackLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateStatus2OrderRollbackLogic {
+	return &UpdateStatus2OrderRollbackLogic{
 		ctx:    ctx,
 		svcCtx: svcCtx,
 		Logger: logx.WithContext(ctx),
 	}
 }
 
-// UpdateCheckoutStatus2Success 当订单超时，支付超时，支付退款
-func (l *ReleaseCheckoutLogic) ReleaseCheckout(in *checkout.ReleaseReq) (*checkout.EmptyResp, error) {
+// UpdateStatus2OrderRollback 补偿操作
+func (l *UpdateStatus2OrderRollbackLogic) UpdateStatus2OrderRollback(in *checkout.UpdateStatusReq) (*checkout.EmptyResp, error) {
 	// todo: add your logic here and delete this line
 
 	return &checkout.EmptyResp{}, nil

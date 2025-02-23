@@ -23,7 +23,7 @@ func NewPrepareCheckoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *P
 	}
 }
 
-// 预结算（生成预订单）
+// PrepareCheckout 预结算)生成预订单）
 func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*checkout.CheckoutResp, error) {
 	// todo: add your logic here and delete this line
 
