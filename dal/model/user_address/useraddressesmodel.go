@@ -18,13 +18,13 @@ type (
 		userAddressesModel
 		GetUserAddressExistsByIdAndUserId(ctx context.Context, addressId int32, userId int32) (bool, error)
 		WithSession(session sqlx.Session) UserAddressesModel
-		GetUserAddress(ctx context.Context, userId int32) (*UserAddresses, error)
+
 		FindAllByUserId(ctx context.Context, userId int32) ([]*UserAddresses, error)
 		DeleteByAddressIdandUserId(ctx context.Context, addressId int32, userId int32) error
 		InsertWithSession(ctx context.Context, session sqlx.Session, data *UserAddresses) (sql.Result, error)
 		GetUserAddressbyIdAndUserId(ctx context.Context, addressId int32, userId int32) (*UserAddresses, error)
 		UpdateWithSession(ctx context.Context, session sqlx.Session, data *UserAddresses) (sql.Result, error)
-		FindDefaultByUserId(ctx context.Context, userId int32) (*UserAddresses, error)
+
 		BatchUpdateDeFaultWithSession(ctx context.Context, session sqlx.Session, data []*UserAddresses) error
 	}
 
@@ -49,26 +49,6 @@ func (m *customUserAddressesModel) WithSession(session sqlx.Session) UserAddress
 		m.cacheConf, // 使用保存的缓存配置
 	)
 }
-func (m *customUserAddressesModel) GetUserAddress(ctx context.Context, userId int32) (*UserAddresses, error) {
-	cacheKey := fmt.Sprintf("userAddress:default:%d", userId)
-	var resp UserAddresses
-
-	// 尝试从缓存读取
-	err := m.QueryRowCtx(ctx, &resp, cacheKey, func(ctx context.Context, conn sqlx.SqlConn, v any) error {
-		query := fmt.Sprintf("select %s from %s where `user_id` = ? and `is_default` = true limit 1",
-			userAddressesRows, m.table)
-		return conn.QueryRowCtx(ctx, v, query, userId)
-	})
-
-	switch err {
-	case nil:
-		return &resp, nil
-	case sqlx.ErrNotFound:
-		return nil, ErrNotFound
-	default:
-		return nil, err
-	}
-}
 
 func (m *customUserAddressesModel) FindAllByUserId(ctx context.Context, userId int32) ([]*UserAddresses, error) {
 	var resp []*UserAddresses
@@ -91,15 +71,10 @@ func (m *customUserAddressesModel) FindAllByUserId(ctx context.Context, userId i
 	}
 }
 
-func (m *customUserAddressesModel) FindDefaultByUserId(ctx context.Context, userId int32) (*UserAddresses, error) {
-	return m.GetUserAddress(ctx, userId)
-}
 func (m *customUserAddressesModel) DeleteByAddressIdandUserId(ctx context.Context, addressId int32, userId int32) error {
 	// 添加全量缓存清除
 	keys := []string{
 		fmt.Sprintf("userAddress:%d:%d", userId, addressId), // 主键缓存
-		fmt.Sprintf("userAddress:default:%d", userId),       // 默认地址
-		fmt.Sprintf("userAddress:all:%d", userId),           // 用户所有地址
 	}
 
 	// 带缓存的删除操作
@@ -159,6 +134,18 @@ func (m *customUserAddressesModel) BatchUpdateDeFaultWithSession(ctx context.Con
 			return err
 		}
 	}
+	// 事务成功后，批量删除相关用户的默认地址缓存
+
+	var keys []string
+	for _, addr := range data {
+		keys = append(keys, fmt.Sprintf("userAddress:%d:%d", addr.UserId, addr.AddressId))
+	}
+	err := m.CachedConn.DelCacheCtx(ctx, keys...)
+	if err != nil {
+		// 可选择回滚事务或记录日志
+		return err
+	}
+
 	return nil
 }
 func (m *customUserAddressesModel) InsertWithSession(ctx context.Context, session sqlx.Session, data *UserAddresses) (sql.Result, error) {
@@ -180,5 +167,6 @@ func (m *customUserAddressesModel) UpdateWithSession(ctx context.Context, sessio
 	if err != nil {
 		return nil, err
 	}
+
 	return result, nil
 }
