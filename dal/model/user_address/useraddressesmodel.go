@@ -74,7 +74,7 @@ func (m *customUserAddressesModel) FindAllByUserId(ctx context.Context, userId i
 func (m *customUserAddressesModel) DeleteByAddressIdandUserId(ctx context.Context, addressId int32, userId int32) error {
 	// 添加全量缓存清除
 	keys := []string{
-		fmt.Sprintf("userAddress:%d:%d", userId, addressId), // 主键缓存
+		fmt.Sprintf("cache:userAddress:%d:%d", userId, addressId), // 主键缓存
 	}
 
 	// 带缓存的删除操作
@@ -86,7 +86,7 @@ func (m *customUserAddressesModel) DeleteByAddressIdandUserId(ctx context.Contex
 	return err
 }
 func (m *customUserAddressesModel) GetUserAddressExistsByIdAndUserId(ctx context.Context, addressId int32, userId int32) (bool, error) {
-	cacheKey := fmt.Sprintf("userAddressExists:%d:%d", userId, addressId)
+	cacheKey := fmt.Sprintf("cache:userAddressExists:%d:%d", userId, addressId)
 	var exists int8
 
 	// 使用联合主键缓存
@@ -106,7 +106,7 @@ func (m *customUserAddressesModel) GetUserAddressExistsByIdAndUserId(ctx context
 	}
 }
 func (m *customUserAddressesModel) GetUserAddressbyIdAndUserId(ctx context.Context, addressId int32, userId int32) (*UserAddresses, error) {
-	cacheKey := fmt.Sprintf("userAddress:%d:%d", userId, addressId)
+	cacheKey := fmt.Sprintf("cache:userAddress:%d:%d", userId, addressId)
 	var resp UserAddresses
 
 	// 使用联合主键缓存
@@ -134,11 +134,10 @@ func (m *customUserAddressesModel) BatchUpdateDeFaultWithSession(ctx context.Con
 			return err
 		}
 	}
-	// 事务成功后，批量删除相关用户的默认地址缓存
 
 	var keys []string
 	for _, addr := range data {
-		keys = append(keys, fmt.Sprintf("userAddress:%d:%d", addr.UserId, addr.AddressId))
+		keys = append(keys, fmt.Sprintf("cache:userAddress:%d:%d", addr.UserId, addr.AddressId))
 	}
 	err := m.CachedConn.DelCacheCtx(ctx, keys...)
 	if err != nil {
