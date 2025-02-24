@@ -27,7 +27,6 @@ services:
       - "11000:11000"
     environment:
       HEALTHCHECK_PORT: "11000"
-
   users-service:
     <<: [ *common,*healthcheck ]
     container_name: go-mall-users-service
@@ -37,17 +36,15 @@ services:
       - "11001:11001"
     environment:
       HEALTHCHECK_PORT: "11001"
-
   products-service:
     <<: [ *common,*healthcheck ]
     container_name: go-mall-products-service
-    command: [ "/app/services/Product", "-f", "/app/etc/users.prod.yaml" ]
+    command: [ "/app/services/Product", "-f", "/app/etc/products.prod.yaml" ]
     ports:
       - "10002:10002"
       - "11002:11002"
     environment:
       HEALTHCHECK_PORT: "11002"
-
   carts-service:
     <<: [ *common,*healthcheck ]
     container_name: go-mall-carts-service
@@ -57,7 +54,15 @@ services:
       - "11003:11003"
     environment:
       HEALTHCHECK_PORT: "11003"
-
+  audit-service:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-audit-service
+    command: [ "/app/services/Audit", "-f", "/app/etc/audit.prod.yaml" ]
+    ports:
+      - "10008:10008"
+      - "11008:11008"
+    environment:
+      HEALTHCHECK_PORT: "11008"
   inventory-service:
     <<: [ *common,*healthcheck ]
     container_name: go-mall-inventory-service
@@ -67,6 +72,8 @@ services:
       - "11011:11011"  # 指标监控端口
     environment:
       HEALTHCHECK_PORT: "11011"
+
+
   user-api:
     <<: [ *common,*healthcheck ]
     container_name: go-mall-users-api
@@ -87,7 +94,6 @@ services:
       - .env
     environment:
       HEALTHCHECK_PORT: "8102"
-
   carts-api:
     <<: [ *common,*healthcheck ]
     container_name: go-mall-carts-api
