@@ -24,8 +24,7 @@ go.work.sum
 # env file
 .env
 
-.idea
-.idea/*
+.idea/
 
 logs/
 **/logs/
