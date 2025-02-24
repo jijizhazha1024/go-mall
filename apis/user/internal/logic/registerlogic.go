@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/zeromicro/x/errors"
 
@@ -34,6 +35,13 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 
 	if req.Email == "" || req.Password == "" {
 		return nil, errors.New(code.LoginMessageEmpty, code.LoginMessageEmptyMsg)
+	}
+
+	// 使用RFC 5322简化版正则
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(req.Email) {
+		l.Logger.Infow("邮箱格式不合法")
+		return nil, errors.New(code.EmailFormatError, code.EmailFormatErrorMsg)
 	}
 
 	if req.Password != req.ConfirmPassword {
