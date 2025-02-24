@@ -13,6 +13,10 @@ jobs:
         run: |
           echo "Full ref: $GITHUB_REF"
           echo "Tag name: $GITHUB_REF_NAME"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          driver: docker-container
       - name: Build and push
         uses: docker/build-push-action@v4
         env:
@@ -22,3 +26,5 @@ jobs:
           tags: |
             swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
             swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:${{ env.IMAGE_TAG }}
+          cache-from: type=registry,ref=swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:buildcache
+          cache-to: type=registry,ref=swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:buildcache,mode=max
