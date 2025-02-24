@@ -31,7 +31,7 @@ func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.InventoryReq) (*inv
 	for _, item := range in.Items {
 
 		if item.Quantity <= 0 {
-			l.Logger.Infow("quantity must be greater than 0", logx.Field("quantity", item.Quantity), logx.Field("product_id", item.ProductId))
+			l.Logger.Errorw("quantity must be greater than 0", logx.Field("quantity", item.Quantity), logx.Field("product_id", item.ProductId))
 			return nil, biz.InvalidInventoryErr
 		}
 		tostr := fmt.Sprintf("%d", item.Quantity)

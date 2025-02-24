@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/inventory/internal/svc"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
 
@@ -29,12 +30,15 @@ func NewDecreasePreInventoryLogic(ctx context.Context, svcCtx *svc.ServiceContex
 // DecreaseInventory 预扣减库存，此时并非真实扣除库存，而是在缓存进行--操作
 func (l *DecreasePreInventoryLogic) DecreasePreInventory(in *inventory.InventoryReq) (*inventory.InventoryResp, error) {
 
+	resp := &inventory.InventoryResp{}
 	// 构建幂等锁Key（用户ID+预订单ID）
 	lockKey := fmt.Sprintf("inventory:deduct:lock:%d:%s", in.UserId, in.PreOrderId)
 
-	// 准备Lua脚本参数
-	keys := []string{lockKey}
-	args := []interface{}{in.PreOrderId}
+	//准备参数
+	keys := make([]string, len(in.Items)+1)
+	args := make([]interface{}, len(in.Items)+1)
+	keys[0] = lockKey
+	args[0] = in.PreOrderId // 构造库存Key列表
 
 	// 构造库存Key列表
 	for _, item := range in.Items {
@@ -51,6 +55,7 @@ func (l *DecreasePreInventoryLogic) DecreasePreInventory(in *inventory.Inventory
 	// 执行Lua脚本（使用go-zero的Evalsah方法）
 	val, err := l.svcCtx.Rdb.EvalSha(l.svcCtx.DecreaseInventoryShal, keys, args)
 	if err != nil {
+
 		l.Logger.Errorw("LUA脚本执行失败",
 			logx.Field("error", err),
 			logx.Field("pre_order_id", in.PreOrderId))
@@ -73,10 +78,16 @@ func (l *DecreasePreInventoryLogic) DecreasePreInventory(in *inventory.Inventory
 	case 1: // 已处理过
 		l.Logger.Infow("订单已处理",
 			logx.Field("pre_order_id", in.PreOrderId))
-		return &inventory.InventoryResp{}, status.Error(codes.AlreadyExists, "订单已处理")
-	case 2: // 库存不足
+		resp.StatusCode = code.OrderhasBeenPaid
+		resp.StatusMsg = code.OrderhasBeenPaidMsg
+		return resp, nil
 
-		return nil, status.Error(codes.ResourceExhausted, "库存不足")
+	case 2: // 库存不足
+		resp.StatusCode = code.InventoryNotEnough
+		resp.StatusMsg = code.InventoryNotEnoughMsg
+		l.Logger.Infow("库存不足",
+			logx.Field("pre_order_id", in.PreOrderId))
+		return resp, nil
 	default:
 		l.Logger.Errorw("未知返回码",
 			logx.Field("result", result))

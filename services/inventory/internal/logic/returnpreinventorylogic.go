@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/inventory/internal/svc"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
 
@@ -28,13 +29,16 @@ func NewReturnPreInventoryLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 // ReturnPreInventory 退还预扣减的库存（）
 func (l *ReturnPreInventoryLogic) ReturnPreInventory(in *inventory.InventoryReq) (*inventory.InventoryResp, error) {
-
+	resp := &inventory.InventoryResp{}
 	// 构建幂等锁Key（用户ID+预订单ID）
 	lockKey := fmt.Sprintf("inventory:deduct:lock:%d:%s", in.UserId, in.PreOrderId)
 
-	// 准备Lua脚本参数
-	keys := []string{lockKey}
-	args := []interface{}{in.PreOrderId}
+	//准备参数
+	keys := make([]string, len(in.Items)+1)
+	args := make([]interface{}, len(in.Items)+1)
+
+	keys[0] = lockKey
+	args[0] = in.PreOrderId // 构造库存Key列表
 
 	// 构造库存Key列表
 	for _, item := range in.Items {
@@ -69,9 +73,11 @@ func (l *ReturnPreInventoryLogic) ReturnPreInventory(in *inventory.InventoryReq)
 	case 0: // 归还成功
 		return &inventory.InventoryResp{}, nil
 	case 1: // 已处理过
-		l.Logger.Infow("订单没有进行预扣除",
+		l.Logger.Infow("订单已处理",
 			logx.Field("pre_order_id", in.PreOrderId))
-		return &inventory.InventoryResp{}, status.Error(codes.AlreadyExists, "订单没有进行预扣除")
+		resp.StatusCode = code.OrderhasBeenPaid
+		resp.StatusMsg = code.OrderhasBeenPaidMsg
+		return resp, nil
 
 	default:
 		l.Logger.Errorw("未知返回码",
