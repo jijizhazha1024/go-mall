@@ -19,24 +19,30 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CheckoutService_PrepareCheckout_FullMethodName              = "/checkout.CheckoutService/PrepareCheckout"
-	CheckoutService_ReleaseCheckout_FullMethodName              = "/checkout.CheckoutService/ReleaseCheckout"
-	CheckoutService_UpdateCheckoutStatus2Success_FullMethodName = "/checkout.CheckoutService/UpdateCheckoutStatus2Success"
-	CheckoutService_GetCheckoutList_FullMethodName              = "/checkout.CheckoutService/GetCheckoutList"
-	CheckoutService_GetCheckoutDetail_FullMethodName            = "/checkout.CheckoutService/GetCheckoutDetail"
+	CheckoutService_PrepareCheckout_FullMethodName            = "/checkout.CheckoutService/PrepareCheckout"
+	CheckoutService_ReleaseCheckout_FullMethodName            = "/checkout.CheckoutService/ReleaseCheckout"
+	CheckoutService_GetCheckoutList_FullMethodName            = "/checkout.CheckoutService/GetCheckoutList"
+	CheckoutService_GetCheckoutDetail_FullMethodName          = "/checkout.CheckoutService/GetCheckoutDetail"
+	CheckoutService_UpdateStatus2Order_FullMethodName         = "/checkout.CheckoutService/UpdateStatus2Order"
+	CheckoutService_UpdateStatus2OrderRollback_FullMethodName = "/checkout.CheckoutService/UpdateStatus2OrderRollback"
 )
 
 // CheckoutServiceClient is the client API for CheckoutService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CheckoutServiceClient interface {
-	// 预结算（生成预订单）
+	// PrepareCheckout 预结算)生成预订单）
 	PrepareCheckout(ctx context.Context, in *CheckoutReq, opts ...grpc.CallOption) (*CheckoutResp, error)
-	// 由订单服务触发
-	ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*ReleaseResp, error)
-	UpdateCheckoutStatus2Success(ctx context.Context, in *UpdateCheckoutStatusReq, opts ...grpc.CallOption) (*UpdateCheckoutStatusResp, error)
+	// UpdateCheckoutStatus2Success 当订单超时，支付超时，支付退款
+	ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*EmptyResp, error)
+	// GetCheckoutList 获取结算列表
 	GetCheckoutList(ctx context.Context, in *CheckoutListReq, opts ...grpc.CallOption) (*CheckoutListResp, error)
+	// GetCheckoutDetail 获取结算详情
 	GetCheckoutDetail(ctx context.Context, in *CheckoutDetailReq, opts ...grpc.CallOption) (*CheckoutDetailResp, error)
+	// UpdateStatus2Order 由订单服务调用，更新结算状态为已确认
+	UpdateStatus2Order(ctx context.Context, in *UpdateStatusReq, opts ...grpc.CallOption) (*EmptyResp, error)
+	// UpdateStatus2OrderRollback 补偿操作
+	UpdateStatus2OrderRollback(ctx context.Context, in *UpdateStatusReq, opts ...grpc.CallOption) (*EmptyResp, error)
 }
 
 type checkoutServiceClient struct {
@@ -57,20 +63,10 @@ func (c *checkoutServiceClient) PrepareCheckout(ctx context.Context, in *Checkou
 	return out, nil
 }
 
-func (c *checkoutServiceClient) ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*ReleaseResp, error) {
+func (c *checkoutServiceClient) ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*EmptyResp, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ReleaseResp)
+	out := new(EmptyResp)
 	err := c.cc.Invoke(ctx, CheckoutService_ReleaseCheckout_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *checkoutServiceClient) UpdateCheckoutStatus2Success(ctx context.Context, in *UpdateCheckoutStatusReq, opts ...grpc.CallOption) (*UpdateCheckoutStatusResp, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateCheckoutStatusResp)
-	err := c.cc.Invoke(ctx, CheckoutService_UpdateCheckoutStatus2Success_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -97,17 +93,42 @@ func (c *checkoutServiceClient) GetCheckoutDetail(ctx context.Context, in *Check
 	return out, nil
 }
 
+func (c *checkoutServiceClient) UpdateStatus2Order(ctx context.Context, in *UpdateStatusReq, opts ...grpc.CallOption) (*EmptyResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmptyResp)
+	err := c.cc.Invoke(ctx, CheckoutService_UpdateStatus2Order_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *checkoutServiceClient) UpdateStatus2OrderRollback(ctx context.Context, in *UpdateStatusReq, opts ...grpc.CallOption) (*EmptyResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(EmptyResp)
+	err := c.cc.Invoke(ctx, CheckoutService_UpdateStatus2OrderRollback_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CheckoutServiceServer is the server API for CheckoutService service.
 // All implementations must embed UnimplementedCheckoutServiceServer
 // for forward compatibility.
 type CheckoutServiceServer interface {
-	// 预结算（生成预订单）
+	// PrepareCheckout 预结算)生成预订单）
 	PrepareCheckout(context.Context, *CheckoutReq) (*CheckoutResp, error)
-	// 由订单服务触发
-	ReleaseCheckout(context.Context, *ReleaseReq) (*ReleaseResp, error)
-	UpdateCheckoutStatus2Success(context.Context, *UpdateCheckoutStatusReq) (*UpdateCheckoutStatusResp, error)
+	// UpdateCheckoutStatus2Success 当订单超时，支付超时，支付退款
+	ReleaseCheckout(context.Context, *ReleaseReq) (*EmptyResp, error)
+	// GetCheckoutList 获取结算列表
 	GetCheckoutList(context.Context, *CheckoutListReq) (*CheckoutListResp, error)
+	// GetCheckoutDetail 获取结算详情
 	GetCheckoutDetail(context.Context, *CheckoutDetailReq) (*CheckoutDetailResp, error)
+	// UpdateStatus2Order 由订单服务调用，更新结算状态为已确认
+	UpdateStatus2Order(context.Context, *UpdateStatusReq) (*EmptyResp, error)
+	// UpdateStatus2OrderRollback 补偿操作
+	UpdateStatus2OrderRollback(context.Context, *UpdateStatusReq) (*EmptyResp, error)
 	mustEmbedUnimplementedCheckoutServiceServer()
 }
 
@@ -121,17 +142,20 @@ type UnimplementedCheckoutServiceServer struct{}
 func (UnimplementedCheckoutServiceServer) PrepareCheckout(context.Context, *CheckoutReq) (*CheckoutResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PrepareCheckout not implemented")
 }
-func (UnimplementedCheckoutServiceServer) ReleaseCheckout(context.Context, *ReleaseReq) (*ReleaseResp, error) {
+func (UnimplementedCheckoutServiceServer) ReleaseCheckout(context.Context, *ReleaseReq) (*EmptyResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReleaseCheckout not implemented")
-}
-func (UnimplementedCheckoutServiceServer) UpdateCheckoutStatus2Success(context.Context, *UpdateCheckoutStatusReq) (*UpdateCheckoutStatusResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateCheckoutStatus2Success not implemented")
 }
 func (UnimplementedCheckoutServiceServer) GetCheckoutList(context.Context, *CheckoutListReq) (*CheckoutListResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCheckoutList not implemented")
 }
 func (UnimplementedCheckoutServiceServer) GetCheckoutDetail(context.Context, *CheckoutDetailReq) (*CheckoutDetailResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCheckoutDetail not implemented")
+}
+func (UnimplementedCheckoutServiceServer) UpdateStatus2Order(context.Context, *UpdateStatusReq) (*EmptyResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateStatus2Order not implemented")
+}
+func (UnimplementedCheckoutServiceServer) UpdateStatus2OrderRollback(context.Context, *UpdateStatusReq) (*EmptyResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateStatus2OrderRollback not implemented")
 }
 func (UnimplementedCheckoutServiceServer) mustEmbedUnimplementedCheckoutServiceServer() {}
 func (UnimplementedCheckoutServiceServer) testEmbeddedByValue()                         {}
@@ -190,24 +214,6 @@ func _CheckoutService_ReleaseCheckout_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CheckoutService_UpdateCheckoutStatus2Success_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateCheckoutStatusReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CheckoutServiceServer).UpdateCheckoutStatus2Success(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: CheckoutService_UpdateCheckoutStatus2Success_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CheckoutServiceServer).UpdateCheckoutStatus2Success(ctx, req.(*UpdateCheckoutStatusReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _CheckoutService_GetCheckoutList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CheckoutListReq)
 	if err := dec(in); err != nil {
@@ -244,6 +250,42 @@ func _CheckoutService_GetCheckoutDetail_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CheckoutService_UpdateStatus2Order_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateStatusReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CheckoutServiceServer).UpdateStatus2Order(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CheckoutService_UpdateStatus2Order_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CheckoutServiceServer).UpdateStatus2Order(ctx, req.(*UpdateStatusReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CheckoutService_UpdateStatus2OrderRollback_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateStatusReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CheckoutServiceServer).UpdateStatus2OrderRollback(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CheckoutService_UpdateStatus2OrderRollback_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CheckoutServiceServer).UpdateStatus2OrderRollback(ctx, req.(*UpdateStatusReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CheckoutService_ServiceDesc is the grpc.ServiceDesc for CheckoutService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -260,16 +302,20 @@ var CheckoutService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _CheckoutService_ReleaseCheckout_Handler,
 		},
 		{
-			MethodName: "UpdateCheckoutStatus2Success",
-			Handler:    _CheckoutService_UpdateCheckoutStatus2Success_Handler,
-		},
-		{
 			MethodName: "GetCheckoutList",
 			Handler:    _CheckoutService_GetCheckoutList_Handler,
 		},
 		{
 			MethodName: "GetCheckoutDetail",
 			Handler:    _CheckoutService_GetCheckoutDetail_Handler,
+		},
+		{
+			MethodName: "UpdateStatus2Order",
+			Handler:    _CheckoutService_UpdateStatus2Order_Handler,
+		},
+		{
+			MethodName: "UpdateStatus2OrderRollback",
+			Handler:    _CheckoutService_UpdateStatus2OrderRollback_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
