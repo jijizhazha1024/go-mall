@@ -106,6 +106,8 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 			IsDefault:       in.IsDefault,
 		}
 
+		//添加审计服务
+
 		return &users.AddAddressResponse{
 
 			Data: data,
@@ -143,7 +145,7 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 			DetailedAddress: in.DetailedAddress,
 			IsDefault:       in.IsDefault,
 		}
-
+		//添加审计服务
 		return &users.AddAddressResponse{
 
 			Data: data,

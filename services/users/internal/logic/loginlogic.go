@@ -73,6 +73,9 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 			StatusMsg:  code.PasswordNotMatchMsg,
 		}, nil
 	}
+
+	//审计操作
+
 	return &users.LoginResponse{
 
 		UserId: uint32(user.UserId),

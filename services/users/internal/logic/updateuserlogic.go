@@ -68,9 +68,11 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 			}, nil
 
 		}
+
 		return &users.UpdateUserResponse{}, err
 
 	}
+	//审计操作
 
 	return &users.UpdateUserResponse{
 

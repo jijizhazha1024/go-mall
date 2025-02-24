@@ -56,6 +56,7 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
 		return &users.DeleteAddressResponse{}, err
 	}
+	//审计操作
 
 	return &users.DeleteAddressResponse{}, nil
 }

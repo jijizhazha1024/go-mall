@@ -89,6 +89,9 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				}, nil
 
 			}
+
+			//审计操作
+
 			return &users.RegisterResponse{
 
 				UserId: uint32(userId),
@@ -121,6 +124,8 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				return &users.RegisterResponse{}, err
 
 			}
+
+			//审计操作
 
 			return &users.RegisterResponse{
 				UserId: uint32(existUser.UserId),

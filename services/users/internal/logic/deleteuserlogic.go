@@ -60,7 +60,7 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 
 		return &users.DeleteUserResponse{}, err
 	}
-
+	//审计操作
 	return &users.DeleteUserResponse{
 		UserId: in.UserId,
 	}, nil

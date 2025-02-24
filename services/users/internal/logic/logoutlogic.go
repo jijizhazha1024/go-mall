@@ -57,6 +57,8 @@ func (l *LogoutLogic) Logout(in *users.LogoutRequest) (*users.LogoutResponse, er
 		logx.Errorw("get logout time failed  query failed", logx.Field("err", err), logx.Field("user_id", in.UserId))
 		return &users.LogoutResponse{}, err
 	}
+	//审计操作
+
 	return &users.LogoutResponse{
 
 		LogoutTime: logtoutime.Unix(),
