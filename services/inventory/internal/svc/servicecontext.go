@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"jijizhazha1024/go-mall/dal/model/inventory"
 	"jijizhazha1024/go-mall/services/inventory/internal/config"
-	"jijizhazha1024/go-mall/services/inventory/internal/mq"
 
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -15,22 +14,15 @@ type ServiceContext struct {
 	Config         config.Config
 	Rdb            *redis.Redis
 	InventoryModel inventory.InventoryModel
-	InventoryMQ    *mq.InventoryMQ
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	// 初始化消息队列等
-	inventoryMQ, err := mq.Init(c)
-	if err != nil {
-		panic(err)
-	}
 
 	// 创建ServiceContext实例
 	svcCtx := &ServiceContext{
 		Config:         c,
 		Rdb:            redis.MustNewRedis(c.RedisConf),
 		InventoryModel: inventory.NewInventoryModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
-		InventoryMQ:    inventoryMQ,
 	}
 
 	// 执行缓存预热
