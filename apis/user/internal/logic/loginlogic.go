@@ -43,7 +43,7 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, 
 	})
 	if err != nil {
 
-		l.Logger.Errorf("call rpc login failed", logx.Field("err", err))
+		l.Logger.Errorw("call rpc login failed", logx.Field("err", err))
 		fmt.Println("loginres:", loginres)
 		fmt.Println("err:", err)
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)

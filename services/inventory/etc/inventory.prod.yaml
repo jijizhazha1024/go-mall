@@ -45,9 +45,3 @@ RedisConf:
   Pass: ${REDIS_PASSWORD}
   Tls: false
 
-RabbitMQConfig:
-  Host: ${RABBITMQ_HOST}
-  Port: ${RABBITMQ_PORT}
-  User: ${RABBITMQ_USERNAME}
-  Pass: ${RABBITMQ_PASSWORD}
-  VHost: ${RABBITMQ_VHOST}
