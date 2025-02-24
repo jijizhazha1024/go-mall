@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/inventory/internal/svc"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
@@ -32,8 +33,7 @@ func (l *DecreasePreInventoryLogic) DecreasePreInventory(in *inventory.Inventory
 
 	resp := &inventory.InventoryResp{}
 	// 构建幂等锁Key（用户ID+预订单ID）
-	lockKey := fmt.Sprintf("inventory:deduct:lock:%d:%s", in.UserId, in.PreOrderId)
-
+	lockKey := fmt.Sprintf("%s:%d:%s", biz.InventoryDeductLockPrefix, in.UserId, in.PreOrderId)
 	//准备参数
 	keys := make([]string, len(in.Items)+1)
 	args := make([]interface{}, len(in.Items)+1)
@@ -43,11 +43,13 @@ func (l *DecreasePreInventoryLogic) DecreasePreInventory(in *inventory.Inventory
 	// 构造库存Key列表
 	for _, item := range in.Items {
 		if item.Quantity <= 0 {
-			l.Logger.Errorw("商品数量不合法",
+			l.Logger.Infow("商品数量不合法",
 				logx.Field("product_id", item.ProductId))
-			return nil, status.Error(codes.InvalidArgument, "商品数量不合法")
+			resp.StatusCode = code.InvalidParams
+			resp.StatusMsg = code.InvalidParamsMsg
+			return resp, nil
 		}
-		productKey := fmt.Sprintf("inventory:product:%d", item.ProductId)
+		productKey := fmt.Sprintf("%d:%d", biz.InventoryProductKey, item.ProductId)
 		keys = append(keys, productKey)
 		args = append(args, item.Quantity)
 	}
