@@ -2,11 +2,14 @@ package logic
 
 import (
 	"context"
+	"fmt"
 
 	"jijizhazha1024/go-mall/services/inventory/internal/svc"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type DecreasePreInventoryLogic struct {
@@ -26,64 +29,57 @@ func NewDecreasePreInventoryLogic(ctx context.Context, svcCtx *svc.ServiceContex
 // DecreaseInventory 预扣减库存，此时并非真实扣除库存，而是在缓存进行--操作
 func (l *DecreasePreInventoryLogic) DecreasePreInventory(in *inventory.InventoryReq) (*inventory.InventoryResp, error) {
 
-	// var res = new(inventory.InventoryResp)
+	// 构建幂等锁Key（用户ID+预订单ID）
+	lockKey := fmt.Sprintf("inventory:deduct:lock:%d:%s", in.UserId, in.PreOrderId)
 
-	// if in.Quantity <= 0 {
-	// 	l.Logger.Infow("quantity must be greater than 0", logx.Field("quantity", in.Quantity), logx.Field("product_id", in.ProductId))
-	// 	return nil, biz.InvalidInventoryErr
-	// }
-	// // 获取缓存内的总量
-	// total, err := l.svcCtx.Rdb.Hget(fmt.Sprintf("inventory:%d", in.ProductId), "total")
+	// 准备Lua脚本参数
+	keys := []string{lockKey}
+	args := []interface{}{in.PreOrderId}
 
-	// if err != nil {
-	// 	l.Logger.Errorw("get inventory total failed", logx.Field("product_id", in.ProductId), logx.Field("err", err))
-	// 	return nil, err
-	// }
+	// 构造库存Key列表
+	for _, item := range in.Items {
+		if item.Quantity <= 0 {
+			l.Logger.Errorw("商品数量不合法",
+				logx.Field("product_id", item.ProductId))
+			return nil, status.Error(codes.InvalidArgument, "商品数量不合法")
+		}
+		productKey := fmt.Sprintf("inventory:product:%d", item.ProductId)
+		keys = append(keys, productKey)
+		args = append(args, item.Quantity)
+	}
 
-	// if total == "" {
-	// 	l.Logger.Infow("product not in inventory", logx.Field("product_id", in.ProductId))
-	// 	res.StatusCode = code.ProductNotFoundInventory
-	// 	res.StatusMsg = code.ProductNotFoundInventoryMsg
-	// 	return res, nil
-	// }
+	// 执行Lua脚本（使用go-zero的Evalsah方法）
+	val, err := l.svcCtx.Rdb.EvalSha(l.svcCtx.DecreaseInventoryShal, keys, args)
+	if err != nil {
+		l.Logger.Errorw("LUA脚本执行失败",
+			logx.Field("error", err),
+			logx.Field("pre_order_id", in.PreOrderId))
+		return nil, status.Error(codes.Internal, "系统繁忙")
+	}
 
-	// totalInt, err := strconv.Atoi(total)
+	// 类型转换处理
+	result, ok := val.(int64)
+	if !ok {
+		l.Logger.Errorw("脚本返回类型异常",
+			logx.Field("result", val),
+			logx.Field("type", fmt.Sprintf("%T", val)))
+		return nil, status.Error(codes.Internal, "系统异常")
+	}
 
-	// if err != nil {
-	// 	l.Logger.Errorw("convert inventory total to int failed", logx.Field("product_id", in.ProductId), logx.Field("err", err))
-	// 	return nil, err
-	// }
+	// 处理结果
+	switch result {
+	case 0: // 扣减成功
+		return &inventory.InventoryResp{}, nil
+	case 1: // 已处理过
+		l.Logger.Infow("订单已处理",
+			logx.Field("pre_order_id", in.PreOrderId))
+		return &inventory.InventoryResp{}, status.Error(codes.AlreadyExists, "订单已处理")
+	case 2: // 库存不足
 
-	// // 判断库存是否足够
-	// if in.Quantity > int32(totalInt) {
-	// 	l.Logger.Infow("product inventory not enough", logx.Field("product_id", in.ProductId), logx.Field("total", totalInt))
-	// 	res.StatusCode = code.InventoryNotEnough
-	// 	res.StatusMsg = code.InventoryNotEnoughMsg
-	// 	return res, nil
-	// }
-
-	// // 使用原子操作减少库存
-	// newTotal, err := l.svcCtx.Rdb.Hincrby(fmt.Sprintf("inventory:%d", in.ProductId), "total", -int(in.Quantity))
-
-	// if err != nil {
-	// 	l.Logger.Errorw("update inventory total failed", logx.Field("product_id", in.ProductId), logx.Field("err", err))
-	// 	return nil, err
-	// }
-
-	// if newTotal < 0 {
-	// 	// 检查库存是否被减到负数，如果是，应该恢复库存并返回错误
-	// 	_, err = l.svcCtx.Rdb.Hincrby(fmt.Sprintf("inventory:%d", in.ProductId), "total", int(in.Quantity))
-	// 	if err != nil {
-	// 		l.Logger.Errorw("rollback inventory total failed", logx.Field("product_id", in.ProductId), logx.Field("err", err))
-	// 		return nil, err
-	// 	}
-	// 	l.Logger.Infow("product inventory not enough", logx.Field("product_id", in.ProductId), logx.Field("total", newTotal+int(in.Quantity)))
-	// 	res.StatusCode = code.InventoryNotEnough
-	// 	res.StatusMsg = code.InventoryNotEnoughMsg
-	// 	return res, nil
-	// }
-
-	// res.Inventory = int64(newTotal)
-	// return res, nil
-	return &inventory.InventoryResp{}, nil
+		return nil, status.Error(codes.ResourceExhausted, "库存不足")
+	default:
+		l.Logger.Errorw("未知返回码",
+			logx.Field("result", result))
+		return nil, status.Error(codes.Internal, "系统异常")
+	}
 }
