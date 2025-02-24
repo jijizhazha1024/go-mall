@@ -37,11 +37,11 @@ func (l *AllAddressListLogic) AllAddressList(req *types.AllAddressListRequest) (
 	if err != nil {
 		l.Logger.Errorw("调用 rpc 获取地址列表失败", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
-	} else {
+	} else 
 		if listaddressresp.StatusMsg != "" {
 
 			return nil, errors.New(int(listaddressresp.StatusCode), listaddressresp.StatusMsg)
-		}
+		
 	}
 
 	// 创建响应对象并填充数据
