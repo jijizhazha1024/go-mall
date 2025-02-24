@@ -29,9 +29,8 @@ func NewUpdateAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upd
 
 func (l *UpdateAddressLogic) UpdateAddress(req *types.UpdateAddressRequest) (resp *types.UpdateAddressResponse, err error) {
 
-	if req.City == ""|| req.DetailedAddress == "" || req.PhoneNumber == "" || req.Province == "" {
+	if req.City == "" || req.DetailedAddress == "" || req.PhoneNumber == "" || req.Province == "" {
 
-		l.Logger.Errorf("用户信息为空", logx.Field("err", err))
 		return nil, errors.New(code.Fail, "user informaition empty")
 
 	}
@@ -49,13 +48,12 @@ func (l *UpdateAddressLogic) UpdateAddress(req *types.UpdateAddressRequest) (res
 	})
 	if err != nil {
 
-		l.Logger.Errorf("call rpc updateaddress failed", logx.Field("err", err))
+		l.Logger.Errorw("call rpc updateaddress failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
-	} else {
-		if updateAddressresp.StatusCode != code.UpdateUserAddressSuccess {
-			l.Logger.Errorf("updeteaddress rpc failed", logx.Field("status_code", updateAddressresp.StatusCode), logx.Field("status_msg", updateAddressresp.StatusMsg))
-			return nil, errors.New(int(updateAddressresp.StatusCode), updateAddressresp.StatusMsg)
-		}
+	} else if updateAddressresp.StatusMsg != "" {
+
+		return nil, errors.New(int(updateAddressresp.StatusCode), updateAddressresp.StatusMsg)
+
 	}
 
 	resp = &types.UpdateAddressResponse{

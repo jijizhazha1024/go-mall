@@ -35,11 +35,11 @@ func (l *AllAddressListLogic) AllAddressList(req *types.AllAddressListRequest) (
 	})
 
 	if err != nil {
-		l.Logger.Errorf("调用 rpc 获取地址列表失败", logx.Field("err", err))
+		l.Logger.Errorw("调用 rpc 获取地址列表失败", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 	} else {
-		if listaddressresp.StatusCode != code.GetUserAddressSuccess {
-			l.Logger.Errorf("调用 rpc 获取地址列表失败", logx.Field("status_code", listaddressresp.StatusCode), logx.Field("status_msg", listaddressresp.StatusMsg))
+		if listaddressresp.StatusMsg != "" {
+
 			return nil, errors.New(int(listaddressresp.StatusCode), listaddressresp.StatusMsg)
 		}
 	}
