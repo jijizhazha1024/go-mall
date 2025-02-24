@@ -26,5 +26,3 @@ jobs:
           tags: |
             swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
             swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:${{ env.IMAGE_TAG }}
-          cache-from: type=registry,ref=swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:buildcache
-          cache-to: type=registry,ref=swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:buildcache,mode=max
