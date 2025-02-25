@@ -3,7 +3,9 @@ package logic
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
 	"sync"
@@ -82,6 +84,16 @@ func (l *GetAllProductLogic) GetAllProduct(in *product.GetAllProductsReq) (*prod
 			Description: p.Description.String,
 			Picture:     p.Picture.String,
 			Price:       p.Price,
+		}
+		if _, err := l.svcCtx.EsClient.Index().
+			Index(biz.ProductEsIndexName).
+			Id(fmt.Sprintf("%d", p.Id)).
+			BodyJson(result[i]).
+			Refresh("true").
+			Do(l.ctx); err != nil {
+			l.Logger.Errorw("product es creation failed",
+				logx.Field("err", err))
+			return nil, err
 		}
 		go func(index int, productId int64) {
 			defer wgStock.Done()

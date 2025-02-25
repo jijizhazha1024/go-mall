@@ -33,9 +33,7 @@ func TestGetallProduct(t *testing.T) {
 		Page:     1,
 		PageSize: 2,
 	})
-	if err != nil {
-		return
-	}
+
 	if err != nil {
 		t.Fatal(err)
 

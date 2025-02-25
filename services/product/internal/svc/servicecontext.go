@@ -1,14 +1,15 @@
 package svc
 
 import (
-	"github.com/elastic/go-elasticsearch/v7"
+	"fmt"
+	"github.com/olivere/elastic"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/zrpc"
 	"jijizhazha1024/go-mall/dal/model/products/categories"
 	"jijizhazha1024/go-mall/services/inventory/inventoryclient"
 	"jijizhazha1024/go-mall/services/product/internal/config"
-	"net/http"
+	"time"
 )
 
 type ServiceContext struct {
@@ -16,7 +17,7 @@ type ServiceContext struct {
 	Mysql           sqlx.SqlConn
 	RedisClient     *redis.Redis
 	CategoriesModel categories.CategoriesModel
-	Es              *elasticsearch.Client
+	EsClient        *elastic.Client
 	InventoryRpc    inventoryclient.Inventory
 }
 
@@ -25,18 +26,18 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	// 初始化 Redis 配置
 	redisconf, _ := redis.NewRedis(c.RedisConf)
 	// 初始化 ES 客户端
-	es, _ := elasticsearch.NewClient(elasticsearch.Config{
-		Addresses: c.ElasticsearchConfig.Addresses,
-		Transport: &http.Transport{
-			MaxIdleConnsPerHost:   c.ElasticsearchConfig.MaxIdleConnsPerHost,
-			ResponseHeaderTimeout: c.ElasticsearchConfig.ResponseHeaderTimeout,
-		},
-	})
+	fmt.Println(c.ElasticSearch.Addr)
+	client, err := elastic.NewClient(elastic.SetURL(c.ElasticSearch.Addr),
+		elastic.SetSniff(false),
+		elastic.SetHealthcheckTimeoutStartup(30*time.Second))
+	if err != nil {
+		panic(err)
+	}
 	return &ServiceContext{
 		Config:          c,
 		Mysql:           mysql,
 		RedisClient:     redisconf,
-		Es:              es,
+		EsClient:        client,
 		InventoryRpc:    inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
 		CategoriesModel: categories.NewCategoriesModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
 	}

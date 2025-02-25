@@ -3,9 +3,8 @@ package logic
 import (
 	"context"
 	"fmt"
-	"github.com/elastic/go-elasticsearch/v7/esapi"
+	"github.com/olivere/elastic"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"io"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
@@ -64,7 +63,7 @@ func (l *DeleteProductLogic) DeleteProduct(in *product.DeleteProductReq) (*produ
 			return fmt.Errorf("删除商品失败: %v", err)
 		}
 		// 4. 删除商品分类关系：同样生成基于事务的 deleteCategoryModel 实例
-		deleteCategoryModel := product_categories.NewProductCategoriesModel((l.svcCtx.Mysql)).WithSession(session)
+		deleteCategoryModel := product_categories.NewProductCategoriesModel(l.svcCtx.Mysql).WithSession(session)
 		if err := deleteCategoryModel.DeleteByProductId(l.ctx, in.Id); err != nil {
 			return fmt.Errorf("删除商品分类关系失败: %v", err)
 		}
@@ -84,39 +83,22 @@ func (l *DeleteProductLogic) DeleteProduct(in *product.DeleteProductReq) (*produ
 	}
 
 	// 6. 删除es记录
-
-	// Elasticsearch文档ID
-	docID := fmt.Sprintf("%d", in.Id)
-
-	// 删除Elasticsearch记录
-	req := esapi.DeleteRequest{
-		Index:      biz.ProductEsIndexName,
-		DocumentID: docID,
-		Refresh:    "true",
-	}
-
-	res, err := req.Do(context.Background(), l.svcCtx.Es)
-	if err != nil {
-		l.Logger.Errorw("product es delete  failed",
-			logx.Field("err", err),
-			logx.Field("product_id", in.Id))
-		return nil, err
-	}
-	if res != nil {
-		defer res.Body.Close()
-	}
-	// 检查响应是否包含错误
-	if res.IsError() {
-		body, readErr := io.ReadAll(res.Body)
-		if readErr != nil {
-			l.Logger.Errorf("读取 Elasticsearch 响应体失败: %v", readErr)
+	// 构建删除请求
+	if _, err := l.svcCtx.EsClient.Delete().
+		Index(biz.ProductEsIndexName).
+		Id(fmt.Sprintf("%d", in.Id)).
+		Refresh("true").
+		Do(l.ctx); err != nil {
+		// 处理文档不存在的情况（404错误）
+		if elastic.IsNotFound(err) {
+			l.Logger.Infow("尝试删除不存在的ES文档",
+				logx.Field("product_id", in.Id))
 		} else {
-			l.Logger.Errorf("删除 Elasticsearch 记录时返回错误响应: %s", string(body))
+			l.Logger.Errorw("product es delete failed",
+				logx.Field("err", err),
+				logx.Field("product_id", in.Id))
+			return nil, err
 		}
-		l.Logger.Errorw("product es resp read failed",
-			logx.Field("err", err),
-			logx.Field("product_id", in.Id))
-		return nil, err
 	}
 
 	// 7. 延迟第二次删除缓存

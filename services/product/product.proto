@@ -17,6 +17,26 @@ service ProductCatalogService {
   rpc GetAllProduct(GetAllProductsReq) returns (GetAllProductsResp){}
   // 判断商品是否存在
   rpc IsExistProduct(IsExistProductReq) returns(IsExistProductResp){}
+  // 根据条件查询商品
+  rpc QueryProduct(QueryProductReq) returns(GetAllProductsResp){}
+}
+
+message QueryProductReq{
+  string name = 1;
+  bool new = 2;
+  bool hot = 3;
+  string keyword = 4;
+  repeated string category = 5;
+  message Price{
+    int64 min = 1; // 最低价格
+    int64 max = 2; // 最高价格
+  }
+  Price price = 6;
+  message Paginator{
+    int64 page = 1;
+    int64 pageSize = 2;
+  }
+  Paginator paginator = 7;
 }
 
 

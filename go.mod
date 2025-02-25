@@ -21,6 +21,8 @@ require (
 	google.golang.org/protobuf v1.36.1
 )
 
+require github.com/olivere/elastic v6.2.37+incompatible // indirect
+
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/BurntSushi/toml v1.3.2 // indirect
