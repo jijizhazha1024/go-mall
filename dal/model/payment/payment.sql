@@ -10,7 +10,7 @@ CREATE TABLE payments
     -- 支付信息
     payment_method  VARCHAR(20)  NOT NULL COMMENT '支付渠道（wx_pay/alipay）',
     transaction_id  VARCHAR(64)  DEFAULT NULL COMMENT '支付平台交易号',
-    pay_url         VARCHAR(512) NOT NULL COMMENT '支付跳转链接',
+    pay_url         Text         NOT NULL COMMENT '支付跳转链接',
     expire_time     BIGINT       NOT NULL COMMENT '支付链接过期时间戳（秒）',
 
     status          TINYINT      NOT NULL COMMENT '支付状态（0-未定义 1-待支付 2-已支付...）',

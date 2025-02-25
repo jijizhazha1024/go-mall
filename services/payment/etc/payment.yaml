@@ -22,7 +22,7 @@ Log:
   Path: ./logs/payment-rpc
 
 MysqlConfig:
-  datasource: jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local
+  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
 
 RedisConf:
   Host: 124.71.72.124:6379
@@ -30,8 +30,11 @@ RedisConf:
   Tls: false
 
 Alipay:
-  AppId: 9021000144642851
-  PrivateKey: your-private-key
-  AlipayPublicKey: alipay-public-key
-  NotifyURL:
+  AppId: ${APPID}
+  PrivateKey: ${PRIVATE_KEY}
+  AlipayPublicKey: ${ALIPAY_PUBLIC_KEY}
+  NotifyURL: ${NOTIFY_URL}
   ReturnURL:
+OrderRpc:
+  Target: consul://124.71.72.124:8500/order.rpc?wait=14s
+  NonBlock: true

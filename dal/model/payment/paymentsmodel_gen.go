@@ -98,6 +98,7 @@ func (m *defaultPaymentsModel) FindOneByIdempotencyKey(ctx context.Context, idem
 
 func (m *defaultPaymentsModel) Insert(ctx context.Context, data *Payments) (sql.Result, error) {
 	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, paymentsRowsExpectAutoSet)
+	fmt.Println(data.PaidAmount)
 	ret, err := m.conn.ExecCtx(ctx, query, data.PaymentId, data.PreOrderId, data.OrderId, data.OriginalAmount, data.PaidAmount, data.PaymentMethod, data.TransactionId, data.PayUrl, data.ExpireTime, data.Status, data.IdempotencyKey, data.PaidAt)
 	return ret, err
 }

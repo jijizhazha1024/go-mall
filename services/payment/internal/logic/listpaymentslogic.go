@@ -2,7 +2,8 @@ package logic
 
 import (
 	"context"
-
+	"errors"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"jijizhazha1024/go-mall/services/payment/internal/svc"
 	"jijizhazha1024/go-mall/services/payment/payment"
 
@@ -24,7 +25,47 @@ func NewListPaymentsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *List
 }
 
 func (l *ListPaymentsLogic) ListPayments(in *payment.PaymentListReq) (*payment.PaymentListResp, error) {
-	// todo: add your logic here and delete this line
+	var queryErr error
+	paymentModel := l.svcCtx.PaymentModel
 
-	return &payment.PaymentListResp{}, nil
+	// 查询商品列表
+	offset := (in.Pagination.Page - 1) * in.Pagination.PageSize
+	payments, queryErr := paymentModel.FindPage(l.ctx, in.UserId, int(offset), int(in.Pagination.PageSize))
+	// 统一错误处理
+	if queryErr != nil {
+		if errors.Is(queryErr, sqlx.ErrNotFound) {
+			// 也可以记录info日志
+			// 返回空，可能是由于用户的过滤条件导致没有匹配到数据
+
+			return &payment.PaymentListResp{}, nil
+		}
+		l.Logger.Errorw("query payments failed",
+			logx.Field("err", queryErr),
+			logx.Field("page", in.Pagination.Page),
+			logx.Field("pageSize", in.Pagination.PageSize))
+		return nil, queryErr
+	}
+	items := make([]*payment.PaymentItem, len(payments))
+	for i, p := range payments {
+		items[i] = &payment.PaymentItem{
+			PaymentId:      p.PaymentId,
+			PreOrderId:     p.PreOrderId,
+			OrderId:        p.OrderId.String,
+			OriginalAmount: p.OriginalAmount,
+			PaidAmount:     p.PaidAmount.Int64,
+			TransactionId:  p.TransactionId.String,
+			PayUrl:         p.PayUrl,
+			ExpireTime:     p.ExpireTime,
+			Status:         payment.PaymentStatus(p.Status),
+			CreatedAt:      p.CreatedAt.Unix(),
+			UpdatedAt:      p.UpdatedAt.Unix(),
+			PaidAt:         p.PaidAt.Int64,
+		}
+	}
+
+	return &payment.PaymentListResp{
+		StatusCode: 0,
+		StatusMsg:  "Success",
+		Payments:   items,
+	}, nil
 }
