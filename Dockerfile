@@ -8,8 +8,6 @@ WORKDIR /project/go-mall
 
 # 设置Go环境
 ENV CGO_ENABLED=0
-ENV GOPROXY=https://goproxy.cn,direct
-
 # 复制源代码
 COPY . .
 
