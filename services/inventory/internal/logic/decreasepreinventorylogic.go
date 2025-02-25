@@ -35,13 +35,12 @@ func (l *DecreasePreInventoryLogic) DecreasePreInventory(in *inventory.Inventory
 	// 构建幂等锁Key（用户ID+预订单ID）
 	lockKey := fmt.Sprintf("%s:%d:%s", biz.InventoryDeductLockPrefix, in.UserId, in.PreOrderId)
 	//准备参数
-	keys := make([]string, 0, len(in.Items))
-	args := make([]interface{}, 0, len(in.Items))
+	keys := make([]string, len(in.Items)+1)
+	args := make([]interface{}, len(in.Items)+1)
 	keys[0] = lockKey
 	args[0] = in.PreOrderId // 构造库存Key列表
 
-	// 构造库存Key列表
-	for _, item := range in.Items {
+	for i, item := range in.Items {
 		if item.Quantity <= 0 {
 			l.Logger.Infow("商品数量不合法",
 				logx.Field("product_id", item.ProductId))
@@ -50,8 +49,8 @@ func (l *DecreasePreInventoryLogic) DecreasePreInventory(in *inventory.Inventory
 			return resp, nil
 		}
 		productKey := fmt.Sprintf("%s:%d", biz.InventoryProductKey, item.ProductId)
-		keys = append(keys, productKey)
-		args = append(args, item.Quantity)
+		keys[i+1] = productKey
+		args[i+1] = item.Quantity
 	}
 
 	// 执行Lua脚本（使用go-zero的Evalsah方法）
