@@ -1,7 +1,8 @@
 name: DockerPush
 on:
   push:
-    branches: [ dev,main,"*/ci" ]
+    branches: [ dev,main,"**ci" ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
