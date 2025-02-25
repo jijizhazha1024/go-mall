@@ -11,6 +11,14 @@ MysqlConfig:
   datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
   conntimeout: 5
 
+InventoryRpc:
+  Target: consul://124.71.72.124:8500/inventory.rpc?wait=14s
+  NonBlock: true
+
+CartsRpc:
+  Target: consul://124.71.72.124:8500/carts.rpc?wait=14s
+  NonBlock: true
+
 RedisConf:
   Host: 124.71.72.124:6379
   Type: node

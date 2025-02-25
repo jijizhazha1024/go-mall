@@ -8,9 +8,11 @@ import (
 
 type Config struct {
 	zrpc.RpcServerConf
-	MysqlConfig MysqlConfig
-	RedisConf   redis.RedisConf
-	Consul      consul.Conf
+	MysqlConfig  MysqlConfig
+	RedisConf    redis.RedisConf
+	Consul       consul.Conf
+	InventoryRpc zrpc.RpcClientConf
+	CartsRpc     zrpc.RpcClientConf
 }
 
 type MysqlConfig struct {
