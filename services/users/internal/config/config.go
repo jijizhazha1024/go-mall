@@ -9,8 +9,9 @@ import (
 type Config struct {
 	zrpc.RpcServerConf
 	MysqlConfig MysqlConfig
-	Consul      consul.Conf
-	Cache       cache.CacheConf
+
+	Consul consul.Conf
+	Cache  cache.CacheConf
 }
 type MysqlConfig struct {
 	DataSource  string

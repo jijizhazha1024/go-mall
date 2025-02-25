@@ -91,6 +91,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			}
 
 			//审计操作
+			svc.UserRegCounter.Inc("success")
 
 			return &users.RegisterResponse{
 
@@ -127,6 +128,8 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 
 			//审计操作
 
+			//埋点操作
+			svc.UserRegCounter.Inc("success")
 			return &users.RegisterResponse{
 				UserId: uint32(existUser.UserId),
 			}, nil

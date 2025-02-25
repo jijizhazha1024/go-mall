@@ -41,12 +41,6 @@ func main() {
 	}
 	defer s.Stop()
 
-	emails, _ := ctx.UsersModel.FindAllEmails()
-
-	for _, email := range emails {
-		ctx.Bf.Add(email)
-	}
-
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()
 }
