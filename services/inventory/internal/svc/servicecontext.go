@@ -2,11 +2,14 @@ package svc
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"jijizhazha1024/go-mall/dal/model/inventory"
 	"jijizhazha1024/go-mall/services/inventory/internal/config"
-	"jijizhazha1024/go-mall/services/inventory/internal/mq"
+	"jijizhazha1024/go-mall/services/inventory/internal/decreaselua"
+	"jijizhazha1024/go-mall/services/inventory/internal/returnlua"
 
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
@@ -15,28 +18,34 @@ type ServiceContext struct {
 	Config         config.Config
 	Rdb            *redis.Redis
 	InventoryModel inventory.InventoryModel
-	InventoryMQ    *mq.InventoryMQ
+
+	DecreaseInventoryShal string
+	ReturnInventoryShal   string
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	// 初始化消息队列等
-	inventoryMQ, err := mq.Init(c)
-	if err != nil {
-		panic(err)
-	}
 
 	// 创建ServiceContext实例
 	svcCtx := &ServiceContext{
 		Config:         c,
 		Rdb:            redis.MustNewRedis(c.RedisConf),
 		InventoryModel: inventory.NewInventoryModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
-		InventoryMQ:    inventoryMQ,
 	}
 
 	// 执行缓存预热
 	if err := svcCtx.PreheatInventoryCache(); err != nil {
 		panic(fmt.Sprintf("缓存预热失败: %v", err))
 	}
+	decreaseInventoryShashal, err := svcCtx.predecreaseloadScript()
+	if err != nil {
+		panic(fmt.Sprintf("加载Lua脚本失败: %v", err))
+	}
+	svcCtx.DecreaseInventoryShal = decreaseInventoryShashal
+	returnInventoryShashal, err := svcCtx.prereturnloadScript()
+	if err != nil {
+		panic(fmt.Sprintf("加载Lua脚本失败: %v", err))
+	}
+	svcCtx.ReturnInventoryShal = returnInventoryShashal
 
 	return svcCtx
 }
@@ -60,4 +69,25 @@ func (s *ServiceContext) PreheatInventoryCache() error {
 
 	return nil
 
+}
+
+func (s *ServiceContext) predecreaseloadScript() (string, error) {
+
+	sha, err := s.Rdb.ScriptLoad(decreaselua.Decreaselua)
+
+	if err != nil {
+		logx.Errorf("Failed to decrease load script: %v", err)
+		return "", err
+	}
+	return sha, nil
+}
+func (s *ServiceContext) prereturnloadScript() (string, error) {
+
+	sha, err := s.Rdb.ScriptLoad(returnlua.Returnlua)
+
+	if err != nil {
+		logx.Errorf("Failed to load return script: %v", err)
+		return "", err
+	}
+	return sha, nil
 }

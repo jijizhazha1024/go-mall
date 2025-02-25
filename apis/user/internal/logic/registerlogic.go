@@ -47,15 +47,14 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 		Password:        req.Password,
 		ConfirmPassword: req.ConfirmPassword,
 	})
+
 	if err != nil {
 
-		l.Logger.Errorf("call rpc register failed", logx.Field("err", err))
+		l.Logger.Errorw("call rpc register failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, err.Error())
-	} else {
-		if response.StatusCode != code.UserCreated {
-			l.Logger.Errorf("login failed", logx.Field("status_code", response.StatusCode), logx.Field("status_msg", response.StatusMsg))
-			return nil, errors.New(int(response.StatusCode), response.StatusMsg)
-		}
+	} else if response.StatusMsg != "" {
+
+		return nil, errors.New(int(response.StatusCode), response.StatusMsg)
 
 	}
 
@@ -67,7 +66,7 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 		ClientIp: client_IP,
 	})
 	if err != nil {
-		l.Logger.Errorf("call rpc generate token failed", logx.Field("err", err))
+		l.Logger.Errorw("call rpc generate token failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 
 	}

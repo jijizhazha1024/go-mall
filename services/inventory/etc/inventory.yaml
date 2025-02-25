@@ -29,9 +29,3 @@ RedisConf:
   Pass: jjzzchtt
   Tls: false
 
-RabbitMQConfig:
-  Host: 124.71.72.124
-  Port: 5672
-  User: admin
-  Pass: admin
-  VHost: /

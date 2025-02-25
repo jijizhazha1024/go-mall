@@ -23,8 +23,9 @@ func NewReleaseCheckoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *R
 	}
 }
 
-func (l *ReleaseCheckoutLogic) ReleaseCheckout(in *checkout.ReleaseReq) (*checkout.ReleaseResp, error) {
+// UpdateCheckoutStatus2Success 当订单超时，支付超时，支付退款
+func (l *ReleaseCheckoutLogic) ReleaseCheckout(in *checkout.ReleaseReq) (*checkout.EmptyResp, error) {
 	// todo: add your logic here and delete this line
 
-	return &checkout.ReleaseResp{}, nil
+	return &checkout.EmptyResp{}, nil
 }

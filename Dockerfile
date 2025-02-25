@@ -8,8 +8,6 @@ WORKDIR /project/go-mall
 
 # 设置Go环境
 ENV CGO_ENABLED=0
-ENV GOPROXY=https://goproxy.cn,direct
-
 # 复制源代码
 COPY . .
 
@@ -31,7 +29,6 @@ ENV TZ=Asia/Shanghai
 
 # 创建必要的目录
 WORKDIR /app
-RUN mkdir -p apis/logs services/logs
 
 # 从构建阶段复制编译好的文件
 COPY --from=builder /app /app/ 
