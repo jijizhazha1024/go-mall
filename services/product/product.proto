@@ -17,6 +17,7 @@ service ProductCatalogService {
   rpc GetAllProduct(GetAllProductsReq) returns (GetAllProductsResp){}
   // 判断商品是否存在
   rpc IsExistProduct(IsExistProductReq) returns(IsExistProductResp){}
+
 }
 
 
