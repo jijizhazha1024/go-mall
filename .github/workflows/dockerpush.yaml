@@ -1,7 +1,13 @@
+
+
+
+
+
 name: DockerPush
 on:
   push:
-    branches: [ dev,main ]
+    branches: [ dev,main,"**ci" ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -9,33 +15,16 @@ jobs:
       - name: Login docker
         run: |
           echo ${{ secrets.REGISTRY_PASSWORD }} | docker login -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin swr.cn-south-1.myhuaweicloud.com
-      - name: Get tag version
-        run: |
-          echo "Full ref: $GITHUB_REF"
-          echo "Tag name: $GITHUB_REF_NAME"
-      - name: Cache Go modules
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-        with:
-          driver: docker-container
-
-
+          
 
       - name: Build and push
         uses: docker/build-push-action@v4
         env:
           IMAGE_TAG: ${{ github.sha }}
         with:
-          cache-from: type=gha  # 使用 GitHub Actions 缓存
-          cache-to: type=gha,mode=max  # 写入缓存
           push: true
-          tags: |      
+          tags: |
             swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
             swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:${{ env.IMAGE_TAG }}
+   
