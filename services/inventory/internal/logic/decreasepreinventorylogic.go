@@ -49,7 +49,7 @@ func (l *DecreasePreInventoryLogic) DecreasePreInventory(in *inventory.Inventory
 			resp.StatusMsg = code.InvalidParamsMsg
 			return resp, nil
 		}
-		productKey := fmt.Sprintf("%d:%d", biz.InventoryProductKey, item.ProductId)
+		productKey := fmt.Sprintf("%s:%d", biz.InventoryProductKey, item.ProductId)
 		keys = append(keys, productKey)
 		args = append(args, item.Quantity)
 	}

@@ -35,8 +35,8 @@ func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.InventoryReq) (*inv
 			return nil, biz.InvalidInventoryErr
 		}
 		tostr := fmt.Sprintf("%d", item.Quantity)
+		err := l.svcCtx.Rdb.Set(fmt.Sprintf("%s:%d", biz.InventoryProductKey, item.ProductId), tostr)
 
-		err := l.svcCtx.Rdb.Set(fmt.Sprintf("inventory:product:%d", item.ProductId), tostr)
 		if err != nil {
 			l.Logger.Errorw("update inventory failed", logx.Field("product_id", item.ProductId), logx.Field("err", err))
 			return nil, err
