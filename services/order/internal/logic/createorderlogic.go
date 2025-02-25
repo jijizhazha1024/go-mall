@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"database/sql"
-	"github.com/dtm-labs/client/dtmcli"
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"golang.org/x/sync/errgroup"
@@ -92,7 +91,7 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (*order.Ord
 		}
 		return nil
 	}); err != nil {
-		return nil, status.Error(codes.Aborted, dtmcli.ResultFailure)
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	if res.StatusCode != code.Success {
 		l.Logger.Infow("transaction aborted", l.logContext(dto)...)
@@ -102,7 +101,7 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (*order.Ord
 }
 func (l *CreateOrderLogic) validateRequest(in *order.CreateOrderRequest) error {
 	if in.PreOrderId == "" || in.UserId == 0 || in.AddressId == 0 || in.CouponId == "" || in.PaymentMethod == 0 {
-		return status.Error(codes.InvalidArgument, "参数不合法")
+		return status.Error(codes.Aborted, "参数不合法")
 	}
 	return nil
 }
