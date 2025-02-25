@@ -9,14 +9,14 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="local(项目级别)">
+      <paths name="华为云">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="华为云">
+      <paths name="华为云(项目级别)">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
