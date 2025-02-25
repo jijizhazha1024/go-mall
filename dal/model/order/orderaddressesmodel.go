@@ -16,12 +16,19 @@ type (
 		orderAddressesModel
 		withSession(session sqlx.Session) OrderAddressesModel
 		GetOrderAddressByOrderID(ctx context.Context, orderID string) (*OrderAddresses, error)
+		DeleteOrderAddressByOrderID(ctx context.Context, session sqlx.Session, orderID string) error
 	}
 
 	customOrderAddressesModel struct {
 		*defaultOrderAddressesModel
 	}
 )
+
+func (m *customOrderAddressesModel) DeleteOrderAddressByOrderID(ctx context.Context, session sqlx.Session, orderID string) error {
+	query := fmt.Sprintf("delete from %s where `order_id` = ?", m.table)
+	_, err := session.ExecCtx(ctx, query, orderID)
+	return err
+}
 
 func (m *customOrderAddressesModel) GetOrderAddressByOrderID(ctx context.Context, orderID string) (*OrderAddresses, error) {
 	query := fmt.Sprintf("select %s from %s where `order_id` = ?", orderAddressesRows, m.table)
