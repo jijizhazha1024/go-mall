@@ -39,7 +39,9 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	// 1. 生成 pre_order_id
 	preOrderId, err := generatePreOrderID()
 	if err != nil {
-		logx.Errorf("生成 preOrderId 失败: %v", err)
+		l.Logger.Errorw("生成 preOrderId 失败",
+			logx.Field("err", err),
+			logx.Field("user_id", in.UserId))
 		return nil, errors.New("生成订单ID失败")
 	}
 
@@ -47,12 +49,14 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	cacheKey := fmt.Sprintf("checkout:preorder:%d", in.UserId)
 	exist, err := l.svcCtx.RedisClient.Exists(cacheKey)
 	if err != nil {
-		logx.Errorf("Redis 查询失败: %v", err)
+		l.Logger.Errorw("Redis 查询失败",
+			logx.Field("err", err),
+			logx.Field("user_id", in.UserId))
 		return nil, errors.New("系统错误")
 	}
 
 	if exist { // 如果该用户已有预结算订单，直接返回，防止重复删除购物车
-		logx.Infof("用户 %d 的预订单 %s 已存在，跳过重复结算", in.UserId, preOrderId)
+		l.Logger.Infof("用户 %d 的预订单 %s 已存在，跳过重复结算", in.UserId, preOrderId)
 		return &checkout.CheckoutResp{
 			StatusCode: 200,
 			StatusMsg:  "预结算已处理",
@@ -63,14 +67,18 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	// 3. 设置 Redis 幂等锁 (有效期 5 分钟)
 	_, err = l.svcCtx.RedisClient.SetnxEx(cacheKey, preOrderId, 300) // 5 分钟过期
 	if err != nil {
-		logx.Errorf("Redis 设置失败: %v", err)
+		l.Logger.Errorw("Redis 设置失败",
+			logx.Field("err", err),
+			logx.Field("user_id", in.UserId))
 		return nil, errors.New("系统错误")
 	}
 
 	// 4. 查询购物车
 	cartItems, err := l.svcCtx.CartsModel.FindByUserID(l.ctx, int64(in.UserId))
 	if err != nil {
-		logx.Errorf("获取购物车失败: user_id=%d, err=%v", in.UserId, err)
+		l.Logger.Errorw("获取购物车失败",
+			logx.Field("err", err),
+			logx.Field("user_id", in.UserId))
 		return nil, errors.New("获取购物车失败")
 	}
 
@@ -97,14 +105,19 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	})
 
 	if err != nil {
-		logx.Errorf("库存预扣失败: user_id=%d, pre_order_id=%s, err=%v", in.UserId, preOrderId, err)
+		l.Logger.Errorw("库存预扣失败",
+			logx.Field("err", err),
+			logx.Field("user_id", in.UserId),
+			logx.Field("pre_order_id", preOrderId))
 		return nil, errors.New("库存不足")
 	}
 
 	// 6. 存储结算信息到 Redis
 	_, err = l.svcCtx.RedisClient.SetnxEx(fmt.Sprintf("checkout:order:%s", preOrderId), preOrderId, 300)
 	if err != nil {
-		logx.Errorf("Redis 存储结算信息失败: %v", err)
+		l.Logger.Errorw("Redis 存储结算信息失败",
+			logx.Field("err", err),
+			logx.Field("pre_order_id", preOrderId))
 		return nil, errors.New("系统错误")
 	}
 
@@ -118,9 +131,14 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 			})
 
 			if err != nil {
-				logx.Errorf("删除购物车失败: user_id=%d, product_id=%d, err=%v", in.UserId, item.ProductId, err)
+				l.Logger.Errorw("删除购物车失败",
+					logx.Field("err", err),
+					logx.Field("user_id", in.UserId),
+					logx.Field("product_id", item.ProductId))
 			} else {
-				logx.Infof("成功删除购物车商品: user_id=%d, product_id=%d", in.UserId, item.ProductId)
+				l.Logger.Infow("成功删除购物车商品",
+					logx.Field("user_id", in.UserId),
+					logx.Field("product_id", item.ProductId))
 			}
 		}
 	}()
