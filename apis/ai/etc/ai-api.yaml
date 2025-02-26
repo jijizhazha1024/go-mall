@@ -2,9 +2,6 @@ Name: ai-api
 Host: 0.0.0.0
 Port: 8010
 
-Consul:
-  Host: 124.71.72.124:8500
-  Key: ai-api
 
 
 # 链路追踪
@@ -18,3 +15,6 @@ Telemetry:
 AuthsRpc:
   Target: consul://124.71.72.124:8500/auths.rpc?wait=14s
   NonBlock: true # 启动时是否阻塞 , 即使rpc服务没有启动也不会影响客户端的启动
+AIRpc:
+  Target: consul://124.71.72.124:8500/ai.rpc?wait=14s
+  NonBlock: true

@@ -1,0 +1,40 @@
+Name: ai-api
+Host: 0.0.0.0
+Port: 8007
+Mode: pro
+Verbose: false # 关闭详细日志
+
+
+# rpc服务
+AuthsRpc:
+  Target: consul://${CONSUL_HOST}/auths.rpc?wait=14s
+  NonBlock: true # 启动时是否阻塞 , 即使rpc服务没有启动也不会影响客户端的启动
+
+AIRpc:
+  Target: consul://${CONSUL_HOST}/ai.rpc?wait=14s
+  NonBlock: true
+
+# 日志配置
+Log:
+  ServiceName: "ai-api"
+  Mode: 'file'
+  Encoding: "json"
+  Path: "./logs/ai-api"
+  KeepDays: 30    # 保留30天日志
+  Compress: true  # 启用日志压缩
+  Rotation: size  # 按大小切割日志
+  MaxSize: 100    # 每个日志文件最大100MB
+
+# 链路追踪
+Telemetry:
+  Name: ai-api
+  Endpoint: ${TRACES_ENDPOINT}
+  Batcher: jaeger
+  Sampler: 0.1
+
+# 指标监控配置
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port: 8107 # api服务端口+100，例如api端口为8001，指标端口是8101
+  EnablePprof: false
