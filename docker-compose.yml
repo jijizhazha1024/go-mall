@@ -72,8 +72,15 @@ services:
       - "11011:11011"  # 指标监控端口
     environment:
       HEALTHCHECK_PORT: "11011"
-
-
+  coupons-service:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-coupons-service
+    command: [ "/app/services/Coupons", "-f", "/app/etc/coupons.prod.yaml" ]
+    ports:
+      - "10009:10009"
+      - "11009:11009"
+    environment:
+      HEALTHCHECK_PORT: "11009"
   user-api:
     <<: [ *common,*healthcheck ]
     container_name: go-mall-users-api
@@ -103,6 +110,14 @@ services:
       - "8103:8103"  # 指标监控端口（Port+100）
     environment:
       HEALTHCHECK_PORT: "8103"
-
+  coupon-api:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-coupons-api
+    command: [ "/app/apis/Coupon", "-f", "/app/etc/coupon-api.prod.yaml" ]
+    ports:
+      - "8009:8009"
+      - "8109:8109"
+    environment:
+      HEALTHCHECK_PORT: "8109"
 networks:
   go-mall:
