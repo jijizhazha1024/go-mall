@@ -6,6 +6,7 @@ import (
 	"github.com/zeromicro/x/errors"
 	"jijizhazha1024/go-mall/apis/product/internal/svc"
 	"jijizhazha1024/go-mall/apis/product/internal/types"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/product/product"
 )
@@ -25,8 +26,13 @@ func NewGetProductByIDLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ge
 }
 
 func (l *GetProductByIDLogic) GetProductByID(req *types.GetProductByIDReq) (resp *types.GetProductByIDResp, err error) {
+	userID, ok := l.ctx.Value(biz.UserIDKey).(uint32)
+	if !ok {
+		return nil, errors.New(code.AuthBlank, code.AuthBlankMsg)
+	}
 	res, err := l.svcCtx.ProductRpc.GetProduct(l.ctx, &product.GetProductReq{
-		Id: uint32(req.ID),
+		ProductId: req.ID,
+		UserId:    int32(userID),
 	})
 	if err != nil {
 		l.Logger.Errorf("call rpc ProductRpc.GetProduct failed", logx.Field("err", err))

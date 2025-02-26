@@ -9,10 +9,12 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
+	gorse "jijizhazha1024/go-mall/common/utils/gorse"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
 	"jijizhazha1024/go-mall/services/product/internal/svc"
 	"jijizhazha1024/go-mall/services/product/product"
+	"strconv"
 	"time"
 )
 
@@ -36,13 +38,13 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 	// 在redis中维护商品的访问频率次数 PV
 	// 检查商品 ID 是否存在
 	redisKey := biz.ProductRedisPVName
-	cacheKey := fmt.Sprintf(biz.ProductIDKey, in.Id)
+	cacheKey := fmt.Sprintf(biz.ProductIDKey, in.ProductId)
 	_, err := l.svcCtx.RedisClient.Zincrby(redisKey, 1, cacheKey)
 	if err != nil {
 		// 这里可以只进行记录即可，可以无需返回,还是可以正常的进行执行的，不影响返回结果
 		l.Logger.Errorw("自增商品的访问次数失败",
 			logx.Field("err", err),
-			logx.Field("product_id", in.Id))
+			logx.Field("product_id", in.ProductId))
 	}
 	// 从Redis中获取数据
 	cacheData, err := l.svcCtx.RedisClient.Get(cacheKey)
@@ -50,7 +52,7 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 		// 这里也是，可以想象一个场景，假设在请求redis时网络抖动了，导致请求失败，但是在后面还可以通过mysql获取数据
 		l.Logger.Errorw("get product from cache failed",
 			logx.Field("err", err),
-			logx.Field("product_id", in.Id))
+			logx.Field("product_id", in.ProductId))
 	}
 
 	// 如果Redis中有数据且没有错误，直接反序列化并返回
@@ -58,7 +60,7 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 		var productRes product.Product
 		if err := json.Unmarshal([]byte(cacheData), &productRes); err == nil {
 			// 序列化成功返回，查询库存，我们进行返回动态库存
-			productRes.Stock, productRes.Sold = l.getRealTimeStockAndSold(int64(in.Id))
+			productRes.Stock, productRes.Sold = l.getRealTimeStockAndSold(in.ProductId)
 			return &product.GetProductResp{
 				Product: &productRes,
 			}, nil
@@ -66,13 +68,13 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 		// 序列失败 也是一样进行记录日志，因为在后面还可以从mysql查询，这样用用户体验感好点
 		logx.Errorw("Failed to unmarshal data",
 			logx.Field("err", err),
-			logx.Field("product_id", in.Id))
+			logx.Field("product_id", in.ProductId))
 	}
 
 	// 如果Redis中没有数据，从数据库中获取
 
 	productModel := product2.NewProductsModel(l.svcCtx.Mysql)
-	productData, err := productModel.FindOne(l.ctx, int64(in.Id))
+	productData, err := productModel.FindOne(l.ctx, int64(in.ProductId))
 	// 存在错误直接返回，因为没有兜底的了。
 	if err != nil {
 		if errors.Is(err, sqlx.ErrNotFound) {
@@ -84,7 +86,7 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 		}
 		l.Logger.Errorw("Failed to find product from database",
 			logx.Field("err", err),
-			logx.Field("product_id", in.Id))
+			logx.Field("product_id", in.ProductId))
 		return nil, err
 	}
 
@@ -102,11 +104,11 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 	}
 
 	// 在这里创建连接，懒惰创建连接。
-	categories, err := l.svcCtx.CategoriesModel.FindCategoryNameByProductID(l.ctx, int64(in.Id))
+	categories, err := l.svcCtx.CategoriesModel.FindCategoryNameByProductID(l.ctx, in.ProductId)
 	if err != nil {
 		l.Logger.Errorw("Failed to find product_category from database",
 			logx.Field("err", err),
-			logx.Field("product_id", in.Id))
+			logx.Field("product_id", in.ProductId))
 		// 因为查询不完整，所以不需要写入缓存了，直接返回
 		return resp, nil
 	}
@@ -118,19 +120,36 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 	if err != nil {
 		l.Logger.Errorw("Failed to unmarshal data",
 			logx.Field("err", err),
-			logx.Field("product_id", in.Id))
+			logx.Field("product_id", in.ProductId))
 		return resp, nil
 	}
 	// 设置合理的过期时间
 	if err = l.svcCtx.RedisClient.SetexCtx(l.ctx, cacheKey, cacheData, biz.ProductIDKeyExpire); err != nil {
 		l.Logger.Errorw("Failed to save redis data",
 			logx.Field("err", err),
-			logx.Field("product_id", in.Id))
+			logx.Field("product_id", in.ProductId))
 		return resp, nil
 	}
 
 	// 查询实时库存
 	resp.Product.Stock, resp.Product.Sold = l.getRealTimeStockAndSold(productData.Id)
+	if in.UserId != 0 {
+		go func() {
+			// 插入反馈
+			if _, err := l.svcCtx.GorseClient.InsertFeedback(l.ctx, []gorse.Feedback{
+				{
+					ItemId:       strconv.Itoa(int(productData.Id)),
+					UserId:       strconv.Itoa(int(in.UserId)),
+					Timestamp:    time.Now().Format(time.DateTime),
+					FeedbackType: biz.ReadFeedBackType,
+				},
+			}); err != nil {
+				l.Logger.Infow("Failed to insert feedback", logx.Field("err", err), logx.Field("product_id", productData.Id))
+				return
+			}
+		}()
+	}
+
 	return resp, nil
 }
 
