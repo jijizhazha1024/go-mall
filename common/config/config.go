@@ -13,6 +13,9 @@ type RabbitMQConfig struct {
 	Pass  string
 	VHost string
 }
+type ElasticSearchConfig struct {
+	Addr string
+}
 
 func (r *RabbitMQConfig) Dns() string {
 	return fmt.Sprintf(

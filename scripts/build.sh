@@ -26,7 +26,7 @@ build_module() {
     echo "building $i"
     capName=$(echo "${i^}")
     cd "$i" || { echo "Failed to enter directory $i"; exit 1; }
-    go build -ldflags="-s -w" -o "$target_dir/${capName}Api" || { echo "Failed to build $i"; exit 1; }
+    go build -ldflags="-s -w" -o "$target_dir/${capName}" || { echo "Failed to build $i"; exit 1; }
     cp ./etc/* "$ETC_DIR/" 2>/dev/null ||  { echo "Failed to copy etc files"; exit 1;}
     cd ..
   done

@@ -25,3 +25,9 @@ Log:
 MysqlConfig:
   datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
   Conntimeout: 5
+
+
+Cache:
+  - Host: 124.71.72.124:6379 #缓存地址
+    Pass: jjzzchtt
+    Type: node      

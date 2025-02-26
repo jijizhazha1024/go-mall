@@ -52,3 +52,9 @@ func (s *InventoryServer) ReturnPreInventory(ctx context.Context, in *inventory.
 	l := logic.NewReturnPreInventoryLogic(ctx, s.svcCtx)
 	return l.ReturnPreInventory(in)
 }
+
+// ReturnInventory 退还库存（支付失败时）
+func (s *InventoryServer) ReturnInventory(ctx context.Context, in *inventory.InventoryReq) (*inventory.InventoryResp, error) {
+	l := logic.NewReturnInventoryLogic(ctx, s.svcCtx)
+	return l.ReturnInventory(in)
+}

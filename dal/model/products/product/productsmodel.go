@@ -17,12 +17,20 @@ type (
 		FindPage(ctx context.Context, offset, limit int) ([]*Products, error)
 		Count(ctx context.Context) (int64, error)
 		FindProductIsExist(ctx context.Context, productID int64) (bool, error)
+		QueryAllProducts(ctx context.Context) ([]*Products, error)
 	}
 
 	CustomProductsModel struct {
 		*defaultProductsModel
 	}
 )
+
+func (m *CustomProductsModel) QueryAllProducts(ctx context.Context) ([]*Products, error) {
+	query := fmt.Sprintf("SELECT * FROM %s", m.table)
+	products := make([]*Products, 0)
+	err := m.conn.QueryRowsCtx(ctx, &products, query)
+	return products, err
+}
 
 // NewProductsModel returns a model for the database table.
 func NewProductsModel(conn sqlx.SqlConn) ProductsModel {

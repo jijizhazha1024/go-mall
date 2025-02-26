@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/dal/model/user_address"
@@ -32,9 +33,9 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 
 	//判断address——id和user——id是否存在
 
-	_, err := l.svcCtx.AddressModel.GetUserAddressbyIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
+	_, err := l.svcCtx.AddressModel.GetUserAddressExistsByIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Infow("update address not found", logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId))
 			return &users.UpdateAddressResponse{
 				StatusMsg:  code.UserAddressNotFoundMsg,
@@ -42,10 +43,7 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 			}, nil
 		}
 		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
-		return &users.UpdateAddressResponse{
-			StatusMsg:  code.ServerErrorMsg,
-			StatusCode: code.ServerError,
-		}, err
+		return &users.UpdateAddressResponse{}, err
 	}
 
 	//判断修改后的地址是否是默认地址
@@ -54,7 +52,7 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 
 		addresses, err := l.svcCtx.AddressModel.FindAllByUserId(l.ctx, int32(in.UserId))
 		if err != nil {
-			if err == sql.ErrNoRows {
+			if errors.Is(err, sql.ErrNoRows) {
 				l.Logger.Infow("update address is default, but user has no address", logx.Field("user_id", in.UserId))
 				return &users.UpdateAddressResponse{
 					StatusMsg:  code.UserAddressNotFoundMsg,
@@ -62,10 +60,7 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 				}, nil
 			}
 			l.Logger.Errorw(code.ServerErrorMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))
-			return &users.UpdateAddressResponse{
-				StatusMsg:  code.ServerErrorMsg,
-				StatusCode: code.ServerError,
-			}, err
+			return &users.UpdateAddressResponse{}, err
 		}
 		// 将所有地址的IsDefault字段设置为false+
 		if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
@@ -95,13 +90,10 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 			return nil
 		}); err != nil {
 			l.Logger.Errorw("update address is__default is false, but update address failed", logx.Field("address_id", in.AddressId), logx.Field("err", err))
-			return &users.UpdateAddressResponse{
-				StatusMsg:  code.ServerErrorMsg,
-				StatusCode: code.ServerError,
-			}, nil
+			return &users.UpdateAddressResponse{}, err
 		}
 	} else {
-		_, err = l.svcCtx.AddressModel.Update(l.ctx, &user_address.UserAddresses{
+		err = l.svcCtx.AddressModel.Update(l.ctx, &user_address.UserAddresses{
 
 			AddressId:     int64(in.AddressId),
 			RecipientName: in.RecipientName,
@@ -118,17 +110,14 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 		})
 		if err != nil {
 			l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
-			return &users.UpdateAddressResponse{
-				StatusMsg:  code.ServerErrorMsg,
-				StatusCode: code.ServerError,
-			}, err
+			return &users.UpdateAddressResponse{}, err
 		}
 
 	}
 
-	addressData, err := l.svcCtx.AddressModel.FindOne(l.ctx, in.AddressId)
+	addressData, err := l.svcCtx.AddressModel.FindOne(l.ctx, int64(in.AddressId))
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			l.Logger.Infow("update address is not default, but address not found", logx.Field("address_id", in.AddressId), logx.Field("err", err))
 			return &users.UpdateAddressResponse{
 				StatusMsg:  code.UserAddressNotFoundMsg,
@@ -136,10 +125,7 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 			}, nil
 		}
 		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
-		return &users.UpdateAddressResponse{
-			StatusMsg:  code.ServerErrorMsg,
-			StatusCode: code.ServerError,
-		}, err
+		return &users.UpdateAddressResponse{}, err
 	}
 
 	data := &users.AddressData{
@@ -155,8 +141,7 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 	}
 
 	return &users.UpdateAddressResponse{
-		StatusMsg:  code.UpdateUserAddressSuccessMsg,
-		StatusCode: code.UpdateUserAddressSuccess,
-		Data:       data,
+
+		Data: data,
 	}, nil
 }

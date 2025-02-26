@@ -11,7 +11,6 @@ import (
 	"jijizhazha1024/go-mall/common/utils/cryptx"
 	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
-	"jijizhazha1024/go-mall/services/users/internal/users_biz"
 	"jijizhazha1024/go-mall/services/users/users"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -76,22 +75,27 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			if insertErr != nil {
 
 				logx.Errorw("register insert user failed", logx.Field("err", insertErr), logx.Field("user_email", in.Email))
-				return users_biz.HandleRegistererror(code.UserCreationFailedMsg, code.UserCreationFailed, insertErr)
+				return &users.RegisterResponse{}, err
+
 			}
 
 			userId, lastInsertErr := result.LastInsertId()
 			if lastInsertErr != nil {
 				l.Logger.Infow("register get user_id failed", logx.Field("err", lastInsertErr),
 					logx.Field("email", in.Email))
+				return &users.RegisterResponse{
+					StatusCode: code.UserInfoRetrievalFailed,
+					StatusMsg:  code.UserInfoRetrievalFailedMsg,
+				}, nil
 
-				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, nil)
 			}
+			return &users.RegisterResponse{
 
-			return users_biz.HandleRegisterResp(code.UserCreatedMsg, code.UserCreated, uint32(userId))
+				UserId: uint32(userId),
+			}, nil
+
 		}
-		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_email", in.Email))
 
-		return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, err)
 	}
 
 	if existUser != nil {
@@ -104,27 +108,36 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			if updateErr != nil {
 				l.Logger.Errorw("register update user_deleted failed", logx.Field("err", updateErr),
 					logx.Field("email", in.Email))
+				return &users.RegisterResponse{}, updateErr
 
-				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, updateErr)
 			}
+			//给删除状态的用户 更新密码
 
 			updatepasswordErr := l.svcCtx.UsersModel.UpdatePasswordHash(l.ctx, existUser.UserId, PasswordHash)
 			if updatepasswordErr != nil {
 				l.Logger.Errorw("register update password_hash failed", logx.Field("err", updatepasswordErr),
 					logx.Field("email", in.Email))
 
-				return users_biz.HandleRegistererror(code.UserInfoRetrievalFailedMsg, code.UserInfoRetrievalFailed, updatepasswordErr)
+				return &users.RegisterResponse{}, err
+
 			}
 
-			return users_biz.HandleRegisterResp(code.UserCreatedMsg, code.UserCreated, uint32(existUser.UserId))
+			return &users.RegisterResponse{
+				UserId: uint32(existUser.UserId),
+			}, nil
 		} else { // 未删除
 			l.Logger.Infow("register  user already exist",
 				logx.Field("email", in.Email))
 
-			return users_biz.HandleRegistererror(code.UserAlreadyExistsMsg, code.UserAlreadyExists, nil)
+			return &users.RegisterResponse{
+				StatusCode: code.UserAlreadyExists,
+				StatusMsg:  code.UserAlreadyExistsMsg,
+			}, nil
+
 		}
 
 	}
 
-	return users_biz.HandleRegistererror(code.ServerErrorMsg, code.ServerError, nil)
+	return &users.RegisterResponse{}, errors.New("register failed")
+
 }

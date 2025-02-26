@@ -14,8 +14,9 @@ jobs:
       - uses: actions/setup-go@v4
         with:
           go-version: '1.21'
-          cache: false
+          cache: true
       - name: Run GolangCI Lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v6.0.1
         with:
           version: v1.57.2
+          args: --timeout 10m --concurrency 10

@@ -13,6 +13,7 @@ import (
 	"jijizhazha1024/go-mall/services/inventory/inventory"
 	"jijizhazha1024/go-mall/services/product/internal/svc"
 	"jijizhazha1024/go-mall/services/product/product"
+	"time"
 )
 
 type GetProductLogic struct {
@@ -29,7 +30,7 @@ func NewGetProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetPro
 	}
 }
 
-// 根据商品id得到商品详细信息
+// GetProduct 根据商品id得到商品详细信息
 func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetProductResp, error) {
 
 	// 在redis中维护商品的访问频率次数 PV
@@ -95,6 +96,8 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 			Description: productData.Description.String,
 			Picture:     productData.Picture.String,
 			Price:       productData.Price,
+			CratedAt:    productData.CreatedAt.Format(time.DateTime),
+			UpdatedAt:   productData.CreatedAt.Format(time.DateTime),
 		},
 	}
 

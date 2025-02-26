@@ -1,0 +1,116 @@
+syntax = "proto3";
+package checkout;
+option go_package = "./checkout";
+
+// 状态枚举
+enum CheckoutStatus {
+  UNKNOWN = 0; // 初始状态
+  RESERVING = 1;   // 预占中
+  CONFIRMED = 2;   // 已确认
+  CANCELLED = 3;   // 已取消
+  EXPIRED = 4;     // 已过期
+}
+
+message CheckoutItem {
+  int32 product_id = 1;
+  int32 quantity = 2;
+  string product_name = 3;
+  string product_desc = 4;
+  int64 price = 5;  // 单位：分
+}
+message CheckoutOrder {
+  string pre_order_id = 1;         // 预订单ID
+  int64 user_id = 2;               // 用户ID
+  CheckoutStatus status = 3;       // 订单状态
+
+  int64 expire_time = 4;           // 过期时间戳)秒）
+  string created_at = 5;           // 创建时间
+  string updated_at = 6;
+  repeated CheckoutItem items = 7; // 商品明细快照
+}
+
+
+// --------------- request ---------------
+
+message CheckoutDetailReq {
+
+  string pre_order_id = 1;
+  int32 user_id = 2;
+}
+message UpdateCheckoutStatusReq {
+  string pre_order_id = 1;
+  int32 user_id = 2;
+  CheckoutStatus status = 3; // 状态码
+}
+message CheckoutListReq{
+  uint32 user_id = 1;
+  int32 page = 2;       // 从1开始计数
+  int32 page_size = 3;  // 业务层校验最大值
+}
+message CheckoutReq{
+  message OrderItem {
+    int32 product_id = 1;
+    int32 quantity = 2;
+  }
+  uint32 user_id = 1;
+  string coupon_id = 2; //
+  repeated OrderItem order_items = 3; // 新增：直接传商品信息
+
+}
+
+// --------------- response ---------------
+
+// 分页响应结构
+message CheckoutListResp {
+  int32 status_code = 1;
+  int32 status_msg = 2;
+  int64 total = 3;
+  repeated CheckoutOrder data = 4; // 订单数据列表
+}
+message CheckoutResp {
+  int32 status_code = 1;
+  string status_msg = 2;
+
+  int64 expire_time = 3;        // 预占库存有效期)如30分钟）
+  string pre_order_id = 4;    // 结算令牌)用于后续提交）也就是pre_order_id)幂等控制）
+  repeated int64  pay_method = 5;// 支付方式 )如：微信支付：1、支付宝支付：2）
+}
+message CheckoutDetailResp {
+  int32 status_code = 1;
+  string status_msg = 2;
+  CheckoutOrder data = 3;
+}
+
+message ReleaseReq {
+  string pre_order_id = 1;
+  int32 user_id = 2;
+}
+
+
+
+service CheckoutService {
+  //  PrepareCheckout 预结算)生成预订单）
+  rpc PrepareCheckout (CheckoutReq) returns (CheckoutResp);
+  //  UpdateCheckoutStatus2Success 当订单超时，支付超时，支付退款
+  rpc ReleaseCheckout (ReleaseReq) returns (EmptyResp); // 释放预订单，释放库存，返还优惠券
+  //  GetCheckoutList 获取结算列表
+  rpc GetCheckoutList (CheckoutListReq) returns (CheckoutListResp);
+  //  GetCheckoutDetail 获取结算详情
+  rpc GetCheckoutDetail (CheckoutDetailReq) returns (CheckoutDetailResp);
+
+  // --------------- 订单服务调用 ---------------
+
+  //  UpdateStatus2Order 由订单服务调用，更新结算状态为已确认
+  rpc UpdateStatus2Order(UpdateStatusReq) returns (EmptyResp);
+  //  UpdateStatus2OrderRollback 补偿操作
+  rpc UpdateStatus2OrderRollback(UpdateStatusReq)returns(EmptyResp);
+
+}
+message EmptyResp {
+  int32 status_code = 1;
+  string status_msg = 2;
+}
+message UpdateStatusReq {
+  int32 user_id = 1;
+  string pre_order_id = 2;
+}

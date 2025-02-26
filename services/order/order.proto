@@ -1,0 +1,178 @@
+syntax = "proto3";
+package order;
+option go_package = "./order";
+
+
+// ================== 状态枚举定义 ==================
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;
+  ORDER_STATUS_CREATED = 1; // 创建
+  ORDER_STATUS_PENDING_PAYMENT = 2;    // 待支付
+  ORDER_STATUS_PAID = 3;               // 已支付
+  ORDER_STATUS_COMPLETED = 4;          // 已完成 进行对账
+  ORDER_STATUS_CANCELLED = 5;          // 已取消
+  ORDER_STATUS_CLOSED = 6;             // 已关闭（超时）
+  ORDER_STATUS_REFUND = 7;             // 退款
+}
+
+enum PaymentStatus {
+  PAYMENT_STATUS_UNSPECIFIED = 0;
+  PAYMENT_STATUS_NOT_PAID = 1;           // 未支付 创建二维码但为支付
+  PAYMENT_STATUS_PAYING = 2;             // 支付中 进入支付状态
+  PAYMENT_STATUS_PAID = 3;               // 已支付
+  PAYMENT_STATUS_EXPIRED = 4;            // 已过期
+  PAYMENT_STATUS_REFUND = 5;             // 退款
+}
+
+enum PaymentMethod {
+  PAYMENT_METHOD_UNSPECIFIED = 0;
+  WECHAT_PAY = 1;
+  ALIPAY = 2;
+}
+
+
+// // --------------- 数据结构定义 ---------------
+message Order {
+  string order_id = 1;
+  string pre_order_id = 2;
+  uint32 user_id = 3;
+
+  // 支付信息
+  PaymentMethod payment_method = 4;
+  string transaction_id = 5;
+  int64 paid_at = 6;
+
+  // 金额信息
+  int64 original_amount = 7;  // 单位：分
+  int64 discount_amount = 8;
+  int64 payable_amount = 9;
+  int64 paid_amount = 10;
+
+  // 状态信息
+  OrderStatus order_status = 11;
+  PaymentStatus payment_status = 12;
+  string Reason = 13;
+
+  // 时间信息
+  string expire_time = 14;
+  string created_at = 15;
+  string updated_at = 16;
+}
+message OrderItem {
+  string item_id = 1;
+  uint64 product_id = 2;
+  uint64 quantity = 3;
+  string product_name = 4;
+  string product_desc = 5;
+  int64 unit_price = 6;  // 单位：分
+}
+message OrderAddress {
+  uint64 address_id = 1;
+  string recipient_name = 2;
+  string phone_number = 3;
+  string province = 4;
+  string city = 5;
+  string detailed_address = 6;
+  string created_at = 7;
+  string updated_at = 8;
+  string order_id = 9;
+
+}
+message PaymentResult {
+  string transaction_id = 1;     // 支付平台流水号
+  int64 paid_amount = 2;         // 实际支付金额（分）
+  int64 paid_at = 3;             // 支付时间戳
+}
+
+
+// --------------- 请求 ---------------
+message CancelOrderRequest {
+  string order_id = 1;
+  uint32 user_id = 2;            // 用于权限校验
+  string cancel_reason = 3;      // 取消原因（可选）
+}
+message UpdateOrder2PaymentRequest {
+  string order_id = 1;
+  int32 user_id = 2;
+}
+message CreateOrderRequest {
+  string pre_order_id = 1;       // 必须有效的预订单ID
+  uint32 user_id = 2;            // 用户身份验证
+  string coupon_id = 3;
+  int32 address_id = 4;
+  PaymentMethod payment_method = 5;
+}
+message UpdateOrder2PaymentSuccessRequest {
+  string order_id = 1;
+  PaymentResult payment_result = 2;
+  int32 user_id = 3;
+}
+message GetOrderRequest {
+  string order_id = 1;
+  uint32 user_id = 2;            // 普通用户传实际ID，管理端传0
+}
+message ListOrdersRequest {
+  uint32 user_id = 1;
+  OrderStatusFilter status_filter = 2;
+  Pagination pagination = 3;
+
+  message OrderStatusFilter {
+    repeated OrderStatus statuses = 1; // 空列表表示不过滤
+  }
+
+  message Pagination {
+    int32 page = 1;              // 从1开始
+    int32 page_size = 2;         // 最大100
+  }
+}
+
+// --------------- response ---------------
+message OrderDetail2PaymentResponse {
+  int32 status_code = 1;
+  string status_msg = 2;
+  Order order = 3;
+}
+message OrderDetailResponse {
+  int32 status_code = 1;
+  string status_msg = 2;
+  Order order = 3;
+  repeated OrderItem items = 4;
+  OrderAddress address = 5;
+}
+message ListOrdersResponse {
+  int32 status_code = 1;
+  string status_msg = 2;
+  repeated Order orders = 3;
+}
+message EmptyRes {
+  int32 status_code = 1;
+  string status_msg = 2;
+
+}
+
+// // --------------- 服务接口定义 ---------------
+service OrderService {
+  //  CreateOrder 创建订单（需预先生成预订单）
+  rpc CreateOrder(CreateOrderRequest) returns (OrderDetailResponse);
+  //  CreateOrderRollback 补偿操作
+  rpc CreateOrderRollback(CreateOrderRequest) returns (EmptyRes);
+
+  //  CancelOrder 取消订单 由用户发起
+  rpc CancelOrder(CancelOrderRequest) returns (EmptyRes);
+  // GetOrder 获取订单详情
+  rpc GetOrder(GetOrderRequest) returns (OrderDetailResponse);
+  // ListOrders 分页查询订单列表
+  rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse);
+  // --------------- 支付服务内部接口 ---------------
+  //  修改订单状态为支付成功
+  //  UpdateOrder2PaymentSuccess 支付成功时（进行修改订单状态）
+  rpc UpdateOrder2PaymentSuccess(UpdateOrder2PaymentSuccessRequest) returns (EmptyRes);
+  //  UpdateOrder2PaymentSuccessRollback 支付失败的补充操作
+  rpc UpdateOrder2PaymentSuccessRollback(UpdateOrder2PaymentSuccessRequest) returns (EmptyRes);
+  //  UpdateOrder2Payment 更新订单（支付服务回调使用） 更新为支付中
+  rpc UpdateOrder2PaymentStatus(UpdateOrder2PaymentRequest) returns (EmptyRes);
+  //  UpdateOrder2PaymentStatusRollback 补偿操作 更新订单（支付服务回调使用） 创建状态
+  rpc UpdateOrder2PaymentStatusRollback(UpdateOrder2PaymentRequest) returns (EmptyRes);
+  rpc GetOrder2Payment(GetOrderRequest) returns (OrderDetail2PaymentResponse);
+
+}

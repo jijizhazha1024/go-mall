@@ -7,6 +7,7 @@ import (
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
 	"sync"
+	"time"
 
 	"jijizhazha1024/go-mall/services/product/internal/svc"
 	"jijizhazha1024/go-mall/services/product/product"
@@ -28,7 +29,7 @@ func NewGetAllProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Get
 	}
 }
 
-// 分页得到全部商品
+// GetAllProduct 分页得到全部商品
 func (l *GetAllProductLogic) GetAllProduct(in *product.GetAllProductsReq) (*product.GetAllProductsResp, error) {
 
 	// 并发查询数据
@@ -38,7 +39,6 @@ func (l *GetAllProductLogic) GetAllProduct(in *product.GetAllProductsReq) (*prod
 	var queryErr error
 	productModel := product2.NewProductsModel(l.svcCtx.Mysql)
 	wg.Add(2)
-
 	// 查询商品列表
 	go func() {
 		defer wg.Done()
@@ -82,6 +82,8 @@ func (l *GetAllProductLogic) GetAllProduct(in *product.GetAllProductsReq) (*prod
 			Description: p.Description.String,
 			Picture:     p.Picture.String,
 			Price:       p.Price,
+			CratedAt:    p.CreatedAt.Format(time.DateTime),
+			UpdatedAt:   p.CreatedAt.Format(time.DateTime),
 		}
 		go func(index int, productId int64) {
 			defer wgStock.Done()

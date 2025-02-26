@@ -36,13 +36,12 @@ func (l *GetAddressLogic) GetAddress(req *types.GetAddressRequest) (resp *types.
 	})
 
 	if err != nil {
-		l.Logger.Errorf("调用 rpc 获取地址失败", logx.Field("err", err))
+		l.Logger.Errorw("调用 rpc 获取地址失败", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
-	} else {
-		if getaddressresp.StatusCode != code.GetUserAddressSuccess {
-			l.Logger.Errorf("调用 rpc 获取地址失败", logx.Field("status_code", getaddressresp.StatusCode), logx.Field("status_msg", getaddressresp.StatusMsg))
-			return nil, errors.New(int(getaddressresp.StatusCode), getaddressresp.StatusMsg)
-		}
+	} else if getaddressresp.StatusMsg != "" {
+
+		return nil, errors.New(int(getaddressresp.StatusCode), getaddressresp.StatusMsg)
+
 	}
 
 	// 创建响应对象并填充数据

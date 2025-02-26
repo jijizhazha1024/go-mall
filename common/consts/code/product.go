@@ -1,17 +1,12 @@
 package code
 
 const (
-	ProductSensitiveWordFailed = 30009
-	EsFailed                   = 30010
-	ProductCacheFailed         = 30011
-	ProductPVCacheFailed       = 30012
-	NoProductFromDataBase      = 30013
+	ProductNotFound = 30000 + iota
+
+	ProductInfoRetrievalFailed
 )
 
 const (
-	ProductSensitiveWordFailedMsg = "敏感词校验失败"
-	EsFailedMag                   = "Es操作失败"
-	ProductCacheFailedMsg         = "缓存操作失败"
-	ProductPVCacheFailedMsg       = "商品缓存PV操作失败"
-	NoProductFromDataBaseMsg      = "数据库中没有该商品"
+	ProductNotFoundMsg            = "商品不存在"
+	ProductInfoRetrievalFailedMsg = "商品信息查询失败"
 )

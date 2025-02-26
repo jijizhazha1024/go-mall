@@ -10,6 +10,14 @@ AuthsRpc:
   Target: consul://${CONSUL_HOST}/auths.rpc?wait=14s
   NonBlock: true # 启动时是否阻塞 , 即使rpc服务没有启动也不会影响客户端的启动
 
+CartsRpc:
+  Target: consul://${CONSUL_HOST}/carts.rpc?wait=14s
+  NonBlock: true
+
+ProductRpc:
+  Target: consul://${CONSUL_HOST}/products.rpc?wait=14s
+  NonBlock: true
+
 # 日志配置
 Log:
   ServiceName: "carts-api"
