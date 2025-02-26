@@ -78,6 +78,7 @@ type GetInfoResponse struct {
 	UpdateAt  string `json:"update_at"`
 	Email     string `json:"email"`
 	UserName  string `json:"user_name"`
+	Avatar    string `json:"avatar"`
 }
 
 type LoginRequest struct {
@@ -124,9 +125,11 @@ type UpdateAddressResponse struct {
 
 type UpdateRequest struct {
 	UserName string `json:"user_name"`
+	Avatar   string `json:"avatar"`
 }
 
 type UpdateResponse struct {
 	UserId   int64  `json:"user_id"`
 	UserName string `json:"user_name"`
+	Avatar   string `json:"avatar"`
 }

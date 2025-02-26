@@ -37,8 +37,11 @@ func (l *AddAddressLogic) AddAddress(req *types.AddAddressRequest) (resp *types.
 
 	}
 
+	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
+
 	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
 	addaddressresp, err := l.svcCtx.UserRpc.AddAddress(l.ctx, &users.AddAddressRequest{
+		Ip: user_ip,
 
 		UserId:          user_id,
 		RecipientName:   req.RecipientName,

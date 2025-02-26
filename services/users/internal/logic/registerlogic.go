@@ -2,10 +2,11 @@ package logic
 
 import (
 	"context"
-	"crypto/rand"
 	"database/sql"
+	"encoding/json"
 	"errors"
-	"math/big"
+	"io"
+	"net/http"
 
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
@@ -32,20 +33,51 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 	}
 }
 
-var avatarList = []string{
-	"http://example.com/avatar1.jpg",
-	"http://example.com/avatar2.jpg",
-	"http://example.com/avatar3.jpg",
-	// 添加更多的头像URL
-}
-
-func getRandomAvatar() (string, error) {
-	max := big.NewInt(int64(len(avatarList)))
-	n, err := rand.Int(rand.Reader, max)
+func (l *RegisterLogic) GetAvatar() (string, error) {
+	// 构建请求
+	req, err := http.NewRequest("GET", "https://v2.xxapi.cn/api/head", nil)
 	if err != nil {
-		return "", err
+		l.Logger.Infow("创建请求失败", logx.Field("err", err))
+		return "", nil
 	}
-	return avatarList[n.Int64()], nil
+
+	// 设置 Header
+	req.Header.Set("User-Agent", "xiaoxiaoapi/1.0.0 (https://xxapi.cn)")
+	// 可选：其他 Header
+	req.Header.Add("Accept", "application/json")
+	// 发送请求
+	resp, err := l.svcCtx.HttpClient.Do(req)
+	if err != nil {
+		l.Logger.Errorw("请求失败", logx.Field("err", err))
+		return "", nil
+	}
+	defer resp.Body.Close()
+
+	// 校验状态码
+	if resp.StatusCode != http.StatusOK {
+		l.Logger.Infow("非200响应", logx.Field("status", resp.Status))
+		return "", nil
+	}
+
+	// 读取响应体
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		l.Logger.Infow("读取响应失败", logx.Field("err", err))
+		return "", nil
+	}
+	type ResponseURL struct {
+		Code int    `json:"code"`
+		Msg  string `json:"msg"`
+		Data string `json:"data"`
+	}
+	var responseURL ResponseURL
+	err = json.Unmarshal(body, &responseURL)
+	if err != nil {
+		l.Logger.Infow("解析响应失败", logx.Field("err", err))
+		return "", nil
+	}
+
+	return responseURL.Data, nil
 }
 
 // 注册方法
@@ -62,10 +94,11 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 
-			avatar, err := getRandomAvatar()
-			if err != nil {
-				l.Logger.Infow("register get avatar failed", logx.Field("err", err))
-			}
+			// 获取头像
+			avatar, _ := l.GetAvatar()
+			if avatar == "" {
+				avatar = "https://www.gravatar.com/avatar/0000000000?d=mp"
+			} //获取失败使用默认头像
 
 			// 用户不存在，直接注册
 			result, insertErr := l.svcCtx.UsersModel.Insert(l.ctx, &user.Users{
@@ -101,7 +134,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				ActionDescription: "用户注册",
 				TargetId:          int64(userId),
 				ServiceName:       "users",
-				ClientIp:          "127.0.0.1",
+				ClientIp:          in.Ip,
 			})
 			if err != nil {
 				l.Logger.Infow("register audit failed", logx.Field("err", err),
@@ -152,7 +185,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				ActionDescription: "用户注册",
 				TargetId:          int64(existUser.UserId),
 				ServiceName:       "users",
-				ClientIp:          "127.0.0.1",
+				ClientIp:          in.Ip,
 			})
 			if err != nil {
 				l.Logger.Infow("register audit failed", logx.Field("err", err),

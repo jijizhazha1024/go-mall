@@ -65,7 +65,7 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 		ActionType:        biz.Delete,
 		TargetTable:       "user_address",
 		ActionDescription: "删除用户地址",
-		ClientIp:          "127.0.0.1",
+		ClientIp:          in.Ip,
 		TargetId:          int64(in.AddressId),
 		ServiceName:       "users",
 	})

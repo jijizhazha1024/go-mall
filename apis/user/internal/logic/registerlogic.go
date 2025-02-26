@@ -50,7 +50,10 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 
 	}
 
+	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
+
 	response, err := l.svcCtx.UserRpc.Register(l.ctx, &usersclient.RegisterRequest{
+		Ip:              user_ip,
 		Email:           req.Email,
 		Password:        req.Password,
 		ConfirmPassword: req.ConfirmPassword,

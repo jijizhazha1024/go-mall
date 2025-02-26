@@ -36,7 +36,9 @@ func (l *UpdateAddressLogic) UpdateAddress(req *types.UpdateAddressRequest) (res
 	}
 
 	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
+	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
 	updateAddressresp, err := l.svcCtx.UserRpc.UpdateAddress(l.ctx, &users.UpdateAddressRequest{
+		Ip:              user_ip,
 		RecipientName:   req.RecipientName,
 		PhoneNumber:     req.PhoneNumber,
 		Province:        req.Province,

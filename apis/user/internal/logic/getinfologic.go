@@ -51,6 +51,7 @@ func (l *GetInfoLogic) GetInfo(req *types.GetInfoRequest) (resp *types.GetInfoRe
 		UpdateAt:  getresp.UpdatedAt,
 		Email:     getresp.Email,
 		UserName:  getresp.UserName,
+		Avatar:    getresp.AvatarUrl,
 	}
 	fmt.Println("resp:", resp)
 

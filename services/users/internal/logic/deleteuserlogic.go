@@ -72,7 +72,7 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 		ActionDescription: "用户注销",
 		TargetId:          int64(in.UserId),
 		ServiceName:       "users",
-		ClientIp:          "127.0.0.1",
+		ClientIp:          in.Ip,
 	})
 	if err != nil {
 		l.Logger.Infow("add address audit failed", logx.Field("err", err),

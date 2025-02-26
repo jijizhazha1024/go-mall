@@ -9,6 +9,7 @@ import (
 type Config struct {
 	zrpc.RpcServerConf
 	MysqlConfig MysqlConfig
+	HttpClient  HttpClientConf
 	AuditRpc    zrpc.RpcClientConf
 	Consul      consul.Conf
 	Cache       cache.CacheConf
@@ -16,4 +17,8 @@ type Config struct {
 type MysqlConfig struct {
 	DataSource  string
 	Conntimeout int
+}
+type HttpClientConf struct {
+	Timeout      int
+	MaxIdleConns int
 }

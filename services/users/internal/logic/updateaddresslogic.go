@@ -159,7 +159,7 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 		ActionDescription: "用户地址更新",
 		ServiceName:       "users",
 		TargetId:          int64(in.AddressId),
-		ClientIp:          "127.0.0.1",
+		ClientIp:          in.Ip,
 		NewData:           newData,
 	})
 	if err != nil {
