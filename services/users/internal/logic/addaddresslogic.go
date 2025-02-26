@@ -3,10 +3,13 @@ package logic
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/dal/model/user_address"
+	"jijizhazha1024/go-mall/services/audit/audit"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -105,8 +108,32 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 			DetailedAddress: in.DetailedAddress,
 			IsDefault:       in.IsDefault,
 		}
+		datajson, err := json.Marshal(data)
+		if err != nil {
+			l.Logger.Errorw("json marshal failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
+			return &users.AddAddressResponse{}, err
+		}
+		datastr := string(datajson)
 
 		//添加审计服务
+		_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
+
+			UserId:            uint32(in.UserId),
+			ActionType:        biz.Create,
+			TargetTable:       "user",
+			ActionDescription: "添加用户地址",
+			TargetId:          int64(in.UserId),
+			ServiceName:       "users",
+			NewData:           datastr,
+		})
+		if err != nil {
+			l.Logger.Infow("add address audit failed", logx.Field("err", err),
+				logx.Field("user_id", in.UserId))
+			return &users.AddAddressResponse{
+				StatusMsg:  code.AuditAddAddressFailedMsg,
+				StatusCode: code.AuditAddAddressFailed,
+			}, nil
+		}
 
 		return &users.AddAddressResponse{
 
@@ -146,6 +173,33 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 			IsDefault:       in.IsDefault,
 		}
 		//添加审计服务
+		datajson, err := json.Marshal(data)
+		if err != nil {
+			l.Logger.Errorw("json marshal failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
+			return &users.AddAddressResponse{}, err
+		}
+		datastr := string(datajson)
+
+		//添加审计服务
+		_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
+
+			UserId:            uint32(in.UserId),
+			ActionType:        biz.Create,
+			TargetTable:       "user",
+			ActionDescription: "添加用户地址",
+			TargetId:          int64(in.UserId),
+			ServiceName:       "users",
+			NewData:           datastr,
+		})
+		if err != nil {
+			l.Logger.Infow("add address audit failed", logx.Field("err", err),
+				logx.Field("user_id", in.UserId))
+			return &users.AddAddressResponse{
+				StatusMsg:  code.AuditAddAddressFailedMsg,
+				StatusCode: code.AuditAddAddressFailed,
+			}, nil
+		}
+
 		return &users.AddAddressResponse{
 
 			Data: data,

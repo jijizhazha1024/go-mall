@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
+	"jijizhazha1024/go-mall/services/audit/audit"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -72,7 +74,26 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 		return &users.UpdateUserResponse{}, err
 
 	}
+
 	//审计操作
+	_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
+
+		UserId:            uint32(in.UserId),
+		ActionType:        biz.Update,
+		TargetTable:       "user",
+		ActionDescription: "用户更新",
+		ServiceName:       "users",
+		OldData:           update_user.Username.String,
+		NewData:           in.UsrName,
+	})
+	if err != nil {
+		logx.Infow("create audit log failed", logx.Field("err", err))
+		return &users.UpdateUserResponse{
+			StatusCode: code.AuditUpdateuserFailed,
+			StatusMsg:  code.AuditUpdateuserFailedMsg,
+		}, nil
+
+	}
 
 	return &users.UpdateUserResponse{
 

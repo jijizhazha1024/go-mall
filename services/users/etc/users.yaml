@@ -16,6 +16,10 @@ Telemetry:
   Batcher: jaeger
   Sampler: 1.0
 
+AuditRpc:
+  Target: consul://124.71.72.124:8500/audit.rpc?wait=14s
+  NonBlock: true 
+
 Log:
   ServiceName: "users-rpc"
   Mode: 'console'

@@ -3,10 +3,13 @@ package logic
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/dal/model/user_address"
+	"jijizhazha1024/go-mall/services/audit/audit"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -139,7 +142,33 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 		CreatedAt:       addressData.CreatedAt.Format("2006-01-02 15:04:05"),
 		UpdatedAt:       addressData.UpdatedAt.Format("2006-01-02 15:04:05"),
 	}
+	newDataBytes, err := json.Marshal(data)
+	if err != nil {
+		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
+		return &users.UpdateAddressResponse{}, err
+	}
+
+	newData := string(newDataBytes)
+
 	//审计操作
+	_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
+
+		UserId:            uint32(in.UserId),
+		ActionType:        biz.Update,
+		TargetTable:       "user_addresses",
+		ActionDescription: "用户地址更新",
+		ServiceName:       "users",
+		TargetId:          int64(in.AddressId),
+		OldData:           "",
+		NewData:           newData,
+	})
+	if err != nil {
+		l.Logger.Infow(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
+		return &users.UpdateAddressResponse{
+			StatusCode: code.AuditUpdateaddressFailed,
+			StatusMsg:  code.AuditUpdateaddressFailedMsg,
+		}, nil
+	}
 
 	return &users.UpdateAddressResponse{
 

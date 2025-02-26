@@ -7,9 +7,11 @@ import (
 	"errors"
 	"math/big"
 
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/common/utils/cryptx"
 	"jijizhazha1024/go-mall/dal/model/user"
+	"jijizhazha1024/go-mall/services/audit/audit"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -91,6 +93,29 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			}
 
 			//审计操作
+			_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
+
+				UserId:            uint32(existUser.UserId),
+				ActionType:        biz.Create,
+				TargetTable:       "user",
+				ActionDescription: "用户注册",
+				TargetId:          int64(userId),
+				OldData:           "",
+				NewData:           "",
+				CreateAt:          0,
+				ServiceName:       "users",
+				ClientIp:          "",
+			})
+			if err != nil {
+				l.Logger.Infow("register audit failed", logx.Field("err", err),
+					logx.Field("email", in.Email))
+
+				return &users.RegisterResponse{
+					StatusCode: code.AuditRegisterFailed,
+					StatusMsg:  code.AuditRegisterFailedMsg,
+				}, nil
+			}
+			//埋点
 			svc.UserRegCounter.Inc("success")
 
 			return &users.RegisterResponse{
@@ -127,7 +152,23 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			}
 
 			//审计操作
+			// _, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
 
+			// 	UserId:            uint32(existUser.UserId),
+			// 	ActionType:        biz.Create,
+			// 	TargetTable:       "user",
+			// 	ActionDescription: "用户注册",
+			// 	ServiceName:       "users",
+			// })
+			// if err != nil {
+			// 	l.Logger.Infow("register audit failed", logx.Field("err", err),
+			// 		logx.Field("email", in.Email))
+
+			// 	return &users.RegisterResponse{
+			// 		StatusCode: code.AuditRegisterFailed,
+			// 		StatusMsg:  code.AuditRegisterFailedMsg,
+			// 	}, nil
+			// }
 			//埋点操作
 			svc.UserRegCounter.Inc("success")
 			return &users.RegisterResponse{

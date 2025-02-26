@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
+	"jijizhazha1024/go-mall/services/audit/audit"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -56,7 +58,24 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
 		return &users.DeleteAddressResponse{}, err
 	}
-	//审计操作
+	//添加审计服务
+	_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
+
+		UserId:            uint32(in.UserId),
+		ActionType:        biz.Delete,
+		TargetTable:       "user",
+		ActionDescription: "删除用户地址",
+		TargetId:          int64(in.AddressId),
+		ServiceName:       "users",
+	})
+	if err != nil {
+		l.Logger.Infow("add address audit failed", logx.Field("err", err),
+			logx.Field("user_id", in.UserId))
+		return &users.DeleteAddressResponse{
+			StatusCode: code.AuditDeleteaddressFailed,
+			StatusMsg:  code.AuditDeleteaddressFailedMsg,
+		}, nil
+	}
 
 	return &users.DeleteAddressResponse{}, nil
 }
