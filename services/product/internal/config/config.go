@@ -5,7 +5,6 @@ import (
 	"github.com/zeromicro/go-zero/zrpc"
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 	"jijizhazha1024/go-mall/common/config"
-	"time"
 )
 
 type Config struct {
@@ -22,11 +21,7 @@ type MysqlConfig struct {
 	DataSource  string
 	Conntimeout int
 }
-type ElasticsearchConfig struct {
-	Addresses             []string      `yaml:"addresses"`
-	MaxIdleConnsPerHost   int           `yaml:"max_idle_conns_per_host"`
-	ResponseHeaderTimeout time.Duration `yaml:"response_header_timeout"`
-}
+
 type QiNiu struct {
 	AccessKey string
 	SecretKey string

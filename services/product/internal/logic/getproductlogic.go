@@ -30,7 +30,7 @@ func NewGetProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetPro
 	}
 }
 
-// 根据商品id得到商品详细信息
+// GetProduct 根据商品id得到商品详细信息
 func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetProductResp, error) {
 
 	// 在redis中维护商品的访问频率次数 PV

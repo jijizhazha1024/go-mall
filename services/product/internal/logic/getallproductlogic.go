@@ -39,7 +39,6 @@ func (l *GetAllProductLogic) GetAllProduct(in *product.GetAllProductsReq) (*prod
 	var queryErr error
 	productModel := product2.NewProductsModel(l.svcCtx.Mysql)
 	wg.Add(2)
-
 	// 查询商品列表
 	go func() {
 		defer wg.Done()

@@ -27,7 +27,7 @@ func NewIsExistProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Is
 	}
 }
 
-// 判断商品是否存在
+// IsExistProduct 判断商品是否存在
 func (l *IsExistProductLogic) IsExistProduct(in *product.IsExistProductReq) (*product.IsExistProductResp, error) {
 	productModel := product2.NewProductsModel(l.svcCtx.Mysql)
 	exist, err := productModel.FindProductIsExist(l.ctx, in.Id)
