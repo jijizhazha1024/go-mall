@@ -190,6 +190,23 @@ func TestLoadProduct2EsAndGorse(t *testing.T) {
 		return
 	}
 }
+func TestProductRecommend(t *testing.T) {
+	initproduct()
+	recommendProduct, err := product_client.RecommendProduct(context.Background(), &product.RecommendProductReq{
+		UserId:   1,
+		Category: []string{"手机"},
+		Paginator: &product.RecommendProductReq_Paginator{
+			Page:     1,
+			PageSize: 10,
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range recommendProduct.Products {
+		t.Log(" success", p)
+	}
+}
 
 // 七牛云配置
 const (
