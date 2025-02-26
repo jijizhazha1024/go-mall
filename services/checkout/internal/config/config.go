@@ -13,6 +13,8 @@ type Config struct {
 	Consul       consul.Conf
 	InventoryRpc zrpc.RpcClientConf
 	CartsRpc     zrpc.RpcClientConf
+	CouponsRpc   zrpc.RpcClientConf
+	ProductRpc   zrpc.RpcClientConf
 }
 
 type MysqlConfig struct {

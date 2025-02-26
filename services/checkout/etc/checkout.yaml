@@ -19,6 +19,10 @@ CartsRpc:
   Target: consul://124.71.72.124:8500/carts.rpc?wait=14s
   NonBlock: true
 
+ProductRpc:
+  Target: consul://${CONSUL_HOST}/product.rpc?wait=14s
+  NonBlock: true
+
 RedisConf:
   Host: 124.71.72.124:6379
   Type: node

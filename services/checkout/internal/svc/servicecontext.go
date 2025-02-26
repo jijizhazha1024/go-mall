@@ -9,7 +9,9 @@ import (
 	"jijizhazha1024/go-mall/services/carts/cartsclient"
 	"jijizhazha1024/go-mall/services/checkout/internal/config"
 	"jijizhazha1024/go-mall/services/checkout/internal/db"
+	"jijizhazha1024/go-mall/services/coupons/couponsclient"
 	"jijizhazha1024/go-mall/services/inventory/inventoryclient"
+	"jijizhazha1024/go-mall/services/product/productcatalogservice"
 )
 
 type ServiceContext struct {
@@ -20,6 +22,8 @@ type ServiceContext struct {
 	CartsModel    cart.CartsModel
 	InventoryRpc  inventoryclient.Inventory
 	CartsRpc      cartsclient.Cart
+	CouponsRpc    couponsclient.Coupons
+	ProductRpc    productcatalogservice.ProductCatalogService
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -33,5 +37,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		CheckoutModel: checkout.NewCheckoutsModel(mysql),
 		InventoryRpc:  inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
 		CartsRpc:      cartsclient.NewCart(zrpc.MustNewClient(c.CartsRpc)),
+		CouponsRpc:    couponsclient.NewCoupons(zrpc.MustNewClient(c.CouponsRpc)),
+		ProductRpc:    productcatalogservice.NewProductCatalogService(zrpc.MustNewClient(c.ProductRpc)),
 	}
 }
