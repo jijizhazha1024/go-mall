@@ -100,7 +100,15 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 	if _, err = l.svcCtx.EsClient.Index().
 		Index(biz.ProductEsIndexName).
 		Id(fmt.Sprintf("%d", productId)).
-		BodyJson(productRes).
+		BodyJson(map[string]interface{}{
+			"name":        productRes.Name,
+			"description": productRes.Description.String,
+			"picture":     productRes.Picture.String,
+			"price":       productRes.Price,
+			"categories":  in.Categories,
+			"created_at":  productRes.CreatedAt,
+			"updated_at":  productRes.UpdatedAt,
+		}).
 		Refresh("true").
 		Do(l.ctx); err != nil {
 		l.Logger.Errorw("product es creation failed",
