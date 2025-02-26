@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/qiniu/go-sdk/v7/storage"
 	"jijizhazha1024/go-mall/common/consts/biz"
-	"jijizhazha1024/go-mall/common/consts/code"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
 	pc "jijizhazha1024/go-mall/dal/model/products/product_categories"
 	"jijizhazha1024/go-mall/services/product/internal/svc"
@@ -32,18 +32,7 @@ func NewCreateProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cre
 	}
 }
 
-type esProductDocument struct {
-	Type        string    `json:"type"`
-	Name        string    `json:"name"`
-	Description string    `json:"description" type:"text"`
-	Picture     string    `json:"picture" type:"text"`
-	Price       int64     `json:"price"`
-	Categories  []string  `json:"categories"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-}
-
-// 添加新商品
+// CreateProduct 添加新商品
 func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*product.CreateProductResp, error) {
 	// 1. 敏感词校验
 	if err := l.checkSensitiveWords(in.Name); err != nil {
@@ -52,12 +41,18 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 		return nil, err
 	}
 	var productId int64
-	pictureUrl, err := UploadImage(in.Picture, l.svcCtx.Config)
-	if err != nil {
-		l.Logger.Errorw("product picture upload failed",
-			logx.Field("err", err))
-		return nil, err
+	var pictureUrl string
+	if len(in.Picture) != 0 {
+		zone, _ := storage.GetZone(l.svcCtx.Config.QiNiu.AccessKey, l.svcCtx.Config.QiNiu.Bucket)
+		url, err := UploadImage(in.Picture, zone, l.svcCtx.Config)
+		if err != nil {
+			l.Logger.Errorw("product picture upload failed",
+				logx.Field("err", err))
+			return nil, err
+		}
+		pictureUrl = url
 	}
+
 	// 创建 Products 结构体实例
 	productRes := &product2.Products{
 		Name:        in.Name,
@@ -67,6 +62,7 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
+	res := &product.CreateProductResp{}
 	// 2. 使用 Transact 开启事务
 	if err := l.svcCtx.Mysql.Transact(func(session sqlx.Session) error {
 		// 通过 withSession 生成支持事务的 productModel 实例
@@ -76,60 +72,45 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 		// 得到图片对应url
 		result, err := productModel.Insert(l.ctx, productRes)
 		if err != nil {
-			return fmt.Errorf("插入商品主表失败: %v", err)
+			return err
 		}
 		productId, err = result.LastInsertId()
 		if err != nil {
-			return fmt.Errorf("获取商品 ID 失败: %v", err)
+			return err
 		}
 		// 3. 插入商品分类关联信息
 		for _, categoryId := range in.Categories {
 			categoryId, err := strconv.ParseInt(categoryId, 10, 64)
 			if err != nil {
-				return fmt.Errorf("解析分类 ID 失败: %v", err)
+				return err
 			}
-
 			p := &pc.ProductCategories{
 				ProductId:  sql.NullInt64{Int64: productId, Valid: productId != 0},
 				CategoryId: sql.NullInt64{Int64: categoryId, Valid: categoryId != 0},
 			}
 			if _, err := productCategoriesModel.Insert(l.ctx, p); err != nil {
-				return fmt.Errorf("插入商品分类关联信息失败: %v", err)
+				return err
 			}
 		}
 		return nil
 	}); err != nil {
 		l.Logger.Errorw("product creation failed",
 			logx.Field("err", err))
-		return &product.CreateProductResp{
-			StatusCode: uint32(code.ProductCreationFailed),
-			StatusMsg:  code.ProductCreationFailedMsg,
-		}, nil
-	}
-	doc := esProductDocument{
-		Name:        productRes.Name,
-		Description: productRes.Description.String,
-		Picture:     productRes.Picture.String,
-		Price:       productRes.Price,
-		Categories:  in.Categories,
-		CreatedAt:   productRes.CreatedAt,
-		UpdatedAt:   productRes.UpdatedAt,
+		return nil, err
 	}
 	// 创建文档（自动JSON序列化）
-	if _, err = l.svcCtx.EsClient.Index().
+	if _, err := l.svcCtx.EsClient.Index().
 		Index(biz.ProductEsIndexName).
 		Id(strconv.FormatInt(productId, 10)).
-		BodyJson(doc).
+		BodyJson(productRes).
 		Refresh("true").
 		Do(l.ctx); err != nil {
 		l.Logger.Errorw("product es creation failed",
 			logx.Field("err", err))
-		return nil, err
+		return res, nil
 	}
-
-	return &product.CreateProductResp{
-		I: productId,
-	}, nil
+	res.ProductId = productId
+	return res, nil
 }
 
 func (l *CreateProductLogic) checkSensitiveWords(text string) error {

@@ -88,7 +88,7 @@ message GetProductResp {
 message  CreateProductReq{
   string name = 1;
   string description = 2;
-  string picture = 3;
+  bytes picture = 3;
   int64 price = 4;
   int64 stock = 5;
   repeated string categories = 6;
@@ -97,16 +97,22 @@ message CreateProductResp{
   uint32 status_code = 1; // 状态码
   string status_msg = 2; // 状态描述
 
-  int64 i = 3;// 商品id
+  int64 product_id = 3;// 商品id
 }
 message UpdateProductReq{
-  Product product = 1;
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  bytes picture = 4;
+  int64 price = 5; // 使用分作为单位，方便计算，避免精度丢失
+  int64 stock = 6;
+  repeated string categories = 8;
 }
 message UpdateProductResp{
   uint32 status_code = 1; // 状态码
   string status_msg = 2; // 状态描述
 
-  int64 i = 3;// 商品id
+  int64 id = 3;// 商品id
 }
 message DeleteProductReq{
   int64 id = 1;

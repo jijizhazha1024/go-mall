@@ -28,7 +28,8 @@ ElasticSearch:
   Addr: http://113.45.32.164:9200
 #七牛云
 QiNiu:
-  accessKey: $QINIU_ACCESSKEY
-  secretKey: ${QINIU_SECRETKEY}
-  bucket: ${QINIU_BUCKET}
-  domain: ${QINIU_DOMAIN}
+  accessKey: JfDRw6TYF7B-MXNjIivW1zxcZ6PrSHAHYksBcZOt
+  secretKey: ubXESZ4C3bpTh9P0yKTXmzOPXEbpaBgvzFkecWIu
+  bucket: jjzzchtt-mall
+  domain: ssa12nnvu.hn-bkt.clouddn.com
+

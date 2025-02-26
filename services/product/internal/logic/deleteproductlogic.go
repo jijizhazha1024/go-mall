@@ -2,13 +2,13 @@ package logic
 
 import (
 	"context"
-	"fmt"
 	"github.com/olivere/elastic/v7"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
 	"jijizhazha1024/go-mall/dal/model/products/product_categories"
+	"strconv"
 	"time"
 
 	"jijizhazha1024/go-mall/services/product/internal/svc"
@@ -33,17 +33,15 @@ func NewDeleteProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 
 // 删除商品
 func (l *DeleteProductLogic) DeleteProduct(in *product.DeleteProductReq) (*product.DeleteProductResp, error) {
-	// todo: add your logic here and delete this line
 	// 删除商品对应pv
-	redisKey := biz.ProductRedisPVName
 	// 商品 ID
-	productID := fmt.Sprintf("%d", in.Id)
-	cacheKey := fmt.Sprintf("%d", in.Id)
+	//ProductIDKey
+	cacheKey := strconv.Itoa(int(in.Id))
 	// 删除哈希表中的商品 ID 字段
-	_, err := l.svcCtx.RedisClient.Zrem(redisKey, cacheKey)
+	_, err := l.svcCtx.RedisClient.Zrem(biz.ProductRedisPVName, cacheKey)
 	if err != nil {
 		l.Logger.Errorw("从 Redis 哈希表中删除商品失败",
-			logx.Field("productId", productID),
+			logx.Field("productId", in.Id),
 			logx.Field("err", err))
 		return nil, err
 	}
@@ -54,51 +52,47 @@ func (l *DeleteProductLogic) DeleteProduct(in *product.DeleteProductReq) (*produ
 			logx.Field("product_id", in.Id))
 		return nil, err
 	}
-
+	res := &product.DeleteProductResp{}
 	// 2. 使用 Transact 开启事务
-	err = l.svcCtx.Mysql.Transact(func(session sqlx.Session) error {
+	if err = l.svcCtx.Mysql.Transact(func(session sqlx.Session) error {
 		// 3. 删除商品记录：通过 withSession 生成支持事务的 deleteModel 实例
 		deleteModel := product2.NewProductsModel(l.svcCtx.Mysql).WithSession(session)
+		exist, err := deleteModel.FindProductIsExist(l.ctx, in.Id)
+		if err != nil {
+			return err
+		}
+		if !exist {
+			res.StatusCode = code.ProductNotFound
+			res.StatusMsg = code.ProductNotFoundMsg
+			return nil
+		}
 		if err := deleteModel.Delete(l.ctx, in.Id); err != nil {
-			return fmt.Errorf("删除商品失败: %v", err)
+			return err
 		}
 		// 4. 删除商品分类关系：同样生成基于事务的 deleteCategoryModel 实例
 		deleteCategoryModel := product_categories.NewProductCategoriesModel(l.svcCtx.Mysql).WithSession(session)
 		if err := deleteCategoryModel.DeleteByProductId(l.ctx, in.Id); err != nil {
-			return fmt.Errorf("删除商品分类关系失败: %v", err)
+			return err
 		}
-
 		return nil
-	})
-
-	// 5. 处理事务错误
-	if err != nil {
+	}); err != nil {
 		l.Logger.Errorw("product delete  failed",
 			logx.Field("err", err),
 			logx.Field("product_id", in.Id))
-		return &product.DeleteProductResp{
-			StatusCode: uint32(code.ProductDeletionFailed),
-			StatusMsg:  code.ProductDeletionFailedMsg,
-		}, nil
+		return nil, err
 	}
 
 	// 6. 删除es记录
 	// 构建删除请求
 	if _, err := l.svcCtx.EsClient.Delete().
 		Index(biz.ProductEsIndexName).
-		Id(fmt.Sprintf("%d", in.Id)).
+		Id(strconv.Itoa(int(in.Id))).
 		Refresh("true").
-		Do(l.ctx); err != nil {
-		// 处理文档不存在的情况（404错误）
-		if elastic.IsNotFound(err) {
-			l.Logger.Infow("尝试删除不存在的ES文档",
-				logx.Field("product_id", in.Id))
-		} else {
-			l.Logger.Errorw("product es delete failed",
-				logx.Field("err", err),
-				logx.Field("product_id", in.Id))
-			return nil, err
-		}
+		Do(l.ctx); err != nil && elastic.IsNotFound(err) {
+		l.Logger.Errorw("product es delete failed",
+			logx.Field("err", err),
+			logx.Field("product_id", in.Id))
+		return nil, err
 	}
 
 	// 7. 延迟第二次删除缓存
@@ -109,8 +103,5 @@ func (l *DeleteProductLogic) DeleteProduct(in *product.DeleteProductReq) (*produ
 		}
 	}()
 	// 8. 返回成功响应
-	return &product.DeleteProductResp{
-		StatusCode: uint32(code.ProductDeleted),
-		StatusMsg:  code.ProductDeletedMsg,
-	}, nil
+	return res, nil
 }
