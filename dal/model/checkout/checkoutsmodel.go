@@ -33,6 +33,7 @@ func NewCheckoutsModel(conn sqlx.SqlConn) CheckoutsModel {
 func (m *customCheckoutsModel) withSession(session sqlx.Session) CheckoutsModel {
 	return NewCheckoutsModel(sqlx.NewSqlConnFromSession(session))
 }
+
 func (m *customCheckoutsModel) UpdateStatus(ctx context.Context, status int64, userId int32, preOrderId string) error {
 	updateQuery := "UPDATE checkouts SET status = ? WHERE user_id = ? AND pre_order_id = ?"
 

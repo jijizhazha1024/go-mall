@@ -1,6 +1,8 @@
 package checkout
 
-import "github.com/zeromicro/go-zero/core/stores/sqlx"
+import (
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+)
 
 var _ CheckoutItemsModel = (*customCheckoutItemsModel)(nil)
 
