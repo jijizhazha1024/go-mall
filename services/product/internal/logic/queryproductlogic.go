@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 	"encoding/json"
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/services/product/internal/svc"
 	"jijizhazha1024/go-mall/services/product/product"

@@ -9,6 +9,7 @@ require (
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/google/uuid v1.6.0
+	github.com/olivere/elastic/v7 v7.0.32
 	github.com/qiniu/go-sdk/v7 v7.25.2
 	github.com/shopspring/decimal v1.4.0
 	github.com/streadway/amqp v1.1.0
@@ -20,8 +21,6 @@ require (
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.36.1
 )
-
-require github.com/olivere/elastic v6.2.37+incompatible // indirect
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect

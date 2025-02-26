@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"

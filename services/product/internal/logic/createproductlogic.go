@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
@@ -31,6 +30,17 @@ func NewCreateProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cre
 		svcCtx: svcCtx,
 		Logger: logx.WithContext(ctx),
 	}
+}
+
+type esProductDocument struct {
+	Type        string    `json:"type"`
+	Name        string    `json:"name"`
+	Description string    `json:"description" type:"text"`
+	Picture     string    `json:"picture" type:"text"`
+	Price       int64     `json:"price"`
+	Categories  []string  `json:"categories"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 // 添加新商品
@@ -96,19 +106,20 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 			StatusMsg:  code.ProductCreationFailedMsg,
 		}, nil
 	}
+	doc := esProductDocument{
+		Name:        productRes.Name,
+		Description: productRes.Description.String,
+		Picture:     productRes.Picture.String,
+		Price:       productRes.Price,
+		Categories:  in.Categories,
+		CreatedAt:   productRes.CreatedAt,
+		UpdatedAt:   productRes.UpdatedAt,
+	}
 	// 创建文档（自动JSON序列化）
 	if _, err = l.svcCtx.EsClient.Index().
 		Index(biz.ProductEsIndexName).
-		Id(fmt.Sprintf("%d", productId)).
-		BodyJson(map[string]interface{}{
-			"name":        productRes.Name,
-			"description": productRes.Description.String,
-			"picture":     productRes.Picture.String,
-			"price":       productRes.Price,
-			"categories":  in.Categories,
-			"created_at":  productRes.CreatedAt,
-			"updated_at":  productRes.UpdatedAt,
-		}).
+		Id(strconv.FormatInt(productId, 10)).
+		BodyJson(doc).
 		Refresh("true").
 		Do(l.ctx); err != nil {
 		l.Logger.Errorw("product es creation failed",
@@ -129,13 +140,4 @@ func (l *CreateProductLogic) checkSensitiveWords(text string) error {
 		return fmt.Errorf("包含敏感词")
 	}
 	return nil
-}
-
-// mustJSON 辅助函数，用于将结构体转换为 JSON 字符串
-func mustJSON(v interface{}) (string, error) {
-	b, err := json.Marshal(v)
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
 }

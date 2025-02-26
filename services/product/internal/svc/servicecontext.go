@@ -2,7 +2,7 @@ package svc
 
 import (
 	"context"
-	"github.com/olivere/elastic"
+	"github.com/olivere/elastic/v7"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
