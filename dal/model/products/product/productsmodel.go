@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"strings"
 )
 
 var _ ProductsModel = (*CustomProductsModel)(nil)
@@ -18,12 +19,21 @@ type (
 		Count(ctx context.Context) (int64, error)
 		FindProductIsExist(ctx context.Context, productID int64) (bool, error)
 		QueryAllProducts(ctx context.Context) ([]*Products, error)
+		GetProductByIDs(ctx context.Context, productIDs []string) ([]*Products, error)
 	}
 
 	CustomProductsModel struct {
 		*defaultProductsModel
 	}
 )
+
+func (m *CustomProductsModel) GetProductByIDs(ctx context.Context, productIDs []string) ([]*Products, error) {
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id IN (%s)", m.table, strings.Join(productIDs, ","))
+	products := make([]*Products, 0)
+
+	err := m.conn.QueryRowsCtx(ctx, &products, query)
+	return products, err
+}
 
 func (m *CustomProductsModel) QueryAllProducts(ctx context.Context) ([]*Products, error) {
 	query := fmt.Sprintf("SELECT * FROM %s", m.table)

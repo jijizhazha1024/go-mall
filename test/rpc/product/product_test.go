@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"io"
 	"jijizhazha1024/go-mall/common/consts/biz"
+	gorse "jijizhazha1024/go-mall/common/utils/gorse"
 	"jijizhazha1024/go-mall/dal/model/products/categories"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
 	"jijizhazha1024/go-mall/services/product/product"
@@ -130,11 +131,15 @@ type Product struct {
 	Category    []string `json:"category"`
 }
 
-func TestLoadProduct2Es(t *testing.T) {
+func TestLoadProduct2EsAndGorse(t *testing.T) {
 	os.Setenv("ELASTICSEARCH_HOST", "http://113.45.32.164:9200/")
 	os.Setenv("MYSQL_DATA_SOURCE", "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local")
+	os.Setenv("GORSE_HOST", "http://47.99.130.92:8088")
+	os.Setenv("GORSE_APIKEY", "5105502fc46a411c896aa5b50c31e951")
 	esAddress := os.Getenv("ELASTICSEARCH_HOST")
 	mysqlAddress := os.Getenv("MYSQL_DATA_SOURCE")
+	gorseAddr := os.Getenv("GORSE_HOST")
+	gorseApikey := os.Getenv("GORSE_APIKEY")
 
 	ctx := context.TODO()
 	client, err := elastic.NewClient(elastic.SetURL(esAddress),
@@ -146,12 +151,12 @@ func TestLoadProduct2Es(t *testing.T) {
 	productsModel := product2.NewProductsModel(sqlx.NewMysql(mysqlAddress))
 	categoryModel := categories.NewCategoriesModel(sqlx.NewMysql(mysqlAddress))
 	products, err := productsModel.QueryAllProducts(ctx)
+	gorseClient := gorse.NewGorseClient(gorseAddr, gorseApikey)
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, p := range products {
 		category, err := categoryModel.FindCategoryNameByProductID(ctx, p.Id)
-
 		// 创建文档（自动JSON序列化）
 		if _, err = client.Index().
 			Index(biz.ProductEsIndexName).

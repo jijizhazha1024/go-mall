@@ -33,3 +33,6 @@ QiNiu:
   bucket: jjzzchtt-mall
   domain: ssa12nnvu.hn-bkt.clouddn.com
 
+GorseConfig:
+  GorseAddr: http://47.99.130.92:8088
+  GorseApikey: 5105502fc46a411c896aa5b50c31e951

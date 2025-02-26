@@ -16,6 +16,7 @@ type Config struct {
 	QiNiu         QiNiu
 	Consul        consul.Conf
 	InventoryRpc  zrpc.RpcClientConf
+	GorseConfig   config.GorseConfig
 }
 type MysqlConfig struct {
 	DataSource  string
