@@ -110,21 +110,12 @@ func TestProductsDeleteRpc(t *testing.T) {
 }
 
 func TestQueryProduct(t *testing.T) {
-	/*
 
-		Name      string                     `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-		New       bool                       `protobuf:"varint,2,opt,name=new,proto3" json:"new,omitempty"`
-		Hot       bool                       `protobuf:"varint,3,opt,name=hot,proto3" json:"hot,omitempty"`
-		Keyword   string                     `protobuf:"bytes,4,opt,name=keyword,proto3" json:"keyword,omitempty"`
-		Category  []string                   `protobuf:"bytes,5,rep,name=category,proto3" json:"category,omitempty"`
-		Price     *QueryProductReq_Price     `protobuf:"bytes,6,opt,name=price,proto3" json:"price,omitempty"`
-		Paginator *QueryProductReq_Paginator `protobuf:"bytes,7,opt,name=paginator,proto3" json:"paginator,omitempty"`
-	*/
 	initproduct()
 	resp, err := product_client.QueryProduct(context.Background(), &product.QueryProductReq{
-		New:     true,
-		Hot:     true,
-		Keyword: "手机",
+		New:      true,
+		Hot:      true,
+		Category: []string{"智能手机"},
 	})
 	if err != nil {
 		t.Fatal(err)

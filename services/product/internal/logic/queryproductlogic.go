@@ -27,93 +27,102 @@ func NewQueryProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Quer
 // QueryProduct 根据条件查询商品
 func (l *QueryProductLogic) QueryProduct(in *product.QueryProductReq) (*product.GetAllProductsResp, error) {
 	// 1. 构建基础查询
-	boolQuery := elastic.NewBoolQuery()
-	if in.Name != "" {
-		boolQuery.Must(elastic.NewMatchQuery("name", in.Name))
-	}
-
-	if in.Keyword != "" {
-		boolQuery.Must(elastic.NewMultiMatchQuery(in.Keyword, "name", "description"))
-	}
-
-	if len(in.Category) > 0 {
-		termsQuery := elastic.NewTermsQuery("category", stringSliceToInterface(in.Category)...)
-		boolQuery.Must(termsQuery)
-	}
-
-	if in.Price != nil {
-		rangeQuery := elastic.NewRangeQuery("price")
-		if in.Price.Min > 0 {
-			rangeQuery.Gte(in.Price.Min)
-		}
-		if in.Price.Max > 0 {
-			rangeQuery.Lte(in.Price.Max)
-		}
-		boolQuery.Must(rangeQuery)
-	}
-
-	// 2. 分页处理
+	boolQuery := l.buildESQuery(in)
+	// 分页参数
+	pageSize := biz.DefaultPageSize // 默认分页大小
 	from := 0
-	size := biz.DefaultPageSize // 默认分页大小
-	if in.Paginator != nil {
-		// 处理分页大小
-		if in.Paginator.PageSize > 0 {
-			// 限制最大分页不超过30
-			if in.Paginator.PageSize > biz.MaxPageSize {
-				size = biz.MaxPageSize
-			} else {
-				size = int(in.Paginator.PageSize)
-			}
-		}
-		// 计算起始位置（增加页码有效性校验）
-		if in.Paginator.Page > 1 {
-			from = (int(in.Paginator.Page) - 1) * size
-		}
+	if in.Paginator != nil && in.Paginator.PageSize > 0 {
+		pageSize = int(in.Paginator.PageSize)
 	}
-
-	res := &product.GetAllProductsResp{}
-	// 3. 执行ES查询
-	// 在已有代码中找到ES查询构建部分，修改为：
+	if in.Paginator != nil && in.Paginator.Page > 0 {
+		from = int(in.Paginator.Page) * pageSize
+	}
+	// 构建搜索服务
 	searchService := l.svcCtx.EsClient.Search().
 		Index(biz.ProductEsIndexName).
 		Query(boolQuery).
 		From(from).
-		Size(size)
+		Size(pageSize)
 
-	// 添加排序逻辑
-	// 新增新品排序
+	// 新增排序逻辑
 	if in.New {
-		searchService.SortBy(elastic.NewFieldSort("created_at").Desc()) // 按创建时间倒序
-		searchService.SortBy(elastic.NewFieldSort("updated_at").Desc())
+		searchService.SortBy(
+			elastic.NewFieldSort("created_at").Desc(),
+			elastic.NewFieldSort("updated_at").Desc(),
+		)
 	}
-
-	// 执行查询
+	if in.Hot {
+		searchService.SortBy(
+			elastic.NewFieldSort("price").Asc(),
+			elastic.NewScoreSort().Desc(),
+		)
+	}
 	searchResult, err := searchService.Do(l.ctx)
-
-	if err != nil || searchResult.Error != nil {
-		l.Errorw("query es error", logx.Field("err", err))
-		return res, nil
+	if err != nil {
+		logx.Errorw("elasticsearch query error", logx.Field("err", err))
+		return nil, err
+	}
+	// 处理查询结果
+	var products []*product.Product
+	for _, hit := range searchResult.Hits.Hits {
+		var p *product.Product
+		if err := json.Unmarshal(hit.Source, &p); err != nil {
+			continue
+		}
+		products = append(products, p)
 	}
 
-	products := make([]*product.Product, searchResult.Hits.TotalHits.Value)
-	for i, hit := range searchResult.Hits.Hits {
-		var p product.Product
-		bytes, err := hit.Source.MarshalJSON()
-		if err != nil {
-			l.Logger.Errorw("marshal json error")
-			break
-		}
-		if err := json.Unmarshal(bytes, &p); err != nil {
-			l.Logger.Errorw("unmarshal json error")
-			break
-		}
-		products[i] = &p
+	return &product.GetAllProductsResp{
+		Total:    searchResult.TotalHits(),
+		Products: products,
+	}, nil
+}
+func (l *QueryProductLogic) buildESQuery(req *product.QueryProductReq) *elastic.BoolQuery {
+	boolQuery := elastic.NewBoolQuery()
+
+	// 商品名称模糊匹配
+	if req.Name != "" {
+		boolQuery.Must(elastic.NewMatchQuery("name", req.Name))
 	}
-	res.Products = products
-	return res, nil
+	if req.Keyword != "" {
+		boolQuery.Should(
+			// 多字段匹配（description权重更高）
+			elastic.NewMultiMatchQuery(req.Keyword,
+				"name^1",        // name字段权重1（默认）
+				"description^2", // description字段权重2
+			),
+			// 短语匹配（description权重更高）
+			elastic.NewMatchPhraseQuery("name", req.Keyword).Boost(1),        // 权重1
+			elastic.NewMatchPhraseQuery("description", req.Keyword).Boost(3), // 权重3
+			// 精确匹配
+			elastic.NewTermQuery("description.keyword", req.Keyword).Boost(5), // 最高权重
+		)
+
+		// 设置最小匹配条件（至少满足一个should条件）
+		boolQuery.MinimumNumberShouldMatch(1)
+	}
+
+	// 分类筛选（数组匹配）
+	if len(req.Category) > 0 {
+		boolQuery.Filter(elastic.NewTermsQuery("category", stringSliceToInterface(req.Category)...))
+	}
+
+	// 价格区间筛选
+	if req.Price != nil {
+		rangeQuery := elastic.NewRangeQuery("price")
+		if req.Price.Min > 0 {
+			rangeQuery.Gte(req.Price.Min)
+		}
+		if req.Price.Max > 0 {
+			rangeQuery.Lte(req.Price.Max)
+		}
+		boolQuery.Filter(rangeQuery)
+	}
+
+	return boolQuery
 }
 
-// 辅助函数：转换字符串切片为interface切片
+// 确保存在该转换函数（建议放在公共工具类中）
 func stringSliceToInterface(s []string) []interface{} {
 	r := make([]interface{}, len(s))
 	for i, v := range s {
