@@ -5,15 +5,13 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/qiniu/go-sdk/v7/storage"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
 	pc "jijizhazha1024/go-mall/dal/model/products/product_categories"
 	"jijizhazha1024/go-mall/services/product/internal/svc"
 	"jijizhazha1024/go-mall/services/product/product"
 	"strconv"
-	"time"
-
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -59,8 +57,6 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 		Description: sql.NullString{String: in.Description, Valid: in.Description != ""},
 		Picture:     sql.NullString{String: pictureUrl, Valid: pictureUrl != ""},
 		Price:       in.Price, // 注意类型转换
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
 	}
 	res := &product.CreateProductResp{}
 	// 2. 使用 Transact 开启事务
