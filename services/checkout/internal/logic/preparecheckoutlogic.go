@@ -75,7 +75,9 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	// 3. 检查是否有商品信息
 	if len(in.OrderItems) == 0 {
 		// 释放 Redis 锁
-		l.svcCtx.RedisClient.Del(cacheKey)
+		if _, err := l.svcCtx.RedisClient.Del(cacheKey); err != nil {
+			l.Logger.Errorw("删除 Redis 锁失败", logx.Field("err", err), logx.Field("user_id", in.UserId))
+		}
 		return &checkout.CheckoutResp{
 			StatusCode: 400,
 			StatusMsg:  "订单商品不能为空",
@@ -101,7 +103,9 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 		l.Logger.Errorw("库存预扣失败，执行同步库存回滚", logx.Field("err", err), logx.Field("user_id", in.UserId), logx.Field("pre_order_id", preOrderId))
 
 		// 释放 Redis 锁
-		l.svcCtx.RedisClient.Del(cacheKey)
+		if _, err := l.svcCtx.RedisClient.Del(cacheKey); err != nil {
+			l.Logger.Errorw("删除 Redis 锁失败", logx.Field("err", err), logx.Field("user_id", in.UserId))
+		}
 
 		// 同步回滚库存
 		_, errRollback := l.svcCtx.InventoryRpc.ReturnPreInventory(l.ctx, &inventory.InventoryReq{
@@ -212,7 +216,9 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	}()
 
 	// 释放 Redis 锁
-	l.svcCtx.RedisClient.Del(cacheKey)
+	if _, err := l.svcCtx.RedisClient.Del(cacheKey); err != nil {
+		l.Logger.Errorw("删除 Redis 锁失败", logx.Field("err", err), logx.Field("user_id", in.UserId))
+	}
 
 	// 6. 返回预结算信息
 	return &checkout.CheckoutResp{
