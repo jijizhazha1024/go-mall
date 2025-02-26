@@ -66,8 +66,7 @@ func (l *GetAllProductLogic) GetAllProduct(in *product.GetAllProductsReq) (*prod
 	}
 
 	// 预分配切片容量
-	result := make([]*product.Product, len(products))
-	populateProductDetails(l.ctx, l.svcCtx, products, result)
+	result := populateProductDetails(l.ctx, l.svcCtx, products)
 	return &product.GetAllProductsResp{
 		Products: result,
 		Total:    total,

@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"fmt"
 	"jijizhazha1024/go-mall/services/product/internal/svc"
 	"jijizhazha1024/go-mall/services/product/product"
 	"strconv"
@@ -41,15 +42,18 @@ func (l *RecommendProductLogic) RecommendProduct(in *product.RecommendProductReq
 		l.Logger.Errorw("gorse recommend failed", logx.Field("err", err))
 		return nil, err
 	}
-
 	// 3. 根据推荐结果查询商品详情
 	products, err := l.svcCtx.ProductModel.GetProductByIDs(l.ctx, itemIds)
+	for i, p := range products {
+		fmt.Println(p.Name)
+		fmt.Println(i)
+	}
 	if err != nil {
 		l.Logger.Errorw("query products failed", logx.Field("err", err))
 		return nil, err
 	}
-	result := make([]*product.Product, len(products))
-	populateProductDetails(l.ctx, l.svcCtx, products, result)
+	result := populateProductDetails(l.ctx, l.svcCtx, products)
+
 	return &product.GetAllProductsResp{
 		Products: result,
 	}, nil

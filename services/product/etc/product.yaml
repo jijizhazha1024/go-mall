@@ -1,6 +1,7 @@
 Name: products.rpc
 ListenOn: 0.0.0.0:10002
 Mode: dev
+Timeout: 0
 
 # 服务发现配置
 Consul:
