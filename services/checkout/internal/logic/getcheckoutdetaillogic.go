@@ -25,9 +25,9 @@ func NewGetCheckoutDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 
 // GetCheckoutDetail 获取结算详情
 func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailReq) (*checkout.CheckoutDetailResp, error) {
-	// 第一步：根据传入的 UserId 和 PreOrderId 获取结算记录
 	checkoutRecord, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderId(l.ctx, in.UserId, in.PreOrderId)
 	if err != nil {
+		if err != nil {
 			return nil, err
 		}
 		l.Logger.Errorw("查询结算记录失败", logx.Field("err", err), logx.Field("user_id", in.UserId), logx.Field("pre_order_id", in.PreOrderId))
@@ -37,32 +37,44 @@ func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailRe
 		}, err
 	}
 
-	// 第二步：根据 PreOrderId 获取结算项（Items）
-	checkoutItems, err := l.svcCtx.CheckoutModel.find(l.ctx, in.PreOrderId)
+	checkoutItems, err := l.svcCtx.CheckoutItemsModel.FindOne(l.ctx, in.PreOrderId)
 	if err != nil {
-		l.Logger.Errorw("获取结算项失败", logx.Field("err", err), logx.Field("pre_order_id", in.PreOrderId))
-		// 返回部分数据，不影响结算记录返回
+		if err != nil {
+			return nil, err
+		}
+		l.Logger.Errorw("查询结算记录失败", logx.Field("err", err), logx.Field("user_id", in.UserId), logx.Field("pre_order_id", in.PreOrderId))
+		return &checkout.CheckoutDetailResp{
+			StatusCode: 500,
+			StatusMsg:  "查询结算记录失败",
+		}, err
 	}
 
-	// 将结算记录映射到 CheckoutOrder 结构体
 	orderData := &checkout.CheckoutOrder{
 		PreOrderId: checkoutRecord.PreOrderId,
-		UserId:     checkoutRecord.UserId,
-		Status:     checkoutRecord.Status,
+		UserId:     int64(checkoutRecord.UserId),
+		Status:     checkout.CheckoutStatus(checkoutRecord.Status),
 		ExpireTime: checkoutRecord.ExpireTime,
-		CreatedAt:  checkoutRecord.CreatedAt,
-		UpdatedAt:  checkoutRecord.UpdatedAt,
-		Items:      checkoutItems.Items, // 将结算项添加到 Items
+		CreatedAt:  checkoutRecord.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:  checkoutRecord.UpdatedAt.String(),
 	}
 
-	// 第三步：构建响应结构体
+	var items []*checkout.CheckoutItem
+	if checkoutItems != nil {
+		checkoutItem := &checkout.CheckoutItem{
+			ProductId: int32(checkoutItems.ProductId),
+			Quantity:  int32(checkoutItems.Quantity),
+			Price:     checkoutItems.Price,
+		}
+		items = append(items, checkoutItem)
+	}
+
+	orderData.Items = items
+
 	resp := &checkout.CheckoutDetailResp{
-		StatusCode: 200, // 假设请求成功返回 200
+		StatusCode: 200,
 		StatusMsg:  "成功获取结算详情",
-		Data:       orderData, // 将 CheckoutOrder 作为 Data 返回
+		Data:       orderData,
 	}
 
-	// 第四步：返回填充完的响应对象
 	return resp, nil
-}
 }
