@@ -2,6 +2,7 @@ package checkout
 
 import (
 	"context"
+	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
@@ -13,7 +14,8 @@ type (
 	CheckoutsModel interface {
 		checkoutsModel
 		withSession(session sqlx.Session) CheckoutsModel
-		UpdateStatus(ctx context.Context, status int64, preOrderId string) error
+		UpdateStatus(ctx context.Context, status int64, userId int32, preOrderId string) error
+		FindOneByUserIdAndPreOrderId(ctx context.Context, userId int32, preOrderId string) (*Checkouts, error)
 	}
 
 	customCheckoutsModel struct {
@@ -31,13 +33,36 @@ func NewCheckoutsModel(conn sqlx.SqlConn) CheckoutsModel {
 func (m *customCheckoutsModel) withSession(session sqlx.Session) CheckoutsModel {
 	return NewCheckoutsModel(sqlx.NewSqlConnFromSession(session))
 }
-func (m *customCheckoutsModel) UpdateStatus(ctx context.Context, status int64, preOrderId string) error {
-	updateQuery := "UPDATE checkouts SET status = ? WHERE pre_order_id = ?"
+func (m *customCheckoutsModel) UpdateStatus(ctx context.Context, status int64, userId int32, preOrderId string) error {
+	updateQuery := "UPDATE checkouts SET status = ? WHERE user_id = ? AND pre_order_id = ?"
 
-	_, err := m.conn.ExecCtx(ctx, updateQuery, status, preOrderId)
+	_, err := m.conn.ExecCtx(ctx, updateQuery, status, userId, preOrderId)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (m *customCheckoutsModel) FindOneByUserIdAndPreOrderId(ctx context.Context, userId int32, preOrderId string) (*Checkouts, error) {
+	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `pre_order_id` = ? limit 1", checkoutsRows, m.table)
+
+	// Declare a variable to store the result
+	var resp Checkouts
+
+	// Execute the query and scan the result into the resp variable
+	err := m.conn.QueryRowCtx(ctx, &resp, query, userId, preOrderId)
+
+	// Handle the error cases
+	switch err {
+	case nil:
+		// Return the found checkout record
+		return &resp, nil
+	case sqlx.ErrNotFound:
+		// If no record is found, return a specific error
+		return nil, ErrNotFound
+	default:
+		// If there is another error, return it
+		return nil, err
+	}
 }

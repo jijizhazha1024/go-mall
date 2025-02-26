@@ -25,7 +25,7 @@ func NewUpdateStatus2OrderLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 // UpdateStatus2Order 由订单服务调用，更新结算状态为已确认
 func (l *UpdateStatus2OrderLogic) UpdateStatus2Order(in *checkout.UpdateStatusReq) (*checkout.EmptyResp, error) {
 	// 1. 查询指定 preOrderId 的结算信息
-	checkoutRecord, err := l.svcCtx.CheckoutModel.FindOne(l.ctx, in.PreOrderId)
+	checkoutRecord, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderId(l.ctx, in.UserId, in.PreOrderId)
 	if err != nil {
 		l.Logger.Errorw("查询结算记录失败", logx.Field("err", err), logx.Field("pre_order_id", in.PreOrderId))
 		return nil, err
@@ -37,7 +37,7 @@ func (l *UpdateStatus2OrderLogic) UpdateStatus2Order(in *checkout.UpdateStatusRe
 	}
 
 	// 3. 更新结算状态为已确认
-	err = l.svcCtx.CheckoutModel.UpdateStatus(l.ctx, int64(checkout.CheckoutStatus_CONFIRMED), in.PreOrderId)
+	err = l.svcCtx.CheckoutModel.UpdateStatus(l.ctx, int64(checkout.CheckoutStatus_CONFIRMED), in.UserId, in.PreOrderId)
 	if err != nil {
 		l.Logger.Errorw("更新结算状态失败", logx.Field("err", err), logx.Field("pre_order_id", in.PreOrderId))
 		return nil, errors.New("更新结算状态失败")
