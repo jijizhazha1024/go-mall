@@ -159,15 +159,12 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 		ActionDescription: "用户地址更新",
 		ServiceName:       "users",
 		TargetId:          int64(in.AddressId),
-		OldData:           "",
+		ClientIp:          "127.0.0.1",
 		NewData:           newData,
 	})
 	if err != nil {
 		l.Logger.Infow(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
-		return &users.UpdateAddressResponse{
-			StatusCode: code.AuditUpdateaddressFailed,
-			StatusMsg:  code.AuditUpdateaddressFailedMsg,
-		}, nil
+
 	}
 
 	return &users.UpdateAddressResponse{

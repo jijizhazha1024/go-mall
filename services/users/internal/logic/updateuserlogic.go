@@ -83,8 +83,10 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 		TargetTable:       "user",
 		ActionDescription: "用户更新",
 		ServiceName:       "users",
+		TargetId:          int64(in.UserId),
 		OldData:           update_user.Username.String,
 		NewData:           in.UsrName,
+		ClientIp:          "127.0.0.1",
 	})
 	if err != nil {
 		logx.Infow("create audit log failed", logx.Field("err", err))

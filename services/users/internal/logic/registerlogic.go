@@ -95,25 +95,18 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			//审计操作
 			_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
 
-				UserId:            uint32(existUser.UserId),
+				UserId:            uint32(userId),
 				ActionType:        biz.Create,
 				TargetTable:       "user",
 				ActionDescription: "用户注册",
 				TargetId:          int64(userId),
-				OldData:           "",
-				NewData:           "",
-				CreateAt:          0,
 				ServiceName:       "users",
-				ClientIp:          "",
+				ClientIp:          "127.0.0.1",
 			})
 			if err != nil {
 				l.Logger.Infow("register audit failed", logx.Field("err", err),
 					logx.Field("email", in.Email))
 
-				return &users.RegisterResponse{
-					StatusCode: code.AuditRegisterFailed,
-					StatusMsg:  code.AuditRegisterFailedMsg,
-				}, nil
 			}
 			//埋点
 			svc.UserRegCounter.Inc("success")
@@ -151,24 +144,21 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 
 			}
 
-			//审计操作
-			// _, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
+			_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
 
-			// 	UserId:            uint32(existUser.UserId),
-			// 	ActionType:        biz.Create,
-			// 	TargetTable:       "user",
-			// 	ActionDescription: "用户注册",
-			// 	ServiceName:       "users",
-			// })
-			// if err != nil {
-			// 	l.Logger.Infow("register audit failed", logx.Field("err", err),
-			// 		logx.Field("email", in.Email))
+				UserId:            uint32(existUser.UserId),
+				ActionType:        biz.Create,
+				TargetTable:       "user",
+				ActionDescription: "用户注册",
+				TargetId:          int64(existUser.UserId),
+				ServiceName:       "users",
+				ClientIp:          "127.0.0.1",
+			})
+			if err != nil {
+				l.Logger.Infow("register audit failed", logx.Field("err", err),
+					logx.Field("email", in.Email))
 
-			// 	return &users.RegisterResponse{
-			// 		StatusCode: code.AuditRegisterFailed,
-			// 		StatusMsg:  code.AuditRegisterFailedMsg,
-			// 	}, nil
-			// }
+			}
 			//埋点操作
 			svc.UserRegCounter.Inc("success")
 			return &users.RegisterResponse{

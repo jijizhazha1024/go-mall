@@ -72,15 +72,12 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 		ActionDescription: "用户注销",
 		TargetId:          int64(in.UserId),
 		ServiceName:       "users",
+		ClientIp:          "127.0.0.1",
 	})
 	if err != nil {
 		l.Logger.Infow("add address audit failed", logx.Field("err", err),
 			logx.Field("user_id", in.UserId))
 
-		return &users.DeleteUserResponse{
-			StatusCode: code.AuditDeleteuserFailed,
-			StatusMsg:  code.AuditDeleteuserFailedMsg,
-		}, nil
 	}
 	return &users.DeleteUserResponse{
 		UserId: in.UserId,

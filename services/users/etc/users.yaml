@@ -5,7 +5,8 @@ Mode: dev
 # 服务发现
 Consul:
   Host: 124.71.72.124:8500 # consul endpoint
-  Key: users.rpc
+  Key: 
+    users.rpc
   Meta:
     Protocol: grpc
 

@@ -63,18 +63,16 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 
 		UserId:            uint32(in.UserId),
 		ActionType:        biz.Delete,
-		TargetTable:       "user",
+		TargetTable:       "user_address",
 		ActionDescription: "删除用户地址",
+		ClientIp:          "127.0.0.1",
 		TargetId:          int64(in.AddressId),
 		ServiceName:       "users",
 	})
 	if err != nil {
 		l.Logger.Infow("add address audit failed", logx.Field("err", err),
 			logx.Field("user_id", in.UserId))
-		return &users.DeleteAddressResponse{
-			StatusCode: code.AuditDeleteaddressFailed,
-			StatusMsg:  code.AuditDeleteaddressFailedMsg,
-		}, nil
+
 	}
 
 	return &users.DeleteAddressResponse{}, nil

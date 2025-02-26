@@ -122,6 +122,7 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 			ActionType:        biz.Create,
 			TargetTable:       "user",
 			ActionDescription: "添加用户地址",
+			ClientIp:          "127.0.0.1",
 			TargetId:          int64(in.UserId),
 			ServiceName:       "users",
 			NewData:           datastr,
@@ -182,11 +183,11 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 
 		//添加审计服务
 		_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
-
 			UserId:            uint32(in.UserId),
 			ActionType:        biz.Create,
 			TargetTable:       "user",
 			ActionDescription: "添加用户地址",
+			ClientIp:          "127.0.0.1",
 			TargetId:          int64(in.UserId),
 			ServiceName:       "users",
 			NewData:           datastr,
@@ -194,10 +195,7 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 		if err != nil {
 			l.Logger.Infow("add address audit failed", logx.Field("err", err),
 				logx.Field("user_id", in.UserId))
-			return &users.AddAddressResponse{
-				StatusMsg:  code.AuditAddAddressFailedMsg,
-				StatusCode: code.AuditAddAddressFailed,
-			}, nil
+
 		}
 
 		return &users.AddAddressResponse{
