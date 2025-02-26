@@ -4,3 +4,6 @@ const (
 	ApiKey  = "GPT_API_KEY"
 	ModelID = "GPT_MODEL_ID"
 )
+const (
+	AIRpcPort = 10007
+)

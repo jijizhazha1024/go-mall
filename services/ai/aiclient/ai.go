@@ -15,7 +15,6 @@ import (
 type (
 	NLPExecutorReq  = ai.NLPExecutorReq
 	NLPExecutorResp = ai.NLPExecutorResp
-	ProductItem     = ai.ProductItem
 
 	Ai interface {
 		NLPExecutor(ctx context.Context, in *NLPExecutorReq, opts ...grpc.CallOption) (*NLPExecutorResp, error)

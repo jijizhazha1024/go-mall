@@ -7,6 +7,7 @@
 1. 只进行提取名称、价格范围、种类、最新、最热、关键字。
 2. 如果用户提及的商品名称有误，请根据上下文进行合理纠正。
 3. 关键字可以进行适当分词。
+4. 输出价格单位为分。
 
 # 输入格式
 
@@ -21,11 +22,11 @@
 
 示例1：
 输入：```查询类别为手机的且价格范围在100到3000元的iphone13，颜色红色，内存8GB```
-输出：{"conditions":{"name":"iphone13","new":false,"hot":false,"category":["手机"],"price":{"min":100,"max":3000},"
+输出：{"conditions":{"name":"iphone13","new":false,"hot":false,"category":["手机"],"price":{"min":10000,"max":300000},"
 keyword":"红色,内存8GB"} }
 示例2：
 输入：```想了解一下新款的笔记本电脑，预算大概是4000到6000元，对品牌没有特别要求，但必须是轻薄型的。```
-输出：{"conditions":{"name":"","new:true,"hot":false,"category":["笔记本电脑"],"price":{"min":4000,"max":6000},"
+输出：{"conditions":{"name":"","new:true,"hot":false,"category":["笔记本电脑"],"price":{"min":400000,"max":600000},"
 keyword":"
 轻薄型"} } }
 

@@ -12,21 +12,10 @@ enum CommandType{
   Order = 2;
 }
 
-message ProductItem {
-  uint32 id = 1;
-  string name = 2;
-  string description = 3;
-  string picture = 4;
-  float price = 5;
-  int64 stock = 6;
-  repeated string categories = 7;
-}
-
-
 message NLPExecutorResp {
   uint32 status_code = 1;
   string status_msg = 2;
-  repeated  ProductItem products = 3;
+  bytes data = 3;
   CommandType command_type = 4;
 
 }

@@ -1,5 +1,6 @@
 Name: ai.rpc
 ListenOn: 0.0.0.0:10007
+Timeout: 0
 
 Consul:
   Host: 124.71.72.124:8500 # consul endpoint
@@ -7,5 +8,9 @@ Consul:
   Meta:
     Protocol: grpc
 Gpt:
-  ApiKey: $GPT_API_KEY
-  ModelID: $GPT_MODEL_ID
+  ApiKey: 5b5ab09c-7298-40d7-b60e-433d21314f36
+  ModelID: ep-20241002090911-md25k
+
+ProductRpc:
+  Target: consul://124.71.72.124:8500/products.rpc?wait=14s
+  NonBlock: true

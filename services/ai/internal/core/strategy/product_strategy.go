@@ -5,15 +5,19 @@ import (
 	"fmt"
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/zrpc"
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/ai/internal/config"
 	"jijizhazha1024/go-mall/services/ai/internal/core/model"
 	"jijizhazha1024/go-mall/services/ai/internal/core/prompt/product_query"
 	"jijizhazha1024/go-mall/services/ai/internal/core/vars"
 	"jijizhazha1024/go-mall/services/ai/internal/utils/gpt"
+	"jijizhazha1024/go-mall/services/product/productcatalogservice"
 )
 
 type ProductQueryStrategy struct {
-	gpt *gpt.Gpt
+	gpt        *gpt.Gpt
+	ProductRpc productcatalogservice.ProductCatalogService
 }
 
 func (s *ProductQueryStrategy) Parse(ctx context.Context, command string, userID int) (model.AST, error) {
@@ -41,15 +45,39 @@ func (s *ProductQueryStrategy) Validate(ctx context.Context, ast model.AST) erro
 }
 
 func (s *ProductQueryStrategy) Execute(ctx context.Context, ast model.AST) (interface{}, error) {
-	// 调用rpc服务
-	return nil, nil
+	queryAST := ast.(*model.ProductQueryAST)
+	product, err := s.ProductRpc.QueryProduct(ctx, &productcatalogservice.QueryProductReq{
+		Category: queryAST.Conditions.Category,
+		Name:     queryAST.Conditions.Name,
+		New:      queryAST.Conditions.New,
+		Hot:      queryAST.Conditions.Hot,
+		Price: &productcatalogservice.QueryProductReq_Price{
+			Max: int64(queryAST.Conditions.Price.Max),
+			Min: int64(queryAST.Conditions.Price.Min),
+		},
+		Keyword: queryAST.Conditions.Keyword,
+		Paginator: &productcatalogservice.QueryProductReq_Paginator{
+			Page:     1,
+			PageSize: 10,
+		},
+	})
+	if err != nil {
+		logx.Errorw("failed to execute ast", logx.Field("error", err), logx.Field("ast", ast))
+		return nil, err
+	}
+	if product.StatusCode != code.Success {
+		return nil, vars.ErrProductQueryFailed
+	}
+	logx.Infow("success to execute ast", logx.Field("ast", ast))
+	return product.Products, nil
 }
 func (s *ProductQueryStrategy) GetCommandType() vars.CommandType {
 	return vars.QueryProductCommand
 }
 func NewProductQueryStrategy(conf *config.Config) *ProductQueryStrategy {
 	strategy := &ProductQueryStrategy{
-		gpt: gpt.NewGpt(conf.Gpt.ApiKey, conf.Gpt.ModelID),
+		gpt:        gpt.NewGpt(conf.Gpt.ApiKey, conf.Gpt.ModelID),
+		ProductRpc: productcatalogservice.NewProductCatalogService(zrpc.MustNewClient(conf.ProductRpc)),
 	}
 	return strategy
 }
