@@ -1,6 +1,9 @@
 package checkout
 
-import "github.com/zeromicro/go-zero/core/stores/sqlx"
+import (
+	"context"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+)
 
 var _ CheckoutsModel = (*customCheckoutsModel)(nil)
 
@@ -10,6 +13,7 @@ type (
 	CheckoutsModel interface {
 		checkoutsModel
 		withSession(session sqlx.Session) CheckoutsModel
+		UpdateStatus(ctx context.Context, status int64, preOrderId string) error
 	}
 
 	customCheckoutsModel struct {
@@ -26,4 +30,14 @@ func NewCheckoutsModel(conn sqlx.SqlConn) CheckoutsModel {
 
 func (m *customCheckoutsModel) withSession(session sqlx.Session) CheckoutsModel {
 	return NewCheckoutsModel(sqlx.NewSqlConnFromSession(session))
+}
+func (m *customCheckoutsModel) UpdateStatus(ctx context.Context, status int64, preOrderId string) error {
+	updateQuery := "UPDATE checkouts SET status = ? WHERE pre_order_id = ?"
+
+	_, err := m.conn.ExecCtx(ctx, updateQuery, status, preOrderId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
