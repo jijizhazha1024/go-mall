@@ -155,7 +155,8 @@ func TestLoadProduct2EsAndGorse(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, p := range products {
+	items := make([]gorse.Item, len(products))
+	for i, p := range products {
 		category, err := categoryModel.FindCategoryNameByProductID(ctx, p.Id)
 		// 创建文档（自动JSON序列化）
 		if _, err = client.Index().
@@ -176,6 +177,17 @@ func TestLoadProduct2EsAndGorse(t *testing.T) {
 			t.Fatal("product es creation failed", logx.Field("err", err))
 			return
 		}
+		items[i] = gorse.Item{
+			ItemId:    strconv.FormatInt(p.Id, 10),
+			IsHidden:  false,
+			Labels:    category,
+			Comment:   p.Description.String,
+			Timestamp: p.CreatedAt.Format(time.DateTime),
+		}
+	}
+	if _, err = gorseClient.InsertItems(ctx, items); err != nil {
+		t.Fatal("gorse insert items failed", logx.Field("err", err))
+		return
 	}
 }
 
