@@ -2,7 +2,7 @@
 <project version="4">
   <component name="PublishConfigData">
     <serverData>
-      <paths name="local(项目级别)">
+      <paths name="local">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
