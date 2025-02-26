@@ -50,6 +50,8 @@ message Product {
   int64 stock = 6;
   int64 sold = 7;
   repeated string categories = 8;
+  string crated_at = 9;
+  string updated_at = 10;
 }
 message IsExistProductReq{
   int64 id = 1 ; //商品id

@@ -5,14 +5,20 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"github.com/olivere/elastic/v7"
 	"github.com/qiniu/go-sdk/v7/auth/qbox"
 	"github.com/qiniu/go-sdk/v7/storage"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"io"
 	"jijizhazha1024/go-mall/common/consts/biz"
+	"jijizhazha1024/go-mall/dal/model/products/categories"
+	product2 "jijizhazha1024/go-mall/dal/model/products/product"
 	"jijizhazha1024/go-mall/services/product/product"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -31,7 +37,7 @@ func TestGetallProduct(t *testing.T) {
 	initproduct()
 	resp, err := product_client.GetAllProduct(context.Background(), &product.GetAllProductsReq{
 		Page:     1,
-		PageSize: 2,
+		PageSize: 10,
 	})
 
 	if err != nil {
@@ -101,6 +107,84 @@ func TestProductsDeleteRpc(t *testing.T) {
 	}
 	fmt.Println(" success", resp)
 	t.Log(" success", resp)
+}
+
+func TestQueryProduct(t *testing.T) {
+	/*
+
+		Name      string                     `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+		New       bool                       `protobuf:"varint,2,opt,name=new,proto3" json:"new,omitempty"`
+		Hot       bool                       `protobuf:"varint,3,opt,name=hot,proto3" json:"hot,omitempty"`
+		Keyword   string                     `protobuf:"bytes,4,opt,name=keyword,proto3" json:"keyword,omitempty"`
+		Category  []string                   `protobuf:"bytes,5,rep,name=category,proto3" json:"category,omitempty"`
+		Price     *QueryProductReq_Price     `protobuf:"bytes,6,opt,name=price,proto3" json:"price,omitempty"`
+		Paginator *QueryProductReq_Paginator `protobuf:"bytes,7,opt,name=paginator,proto3" json:"paginator,omitempty"`
+	*/
+	initproduct()
+	resp, err := product_client.QueryProduct(context.Background(), &product.QueryProductReq{
+		New:     true,
+		Hot:     true,
+		Keyword: "手机",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(" success", resp)
+}
+
+type Product struct {
+	Id          int64    `json:"id"`          // 主键，自增,商品id
+	Name        string   `json:"name"`        // 商品名称
+	Description string   `json:"description"` // 商品描述
+	Picture     string   `json:"picture"`     // 商品图片信息
+	Price       int64    `json:"price"`       // 商品价格（分）
+	CreatedAt   string   `json:"created_at"`  // 创建时间
+	UpdatedAt   string   `json:"updated_at"`  // 更新时间
+	Category    []string `json:"category"`
+}
+
+func TestLoadProduct2Es(t *testing.T) {
+	os.Setenv("ELASTICSEARCH_HOST", "http://113.45.32.164:9200/")
+	os.Setenv("MYSQL_DATA_SOURCE", "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local")
+	esAddress := os.Getenv("ELASTICSEARCH_HOST")
+	mysqlAddress := os.Getenv("MYSQL_DATA_SOURCE")
+
+	ctx := context.TODO()
+	client, err := elastic.NewClient(elastic.SetURL(esAddress),
+		elastic.SetSniff(false),
+		elastic.SetHealthcheckTimeoutStartup(30*time.Second))
+	if err != nil {
+		t.Fatal("elasticsearch init error", logx.Field("err", err))
+	}
+	productsModel := product2.NewProductsModel(sqlx.NewMysql(mysqlAddress))
+	categoryModel := categories.NewCategoriesModel(sqlx.NewMysql(mysqlAddress))
+	products, err := productsModel.QueryAllProducts(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range products {
+		category, err := categoryModel.FindCategoryNameByProductID(ctx, p.Id)
+
+		// 创建文档（自动JSON序列化）
+		if _, err = client.Index().
+			Index(biz.ProductEsIndexName).
+			Id(strconv.FormatInt(p.Id, 10)).
+			BodyJson(&Product{
+				Id:          p.Id,
+				Name:        p.Name,
+				Description: p.Description.String,
+				Picture:     p.Picture.String,
+				Price:       p.Price,
+				CreatedAt:   p.CreatedAt.Format(time.DateTime),
+				UpdatedAt:   p.UpdatedAt.Format(time.DateTime),
+				Category:    category,
+			}).
+			Refresh("true").
+			Do(ctx); err != nil {
+			t.Fatal("product es creation failed", logx.Field("err", err))
+			return
+		}
+	}
 }
 
 // 七牛云配置

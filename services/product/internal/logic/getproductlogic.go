@@ -13,6 +13,7 @@ import (
 	"jijizhazha1024/go-mall/services/inventory/inventory"
 	"jijizhazha1024/go-mall/services/product/internal/svc"
 	"jijizhazha1024/go-mall/services/product/product"
+	"time"
 )
 
 type GetProductLogic struct {
@@ -95,6 +96,8 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 			Description: productData.Description.String,
 			Picture:     productData.Picture.String,
 			Price:       productData.Price,
+			CratedAt:    productData.CreatedAt.Format(time.DateTime),
+			UpdatedAt:   productData.CreatedAt.Format(time.DateTime),
 		},
 	}
 
