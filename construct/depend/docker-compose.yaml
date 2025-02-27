@@ -66,6 +66,30 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  gorse:
+    image: zhenghaoz/gorse-in-one
+    restart: unless-stopped
+    ports:
+      - 8086:8086
+      - 8087:8087
+      - 8088:8088
+    command: >
+      -c /etc/gorse/config.toml
+      --log-path /var/log/gorse/master.log
+      --cache-path /var/lib/gorse/master_cache.data
+    volumes:
+      - ./conf/gorse.config.toml:/etc/gorse/config.toml
+    networks:
+      mall:
+  dtm:
+    image: yedf/dtm:latest
+    ports:
+
+    command: [ "dtm", "-c", "/conf/dtm.yaml" ]
+    volumes:
+      - ./conf/dtm.yaml:/conf/dtm.yaml
+    networks:
+      mall:
 
 networks:
   mall:
