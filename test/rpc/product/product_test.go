@@ -68,7 +68,7 @@ func TestProductsCreateRpc(t *testing.T) {
 func TestProductsGetRpc(t *testing.T) {
 	initproduct()
 	resp, err := product_client.GetProduct(context.Background(), &product.GetProductReq{
-		Id: 2,
+		ProductId: 2,
 	})
 	if err != nil {
 		t.Fatal(err)

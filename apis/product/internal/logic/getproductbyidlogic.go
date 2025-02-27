@@ -31,8 +31,8 @@ func (l *GetProductByIDLogic) GetProductByID(req *types.GetProductByIDReq) (resp
 		return nil, errors.New(code.AuthBlank, code.AuthBlankMsg)
 	}
 	res, err := l.svcCtx.ProductRpc.GetProduct(l.ctx, &product.GetProductReq{
-		ProductId: req.ID,
-		UserId:    int32(userID),
+		Id:     uint32(req.ID),
+		UserId: int32(userID),
 	})
 	if err != nil {
 		l.Logger.Errorf("call rpc ProductRpc.GetProduct failed", logx.Field("err", err))
@@ -52,6 +52,8 @@ func (l *GetProductByIDLogic) GetProductByID(req *types.GetProductByIDReq) (resp
 		Price:       res.Product.Price,
 		Sold:        res.Product.Sold,
 		Categories:  res.Product.Categories,
+		CreatedAt:   res.Product.CratedAt,
+		UpdatedAt:   res.Product.UpdatedAt,
 	}
 
 	return resp, err

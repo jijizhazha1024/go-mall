@@ -73,6 +73,8 @@ func (l *GetProductListLogic) GetProductList(req *types.GetProductListReq) (resp
 			Description: p.Description,
 			Categories:  p.Categories,
 			Sold:        p.Sold,
+			CreatedAt:   p.CratedAt,
+			UpdatedAt:   p.UpdatedAt,
 		}
 	}
 
