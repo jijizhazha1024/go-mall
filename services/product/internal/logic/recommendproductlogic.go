@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"fmt"
 	"jijizhazha1024/go-mall/services/product/internal/svc"
 	"jijizhazha1024/go-mall/services/product/product"
 	"strconv"
@@ -34,7 +33,7 @@ func (l *RecommendProductLogic) RecommendProduct(in *product.RecommendProductReq
 		strconv.FormatInt(int64(in.UserId), 10),
 		in.Category, // categories（根据业务需求可传分类列表）
 		"read",      // 写回类型（根据实际场景调整）
-		"10m",       // 写回延迟（根据实际场景调整）
+		"5m",        // 写回延迟（根据实际场景调整）
 		int(n),
 		int(offset),
 	)
@@ -44,10 +43,6 @@ func (l *RecommendProductLogic) RecommendProduct(in *product.RecommendProductReq
 	}
 	// 3. 根据推荐结果查询商品详情
 	products, err := l.svcCtx.ProductModel.GetProductByIDs(l.ctx, itemIds)
-	for i, p := range products {
-		fmt.Println(p.Name)
-		fmt.Println(i)
-	}
 	if err != nil {
 		l.Logger.Errorw("query products failed", logx.Field("err", err))
 		return nil, err

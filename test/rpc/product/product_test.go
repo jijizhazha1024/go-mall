@@ -68,7 +68,7 @@ func TestProductsCreateRpc(t *testing.T) {
 func TestProductsGetRpc(t *testing.T) {
 	initproduct()
 	resp, err := product_client.GetProduct(context.Background(), &product.GetProductReq{
-		ProductId: 2,
+		Id: 2,
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -193,7 +193,7 @@ func TestLoadProduct2EsAndGorse(t *testing.T) {
 func TestProductRecommend(t *testing.T) {
 	initproduct()
 	recommendProduct, err := product_client.RecommendProduct(context.Background(), &product.RecommendProductReq{
-		UserId:   1,
+		UserId:   93,
 		Category: []string{"手机"},
 		Paginator: &product.RecommendProductReq_Paginator{
 			Page:     1,
