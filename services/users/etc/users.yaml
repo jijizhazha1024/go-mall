@@ -48,3 +48,6 @@ RedisConf:
   Host: 124.71.72.124:6379
   Pass: jjzzchtt
   Tls: false
+GorseConfig:
+  GorseAddr: http://47.99.130.92:8088
+  GorseApikey: 5105502fc46a411c896aa5b50c31e951

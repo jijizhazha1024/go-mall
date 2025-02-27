@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"jijizhazha1024/go-mall/common/consts/biz"
@@ -16,6 +17,8 @@ import (
 	"jijizhazha1024/go-mall/services/audit/audit"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
+
+	gorse "jijizhazha1024/go-mall/common/utils/gorse"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -114,6 +117,10 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				}, nil
 
 			}
+			//加入用户推荐
+
+			l.svcCtx.GorseClient.InsertUser(l.ctx, gorse.User{
+				UserId: strconv.FormatInt(userId, 10)})
 
 			//审计操作
 			_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
@@ -133,7 +140,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			}
 			//埋点
 			svc.UserRegCounter.Inc("success")
-
+			// 注册成功，返回用户ID
 			return &users.RegisterResponse{
 
 				UserId: uint32(userId),

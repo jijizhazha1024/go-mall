@@ -10,13 +10,17 @@ import (
 type Config struct {
 	zrpc.RpcServerConf
 	MysqlConfig MysqlConfig
-
-	AuditRpc  zrpc.RpcClientConf
-	Consul    consul.Conf
-	Cache     cache.CacheConf
-	RedisConf redis.RedisConf
+	GorseConfig GorseConfig
+	AuditRpc    zrpc.RpcClientConf
+	Consul      consul.Conf
+	Cache       cache.CacheConf
+	RedisConf   redis.RedisConf
 }
 type MysqlConfig struct {
 	DataSource  string
 	Conntimeout int
+}
+type GorseConfig struct {
+	GorseAddr   string
+	GorseApikey string
 }

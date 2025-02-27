@@ -2,6 +2,7 @@ package svc
 
 import (
 	"fmt"
+	gorse "jijizhazha1024/go-mall/common/utils/gorse"
 	"jijizhazha1024/go-mall/dal/model/user"
 	"jijizhazha1024/go-mall/dal/model/user_address"
 	"jijizhazha1024/go-mall/services/audit/auditclient"
@@ -20,8 +21,8 @@ type ServiceContext struct {
 	UsersModel   user.UsersModel
 	AddressModel user_address.UserAddressesModel
 	Model        sqlx.SqlConn
-
-	BF *bloom.Filter
+	GorseClient  *gorse.GorseClient
+	BF           *bloom.Filter
 }
 
 // 初始化监控指标（包级变量改为结构体字段）
@@ -34,6 +35,7 @@ var UserRegCounter = metric.NewCounterVec(&metric.CounterVecOpts{
 })
 
 func NewServiceContext(c config.Config) *ServiceContext {
+	gorseClient := gorse.NewGorseClient(c.GorseConfig.GorseAddr, c.GorseConfig.GorseApikey)
 	bf := bloom.New(redis.MustNewRedis(c.RedisConf), "user_login_bloom", 1000000)
 	// bloom预热
 	usermodel := user.NewUsersModel(sqlx.NewMysql(c.MysqlConfig.DataSource))
@@ -44,8 +46,8 @@ func NewServiceContext(c config.Config) *ServiceContext {
 
 	return &ServiceContext{
 
-		Config: c,
-
+		Config:       c,
+		GorseClient:  gorseClient,
 		Model:        sqlx.NewMysql(c.MysqlConfig.DataSource),
 		UsersModel:   usermodel,
 		AddressModel: user_address.NewUserAddressesModel(sqlx.NewMysql(c.MysqlConfig.DataSource), c.Cache),
