@@ -2,11 +2,12 @@ package logic
 
 import (
 	"context"
+	"crypto/md5"
 	"database/sql"
-	"encoding/json"
+	"encoding/hex"
 	"errors"
-	"io"
-	"net/http"
+	"fmt"
+	"strings"
 
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
@@ -32,52 +33,31 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 		Logger: logx.WithContext(ctx),
 	}
 }
+func GetCravatar(email string, size int, defaultImage, rating string, imgTag bool, attrs map[string]string) string {
+	// 构建基本的 Cravatar URL
+	baseURL := "https://cravatar.cn/avatar/"
 
-func (l *RegisterLogic) GetAvatar() (string, error) {
-	// 构建请求
-	req, err := http.NewRequest("GET", "https://v2.xxapi.cn/api/head", nil)
-	if err != nil {
-		l.Logger.Infow("创建请求失败", logx.Field("err", err))
-		return "", nil
-	}
+	// 清理并对电子邮件地址进行 MD5 哈希处理
+	email = strings.TrimSpace(strings.ToLower(email))
+	hash := md5.New()
+	hash.Write([]byte(email))
+	emailHash := hex.EncodeToString(hash.Sum(nil))
 
-	// 设置 Header
-	req.Header.Set("User-Agent", "xiaoxiaoapi/1.0.0 (https://xxapi.cn)")
-	// 可选：其他 Header
-	req.Header.Add("Accept", "application/json")
-	// 发送请求
-	resp, err := l.svcCtx.HttpClient.Do(req)
-	if err != nil {
-		l.Logger.Errorw("请求失败", logx.Field("err", err))
-		return "", nil
-	}
-	defer resp.Body.Close()
+	// 构建 Cravatar URL
+	cravURL := fmt.Sprintf("%s%s?s=%d&d=%s&r=%s", baseURL, emailHash, size, defaultImage, rating)
 
-	// 校验状态码
-	if resp.StatusCode != http.StatusOK {
-		l.Logger.Infow("非200响应", logx.Field("status", resp.Status))
-		return "", nil
+	// 如果 imgTag 为 true，则返回完整的 <img> 标签
+	if imgTag {
+		imgTagStr := fmt.Sprintf(`<img src="%s"`, cravURL)
+		for key, value := range attrs {
+			imgTagStr += fmt.Sprintf(` %s="%s"`, key, value)
+		}
+		imgTagStr += " />"
+		return imgTagStr
 	}
 
-	// 读取响应体
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		l.Logger.Infow("读取响应失败", logx.Field("err", err))
-		return "", nil
-	}
-	type ResponseURL struct {
-		Code int    `json:"code"`
-		Msg  string `json:"msg"`
-		Data string `json:"data"`
-	}
-	var responseURL ResponseURL
-	err = json.Unmarshal(body, &responseURL)
-	if err != nil {
-		l.Logger.Infow("解析响应失败", logx.Field("err", err))
-		return "", nil
-	}
-
-	return responseURL.Data, nil
+	// 否则，仅返回 URL
+	return cravURL
 }
 
 // 注册方法
@@ -95,11 +75,13 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 		if errors.Is(err, sql.ErrNoRows) {
 
 			// 获取头像
-			avatar, _ := l.GetAvatar()
-			//获取失败使用默认头像
-			if avatar == "" {
-				avatar = "https://www.gravatar.com/avatar/0000000000?d=mp"
-			}
+			size := 40
+			defaultImage := "https://www.somewhere.com/homestar.jpg"
+			rating := "g"
+			imgTag := true
+			attrs := map[string]string{"class": "avatar", "alt": "User Avatar"}
+			avatar := GetCravatar(in.Email, size, defaultImage, rating, imgTag, attrs)
+
 			// 加入布隆过滤器 在插入数据库之前防止数据库注册失败
 			err = l.svcCtx.BF.Add([]byte(in.Email))
 			if err != nil {
