@@ -119,7 +119,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			}
 			//加入用户推荐
 
-			l.svcCtx.GorseClient.InsertUser(l.ctx, gorse.User{
+			go l.svcCtx.GorseClient.InsertUser(l.ctx, gorse.User{
 				UserId: strconv.FormatInt(userId, 10)})
 
 			//审计操作
