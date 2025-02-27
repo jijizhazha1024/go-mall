@@ -1,6 +1,8 @@
 package checkout
 
 import (
+	"context"
+	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
@@ -12,6 +14,7 @@ type (
 	CheckoutItemsModel interface {
 		checkoutItemsModel
 		withSession(session sqlx.Session) CheckoutItemsModel
+		FindItemsByUserAndPreOrder(ctx context.Context, userId int32, preOrderId string) ([]CheckoutItems, error)
 	}
 
 	customCheckoutItemsModel struct {
@@ -28,4 +31,20 @@ func NewCheckoutItemsModel(conn sqlx.SqlConn) CheckoutItemsModel {
 
 func (m *customCheckoutItemsModel) withSession(session sqlx.Session) CheckoutItemsModel {
 	return NewCheckoutItemsModel(sqlx.NewSqlConnFromSession(session))
+}
+
+func (m *defaultCheckoutItemsModel) FindItemsByUserAndPreOrder(ctx context.Context, userId int32, preOrderId string) ([]CheckoutItems, error) {
+	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `pre_order_id` = ?", checkoutItemsRows, m.table)
+	var resp []CheckoutItems
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId, preOrderId)
+	switch err {
+	case nil:
+		// Return the found checkout record
+		return resp, nil
+	case sqlx.ErrNotFound:
+		return nil, sqlx.ErrNotFound
+	default:
+		// If there is another error, return it
+		return nil, err
+	}
 }

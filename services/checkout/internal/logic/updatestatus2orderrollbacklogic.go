@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"errors"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"jijizhazha1024/go-mall/services/checkout/checkout"
 	"jijizhazha1024/go-mall/services/checkout/internal/svc"
@@ -26,25 +27,32 @@ func NewUpdateStatus2OrderRollbackLogic(ctx context.Context, svcCtx *svc.Service
 
 // UpdateStatus2OrderRollback 补偿操作
 func (l *UpdateStatus2OrderRollbackLogic) UpdateStatus2OrderRollback(in *checkout.UpdateStatusReq) (*checkout.EmptyResp, error) {
-	// 1. 查询指定 preOrderId 的结算信息
-	checkoutRecord, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderId(l.ctx, in.UserId, in.PreOrderId)
+	err := l.svcCtx.Mysql.Transact(func(session sqlx.Session) error {
+		checkoutRecord, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderId(l.ctx, in.UserId, in.PreOrderId)
+		if err != nil {
+			l.Logger.Errorw("查询结算记录失败", logx.Field("err", err), logx.Field("pre_order_id", in.PreOrderId))
+			return err
+		}
+
+		if checkoutRecord.Status == int64(checkout.CheckoutStatus_RESERVING) {
+			l.Logger.Infof("订单 %s 已经是已确认状态", in.PreOrderId)
+			return nil
+		}
+
+		err = l.svcCtx.CheckoutModel.UpdateStatusWithSession(l.ctx, session, int64(checkout.CheckoutStatus_RESERVING), in.UserId, in.PreOrderId)
+		if err != nil {
+			l.Logger.Errorw("更新结算状态失败", logx.Field("err", err), logx.Field("pre_order_id", in.PreOrderId))
+			return errors.New("更新结算状态失败")
+		}
+
+		l.Logger.Infof("成功更新订单 %s 的结算状态为已确认", in.PreOrderId)
+		return nil
+	})
+
 	if err != nil {
-		l.Logger.Errorw("查询结算记录失败", logx.Field("err", err), logx.Field("pre_order_id", in.PreOrderId))
+		l.Logger.Errorw("事务处理失败", logx.Field("err", err))
 		return nil, err
 	}
-	// 2. 判断当前状态是否已经是已预占
-	if checkoutRecord.Status == int64(checkout.CheckoutStatus_RESERVING) {
-		l.Logger.Infof("订单 %s 已经是已确认状态", in.PreOrderId)
-		return &checkout.EmptyResp{}, nil
-	}
 
-	// 3. 更新结算状态为已预占
-	err = l.svcCtx.CheckoutModel.UpdateStatus(l.ctx, int64(checkout.CheckoutStatus_RESERVING), in.UserId, in.PreOrderId)
-	if err != nil {
-		l.Logger.Errorw("更新结算状态失败", logx.Field("err", err), logx.Field("pre_order_id", in.PreOrderId))
-		return nil, errors.New("更新结算状态失败")
-	}
-
-	l.Logger.Infof("成功更新订单 %s 的结算状态为已确认", in.PreOrderId)
 	return &checkout.EmptyResp{}, nil
 }

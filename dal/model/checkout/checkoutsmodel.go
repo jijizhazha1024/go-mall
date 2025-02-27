@@ -14,7 +14,7 @@ type (
 	CheckoutsModel interface {
 		checkoutsModel
 		withSession(session sqlx.Session) CheckoutsModel
-		UpdateStatus(ctx context.Context, status int64, userId int32, preOrderId string) error
+		UpdateStatusWithSession(ctx context.Context, session sqlx.Session, status int64, userId int32, preOrderId string) error
 		FindOneByUserIdAndPreOrderId(ctx context.Context, userId int32, preOrderId string) (*Checkouts, error)
 	}
 
@@ -34,15 +34,12 @@ func (m *customCheckoutsModel) withSession(session sqlx.Session) CheckoutsModel 
 	return NewCheckoutsModel(sqlx.NewSqlConnFromSession(session))
 }
 
-func (m *customCheckoutsModel) UpdateStatus(ctx context.Context, status int64, userId int32, preOrderId string) error {
-	updateQuery := "UPDATE checkouts SET status = ? WHERE user_id = ? AND pre_order_id = ?"
-
-	_, err := m.conn.ExecCtx(ctx, updateQuery, status, userId, preOrderId)
-	if err != nil {
-		return err
-	}
-
-	return nil
+func (m *customCheckoutsModel) UpdateStatusWithSession(ctx context.Context, session sqlx.Session, status int64, userId int32, preOrderId string) error {
+	query := `UPDATE checkout_orders 
+			  SET status = ? 
+			  WHERE user_id = ? AND pre_order_id = ?`
+	_, err := session.ExecCtx(ctx, query, status, userId, preOrderId)
+	return err
 }
 
 func (m *customCheckoutsModel) FindOneByUserIdAndPreOrderId(ctx context.Context, userId int32, preOrderId string) (*Checkouts, error) {
@@ -61,7 +58,7 @@ func (m *customCheckoutsModel) FindOneByUserIdAndPreOrderId(ctx context.Context,
 		return &resp, nil
 	case sqlx.ErrNotFound:
 		// If no record is found, return a specific error
-		return nil, ErrNotFound
+		return nil, sqlx.ErrNotFound
 	default:
 		// If there is another error, return it
 		return nil, err

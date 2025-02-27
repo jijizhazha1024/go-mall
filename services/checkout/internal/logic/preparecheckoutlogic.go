@@ -66,8 +66,6 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	if result == int64(0) {
 		l.Logger.Infof("用户 %d 的预订单 %s 已存在，跳过重复结算", in.UserId, preOrderId)
 		return &checkout.CheckoutResp{
-			StatusCode: 200,
-			StatusMsg:  "预结算已处理",
 			PreOrderId: preOrderId,
 		}, nil
 	}
@@ -222,8 +220,6 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 
 	// 6. 返回预结算信息
 	return &checkout.CheckoutResp{
-		StatusCode: 200,
-		StatusMsg:  "预结算成功",
 		PreOrderId: preOrderId,
 		ExpireTime: time.Now().Add(10 * time.Minute).Unix(),
 		PayMethod:  []int64{1, 2},
