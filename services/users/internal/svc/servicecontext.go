@@ -63,7 +63,10 @@ func bloomPreheat(BF *bloom.Filter, UsersModel user.UsersModel) error {
 	}
 
 	for _, email := range emails {
-		BF.Add([]byte(email))
+		err := BF.Add([]byte(email))
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 

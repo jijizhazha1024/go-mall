@@ -119,8 +119,15 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			}
 			//加入用户推荐
 
-			go l.svcCtx.GorseClient.InsertUser(l.ctx, gorse.User{
-				UserId: strconv.FormatInt(userId, 10)})
+			go func() {
+				_, err := l.svcCtx.GorseClient.InsertUser(l.ctx, gorse.User{
+					UserId: strconv.FormatInt(userId, 10),
+				})
+				if err != nil {
+					l.Logger.Infow("register gorse insert user failed", logx.Field("err", err),
+						logx.Field("email", in.Email))
+				}
+			}()
 
 			//审计操作
 			_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
