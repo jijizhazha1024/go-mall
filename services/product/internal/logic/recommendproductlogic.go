@@ -34,7 +34,7 @@ func (l *RecommendProductLogic) RecommendProduct(in *product.RecommendProductReq
 		strconv.FormatInt(int64(in.UserId), 10),
 		in.Category, // categories（根据业务需求可传分类列表）
 		"read",      // 写回类型（根据实际场景调整）
-		"1h",        // 写回延迟（根据实际场景调整）
+		"10m",       // 写回延迟（根据实际场景调整）
 		int(n),
 		int(offset),
 	)
@@ -57,5 +57,4 @@ func (l *RecommendProductLogic) RecommendProduct(in *product.RecommendProductReq
 	return &product.GetAllProductsResp{
 		Products: result,
 	}, nil
-	// 4. 转换protobuf格式
 }
