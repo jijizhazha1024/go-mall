@@ -109,10 +109,6 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	})
 	if err != nil {
 		logx.Infow("create audit log failed", logx.Field("err", err))
-		return &users.UpdateUserResponse{
-			StatusCode: code.AuditUpdateuserFailed,
-			StatusMsg:  code.AuditUpdateuserFailedMsg,
-		}, nil
 
 	}
 
