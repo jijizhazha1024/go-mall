@@ -130,10 +130,6 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 		if err != nil {
 			l.Logger.Infow("add address audit failed", logx.Field("err", err),
 				logx.Field("user_id", in.UserId))
-			return &users.AddAddressResponse{
-				StatusMsg:  code.AuditAddAddressFailedMsg,
-				StatusCode: code.AuditAddAddressFailed,
-			}, nil
 		}
 
 		return &users.AddAddressResponse{
