@@ -36,6 +36,24 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 		Valid:  true,
 	}
 
+	//bf
+	bloom_exist, err := l.svcCtx.BF.Exists([]byte(in.Email))
+	if err != nil {
+		logx.Errorw("login failed, bloom filter query failed",
+			logx.Field("err", err),
+			logx.Field("user email", in.Email),
+		)
+		return &users.LoginResponse{}, err
+	}
+	if !bloom_exist {
+		logx.Infow("login failed, bloom filter not exist", logx.Field("email", in.Email))
+
+		return &users.LoginResponse{
+			StatusCode: code.UserNotFound,
+			StatusMsg:  code.UserNotFoundMsg,
+		}, nil
+	}
+
 	// 2. 查询用户信息
 	user, err := l.svcCtx.UsersModel.FindOneByEmail(l.ctx, email)
 	if err != nil {

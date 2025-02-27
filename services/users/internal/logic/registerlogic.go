@@ -96,9 +96,18 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 
 			// 获取头像
 			avatar, _ := l.GetAvatar()
+			//获取失败使用默认头像
 			if avatar == "" {
 				avatar = "https://www.gravatar.com/avatar/0000000000?d=mp"
-			} //获取失败使用默认头像
+			}
+			// 加入布隆过滤器 在插入数据库之前防止数据库注册失败
+			err = l.svcCtx.BF.Add([]byte(in.Email))
+			if err != nil {
+				l.Logger.Errorw("register bloom filter add failed", logx.Field("err", err),
+					logx.Field("email", in.Email))
+				return &users.RegisterResponse{}, err
+
+			}
 
 			// 用户不存在，直接注册
 			result, insertErr := l.svcCtx.UsersModel.Insert(l.ctx, &user.Users{
