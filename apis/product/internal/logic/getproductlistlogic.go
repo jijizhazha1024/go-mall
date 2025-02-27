@@ -39,6 +39,19 @@ func (l *GetProductListLogic) GetProductList(req *types.GetProductListReq) (resp
 			Page:     req.Page,
 			PageSize: req.PageSize,
 		})
+		// 推荐服务失败时降级到普通查询
+		if err != nil || res.StatusCode != code.Success {
+			l.Logger.Errorw("recommend product failed, fallback to normal list",
+				logx.Field("err", err),
+				logx.Field("status_code", res.GetStatusCode()),
+				logx.Field("user_id", userID))
+
+			// 使用普通查询作为兜底
+			res, err = l.svcCtx.ProductRpc.GetAllProduct(l.ctx, &product.GetAllProductsReq{
+				Page:     req.Page,
+				PageSize: req.PageSize,
+			})
+		}
 	} else {
 		res, err = l.svcCtx.ProductRpc.RecommendProduct(l.ctx, &product.RecommendProductReq{
 			UserId: int32(userID),
