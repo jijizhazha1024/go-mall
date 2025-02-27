@@ -78,9 +78,8 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			size := 40
 			defaultImage := "https://www.somewhere.com/homestar.jpg"
 			rating := "g"
-			imgTag := true
-			attrs := map[string]string{"class": "avatar", "alt": "User Avatar"}
-			avatar := GetCravatar(in.Email, size, defaultImage, rating, imgTag, attrs)
+
+			avatar := GetCravatar(in.Email, size, defaultImage, rating, false, nil)
 
 			// 加入布隆过滤器 在插入数据库之前防止数据库注册失败
 			err = l.svcCtx.BF.Add([]byte(in.Email))
