@@ -43,24 +43,16 @@ func (m *customCheckoutsModel) UpdateStatusWithSession(ctx context.Context, sess
 }
 
 func (m *customCheckoutsModel) FindOneByUserIdAndPreOrderId(ctx context.Context, userId int32, preOrderId string) (*Checkouts, error) {
-	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `pre_order_id` = ? limit 1", checkoutsRows, m.table)
-
-	// Declare a variable to store the result
+	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `pre_order_id` = ? limit 1 FOR SHARE", checkoutsRows, m.table)
 	var resp Checkouts
-
-	// Execute the query and scan the result into the resp variable
 	err := m.conn.QueryRowCtx(ctx, &resp, query, userId, preOrderId)
 
-	// Handle the error cases
 	switch err {
 	case nil:
-		// Return the found checkout record
 		return &resp, nil
 	case sqlx.ErrNotFound:
-		// If no record is found, return a specific error
 		return nil, sqlx.ErrNotFound
 	default:
-		// If there is another error, return it
 		return nil, err
 	}
 }
