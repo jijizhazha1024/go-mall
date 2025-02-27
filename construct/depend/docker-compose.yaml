@@ -84,7 +84,8 @@ services:
   dtm:
     image: yedf/dtm:latest
     ports:
-
+      - "36789:36789"
+      - "36790:36790"
     command: [ "dtm", "-c", "/conf/dtm.yaml" ]
     volumes:
       - ./conf/dtm.yaml:/conf/dtm.yaml
