@@ -23,11 +23,6 @@ const (
 	OrderCancelled          = 50005
 	OrderCancellationFailed = 50006
 
-	// 结算
-
-	SettlementSuccess = 60001
-	SettlementFailed  = 60002
-
 	// 支付
 
 	PaymentCancelled          = 70001
@@ -60,9 +55,6 @@ const (
 	OrderUpdateFailedMsg       = "订单信息更新失败"
 	OrderCancelledMsg          = "订单取消成功"
 	OrderCancellationFailedMsg = "订单取消失败"
-
-	SettlementSuccessMsg = "结算成功"
-	SettlementFailedMsg  = "结算失败"
 
 	PaymentCancelledMsg          = "支付取消成功"
 	PaymentCancellationFailedMsg = "支付取消失败"
