@@ -40,12 +40,9 @@ func TestGetallProduct(t *testing.T) {
 		Page:     1,
 		PageSize: 10,
 	})
-
 	if err != nil {
 		t.Fatal(err)
-
 	}
-	fmt.Println(" success", resp)
 	t.Log(" success", resp)
 }
 func TestProductsCreateRpc(t *testing.T) {
@@ -120,17 +117,6 @@ func TestQueryProduct(t *testing.T) {
 	fmt.Println(" success", resp)
 }
 
-type Product struct {
-	Id          int64    `json:"id"`          // 主键，自增,商品id
-	Name        string   `json:"name"`        // 商品名称
-	Description string   `json:"description"` // 商品描述
-	Picture     string   `json:"picture"`     // 商品图片信息
-	Price       int64    `json:"price"`       // 商品价格（分）
-	CreatedAt   string   `json:"created_at"`  // 创建时间
-	UpdatedAt   string   `json:"updated_at"`  // 更新时间
-	Category    []string `json:"category"`
-}
-
 func TestLoadProduct2EsAndGorse(t *testing.T) {
 	os.Setenv("ELASTICSEARCH_HOST", "http://113.45.32.164:9200/")
 	os.Setenv("MYSQL_DATA_SOURCE", "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local")
@@ -162,15 +148,15 @@ func TestLoadProduct2EsAndGorse(t *testing.T) {
 		if _, err = client.Index().
 			Index(biz.ProductEsIndexName).
 			Id(strconv.FormatInt(p.Id, 10)).
-			BodyJson(&Product{
-				Id:          p.Id,
-				Name:        p.Name,
-				Description: p.Description.String,
-				Picture:     p.Picture.String,
-				Price:       p.Price,
-				CreatedAt:   p.CreatedAt.Format(time.DateTime),
-				UpdatedAt:   p.UpdatedAt.Format(time.DateTime),
-				Category:    category,
+			BodyJson(map[string]interface{}{
+				"id":          p.Id,
+				"name":        p.Name,
+				"description": p.Description.String,
+				"picture":     p.Picture.String,
+				"price":       p.Price,
+				"created_at":  p.CreatedAt.Format(time.DateTime),
+				"updated_at":  p.UpdatedAt.Format(time.DateTime),
+				"category":    category,
 			}).
 			Refresh("true").
 			Do(ctx); err != nil {
@@ -178,11 +164,12 @@ func TestLoadProduct2EsAndGorse(t *testing.T) {
 			return
 		}
 		items[i] = gorse.Item{
-			ItemId:    strconv.FormatInt(p.Id, 10),
-			IsHidden:  false,
-			Labels:    category,
-			Comment:   p.Description.String,
-			Timestamp: p.CreatedAt.Format(time.DateTime),
+			ItemId:     strconv.FormatInt(p.Id, 10),
+			IsHidden:   false,
+			Categories: category,
+			Labels:     category,
+			Comment:    p.Description.String,
+			Timestamp:  p.CreatedAt.Format(time.DateTime),
 		}
 	}
 	if _, err = gorseClient.InsertItems(ctx, items); err != nil {

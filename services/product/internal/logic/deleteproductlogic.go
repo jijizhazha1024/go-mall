@@ -81,6 +81,9 @@ func (l *DeleteProductLogic) DeleteProduct(in *product.DeleteProductReq) (*produ
 			logx.Field("product_id", in.Id))
 		return nil, err
 	}
+	if res.StatusCode != code.Success {
+		return res, nil
+	}
 
 	// 6. 删除es记录
 	// 构建删除请求
