@@ -32,7 +32,7 @@ func NewReleaseCheckoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *R
 func (l *ReleaseCheckoutLogic) ReleaseCheckout(in *checkout.ReleaseReq) (*checkout.EmptyResp, error) {
 	err := l.svcCtx.Mysql.Transact(func(session sqlx.Session) error {
 		cacheKey := fmt.Sprintf("checkout:preorder:%d", in.UserId)
-		checkoutRecord, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderId(l.ctx, in.UserId, in.PreOrderId)
+		checkoutRecord, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderIdWithSession(l.ctx, session, in.UserId, in.PreOrderId)
 		if err != nil {
 			l.Logger.Errorw("查询结算记录失败",
 				logx.Field("err", err),

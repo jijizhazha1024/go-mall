@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/checkout/checkout"
 	"jijizhazha1024/go-mall/services/checkout/internal/svc"
 
@@ -27,9 +28,12 @@ func NewGetCheckoutDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 // GetCheckoutDetail 获取结算详情
 func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailReq) (*checkout.CheckoutDetailResp, error) {
 	checkoutRecord, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderId(l.ctx, in.UserId, in.PreOrderId)
+	res := &checkout.CheckoutDetailResp{}
 	if err != nil {
 		if errors.Is(err, sqlx.ErrNotFound) {
-			return nil, err
+			res.StatusCode = code.OutOfRecord
+			res.StatusMsg = code.OutOfRecordMsg
+			return res, nil
 		} else {
 			l.Logger.Errorw("查询结算记录失败",
 				logx.Field("err", err),
@@ -42,7 +46,9 @@ func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailRe
 	checkoutItems, err := l.svcCtx.CheckoutItemsModel.FindItemsByUserAndPreOrder(l.ctx, in.UserId, in.PreOrderId)
 	if err != nil {
 		if errors.Is(err, sqlx.ErrNotFound) {
-			return nil, err
+			res.StatusCode = code.OutOfRecord
+			res.StatusMsg = code.OutOfRecordMsg
+			return res, nil
 		} else {
 			l.Logger.Errorw("查询结算记录失败",
 				logx.Field("err", err),

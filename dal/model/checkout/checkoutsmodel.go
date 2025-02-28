@@ -15,8 +15,9 @@ type (
 		checkoutsModel
 		withSession(session sqlx.Session) CheckoutsModel
 		UpdateStatusWithSession(ctx context.Context, session sqlx.Session, status int64, userId int32, preOrderId string) error
-		FindOneByUserIdAndPreOrderId(ctx context.Context, userId int32, preOrderId string) (*Checkouts, error)
+		FindOneByUserIdAndPreOrderIdWithSession(ctx context.Context, session sqlx.Session, userId int32, preOrderId string) (*Checkouts, error)
 		CountByUserId(ctx context.Context, userId uint32) (int64, error)
+		FindOneByUserIdAndPreOrderId(ctx context.Context, userId int32, preOrderId string) (*Checkouts, error)
 		FindByUserId(ctx context.Context, userId uint32, page int32, pageSize int32) ([]*Checkouts, error)
 	}
 
@@ -44,6 +45,19 @@ func (m *customCheckoutsModel) UpdateStatusWithSession(ctx context.Context, sess
 	return err
 }
 
+func (m *customCheckoutsModel) FindOneByUserIdAndPreOrderIdWithSession(ctx context.Context, session sqlx.Session, userId int32, preOrderId string) (*Checkouts, error) {
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE `user_id` = ? AND `pre_order_id` = ? LIMIT 1 FOR SHARE", checkoutsRows, m.table)
+
+	var resp Checkouts
+	err := session.QueryRowCtx(ctx, &resp, query, userId, preOrderId) // 使用 session 查询
+	if err != nil {
+		if err == sqlx.ErrNotFound {
+			return nil, sqlx.ErrNotFound
+		}
+		return nil, err
+	}
+	return &resp, nil
+}
 func (m *customCheckoutsModel) FindOneByUserIdAndPreOrderId(ctx context.Context, userId int32, preOrderId string) (*Checkouts, error) {
 	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `pre_order_id` = ? limit 1 FOR SHARE", checkoutsRows, m.table)
 	var resp Checkouts

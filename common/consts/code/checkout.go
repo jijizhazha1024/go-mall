@@ -16,6 +16,7 @@ const (
 	InternalFailed               = 60011
 	QuerySettlementRecordFailed  = 60012
 	UpdateSettlementStatusFailed = 60013
+	OutOfRecord                  = 60014
 )
 
 // 状态码描述
@@ -34,4 +35,5 @@ const (
 	QueryUserCouponFailedMsg        = "查询用户优惠券失败"
 	QuerySettlementRecordFailedMsg  = "查询结算记录失败"
 	UpdateSettlementStatusFailedMsg = "更新结算状态失败"
+	OutOfRecordMsg                  = "查询的结果记录不存在"
 )
