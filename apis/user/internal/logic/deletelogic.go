@@ -30,9 +30,12 @@ func NewDeleteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *DeleteLogi
 func (l *DeleteLogic) Delete(req *types.DeleteRequest) (resp *types.DeleteResponse, err error) {
 
 	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
+	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
 
 	deleteresp, err := l.svcCtx.UserRpc.DeleteUser(l.ctx, &usersclient.DeleteUserRequest{
+
 		UserId: uint32(user_id),
+		Ip:     user_ip,
 	})
 	if err != nil {
 

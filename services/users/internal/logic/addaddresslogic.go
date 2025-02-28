@@ -3,10 +3,14 @@ package logic
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"time"
 
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/dal/model/user_address"
+	"jijizhazha1024/go-mall/services/audit/audit"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -104,6 +108,30 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 			City:            in.City,
 			DetailedAddress: in.DetailedAddress,
 			IsDefault:       in.IsDefault,
+			CreatedAt:       time.Now().Format("2006-01-02 15:04:05"),
+		}
+		datajson, err := json.Marshal(data)
+		if err != nil {
+			l.Logger.Errorw("json marshal failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
+			return &users.AddAddressResponse{}, err
+		}
+		datastr := string(datajson)
+
+		//添加审计服务
+		auditreq := &audit.CreateAuditLogReq{
+			UserId:            uint32(in.UserId),
+			ActionType:        biz.Create,
+			TargetTable:       "user",
+			ActionDescription: "添加用户地址",
+			ClientIp:          in.Ip,
+			TargetId:          int64(in.UserId),
+			ServiceName:       "users",
+			NewData:           datastr,
+		}
+		_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, auditreq)
+		if err != nil {
+			l.Logger.Infow("add address audit failed", logx.Field("err", err),
+				logx.Field("body", auditreq))
 		}
 
 		return &users.AddAddressResponse{
@@ -142,6 +170,31 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 			City:            in.City,
 			DetailedAddress: in.DetailedAddress,
 			IsDefault:       in.IsDefault,
+			CreatedAt:       time.Now().Format("2006-01-02 15:04:05"),
+		}
+		//添加审计服务
+		datajson, err := json.Marshal(data)
+		if err != nil {
+			l.Logger.Errorw("json marshal failed", logx.Field("user_id", in.UserId), logx.Field("err", err))
+			return &users.AddAddressResponse{}, err
+		}
+		datastr := string(datajson)
+
+		//添加审计服务
+		auditreq := &audit.CreateAuditLogReq{
+			UserId:            uint32(in.UserId),
+			ActionType:        biz.Create,
+			TargetTable:       "user",
+			ActionDescription: "添加用户地址",
+			ClientIp:          in.Ip,
+			TargetId:          int64(in.UserId),
+			ServiceName:       "users",
+			NewData:           datastr,
+		}
+		_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, auditreq)
+		if err != nil {
+			l.Logger.Infow("add address audit failed", logx.Field("err", err),
+				logx.Field("body", auditreq))
 		}
 
 		return &users.AddAddressResponse{

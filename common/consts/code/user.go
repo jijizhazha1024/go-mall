@@ -31,6 +31,13 @@ const (
 	DefaultAddressHasExist   = 20027
 	LoginMessageEmpty        = 20028
 	PasswordNotMatch         = 20029
+	EmailFormatError         = 20030
+	AuditRegisterFailed      = 20031
+	AuditUpdateaddressFailed = 20032
+	AuditUpdateuserFailed    = 20033
+	AuditDeleteaddressFailed = 20034
+	AuditDeleteuserFailed    = 20035
+	AuditAddAddressFailed    = 20036
 )
 
 const (
@@ -63,4 +70,11 @@ const (
 	DefaultAddressHasExistMsg   = "默认地址已存在"
 	LoginMessageEmptyMsg        = "登录信息为空"
 	PasswordNotMatchMsg         = "密码不匹配"
+	EmailFormatErrorMsg         = "邮箱格式错误"
+	AuditRegisterFailedMsg      = "注册审计操作失败"
+	AuditUpdateaddressFailedMsg = "更新地址审计操作失败"
+	AuditUpdateuserFailedMsg    = "更新用户审计操作失败"
+	AuditDeleteaddressFailedMsg = "删除地址审计操作失败"
+	AuditDeleteuserFailedMsg    = "删除用户审计操作失败"
+	AuditAddAddressFailedMsg    = "添加地址审计操作失败"
 )
