@@ -29,6 +29,10 @@ Log:
   Rotation: size  # 按大小切割日志
   MaxSize: 100    # 每个日志文件最大100MB
 
+AuditRpc:
+  Target: consul://${CONSUL_HOST}/audit.rpc?wait=14s
+  NonBlock: true
+
 # 指标监控配置
 DevServer:
   Enabled: true
