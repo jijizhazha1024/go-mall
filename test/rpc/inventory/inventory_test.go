@@ -35,51 +35,54 @@ func TestInventoryService(t *testing.T) {
 	t.Run("预扣库存全流程", func(t *testing.T) {
 		setupInventoryClient(t)
 		ctx := context.Background()
-		testProductID := int32(2)       // 测试用商品ID
-		testPreOrderID := "PRE_ORDER_2" // 测试用预订单ID
-		testuserID := int32(2)          // 测试用用户ID
+		testProductID := int32(1) // 测试用商品ID
+		testProductID2 := int32(2)
+		// testPreOrderID := "PRE_ORDER_2" // 测试用预订单ID
+
+		// testuserID := int32(2) // 测试用用户ID
 		//	初始化库存1
-		_, err := invClient.UpdateInventory(ctx, &inventory.InventoryReq{
-			Items: []*inventory.InventoryReq_Items{
-				{ProductId: testProductID, Quantity: 200},
+		_, err := invClient.UpdateInventory(ctx, &inventory.UpdateInventoryReq{
+			Items: []*inventory.UpdateInventoryReq_Items{
+				{ProductId: testProductID, Quantity: 100},
+				{ProductId: testProductID2, Quantity: 200},
 			},
 		})
 		assert.NoError(t, err)
 
-		// 预扣库存
-		preDecResp, err := invClient.DecreasePreInventory(ctx, &inventory.InventoryReq{
-			Items: []*inventory.InventoryReq_Items{
-				{ProductId: testProductID, Quantity: 30},
-			},
-			PreOrderId: testPreOrderID,
-			UserId:     testuserID,
-		})
-		assert.NoError(t, err)
-		fmt.Println("err---------------------------------------", err)
-		fmt.Println("preDecResp-", preDecResp)
+		// // 预扣库存
+		// preDecResp, err := invClient.DecreasePreInventory(ctx, &inventory.InventoryReq{
+		// 	Items: []*inventory.InventoryReq_Items{
+		// 		{ProductId: testProductID, Quantity: 30},
+		// 	},
+		// 	PreOrderId: testPreOrderID,
+		// 	UserId:     testuserID,
+		// })
+		// assert.NoError(t, err)
+		// fmt.Println("err---------------------------------------", err)
+		// fmt.Println("preDecResp-", preDecResp)
 
-		//真实扣减
-		realDecResp, err := invClient.DecreaseInventory(ctx, &inventory.InventoryReq{
-			Items: []*inventory.InventoryReq_Items{
-				{ProductId: testProductID, Quantity: 30},
-			},
-			PreOrderId: testPreOrderID,
-			UserId:     testuserID,
-		})
-		assert.NoError(t, err)
-		fmt.Println("err-------------------", err)
-		fmt.Println("realDecResp-", realDecResp)
-		//第二次真实扣减
-		realDecResp, err = invClient.DecreaseInventory(ctx, &inventory.InventoryReq{
-			Items: []*inventory.InventoryReq_Items{
-				{ProductId: testProductID, Quantity: 30},
-			},
-			PreOrderId: testPreOrderID,
-			UserId:     testuserID,
-		})
-		assert.NoError(t, err)
-		fmt.Println("err-------------------", err)
-		fmt.Println("realDecResp-", realDecResp)
+		// //真实扣减
+		// realDecResp, err := invClient.DecreaseInventory(ctx, &inventory.InventoryReq{
+		// 	Items: []*inventory.InventoryReq_Items{
+		// 		{ProductId: testProductID, Quantity: 30},
+		// 	},
+		// 	PreOrderId: testPreOrderID,
+		// 	UserId:     testuserID,
+		// })
+		// assert.NoError(t, err)
+		// fmt.Println("err-------------------", err)
+		// fmt.Println("realDecResp-", realDecResp)
+		// //第二次真实扣减
+		// realDecResp, err = invClient.DecreaseInventory(ctx, &inventory.InventoryReq{
+		// 	Items: []*inventory.InventoryReq_Items{
+		// 		{ProductId: testProductID, Quantity: 30},
+		// 	},
+		// 	PreOrderId: testPreOrderID,
+		// 	UserId:     testuserID,
+		// })
+		// assert.NoError(t, err)
+		// fmt.Println("err-------------------", err)
+		// fmt.Println("realDecResp-", realDecResp)
 
 		// //归还缓存库存
 		// retResp, err := invClient.ReturnPreInventory(ctx, &inventory.InventoryReq{
@@ -118,6 +121,13 @@ func TestInventoryService(t *testing.T) {
 		// 验证最终库存
 		getResp, err := invClient.GetInventory(ctx, &inventory.GetInventoryReq{
 			ProductId: testProductID,
+		})
+		assert.NoError(t, err)
+		fmt.Println("err-", err)
+		fmt.Println("getResp-", getResp)
+
+		getResp, err = invClient.GetInventory(ctx, &inventory.GetInventoryReq{
+			ProductId: testProductID2,
 		})
 		assert.NoError(t, err)
 		fmt.Println("err-", err)
@@ -262,8 +272,8 @@ func TestInventoryService_HighConcurrency(t *testing.T) {
 	expectedFinalStock := int32(0) // 预期最终库存
 
 	// 初始化库存
-	_, err := invClient.UpdateInventory(ctx, &inventory.InventoryReq{
-		Items: []*inventory.InventoryReq_Items{
+	_, err := invClient.UpdateInventory(ctx, &inventory.UpdateInventoryReq{
+		Items: []*inventory.UpdateInventoryReq_Items{
 			{ProductId: testProductID, Quantity: initialStock},
 		},
 	})

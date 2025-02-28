@@ -26,7 +26,7 @@ func NewUpdateInventoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *U
 }
 
 // UpdateInventory 更新库存，进行修改库存数量
-func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.InventoryReq) (*inventory.InventoryResp, error) {
+func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.UpdateInventoryReq) (*inventory.InventoryResp, error) {
 
 	for _, item := range in.Items {
 
