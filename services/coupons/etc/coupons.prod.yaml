@@ -39,3 +39,10 @@ RedisConf:
 ProductRpc:
   Target: consul://${CONSUL_HOST}/products.rpc?wait=14s
   NonBlock: true
+
+# 指标监控配置
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port: 11009
+  EnablePprof: false
