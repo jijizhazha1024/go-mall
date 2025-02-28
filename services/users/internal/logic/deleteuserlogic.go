@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
+	"jijizhazha1024/go-mall/services/audit/audit"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -32,8 +34,7 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 	exituser, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			l.Logger.Infow("delete user not found", logx.Field("err", err),
-				logx.Field("user_id", in.UserId))
+
 			return &users.DeleteUserResponse{
 
 				StatusCode: code.UserAddressNotFound,
@@ -55,10 +56,28 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 	}
 	err = l.svcCtx.UsersModel.UpdateDeletebyId(l.ctx, int64(in.UserId), true)
 	if err != nil {
-		l.Logger.Infow("delete update deletebyid failed", logx.Field("err", err),
+		l.Logger.Infow("delete update delete by id failed", logx.Field("err", err),
 			logx.Field("user_id", in.UserId))
 
 		return &users.DeleteUserResponse{}, err
+	}
+
+	//添加审计服务
+	auditreq := &audit.CreateAuditLogReq{
+		UserId:            uint32(in.UserId),
+		ActionType:        biz.Delete,
+		TargetTable:       "user",
+		ActionDescription: "用户注销",
+		TargetId:          int64(in.UserId),
+		ServiceName:       "users",
+		ClientIp:          in.Ip,
+	}
+	_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, auditreq)
+	if err != nil {
+
+		l.Logger.Infow("add address audit failed", logx.Field("err", err),
+			logx.Field("body", auditreq))
+
 	}
 
 	return &users.DeleteUserResponse{

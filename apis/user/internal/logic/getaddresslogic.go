@@ -54,6 +54,8 @@ func (l *GetAddressLogic) GetAddress(req *types.GetAddressRequest) (resp *types.
 			City:            getaddressresp.Data.City,
 			DetailedAddress: getaddressresp.Data.DetailedAddress,
 			IsDefault:       getaddressresp.Data.IsDefault,
+			CreatedAt:       getaddressresp.Data.CreatedAt,
+			UpdatedAt:       getaddressresp.Data.UpdatedAt,
 		},
 	}
 
