@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"jijizhazha1024/go-mall/common/consts/code"
 
 	"jijizhazha1024/go-mall/services/checkout/checkout"
 	"jijizhazha1024/go-mall/services/checkout/internal/svc"
@@ -30,7 +31,9 @@ func (l *UpdateStatus2OrderRollbackLogic) UpdateStatus2OrderRollback(in *checkou
 	err := l.svcCtx.Mysql.Transact(func(session sqlx.Session) error {
 		checkoutRecord, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderId(l.ctx, in.UserId, in.PreOrderId)
 		if err != nil {
-			l.Logger.Errorw("查询结算记录失败", logx.Field("err", err), logx.Field("pre_order_id", in.PreOrderId))
+			l.Logger.Errorw("查询结算记录失败",
+				logx.Field("err", err),
+				logx.Field("pre_order_id", in.PreOrderId))
 			return err
 		}
 
@@ -41,8 +44,10 @@ func (l *UpdateStatus2OrderRollbackLogic) UpdateStatus2OrderRollback(in *checkou
 
 		err = l.svcCtx.CheckoutModel.UpdateStatusWithSession(l.ctx, session, int64(checkout.CheckoutStatus_RESERVING), in.UserId, in.PreOrderId)
 		if err != nil {
-			l.Logger.Errorw("更新结算状态失败", logx.Field("err", err), logx.Field("pre_order_id", in.PreOrderId))
-			return errors.New("更新结算状态失败")
+			l.Logger.Errorw("更新结算状态失败",
+				logx.Field("err", err),
+				logx.Field("pre_order_id", in.PreOrderId))
+			return errors.New(code.UpdateSettlementStatusFailedMsg)
 		}
 
 		l.Logger.Infof("成功更新订单 %s 的结算状态为已确认", in.PreOrderId)
@@ -50,7 +55,8 @@ func (l *UpdateStatus2OrderRollbackLogic) UpdateStatus2OrderRollback(in *checkou
 	})
 
 	if err != nil {
-		l.Logger.Errorw("事务处理失败", logx.Field("err", err))
+		l.Logger.Errorw("事务处理失败",
+			logx.Field("err", err))
 		return nil, err
 	}
 

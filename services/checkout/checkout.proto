@@ -63,7 +63,7 @@ message CheckoutReq{
 // 分页响应结构
 message CheckoutListResp {
   int32 status_code = 1;
-  int32 status_msg = 2;
+  string status_msg = 2;
   int64 total = 3;
   repeated CheckoutOrder data = 4; // 订单数据列表
 }

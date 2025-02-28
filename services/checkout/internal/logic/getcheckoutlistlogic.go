@@ -2,7 +2,7 @@ package logic
 
 import (
 	"context"
-	"errors"
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/checkout/checkout"
 	"jijizhazha1024/go-mall/services/checkout/internal/svc"
 
@@ -36,8 +36,13 @@ func (l *GetCheckoutListLogic) GetCheckoutList(in *checkout.CheckoutListReq) (*c
 	// 2. 查询总记录数
 	total, err := l.svcCtx.CheckoutModel.CountByUserId(l.ctx, in.UserId)
 	if err != nil {
-		l.Logger.Errorw("查询结算订单总数失败", logx.Field("err", err))
-		return nil, errors.New("查询订单总数失败")
+		l.Logger.Errorw("查询结算订单总数失败",
+			logx.Field("err", err),
+			logx.Field("user_id", in.UserId))
+		return &checkout.CheckoutListResp{
+			StatusCode: code.QueryOrderTotalFailed,
+			StatusMsg:  code.QueryOrderTotalFailedMsg,
+		}, nil
 	}
 
 	// 3. 如果没有记录，直接返回空列表
@@ -51,8 +56,15 @@ func (l *GetCheckoutListLogic) GetCheckoutList(in *checkout.CheckoutListReq) (*c
 	// 4. 查询分页订单数据
 	checkouts, err := l.svcCtx.CheckoutModel.FindByUserId(l.ctx, in.UserId, in.Page, in.PageSize)
 	if err != nil {
-		l.Logger.Errorw("查询结算列表失败", logx.Field("err", err))
-		return nil, errors.New("查询订单列表失败")
+		l.Logger.Errorw("查询结算列表失败",
+			logx.Field("err", err),
+			logx.Field("user_id", in.UserId),
+			logx.Field("page", in.Page),
+			logx.Field("page_size", in.GetPageSize()))
+		return &checkout.CheckoutListResp{
+			StatusCode: code.QueryOrderListFailed,
+			StatusMsg:  code.QueryOrderListFailedMsg,
+		}, nil
 	}
 
 	// 5. 查询所有订单对应的商品详情
@@ -62,8 +74,13 @@ func (l *GetCheckoutListLogic) GetCheckoutList(in *checkout.CheckoutListReq) (*c
 	}
 	itemsMap, err := l.svcCtx.CheckoutItemsModel.FindItemsByPreOrderIds(l.ctx, preOrderIds)
 	if err != nil {
-		l.Logger.Errorw("查询订单商品详情失败", logx.Field("err", err))
-		return nil, errors.New("查询订单商品失败")
+		l.Logger.Errorw("查询订单商品详情失败",
+			logx.Field("err", err),
+			logx.Field("pre_order_ids", preOrderIds))
+		return &checkout.CheckoutListResp{
+			StatusCode: code.QueryOrderProductFailed,
+			StatusMsg:  code.QueryOrderProductFailedMsg,
+		}, nil
 	}
 
 	// 6. 组装数据

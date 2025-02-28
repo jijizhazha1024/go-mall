@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/checkout/checkout"
 	"jijizhazha1024/go-mall/services/checkout/internal/svc"
 	"jijizhazha1024/go-mall/services/coupons/coupons"
@@ -44,8 +45,13 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	// 1. 生成 pre_order_id
 	preOrderId, err := generatePreOrderID()
 	if err != nil {
-		l.Logger.Errorw("生成 preOrderId 失败", logx.Field("err", err), logx.Field("user_id", in.UserId))
-		return nil, errors.New("生成订单ID失败")
+		l.Logger.Errorw("生成 preOrderId 失败",
+			logx.Field("err", err),
+			logx.Field("user_id", in.UserId))
+		return &checkout.CheckoutResp{
+			StatusCode: code.GenerateOrderFailed,
+			StatusMsg:  code.GenerateOrderFailedMsg,
+		}, nil
 	}
 
 	// 2. 使用 Redis 锁来保证幂等性
@@ -60,12 +66,20 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	`
 	result, err := l.svcCtx.RedisClient.Eval(luaScript, []string{cacheKey}, preOrderId, 300)
 	if err != nil {
-		l.Logger.Errorw("Redis Lua 执行失败", logx.Field("err", err), logx.Field("user_id", in.UserId))
-		return nil, errors.New("系统错误")
+		l.Logger.Errorw("Redis Lua 执行失败",
+			logx.Field("err", err),
+			logx.Field("user_id", in.UserId))
+		return &checkout.CheckoutResp{
+			StatusCode: code.InternalFailed,
+			StatusMsg:  code.InternalFailedMsg,
+			PreOrderId: preOrderId,
+		}, nil
 	}
 	if result == int64(0) {
 		l.Logger.Infof("用户 %d 的预订单 %s 已存在，跳过重复结算", in.UserId, preOrderId)
 		return &checkout.CheckoutResp{
+			StatusCode: code.PreOrderExisted,
+			StatusMsg:  code.PreOrderExistedMsg,
 			PreOrderId: preOrderId,
 		}, nil
 	}
@@ -74,11 +88,13 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	if len(in.OrderItems) == 0 {
 		// 释放 Redis 锁
 		if _, err := l.svcCtx.RedisClient.Del(cacheKey); err != nil {
-			l.Logger.Errorw("删除 Redis 锁失败", logx.Field("err", err), logx.Field("user_id", in.UserId))
+			l.Logger.Errorw("删除 Redis 锁失败",
+				logx.Field("err", err),
+				logx.Field("user_id", in.UserId))
 		}
 		return &checkout.CheckoutResp{
-			StatusCode: 400,
-			StatusMsg:  "订单商品不能为空",
+			StatusCode: code.OrderProductEmpty,
+			StatusMsg:  code.OrderProductEmptyMsg,
 		}, nil
 	}
 
@@ -98,11 +114,16 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 	})
 
 	if err != nil {
-		l.Logger.Errorw("库存预扣失败，执行同步库存回滚", logx.Field("err", err), logx.Field("user_id", in.UserId), logx.Field("pre_order_id", preOrderId))
+		l.Logger.Errorw("库存预扣失败，执行同步库存回滚",
+			logx.Field("err", err),
+			logx.Field("user_id", in.UserId),
+			logx.Field("pre_order_id", preOrderId))
 
 		// 释放 Redis 锁
 		if _, err := l.svcCtx.RedisClient.Del(cacheKey); err != nil {
-			l.Logger.Errorw("删除 Redis 锁失败", logx.Field("err", err), logx.Field("user_id", in.UserId))
+			l.Logger.Errorw("删除 Redis 锁失败",
+				logx.Field("err", err),
+				logx.Field("user_id", in.UserId))
 		}
 
 		// 同步回滚库存
@@ -112,10 +133,16 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 			UserId:     int32(in.UserId),
 		})
 		if errRollback != nil {
-			l.Logger.Errorw("库存回滚失败", logx.Field("err", errRollback), logx.Field("user_id", in.UserId), logx.Field("pre_order_id", preOrderId))
+			l.Logger.Errorw("库存回滚失败",
+				logx.Field("err", errRollback),
+				logx.Field("user_id", in.UserId),
+				logx.Field("pre_order_id", preOrderId))
 		}
 
-		return nil, errors.New("库存不足")
+		return &checkout.CheckoutResp{
+			StatusCode: code.OutOfInventory,
+			StatusMsg:  code.OutOfInventoryMsg,
+		}, nil
 	}
 
 	// 5. 异步处理结算信息
@@ -140,8 +167,10 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 					Id: uint32(item.ProductId),
 				})
 				if err != nil || productResp.Product == nil {
-					l.Logger.Errorw("获取商品详情失败", logx.Field("err", err), logx.Field("product_id", item.ProductId))
-					return errors.New("获取商品信息失败")
+					l.Logger.Errorw("获取商品详情失败",
+						logx.Field("err", err),
+						logx.Field("product_id", item.ProductId))
+					return errors.New(code.QueryOrderProductInfoFailedMsg)
 				}
 
 				snapshotData := map[string]interface{}{"name": productResp.Product.Name, "specs": productResp.Product.Description}
@@ -169,8 +198,9 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 				Pagination: &coupons.PaginationReq{Page: 1, Size: 50},
 			})
 			if err != nil {
-				l.Logger.Errorw("查询用户优惠券失败", logx.Field("err", err))
-				return errors.New("查询用户优惠券失败")
+				l.Logger.Errorw("查询用户优惠券失败",
+					logx.Field("err", err))
+				return errors.New(code.QueryUserCouponFailedMsg)
 			}
 
 			finalAmount = totalOriginalAmount
@@ -181,7 +211,9 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 					Items:    orderItems,
 				})
 				if err != nil {
-					l.Logger.Errorw("计算优惠失败", logx.Field("err", err), logx.Field("coupon_id", coupon.Id))
+					l.Logger.Errorw("计算优惠失败",
+						logx.Field("err", err),
+						logx.Field("coupon_id", coupon.Id))
 					continue
 				}
 
@@ -209,13 +241,16 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 		})
 
 		if err != nil {
-			l.Logger.Errorw("处理结算信息失败", logx.Field("err", err))
+			l.Logger.Errorw("处理结算信息失败",
+				logx.Field("err", err))
 		}
 	}()
 
 	// 释放 Redis 锁
 	if _, err := l.svcCtx.RedisClient.Del(cacheKey); err != nil {
-		l.Logger.Errorw("删除 Redis 锁失败", logx.Field("err", err), logx.Field("user_id", in.UserId))
+		l.Logger.Errorw("删除 Redis 锁失败",
+			logx.Field("err", err),
+			logx.Field("user_id", in.UserId))
 	}
 
 	// 6. 返回预结算信息

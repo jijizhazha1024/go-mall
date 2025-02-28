@@ -29,10 +29,12 @@ func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailRe
 	checkoutRecord, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderId(l.ctx, in.UserId, in.PreOrderId)
 	if err != nil {
 		if errors.Is(err, sqlx.ErrNotFound) {
-			l.Logger.Errorw("No items found for the given userId and preOrderId.")
 			return nil, err
 		} else {
-			l.Logger.Errorw("查询结算记录失败", logx.Field("err", err), logx.Field("user_id", in.UserId), logx.Field("pre_order_id", in.PreOrderId))
+			l.Logger.Errorw("查询结算记录失败",
+				logx.Field("err", err),
+				logx.Field("user_id", in.UserId),
+				logx.Field("pre_order_id", in.PreOrderId))
 			return nil, err
 		}
 	}
@@ -40,10 +42,12 @@ func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailRe
 	checkoutItems, err := l.svcCtx.CheckoutItemsModel.FindItemsByUserAndPreOrder(l.ctx, in.UserId, in.PreOrderId)
 	if err != nil {
 		if errors.Is(err, sqlx.ErrNotFound) {
-			l.Logger.Errorw("No items found for the given userId and preOrderId.")
 			return nil, err
 		} else {
-			l.Logger.Errorw("查询结算记录失败", logx.Field("err", err), logx.Field("user_id", in.UserId), logx.Field("pre_order_id", in.PreOrderId))
+			l.Logger.Errorw("查询结算记录失败",
+				logx.Field("err", err),
+				logx.Field("user_id", in.UserId),
+				logx.Field("pre_order_id", in.PreOrderId))
 			return nil, err
 		}
 	}
