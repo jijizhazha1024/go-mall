@@ -41,9 +41,7 @@ Prometheus:
   Host: 0.0.0.0   # 监控暴露的 IP
   Port: 9100       # 监控暴露的端口
   Path: /metrics   # 默认路径（可自定义）
-HttpClient:
-  Timeout: 10 # 超时时间
-  MaxIdleConns: 100 # 连接池大小
+
 RedisConf:
   Host: 124.71.72.124:6379
   Pass: jjzzchtt

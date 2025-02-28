@@ -36,17 +36,18 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 
 	//判断address——id和user——id是否存在
 
-	_, err := l.svcCtx.AddressModel.GetUserAddressExistsByIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
+	address1, err := l.svcCtx.AddressModel.GetUserAddressExistsByIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
 
-			return &users.UpdateAddressResponse{
-				StatusMsg:  code.UserAddressNotFoundMsg,
-				StatusCode: code.UserAddressNotFound,
-			}, nil
-		}
-		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
+		l.Logger.Errorw("find address by id and user id failed", logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
 		return nil, err
+	}
+	if !address1 {
+		return &users.UpdateAddressResponse{
+			StatusMsg:  code.UserAddressNotFoundMsg,
+			StatusCode: code.UserAddressNotFound,
+		}, nil
+
 	}
 
 	//判断修改后的地址是否是默认地址
@@ -151,8 +152,7 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 	newData := string(newDataBytes)
 
 	//审计操作
-	_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
-
+	auditreq := &audit.CreateAuditLogReq{
 		UserId:            uint32(in.UserId),
 		ActionType:        biz.Update,
 		TargetTable:       "user_addresses",
@@ -161,9 +161,10 @@ func (l *UpdateAddressLogic) UpdateAddress(in *users.UpdateAddressRequest) (*use
 		TargetId:          int64(in.AddressId),
 		ClientIp:          in.Ip,
 		NewData:           newData,
-	})
+	}
+	_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, auditreq)
 	if err != nil {
-		l.Logger.Infow(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("err", err))
+		l.Logger.Infow(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("body", auditreq))
 
 	}
 

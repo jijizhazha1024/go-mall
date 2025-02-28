@@ -118,8 +118,7 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 		datastr := string(datajson)
 
 		//添加审计服务
-		_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
-
+		auditreq := &audit.CreateAuditLogReq{
 			UserId:            uint32(in.UserId),
 			ActionType:        biz.Create,
 			TargetTable:       "user",
@@ -128,10 +127,11 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 			TargetId:          int64(in.UserId),
 			ServiceName:       "users",
 			NewData:           datastr,
-		})
+		}
+		_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, auditreq)
 		if err != nil {
 			l.Logger.Infow("add address audit failed", logx.Field("err", err),
-				logx.Field("user_id", in.UserId))
+				logx.Field("body", auditreq))
 		}
 
 		return &users.AddAddressResponse{
@@ -181,7 +181,7 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 		datastr := string(datajson)
 
 		//添加审计服务
-		_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
+		auditreq := &audit.CreateAuditLogReq{
 			UserId:            uint32(in.UserId),
 			ActionType:        biz.Create,
 			TargetTable:       "user",
@@ -190,11 +190,11 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 			TargetId:          int64(in.UserId),
 			ServiceName:       "users",
 			NewData:           datastr,
-		})
+		}
+		_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, auditreq)
 		if err != nil {
 			l.Logger.Infow("add address audit failed", logx.Field("err", err),
-				logx.Field("user_id", in.UserId))
-
+				logx.Field("body", auditreq))
 		}
 
 		return &users.AddAddressResponse{

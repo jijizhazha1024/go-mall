@@ -130,8 +130,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 			}()
 
 			//审计操作
-			_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
-
+			auditreq := &audit.CreateAuditLogReq{
 				UserId:            uint32(userId),
 				ActionType:        biz.Create,
 				TargetTable:       "user",
@@ -139,13 +138,14 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				TargetId:          int64(userId),
 				ServiceName:       "users",
 				ClientIp:          in.Ip,
-			})
-			if err != nil {
-				l.Logger.Infow("register audit failed", logx.Field("err", err),
-					logx.Field("email", in.Email))
-
 			}
-			//埋点
+			_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, auditreq)
+			if err != nil {
+				l.Logger.Infow("add address audit failed", logx.Field("err", err),
+					logx.Field("body", auditreq))
+			}
+
+			//埋点操作
 			svc.UserRegCounter.Inc("success")
 			// 注册成功，返回用户ID
 			return &users.RegisterResponse{
@@ -180,20 +180,19 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				return nil, err
 
 			}
-
-			_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
-
+			auditreq := &audit.CreateAuditLogReq{
 				UserId:            uint32(existUser.UserId),
-				ActionType:        biz.Create,
+				ActionType:        biz.Update,
 				TargetTable:       "user",
 				ActionDescription: "用户注册",
 				TargetId:          int64(existUser.UserId),
 				ServiceName:       "users",
 				ClientIp:          in.Ip,
-			})
+			}
+			_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, auditreq)
 			if err != nil {
 				l.Logger.Infow("register audit failed", logx.Field("err", err),
-					logx.Field("email", in.Email))
+					logx.Field("body", auditreq))
 
 			}
 			//埋点操作

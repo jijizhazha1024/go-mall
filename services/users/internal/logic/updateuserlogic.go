@@ -94,8 +94,7 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	} else if in.AvatarUrl != "" {
 		newData = fmt.Sprintf("头像URL: %s", in.AvatarUrl)
 	}
-
-	_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
+	auditreq := audit.CreateAuditLogReq{
 		UserId:            uint32(in.UserId),
 		ActionType:        biz.Update,
 		TargetTable:       "user",
@@ -105,9 +104,11 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 		OldData:           update_user.Username.String + ", " + update_user.AvatarUrl.String,
 		NewData:           newData,
 		ClientIp:          in.Ip,
-	})
+	}
+
+	_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &auditreq)
 	if err != nil {
-		logx.Infow("create audit log failed", logx.Field("err", err))
+		logx.Infow("create audit log failed", logx.Field("err", err), logx.Field("body", auditreq))
 
 	}
 

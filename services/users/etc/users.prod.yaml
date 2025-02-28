@@ -46,3 +46,6 @@ RedisConf:
   Host: ${REDIS_HOST}
   Pass: ${REDIS_PASSWORD}
   Tls: false
+GorseConfig:
+ GorseAddr: ${GORSE HOST}
+ GorseApikey: ${GORSE_APIKEY}
