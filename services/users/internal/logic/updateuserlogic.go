@@ -108,7 +108,7 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 
 	_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, auditreq)
 	if err != nil {
-		logx.Infow("create audit log failed", logx.Field("err", err), logx.Field("body", &auditreq))
+		logx.Infow("create audit log failed", logx.Field("err", err), logx.Field("body", auditreq))
 
 	}
 
