@@ -2,8 +2,10 @@ package checkout
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"jijizhazha1024/go-mall/services/checkout/checkout"
 )
 
 var _ CheckoutItemsModel = (*customCheckoutItemsModel)(nil)
@@ -15,6 +17,7 @@ type (
 		checkoutItemsModel
 		withSession(session sqlx.Session) CheckoutItemsModel
 		FindItemsByUserAndPreOrder(ctx context.Context, userId int32, preOrderId string) ([]CheckoutItems, error)
+		FindItemsByPreOrderIds(ctx context.Context, preOrderIds []string) (map[string][]*checkout.CheckoutItem, error)
 	}
 
 	customCheckoutItemsModel struct {
@@ -33,7 +36,7 @@ func (m *customCheckoutItemsModel) withSession(session sqlx.Session) CheckoutIte
 	return NewCheckoutItemsModel(sqlx.NewSqlConnFromSession(session))
 }
 
-func (m *defaultCheckoutItemsModel) FindItemsByUserAndPreOrder(ctx context.Context, userId int32, preOrderId string) ([]CheckoutItems, error) {
+func (m *customCheckoutItemsModel) FindItemsByUserAndPreOrder(ctx context.Context, userId int32, preOrderId string) ([]CheckoutItems, error) {
 	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `pre_order_id` = ?", checkoutItemsRows, m.table)
 	var resp []CheckoutItems
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId, preOrderId)
@@ -47,4 +50,41 @@ func (m *defaultCheckoutItemsModel) FindItemsByUserAndPreOrder(ctx context.Conte
 		// If there is another error, return it
 		return nil, err
 	}
+}
+func (m *customCheckoutItemsModel) FindItemsByPreOrderIds(ctx context.Context, preOrderIds []string) (map[string][]*checkout.CheckoutItem, error) {
+	if len(preOrderIds) == 0 {
+		return make(map[string][]*checkout.CheckoutItem), nil
+	}
+
+	query := fmt.Sprintf("SELECT pre_order_id, product_id, quantity, snapshot, price FROM %s WHERE pre_order_id IN (?)", m.table)
+	var items []*CheckoutItems
+	err := m.conn.QueryRowsCtx(ctx, &items, query, preOrderIds)
+	if err != nil {
+		return nil, err
+	}
+
+	// 组装 map[pre_order_id] -> []CheckoutItem
+	itemsMap := make(map[string][]*checkout.CheckoutItem)
+	for _, item := range items {
+		// 解析 snapshot
+		var snapshotData map[string]string
+		if err := json.Unmarshal([]byte(item.Snapshot), &snapshotData); err != nil {
+			snapshotData = map[string]string{} // 解析失败，设置为空 map
+		}
+
+		// 获取 name 和 specs
+		productName := snapshotData["name"]
+		productDesc := snapshotData["specs"]
+
+		// 组装返回对象
+		itemsMap[item.PreOrderId] = append(itemsMap[item.PreOrderId], &checkout.CheckoutItem{
+			ProductId:   int32(item.ProductId),
+			Quantity:    int32(item.Quantity),
+			ProductName: productName,
+			ProductDesc: productDesc,
+			Price:       item.Price,
+		})
+	}
+
+	return itemsMap, nil
 }

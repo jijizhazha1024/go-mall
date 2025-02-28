@@ -16,6 +16,8 @@ type (
 		withSession(session sqlx.Session) CheckoutsModel
 		UpdateStatusWithSession(ctx context.Context, session sqlx.Session, status int64, userId int32, preOrderId string) error
 		FindOneByUserIdAndPreOrderId(ctx context.Context, userId int32, preOrderId string) (*Checkouts, error)
+		CountByUserId(ctx context.Context, userId uint32) (int64, error)
+		FindByUserId(ctx context.Context, userId uint32, page int32, pageSize int32) ([]*Checkouts, error)
 	}
 
 	customCheckoutsModel struct {
@@ -55,4 +57,28 @@ func (m *customCheckoutsModel) FindOneByUserIdAndPreOrderId(ctx context.Context,
 	default:
 		return nil, err
 	}
+}
+func (m *customCheckoutsModel) CountByUserId(ctx context.Context, userId uint32) (int64, error) {
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE user_id = ?", m.table)
+	var count int64
+	err := m.conn.QueryRowCtx(ctx, &count, query, userId)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+func (m *customCheckoutsModel) FindByUserId(ctx context.Context, userId uint32, page int32, pageSize int32) ([]*Checkouts, error) {
+	offset := (page - 1) * pageSize
+	query := fmt.Sprintf(`
+		SELECT %s FROM %s 
+		WHERE user_id = ? 
+		ORDER BY created_at DESC 
+		LIMIT ? OFFSET ?`, checkoutsRows, m.table)
+
+	var checkouts []*Checkouts
+	err := m.conn.QueryRowsCtx(ctx, &checkouts, query, userId, pageSize, offset)
+	if err != nil {
+		return nil, err
+	}
+	return checkouts, nil
 }

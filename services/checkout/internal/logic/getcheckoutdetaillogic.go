@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"log"
-
 	"jijizhazha1024/go-mall/services/checkout/checkout"
 	"jijizhazha1024/go-mall/services/checkout/internal/svc"
 
@@ -31,7 +29,8 @@ func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailRe
 	checkoutRecord, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderId(l.ctx, in.UserId, in.PreOrderId)
 	if err != nil {
 		if errors.Is(err, sqlx.ErrNotFound) {
-			log.Println("No items found for the given userId and preOrderId.")
+			l.Logger.Errorw("No items found for the given userId and preOrderId.")
+			return nil, err
 		} else {
 			l.Logger.Errorw("查询结算记录失败", logx.Field("err", err), logx.Field("user_id", in.UserId), logx.Field("pre_order_id", in.PreOrderId))
 			return nil, err
@@ -41,7 +40,8 @@ func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailRe
 	checkoutItems, err := l.svcCtx.CheckoutItemsModel.FindItemsByUserAndPreOrder(l.ctx, in.UserId, in.PreOrderId)
 	if err != nil {
 		if errors.Is(err, sqlx.ErrNotFound) {
-			log.Println("No items found for the given userId and preOrderId.")
+			l.Logger.Errorw("No items found for the given userId and preOrderId.")
+			return nil, err
 		} else {
 			l.Logger.Errorw("查询结算记录失败", logx.Field("err", err), logx.Field("user_id", in.UserId), logx.Field("pre_order_id", in.PreOrderId))
 			return nil, err
@@ -60,9 +60,10 @@ func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailRe
 	var items []*checkout.CheckoutItem
 	for _, item := range checkoutItems {
 		checkoutItem := &checkout.CheckoutItem{
-			ProductId: int32(item.ProductId),
-			Quantity:  int32(item.Quantity),
-			Price:     item.Price,
+			ProductId:   int32(item.ProductId),
+			Quantity:    int32(item.Quantity),
+			Price:       item.Price,
+			ProductName: item.Snapshot,
 		}
 		items = append(items, checkoutItem)
 	}
