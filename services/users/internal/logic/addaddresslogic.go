@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"time"
 
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
@@ -107,6 +108,7 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 			City:            in.City,
 			DetailedAddress: in.DetailedAddress,
 			IsDefault:       in.IsDefault,
+			CreatedAt:       time.Now().Format("2006-01-02 15:04:05"),
 		}
 		datajson, err := json.Marshal(data)
 		if err != nil {
@@ -168,6 +170,7 @@ func (l *AddAddressLogic) AddAddress(in *users.AddAddressRequest) (*users.AddAdd
 			City:            in.City,
 			DetailedAddress: in.DetailedAddress,
 			IsDefault:       in.IsDefault,
+			CreatedAt:       time.Now().Format("2006-01-02 15:04:05"),
 		}
 		//添加审计服务
 		datajson, err := json.Marshal(data)

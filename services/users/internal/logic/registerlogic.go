@@ -177,7 +177,7 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				l.Logger.Errorw("register update password_hash failed", logx.Field("err", updatepasswordErr),
 					logx.Field("email", in.Email))
 
-				return &users.RegisterResponse{}, err
+				return nil, err
 
 			}
 
@@ -214,6 +214,6 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 
 	}
 
-	return &users.RegisterResponse{}, errors.New("register failed")
+	return nil, errors.New("register failed")
 
 }

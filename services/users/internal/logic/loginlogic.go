@@ -59,8 +59,7 @@ func (l *LoginLogic) Login(in *users.LoginRequest) (*users.LoginResponse, error)
 	if err != nil {
 
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Infow("login failed, user not found", logx.Field("err", err),
-				logx.Field("email", in.Email))
+
 			return &users.LoginResponse{
 				StatusCode: code.UserNotFound,
 				StatusMsg:  code.UserNotFoundMsg,

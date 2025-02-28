@@ -72,6 +72,8 @@ func (l *AddAddressLogic) AddAddress(req *types.AddAddressRequest) (resp *types.
 		City:            addaddressresp.Data.City,
 		DetailedAddress: addaddressresp.Data.DetailedAddress,
 		IsDefault:       addaddressresp.Data.IsDefault,
+		CreatedAt:       addaddressresp.Data.CreatedAt,
+		UpdatedAt:       addaddressresp.Data.UpdatedAt,
 	}
 
 	resp = &types.AddAddressResponse{

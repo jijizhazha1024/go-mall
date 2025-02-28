@@ -34,8 +34,7 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 	exituser, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			l.Logger.Infow("delete user not found", logx.Field("err", err),
-				logx.Field("user_id", in.UserId))
+
 			return &users.DeleteUserResponse{
 
 				StatusCode: code.UserAddressNotFound,
@@ -57,7 +56,7 @@ func (l *DeleteUserLogic) DeleteUser(in *users.DeleteUserRequest) (*users.Delete
 	}
 	err = l.svcCtx.UsersModel.UpdateDeletebyId(l.ctx, int64(in.UserId), true)
 	if err != nil {
-		l.Logger.Infow("delete update deletebyid failed", logx.Field("err", err),
+		l.Logger.Infow("delete update delete by id failed", logx.Field("err", err),
 			logx.Field("user_id", in.UserId))
 
 		return &users.DeleteUserResponse{}, err

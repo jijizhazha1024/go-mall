@@ -36,8 +36,7 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 	update_user, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Infow("update user not found", logx.Field("err", err),
-				logx.Field("user_id", in.UserId))
+
 			return &users.UpdateUserResponse{
 				StatusCode: code.UserNotFound,
 				StatusMsg:  code.UserNotFoundMsg,
@@ -45,7 +44,7 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 
 		}
 		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_id", in.UserId))
-		return &users.UpdateUserResponse{}, nil
+		return nil, nil
 
 	}
 
@@ -81,7 +80,7 @@ func (l *UpdateUserLogic) UpdateUser(in *users.UpdateUserRequest) (*users.Update
 
 		}
 
-		return &users.UpdateUserResponse{}, err
+		return nil, err
 
 	}
 

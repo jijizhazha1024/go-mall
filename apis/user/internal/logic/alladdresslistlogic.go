@@ -56,6 +56,8 @@ func (l *AllAddressListLogic) AllAddressList(req *types.AllAddressListRequest) (
 			City:            address.City,
 			DetailedAddress: address.DetailedAddress,
 			IsDefault:       address.IsDefault,
+			CreatedAt:       address.CreatedAt,
+			UpdatedAt:       address.UpdatedAt,
 		})
 	}
 
