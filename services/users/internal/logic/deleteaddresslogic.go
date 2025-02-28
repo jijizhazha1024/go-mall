@@ -32,17 +32,18 @@ func NewDeleteAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*users.DeleteAddressResponse, error) {
 	//判断address——id和user——id是否存在
 
-	_, err := l.svcCtx.AddressModel.GetUserAddressExistsByIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
+	address1, err := l.svcCtx.AddressModel.GetUserAddressExistsByIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
 
-			return &users.DeleteAddressResponse{
-				StatusMsg:  code.UserAddressNotFoundMsg,
-				StatusCode: code.UserAddressNotFound,
-			}, nil
-		}
-		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
+		l.Logger.Errorw("find address by id and user id failed", logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
 		return nil, err
+	}
+	if !address1 {
+		return &users.DeleteAddressResponse{
+			StatusMsg:  code.UserAddressNotFoundMsg,
+			StatusCode: code.UserAddressNotFound,
+		}, nil
+
 	}
 
 	err = l.svcCtx.AddressModel.DeleteByAddressIdandUserId(l.ctx, in.AddressId, int32(in.UserId))
@@ -56,11 +57,10 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 			}, nil
 		}
 		l.Logger.Errorw("delete address failed", logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
-		return &users.DeleteAddressResponse{}, err
+		return nil, err
 	}
 	//添加审计服务
-	_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &audit.CreateAuditLogReq{
-
+	auditreq := audit.CreateAuditLogReq{
 		UserId:            uint32(in.UserId),
 		ActionType:        biz.Delete,
 		TargetTable:       "user_address",
@@ -68,10 +68,11 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 		ClientIp:          in.Ip,
 		TargetId:          int64(in.AddressId),
 		ServiceName:       "users",
-	})
+	}
+	_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &auditreq)
 	if err != nil {
 		l.Logger.Infow("add address audit failed", logx.Field("err", err),
-			logx.Field("user_id", in.UserId))
+			logx.Field("body", auditreq))
 
 	}
 
