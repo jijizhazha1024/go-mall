@@ -5,7 +5,8 @@ Mode: dev
 # 服务发现
 Consul:
   Host: 124.71.72.124:8500 # consul endpoint
-  Key: users.rpc
+  Key: 
+    users.rpc
   Meta:
     Protocol: grpc
 
@@ -15,6 +16,10 @@ Telemetry:
   Endpoint: http://124.71.72.124:14268/api/traces
   Batcher: jaeger
   Sampler: 1.0
+
+AuditRpc:
+  Target: consul://124.71.72.124:8500/audit.rpc?wait=14s
+  NonBlock: true 
 
 Log:
   ServiceName: "users-rpc"
@@ -30,4 +35,17 @@ MysqlConfig:
 Cache:
   - Host: 124.71.72.124:6379 #缓存地址
     Pass: jjzzchtt
-    Type: node      
+    Type: node  
+
+Prometheus:
+  Host: 0.0.0.0   # 监控暴露的 IP
+  Port: 9100       # 监控暴露的端口
+  Path: /metrics   # 默认路径（可自定义）
+
+RedisConf:
+  Host: 124.71.72.124:6379
+  Pass: jjzzchtt
+  Tls: false
+GorseConfig:
+  GorseAddr: http://47.99.130.92:8088
+  GorseApikey: 5105502fc46a411c896aa5b50c31e951

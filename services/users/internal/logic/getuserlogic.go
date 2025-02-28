@@ -33,15 +33,13 @@ func (l *GetUserLogic) GetUser(in *users.GetUserRequest) (*users.GetUserResponse
 	user, err := l.svcCtx.UsersModel.FindOne(l.ctx, int64(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			logx.Infow("get user failed, user not found", logx.Field("err", err),
-				logx.Field("user id", in.UserId))
 
 			return &users.GetUserResponse{
 				StatusCode: code.UserNotFound,
 				StatusMsg:  code.UserNotFoundMsg,
 			}, nil
 		}
-		logx.Errorw(code.ServerErrorMsg, logx.Field("err", err), logx.Field("user_id", in.UserId))
+		logx.Errorw("find user failed", logx.Field("err", err), logx.Field("user_id", in.UserId))
 		return &users.GetUserResponse{}, err
 
 	}

@@ -16,6 +16,7 @@ message RegisterRequest {
   string email = 1;
   string password = 2;
   string confirm_password = 3;
+  string ip=4;
 }
 
 // 定义注册响应消息
@@ -32,6 +33,7 @@ message RegisterResponse {
 message LoginRequest {
   string email = 1;
   string password = 2;
+  string ip=3;
 }
 
 // 定义登录响应消息
@@ -65,6 +67,7 @@ message LogoutResponse {
 // 定义删除用户请求消息
 message DeleteUserRequest {
  uint32 user_id = 1;
+ string ip=2;
 }
 
 // 定义删除用户响应消息
@@ -80,9 +83,9 @@ message DeleteUserResponse {
 // 定义更新用户请求消息
 message UpdateUserRequest {
 uint32 user_id = 1;
-
-
-  string usr_name = 2; // 可选，如果需要更新
+ string usr_name = 2; // 可选，如果需要更新
+ string ip=3;
+ string avatar_url = 4;
 }
 
 // 定义更新用户响应消息
@@ -91,6 +94,7 @@ message UpdateUserResponse {
   string status_msg = 2; // 返回状态描述
   uint32 user_id = 3;
     string user_name = 4;
+    string avatar_url = 5;
 }
 
 
@@ -124,6 +128,7 @@ message AddAddressRequest {
   string detailed_address = 5;
   bool is_default = 6;
   uint32 user_id = 7;
+  string ip=8;
 }
  
 // 添加新地址的响应消息
@@ -138,6 +143,7 @@ message AddAddressResponse {
 message DeleteAddressRequest {
   uint32 user_id = 1;
   int32 address_id = 2;
+  string ip=3;
   
 }
  
@@ -145,6 +151,7 @@ message DeleteAddressRequest {
 message DeleteAddressResponse {
   int32 status_code = 1;
   string status_msg = 2;
+  string ip=3;
 }
  
 // 请求修改地址的消息
@@ -157,6 +164,7 @@ message UpdateAddressRequest {
   bool is_default = 6;
   int32 address_id = 7;
   uint32 user_id = 8;
+  string ip=9;
 }
  
 // 修改地址的响应消息

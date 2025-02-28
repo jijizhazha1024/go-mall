@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-
+	_ "github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 	"jijizhazha1024/go-mall/apis/product/internal/config"
 	"jijizhazha1024/go-mall/apis/product/internal/handler"
 	"jijizhazha1024/go-mall/apis/product/internal/svc"

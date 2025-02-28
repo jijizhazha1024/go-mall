@@ -4,11 +4,13 @@ go 1.21
 
 require (
 	github.com/avast/retry-go v2.7.0+incompatible
+	github.com/bytedance/gopkg v0.1.1
 	github.com/dtm-labs/client v1.17.3
 	github.com/dtm-labs/driver-gozero v0.0.7
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/google/uuid v1.6.0
+	github.com/olivere/elastic/v7 v7.0.32
 	github.com/qiniu/go-sdk/v7 v7.25.2
 	github.com/shopspring/decimal v1.4.0
 	github.com/streadway/amqp v1.1.0
@@ -16,10 +18,13 @@ require (
 	github.com/zeromicro/go-zero v1.7.6
 	github.com/zeromicro/x v0.0.0-20240408115609-8224c482b07e
 	github.com/zeromicro/zero-contrib/zrpc/registry/consul v0.0.0-20231030135404-af9ae855016f
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.45.0
 	golang.org/x/crypto v0.32.0
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.36.1
 )
+
+require github.com/felixge/httpsnoop v1.0.3 // indirect
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
@@ -67,6 +72,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/serf v0.10.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/jmoiron/sqlx v1.4.0
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/jpillora/backoff v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect

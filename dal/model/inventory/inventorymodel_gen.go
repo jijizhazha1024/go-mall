@@ -20,6 +20,8 @@ var (
 	inventoryRowsWithPlaceHolder = strings.Join(stringx.Remove(inventoryFieldNames, "`product_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
 )
 
+
+
 type (
 	inventoryModel interface {
 		Insert(ctx context.Context, data *Inventory) (sql.Result, error)
@@ -31,6 +33,8 @@ type (
 	defaultInventoryModel struct {
 		conn  sqlx.SqlConn
 		table string
+		lockdecreasetable string
+		lockreturntable string
 	}
 
 	Inventory struct {
@@ -44,6 +48,8 @@ func newInventoryModel(conn sqlx.SqlConn) *defaultInventoryModel {
 	return &defaultInventoryModel{
 		conn:  conn,
 		table: "`inventory`",
+		lockdecreasetable:      "`inventory_lock`",  
+		lockreturntable:       "`return_lock`",  
 	}
 }
 
@@ -54,6 +60,7 @@ func (m *defaultInventoryModel) Delete(ctx context.Context, productId int64) err
 }
 
 func (m *defaultInventoryModel) FindOne(ctx context.Context, productId int64) (*Inventory, error) {
+	
 	query := fmt.Sprintf("select %s from %s where `product_id` = ? limit 1", inventoryRows, m.table)
 	var resp Inventory
 	err := m.conn.QueryRowCtx(ctx, &resp, query, productId)

@@ -42,18 +42,22 @@ Telemetry:
   Sampler: 0.1  # 采样率，1.0表示全部采集, 0.1表示10%
 
 # Elasticsearch 配置
-ElasticsearchConfig:
-  addresses:
-    - ${ES_ADDRESSES}
-  max_idle_conns_per_host: 10
-  response_header_timeout: 30s
+ElasticSearch:
+  Addr: ${ELASTICSEARCH_HOST}
 #七牛云
 QiNiu:
   accessKey: ${QINIU_ACCESSKEY}
   secretKey: ${QINIU_SECRETKEY}
   bucket: ${QINIU_BUCKET}
   domain: ${QINIU_DOMAIN}
+
+# Redis
 RedisConf:
   Host: ${REDIS_HOST}
   Pass: ${REDIS_PASSWORD}
   Tls: false
+
+# Gorse
+GorseConfig:
+  GorseAddr: ${GORSE_HOST}
+  GorseApikey: ${GORSE_APIKEY}

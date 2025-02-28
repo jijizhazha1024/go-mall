@@ -6,7 +6,9 @@ const (
 	InventoryRpcPort = 10011
 )
 const (
-	InventoryKeyPrefix = "inventory:%d"
+	InventoryKeyPrefix        = "inventory:%d"
+	InventoryDeductLockPrefix = "inventory:deduct:lock"
+	InventoryProductKey       = "inventory:product"
 )
 
 var (

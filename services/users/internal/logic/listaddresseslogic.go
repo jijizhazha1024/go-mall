@@ -32,18 +32,20 @@ func (l *ListAddressesLogic) ListAddresses(in *users.AllAddressLitstRequest) (*u
 	alladdress, err := l.svcCtx.AddressModel.FindAllByUserId(l.ctx, int32(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			l.Logger.Infow("address list user address not found", logx.Field("user_id", in.UserId))
+
 			return &users.AddressListResponse{
 				StatusMsg:  code.UserAddressNotFoundMsg,
 				StatusCode: code.UserAddressNotFound,
 			}, nil
 		}
-		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("user_id", in.UserId), logx.Field("err", err))
+		l.Logger.Errorw("find all address by user id error", logx.Field("user_id", in.UserId), logx.Field("err", err))
 		return &users.AddressListResponse{}, err
 	}
-	addresslist := make([]*users.AddressData, 0)
-	for _, address := range alladdress {
-		addresslist = append(addresslist, &users.AddressData{
+	addresslist := make([]*users.AddressData, len(alladdress))
+
+	// 按索引赋值
+	for i, address := range alladdress {
+		addresslist[i] = &users.AddressData{
 			AddressId:       int32(address.AddressId),
 			DetailedAddress: address.DetailedAddress,
 			City:            address.City,
@@ -53,7 +55,7 @@ func (l *ListAddressesLogic) ListAddresses(in *users.AllAddressLitstRequest) (*u
 			PhoneNumber:     address.PhoneNumber.String,
 			CreatedAt:       address.CreatedAt.Format("2006-01-02 15:04:05"),
 			UpdatedAt:       address.UpdatedAt.Format("2006-01-02 15:04:05"),
-		})
+		}
 	}
 
 	return &users.AddressListResponse{
