@@ -1,30 +1,31 @@
+# users-api 部署
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auths-service
+  name: users-api-service  # 保持命名规范
   namespace: go-mall
   labels:
     app: go-mall
-    service: auths
+    service: users-api  # 明确区分服务类型
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: go-mall
-      service: auths
+      service: users-api  # 匹配API标签
   template:
     metadata:
       labels:
         app: go-mall
-        service: auths
+        service: users-api
     spec:
       containers:
-        - name: auths-service
+        - name: users-api
           image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
-          command: ["/app/services/Auths", "-f", "/app/etc/auths.prod.yaml"]
+          command: ["/app/apis/User", "-f", "/app/etc/user-api.prod.yaml"]  # API二进制路径
           ports:
-            - containerPort: 10000  # 主服务端口
-            - containerPort: 11000  # 健康检查端口
+            - containerPort: 8001  # API主端口（与docker-compose对齐）
+            - containerPort: 8101  # 健康检查端口
           envFrom:
             - configMapRef:
                 name: go-mall-env
@@ -38,40 +39,38 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: 11000
+              port: 8101  # 使用API健康检查端口
             initialDelaySeconds: 30
             periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /health
-              port: 11000
+              port: 8101
             initialDelaySeconds: 5
-            periodSeconds: 10
           imagePullPolicy: IfNotPresent
       volumes:
         - name: app-logs
           hostPath:
             path: /app/logs
-            type: DirectoryOrCreate
 
 ---
-# service.yaml
+# users-api 的 Service
 apiVersion: v1
 kind: Service
 metadata:
-  name: auths-service
+  name: users-api-service
   namespace: go-mall
 spec:
   selector:
     app: go-mall
-    service: auths
+    service: users-api  # 匹配API标签
   ports:
     - name: http
-      port: 10000
-      targetPort: 10000
+      port: 8001
+      targetPort: 8001
+      nodePort: 31801  # 按30000-32767范围分配
     - name: metrics
-      port: 11000
-      targetPort: 11000
-  type: ClusterIP  # 修改点：从NodePort改为ClusterIP
+      port: 8101
+      targetPort: 8101
+      nodePort: 31811  # 保持+10递增规则
+  type: NodePort

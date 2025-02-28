@@ -1,33 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auths-service
+  name: products-service
   namespace: go-mall
   labels:
     app: go-mall
-    service: auths
+    service: products
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: go-mall
-      service: auths
+      service: products
   template:
     metadata:
       labels:
         app: go-mall
-        service: auths
+        service: products
     spec:
       containers:
-        - name: auths-service
+        - name: products-service
           image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
-          command: ["/app/services/Auths", "-f", "/app/etc/auths.prod.yaml"]
+          command: ["/app/services/Product", "-f", "/app/etc/products.prod.yaml"]
           ports:
-            - containerPort: 10000  # 主服务端口
-            - containerPort: 11000  # 健康检查端口
+            - containerPort: 10002  # 主服务端口
+            - containerPort: 11002  # 健康检查端口
           envFrom:
             - configMapRef:
                 name: go-mall-env
+          env:
+            - name: HEALTHCHECK_PORT
+              value: "11002"
           resources:
             limits:
               cpu: "0.5"
@@ -38,7 +41,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: 11000
+              port: 11002
             initialDelaySeconds: 30
             periodSeconds: 30
             timeoutSeconds: 10
@@ -46,7 +49,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /health
-              port: 11000
+              port: 11002
             initialDelaySeconds: 5
             periodSeconds: 10
           imagePullPolicy: IfNotPresent
@@ -57,21 +60,20 @@ spec:
             type: DirectoryOrCreate
 
 ---
-# service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: auths-service
+  name: products-service
   namespace: go-mall
 spec:
   selector:
     app: go-mall
-    service: auths
+    service: products
   ports:
     - name: http
-      port: 10000
-      targetPort: 10000
+      port: 10002
+      targetPort: 10002
     - name: metrics
-      port: 11000
-      targetPort: 11000
-  type: ClusterIP  # 修改点：从NodePort改为ClusterIP
+      port: 11002
+      targetPort: 11002
+  type: ClusterIP

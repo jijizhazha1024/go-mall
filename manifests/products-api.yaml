@@ -1,33 +1,37 @@
+# product-api-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auths-service
+  name: product-api
   namespace: go-mall
   labels:
     app: go-mall
-    service: auths
+    service: product-api
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: go-mall
-      service: auths
+      service: product-api
   template:
     metadata:
       labels:
         app: go-mall
-        service: auths
+        service: product-api
     spec:
       containers:
-        - name: auths-service
+        - name: product-api
           image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
-          command: ["/app/services/Auths", "-f", "/app/etc/auths.prod.yaml"]
+          command: ["/app/apis/Product", "-f", "/app/etc/product-api.prod.yaml"]
           ports:
-            - containerPort: 10000  # 主服务端口
-            - containerPort: 11000  # 健康检查端口
+            - containerPort: 8002  # API服务端口
+            - containerPort: 8102  # 监控端口
           envFrom:
             - configMapRef:
                 name: go-mall-env
+          env:
+            - name: HEALTHCHECK_PORT
+              value: "8102"
           resources:
             limits:
               cpu: "0.5"
@@ -38,15 +42,13 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: 11000
+              port: 8102
             initialDelaySeconds: 30
             periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /health
-              port: 11000
+              port: 8102
             initialDelaySeconds: 5
             periodSeconds: 10
           imagePullPolicy: IfNotPresent
@@ -57,21 +59,21 @@ spec:
             type: DirectoryOrCreate
 
 ---
-# service.yaml
+# product-api-service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: auths-service
+  name: product-api
   namespace: go-mall
 spec:
   selector:
     app: go-mall
-    service: auths
+    service: product-api
   ports:
-    - name: http
-      port: 10000
-      targetPort: 10000
+    - name: api
+      port: 8002
+      targetPort: 8002
     - name: metrics
-      port: 11000
-      targetPort: 11000
-  type: ClusterIP  # 修改点：从NodePort改为ClusterIP
+      port: 8102
+      targetPort: 8102
+  type: ClusterIP
