@@ -12,12 +12,7 @@ ProductRpc:
   Target: consul://${CONSUL_HOST}/products.rpc?wait=14s
   NonBlock: true 
 
-Consul:
-  Host: ${CONSUL_HOST}
-  Key: 
-    products.rpc
-    auths.rpc
-    # 日志配置
+
 Log:
   ServiceName: "product-api"
   Mode: 'file'

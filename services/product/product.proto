@@ -17,6 +17,37 @@ service ProductCatalogService {
   rpc GetAllProduct(GetAllProductsReq) returns (GetAllProductsResp){}
   // 判断商品是否存在
   rpc IsExistProduct(IsExistProductReq) returns(IsExistProductResp){}
+  // 根据条件查询商品
+  rpc QueryProduct(QueryProductReq) returns(GetAllProductsResp){}
+
+  rpc RecommendProduct(RecommendProductReq) returns(GetAllProductsResp){}
+}
+message RecommendProductReq{
+  int32 userId = 1;
+  Paginator paginator = 2;
+  repeated string category = 3;
+  message Paginator{
+    int64 page = 1;
+    int64 pageSize = 2;
+  }
+}
+
+message QueryProductReq{
+  string name = 1;
+  bool new = 2;
+  bool hot = 3;
+  string keyword = 4;
+  repeated string category = 5;
+  message Price{
+    int64 min = 1; // 最低价格
+    int64 max = 2; // 最高价格
+  }
+  Price price = 6;
+  message Paginator{
+    int64 page = 1;
+    int64 pageSize = 2;
+  }
+  Paginator paginator = 7;
 }
 
 
@@ -30,6 +61,8 @@ message Product {
   int64 stock = 6;
   int64 sold = 7;
   repeated string categories = 8;
+  string crated_at = 9;
+  string updated_at = 10;
 }
 message IsExistProductReq{
   int64 id = 1 ; //商品id
@@ -55,6 +88,7 @@ message GetAllProductsResp {
 
 message GetProductReq {
   uint32 id = 1;
+  int32 user_id = 2;
 }
 
 message GetProductResp {
@@ -66,7 +100,7 @@ message GetProductResp {
 message  CreateProductReq{
   string name = 1;
   string description = 2;
-  string picture = 3;
+  bytes picture = 3;
   int64 price = 4;
   int64 stock = 5;
   repeated string categories = 6;
@@ -75,16 +109,22 @@ message CreateProductResp{
   uint32 status_code = 1; // 状态码
   string status_msg = 2; // 状态描述
 
-  int64 i = 3;// 商品id
+  int64 product_id = 3;// 商品id
 }
 message UpdateProductReq{
-  Product product = 1;
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  bytes picture = 4;
+  int64 price = 5; // 使用分作为单位，方便计算，避免精度丢失
+  int64 stock = 6;
+  repeated string categories = 8;
 }
 message UpdateProductResp{
   uint32 status_code = 1; // 状态码
   string status_msg = 2; // 状态描述
 
-  int64 i = 3;// 商品id
+  int64 id = 3;// 商品id
 }
 message DeleteProductReq{
   int64 id = 1;

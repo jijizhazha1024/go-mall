@@ -4,11 +4,13 @@ go 1.21
 
 require (
 	github.com/avast/retry-go v2.7.0+incompatible
+	github.com/bytedance/gopkg v0.1.1
 	github.com/dtm-labs/client v1.17.3
 	github.com/dtm-labs/driver-gozero v0.0.7
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/google/uuid v1.6.0
+	github.com/olivere/elastic/v7 v7.0.32
 	github.com/qiniu/go-sdk/v7 v7.25.2
 	github.com/shopspring/decimal v1.4.0
 	github.com/streadway/amqp v1.1.0

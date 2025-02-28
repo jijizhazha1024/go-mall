@@ -9,10 +9,13 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
+	gorse "jijizhazha1024/go-mall/common/utils/gorse"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
 	"jijizhazha1024/go-mall/services/product/internal/svc"
 	"jijizhazha1024/go-mall/services/product/product"
+	"strconv"
+	"time"
 )
 
 type GetProductLogic struct {
@@ -29,7 +32,7 @@ func NewGetProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetPro
 	}
 }
 
-// 根据商品id得到商品详细信息
+// GetProduct 根据商品id得到商品详细信息
 func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetProductResp, error) {
 
 	// 在redis中维护商品的访问频率次数 PV
@@ -95,6 +98,8 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 			Description: productData.Description.String,
 			Picture:     productData.Picture.String,
 			Price:       productData.Price,
+			CratedAt:    productData.CreatedAt.Format(time.DateTime),
+			UpdatedAt:   productData.CreatedAt.Format(time.DateTime),
 		},
 	}
 
@@ -128,6 +133,23 @@ func (l *GetProductLogic) GetProduct(in *product.GetProductReq) (*product.GetPro
 
 	// 查询实时库存
 	resp.Product.Stock, resp.Product.Sold = l.getRealTimeStockAndSold(productData.Id)
+	if in.UserId != 0 {
+		go func() {
+			// 插入反馈
+			if _, err := l.svcCtx.GorseClient.InsertFeedback(l.ctx, []gorse.Feedback{
+				{
+					ItemId:       strconv.Itoa(int(productData.Id)),
+					UserId:       strconv.Itoa(int(in.UserId)),
+					Timestamp:    time.Now().Format(time.DateTime),
+					FeedbackType: biz.ReadFeedBackType,
+				},
+			}); err != nil {
+				l.Logger.Infow("Failed to insert feedback", logx.Field("err", err), logx.Field("product_id", productData.Id))
+				return
+			}
+		}()
+	}
+
 	return resp, nil
 }
 
