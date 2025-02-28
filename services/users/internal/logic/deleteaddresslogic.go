@@ -60,7 +60,7 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 		return nil, err
 	}
 	//添加审计服务
-	auditreq := audit.CreateAuditLogReq{
+	auditreq := &audit.CreateAuditLogReq{
 		UserId:            uint32(in.UserId),
 		ActionType:        biz.Delete,
 		TargetTable:       "user_address",
@@ -69,7 +69,7 @@ func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*use
 		TargetId:          int64(in.AddressId),
 		ServiceName:       "users",
 	}
-	_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, &auditreq)
+	_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, auditreq)
 	if err != nil {
 		l.Logger.Infow("add address audit failed", logx.Field("err", err),
 			logx.Field("body", auditreq))
