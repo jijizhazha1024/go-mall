@@ -41,13 +41,13 @@ spec:
               name: app-logs
           livenessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: 8102
             initialDelaySeconds: 30
             periodSeconds: 30
           readinessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: 8102
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -73,7 +73,9 @@ spec:
     - name: api
       port: 8002
       targetPort: 8002
+      nodePort: 31802
     - name: metrics
       port: 8102
       targetPort: 8102
-  type: ClusterIP
+      nodePort: 31812
+  type: NodePort

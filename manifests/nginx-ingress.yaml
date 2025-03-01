@@ -3,9 +3,6 @@ kind: Ingress
 metadata:
   name: go-mall-route
   namespace: go-mall
-  annotations:
-    nginx.ingress.kubernetes.io/configuration-snippet: "underscores_in_headers on"
-
 spec:
   rules:
     - host: nginx.kubernetes-devops.cn

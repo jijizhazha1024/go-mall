@@ -40,11 +40,11 @@ spec:
               value: "1000r/s"
           resources:
             requests:
-              cpu: "0.8"
-              memory: 768Mi
+              cpu: 500m
+              memory: 250Mi
             limits:
-              cpu: "1.5"
-              memory: 1.5Gi
+              cpu: 1000m
+              memory: 1024Mi
           volumeMounts:
             - mountPath: /app/logs
               name: api-logs
