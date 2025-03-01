@@ -118,10 +118,6 @@ func TestQueryProduct(t *testing.T) {
 }
 
 func TestLoadProduct2EsAndGorse(t *testing.T) {
-	os.Setenv("ELASTICSEARCH_HOST", "http://113.45.32.164:9200/")
-	os.Setenv("MYSQL_DATA_SOURCE", "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local")
-	os.Setenv("GORSE_HOST", "http://47.99.130.92:8088")
-	os.Setenv("GORSE_APIKEY", "5105502fc46a411c896aa5b50c31e951")
 	esAddress := os.Getenv("ELASTICSEARCH_HOST")
 	mysqlAddress := os.Getenv("MYSQL_DATA_SOURCE")
 	gorseAddr := os.Getenv("GORSE_HOST")
@@ -144,6 +140,10 @@ func TestLoadProduct2EsAndGorse(t *testing.T) {
 	items := make([]gorse.Item, len(products))
 	for i, p := range products {
 		category, err := categoryModel.FindCategoryNameByProductID(ctx, p.Id)
+		if err != nil {
+			t.Fatal("query category failed", logx.Field("err", err))
+			return
+		}
 		// 创建文档（自动JSON序列化）
 		if _, err = client.Index().
 			Index(biz.ProductEsIndexName).
