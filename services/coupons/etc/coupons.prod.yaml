@@ -1,0 +1,48 @@
+Name: coupons.rpc
+ListenOn: 0.0.0.0:10009
+Mode: pro
+
+# 服务发现
+Consul:
+  Host: ${CONSUL_HOST}
+  Key: coupons.rpc
+  Meta:
+    Protocol: grpc
+  Tag:
+    - "grpc"
+
+Telemetry:
+  Name: coupons.rpc # 与服务名称保持一致
+  Endpoint: ${TRACES_ENDPOINT}
+  Batcher: jaeger
+  Sampler: 0.1 # 采样率，1.0表示全部采集, 0.1表示10%
+
+Log:
+  ServiceName: "coupons-rpc"
+  Mode: 'file'
+  Encoding: "json"
+  Path: "./logs/coupons-rpc"
+  KeepDays: 30    # 保留30天日志
+  Compress: true  # 启用日志压缩
+  Rotation: size  # 按大小切割日志
+  MaxSize: 100    # 每个日志文件最大100MB
+
+MysqlConfig:
+  datasource: ${MYSQL_DATA_SOURCE}
+
+RedisConf:
+  Host: ${REDIS_HOST}
+  Pass: ${REDIS_PASSWORD}
+  Tls: false
+
+
+ProductRpc:
+  Target: consul://${CONSUL_HOST}/products.rpc?wait=14s
+  NonBlock: true
+
+# 指标监控配置
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port: 11009
+  EnablePprof: false

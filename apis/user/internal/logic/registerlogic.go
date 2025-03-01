@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"regexp"
 
 	"github.com/zeromicro/x/errors"
 
@@ -36,26 +37,35 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 		return nil, errors.New(code.LoginMessageEmpty, code.LoginMessageEmptyMsg)
 	}
 
+	// 使用RFC 5322简化版正则
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(req.Email) {
+		l.Logger.Infow("邮箱格式不合法")
+		return nil, errors.New(code.EmailFormatError, code.EmailFormatErrorMsg)
+	}
+
 	if req.Password != req.ConfirmPassword {
 		l.Logger.Infow("密码不一致")
 		return nil, errors.New(code.PasswordNotMatch, code.PasswordNotMatchMsg)
 
 	}
 
+	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
+
 	response, err := l.svcCtx.UserRpc.Register(l.ctx, &usersclient.RegisterRequest{
+		Ip:              user_ip,
 		Email:           req.Email,
 		Password:        req.Password,
 		ConfirmPassword: req.ConfirmPassword,
 	})
+
 	if err != nil {
 
-		l.Logger.Errorf("call rpc register failed", logx.Field("err", err))
+		l.Logger.Errorw("call rpc register failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, err.Error())
-	} else {
-		if response.StatusCode != code.UserCreated {
-			l.Logger.Errorf("login failed", logx.Field("status_code", response.StatusCode), logx.Field("status_msg", response.StatusMsg))
-			return nil, errors.New(int(response.StatusCode), response.StatusMsg)
-		}
+	} else if response.StatusMsg != "" {
+
+		return nil, errors.New(int(response.StatusCode), response.StatusMsg)
 
 	}
 
@@ -67,7 +77,7 @@ func (l *RegisterLogic) Register(req *types.RegisterRequest) (resp *types.Regist
 		ClientIp: client_IP,
 	})
 	if err != nil {
-		l.Logger.Errorf("call rpc generate token failed", logx.Field("err", err))
+		l.Logger.Errorw("call rpc generate token failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
 
 	}

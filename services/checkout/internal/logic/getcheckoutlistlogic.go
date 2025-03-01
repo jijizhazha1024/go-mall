@@ -23,6 +23,7 @@ func NewGetCheckoutListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *G
 	}
 }
 
+// GetCheckoutList 获取结算列表
 func (l *GetCheckoutListLogic) GetCheckoutList(in *checkout.CheckoutListReq) (*checkout.CheckoutListResp, error) {
 	// todo: add your logic here and delete this line
 

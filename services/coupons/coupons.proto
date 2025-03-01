@@ -17,17 +17,7 @@ enum CouponStatus {
   COUPON_STATUS_REVOKED = 5; // 管理员手动作废，强制失效（如活动终止）
 }
 
-enum CouponUsageStatus{
-  // 未使用
-  COUPON_USAGE_STATUS_UNUSED = 0 ;
-  // 占用  下单成功时标记
-  COUPON_USAGE_STATUS_LOCKED = 1;
-  // 已使用 优惠券被使用，订单完成时标记
-  COUPON_USAGE_STATUS_USED = 2;
-  // 已过期 当属于未使用状态才可改变过期
-  COUPON_USAGE_STATUS_EXPIRED = 3;
 
-}
 
 // 优惠券信息
 message Coupon {
@@ -199,9 +189,9 @@ message CalculateCouponResp {
   uint32 status_code = 1;
   string status_msg = 2;
   // 金额相关
-  string origin_amount = 3;     // 原始订单金额（单位：分）
-  string final_amount = 4;      // 最终应付金额（分）
-  string discount_amount = 5;   // 总抵扣金额（分）
+  int64 origin_amount = 3;     // 原始订单金额（单位：分）
+  int64 final_amount = 4;      // 最终应付金额（分）
+  int64 discount_amount = 5;   // 总抵扣金额（分）
   // 优惠券信息
   string coupon_type = 6;      // 优惠券类型（如 DISCOUNT/满减券）
   bool is_usable = 7;  // 是否可用

@@ -29,19 +29,20 @@ func NewDeleteAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 
 func (l *DeleteAddressLogic) DeleteAddress(req *types.DeleteAddressRequest) (resp *types.DeleteAddressResponse, err error) {
 	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
+	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
 	DeleteAddResp, err := l.svcCtx.UserRpc.DeleteAddress(l.ctx, &users.DeleteAddressRequest{
+		Ip:        user_ip,
 		UserId:    user_id,
 		AddressId: req.AddressID,
 	})
 
 	if err != nil {
-		l.Logger.Errorf("调用 rpc 删除地址失败", logx.Field("err", err))
+		l.Logger.Errorw("调用 rpc 删除地址失败", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
-	} else {
-		if DeleteAddResp.StatusCode != code.DeleteUserAddressSuccess {
-			l.Logger.Errorf("调用 rpc 删除地址失败", logx.Field("status_code", DeleteAddResp.StatusCode), logx.Field("status_msg", DeleteAddResp.StatusMsg))
-			return nil, errors.New(int(DeleteAddResp.StatusCode), DeleteAddResp.StatusMsg)
-		}
+	} else if DeleteAddResp.StatusMsg != "" {
+
+		return nil, errors.New(int(DeleteAddResp.StatusCode), DeleteAddResp.StatusMsg)
+
 	}
 
 	return

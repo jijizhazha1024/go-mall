@@ -32,13 +32,16 @@ func (l *AddAddressLogic) AddAddress(req *types.AddAddressRequest) (resp *types.
 	//校验
 	if req.City == "" || req.DetailedAddress == "" || req.PhoneNumber == "" || req.Province == "" {
 
-		l.Logger.Errorf("用户信息为空", logx.Field("err", err))
+		l.Logger.Errorw("用户信息为空", logx.Field("err", err))
 		return nil, errors.New(code.Fail, "user informaition empty")
 
 	}
 
+	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
+
 	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
 	addaddressresp, err := l.svcCtx.UserRpc.AddAddress(l.ctx, &users.AddAddressRequest{
+		Ip: user_ip,
 
 		UserId:          user_id,
 		RecipientName:   req.RecipientName,
@@ -52,14 +55,12 @@ func (l *AddAddressLogic) AddAddress(req *types.AddAddressRequest) (resp *types.
 
 	if err != nil {
 
-		l.Logger.Errorf("call rpc add address add failed", logx.Field("err", err))
+		l.Logger.Errorw("call rpc add address add failed", logx.Field("err", err))
 
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
-	} else {
-		if addaddressresp.StatusCode != code.AddUserAddressSuccess {
-			l.Logger.Errorf("call rpc add address add failed", logx.Field("status_code", addaddressresp.StatusCode), logx.Field("status_msg", addaddressresp.StatusMsg))
-			return nil, errors.New(int(addaddressresp.StatusCode), addaddressresp.StatusMsg)
-		}
+	} else if addaddressresp.StatusMsg != "" {
+
+		return nil, errors.New(int(addaddressresp.StatusCode), addaddressresp.StatusMsg)
 
 	}
 
@@ -71,6 +72,8 @@ func (l *AddAddressLogic) AddAddress(req *types.AddAddressRequest) (resp *types.
 		City:            addaddressresp.Data.City,
 		DetailedAddress: addaddressresp.Data.DetailedAddress,
 		IsDefault:       addaddressresp.Data.IsDefault,
+		CreatedAt:       addaddressresp.Data.CreatedAt,
+		UpdatedAt:       addaddressresp.Data.UpdatedAt,
 	}
 
 	resp = &types.AddAddressResponse{

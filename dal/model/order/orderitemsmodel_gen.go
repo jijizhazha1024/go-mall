@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/zeromicro/go-zero/core/stores/builder"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -16,16 +17,16 @@ import (
 var (
 	orderItemsFieldNames          = builder.RawFieldNames(&OrderItems{})
 	orderItemsRows                = strings.Join(orderItemsFieldNames, ",")
-	orderItemsRowsExpectAutoSet   = strings.Join(stringx.Remove(orderItemsFieldNames, "`item_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	orderItemsRowsWithPlaceHolder = strings.Join(stringx.Remove(orderItemsFieldNames, "`item_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	orderItemsRowsExpectAutoSet   = strings.Join(stringx.Remove(orderItemsFieldNames, "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
+	orderItemsRowsWithPlaceHolder = strings.Join(stringx.Remove(orderItemsFieldNames, "`order_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
 )
 
 type (
 	orderItemsModel interface {
 		Insert(ctx context.Context, data *OrderItems) (sql.Result, error)
-		FindOne(ctx context.Context, itemId uint64) (*OrderItems, error)
+		FindOne(ctx context.Context, orderId string) (*OrderItems, error)
 		Update(ctx context.Context, data *OrderItems) error
-		Delete(ctx context.Context, itemId uint64) error
+		Delete(ctx context.Context, orderId string) error
 	}
 
 	defaultOrderItemsModel struct {
@@ -34,13 +35,13 @@ type (
 	}
 
 	OrderItems struct {
-		ItemId      uint64         `db:"item_id"`
-		OrderId     string         `db:"order_id"`     // 关联订单号
-		ProductId   int64          `db:"product_id"`   // 商品ID
-		Quantity    int64          `db:"quantity"`     // 购买数量
-		ProductName string         `db:"product_name"` // 商品名称
-		ProductDesc sql.NullString `db:"product_desc"` // 规格描述
-		UnitPrice   int64          `db:"unit_price"`   // 单价(分)
+		OrderId     string    `db:"order_id"`     // 预订单ID
+		ProductId   uint64    `db:"product_id"`   // 商品ID
+		Quantity    uint64    `db:"quantity"`     // 数量
+		Price       int64     `db:"price"`        // 当时单价（分）
+		ProductName string    `db:"product_name"` // 商品名称
+		ProductDesc string    `db:"product_desc"` // 商品描述
+		CreatedAt   time.Time `db:"created_at"`
 	}
 )
 
@@ -51,16 +52,16 @@ func newOrderItemsModel(conn sqlx.SqlConn) *defaultOrderItemsModel {
 	}
 }
 
-func (m *defaultOrderItemsModel) Delete(ctx context.Context, itemId uint64) error {
-	query := fmt.Sprintf("delete from %s where `item_id` = ?", m.table)
-	_, err := m.conn.ExecCtx(ctx, query, itemId)
+func (m *defaultOrderItemsModel) Delete(ctx context.Context, orderId string) error {
+	query := fmt.Sprintf("delete from %s where `order_id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, orderId)
 	return err
 }
 
-func (m *defaultOrderItemsModel) FindOne(ctx context.Context, itemId uint64) (*OrderItems, error) {
-	query := fmt.Sprintf("select %s from %s where `item_id` = ? limit 1", orderItemsRows, m.table)
+func (m *defaultOrderItemsModel) FindOne(ctx context.Context, orderId string) (*OrderItems, error) {
+	query := fmt.Sprintf("select %s from %s where `order_id` = ? limit 1", orderItemsRows, m.table)
 	var resp OrderItems
-	err := m.conn.QueryRowCtx(ctx, &resp, query, itemId)
+	err := m.conn.QueryRowCtx(ctx, &resp, query, orderId)
 	switch err {
 	case nil:
 		return &resp, nil
@@ -73,13 +74,13 @@ func (m *defaultOrderItemsModel) FindOne(ctx context.Context, itemId uint64) (*O
 
 func (m *defaultOrderItemsModel) Insert(ctx context.Context, data *OrderItems) (sql.Result, error) {
 	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?)", m.table, orderItemsRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.OrderId, data.ProductId, data.Quantity, data.ProductName, data.ProductDesc, data.UnitPrice)
+	ret, err := m.conn.ExecCtx(ctx, query, data.OrderId, data.ProductId, data.Quantity, data.Price, data.ProductName, data.ProductDesc)
 	return ret, err
 }
 
 func (m *defaultOrderItemsModel) Update(ctx context.Context, data *OrderItems) error {
-	query := fmt.Sprintf("update %s set %s where `item_id` = ?", m.table, orderItemsRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, data.OrderId, data.ProductId, data.Quantity, data.ProductName, data.ProductDesc, data.UnitPrice, data.ItemId)
+	query := fmt.Sprintf("update %s set %s where `order_id` = ?", m.table, orderItemsRowsWithPlaceHolder)
+	_, err := m.conn.ExecCtx(ctx, query, data.ProductId, data.Quantity, data.Price, data.ProductName, data.ProductDesc, data.OrderId)
 	return err
 }
 

@@ -1,18 +1,16 @@
 package config
 
 import (
-	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/zrpc"
 	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
+	"jijizhazha1024/go-mall/common/config"
 )
 
 type Config struct {
 	zrpc.RpcServerConf
-	MysqlConfig MysqlConfig
+	MysqlConfig config.MysqlConfig
 	Consul      consul.Conf
-	Cache       cache.CacheConf
-}
-type MysqlConfig struct {
-	DataSource  string
-	Conntimeout int
+	CheckoutRpc zrpc.RpcClientConf
+	CouponRpc   zrpc.RpcClientConf
+	UserRpc     zrpc.RpcClientConf
 }

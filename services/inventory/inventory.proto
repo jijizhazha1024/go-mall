@@ -16,15 +16,17 @@ message InventoryReq {
 message GetInventoryReq {
   int32 product_id = 1;
 }
+message UpdateInventoryReq {
+  message Items {int32 product_id = 1;
+  int32 quantity = 2;}
+  repeated Items items = 2;
 
+}
 message BatchGetInventoryReq {
   repeated int32 product_ids = 1;
 }
 
-message GetPreInventoryReq {
-  int32 user_id = 1;      // 按用户查询
-  string pre_order_id = 2; // 按预订单号查询
-}
+
 
 // --------------- response ---------------
 
@@ -33,9 +35,6 @@ message PreInventoryRecord {
   int32 product_id = 1;
   int32 quantity = 2;
   int64 expire_time = 3; // 过期时间戳
-}
-message GetPreInventoryResp {
-  repeated PreInventoryRecord records = 1;
 }
 
 message InventoryResp {
@@ -51,10 +50,10 @@ message GetInventoryResp{
 service Inventory {
   //  GetInventory 查询库存，缓存不在，再去数据库查
   rpc GetInventory (GetInventoryReq) returns (GetInventoryResp);
-  rpc GetPreInventory (GetPreInventoryReq) returns (GetPreInventoryResp);
+
 
   // UpdateInventory 增加库存，修改库存数量（直接修改）
-  rpc UpdateInventory (InventoryReq) returns (InventoryResp);
+  rpc UpdateInventory (UpdateInventoryReq) returns (InventoryResp);
   //  DecreaseInventory 预扣减库存，此时并非真实扣除库存，而是在缓存进行--操作
   rpc DecreasePreInventory (InventoryReq) returns (InventoryResp);
   //  DecreaseInventory 真实扣减库存（支付成功时）

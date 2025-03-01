@@ -14,22 +14,21 @@ import (
 )
 
 type (
-	BatchGetInventoryReq = inventory.BatchGetInventoryReq
-	GetInventoryReq      = inventory.GetInventoryReq
-	GetInventoryResp     = inventory.GetInventoryResp
-	GetPreInventoryReq   = inventory.GetPreInventoryReq
-	GetPreInventoryResp  = inventory.GetPreInventoryResp
-	InventoryReq         = inventory.InventoryReq
-	InventoryReq_Items   = inventory.InventoryReq_Items
-	InventoryResp        = inventory.InventoryResp
-	PreInventoryRecord   = inventory.PreInventoryRecord
+	BatchGetInventoryReq     = inventory.BatchGetInventoryReq
+	GetInventoryReq          = inventory.GetInventoryReq
+	GetInventoryResp         = inventory.GetInventoryResp
+	InventoryReq             = inventory.InventoryReq
+	InventoryReq_Items       = inventory.InventoryReq_Items
+	InventoryResp            = inventory.InventoryResp
+	PreInventoryRecord       = inventory.PreInventoryRecord
+	UpdateInventoryReq       = inventory.UpdateInventoryReq
+	UpdateInventoryReq_Items = inventory.UpdateInventoryReq_Items
 
 	Inventory interface {
 		// GetInventory 查询库存，缓存不在，再去数据库查
 		GetInventory(ctx context.Context, in *GetInventoryReq, opts ...grpc.CallOption) (*GetInventoryResp, error)
-		GetPreInventory(ctx context.Context, in *GetPreInventoryReq, opts ...grpc.CallOption) (*GetPreInventoryResp, error)
 		// UpdateInventory 增加库存，修改库存数量（直接修改）
-		UpdateInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error)
+		UpdateInventory(ctx context.Context, in *UpdateInventoryReq, opts ...grpc.CallOption) (*InventoryResp, error)
 		// DecreaseInventory 预扣减库存，此时并非真实扣除库存，而是在缓存进行--操作
 		DecreasePreInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error)
 		// DecreaseInventory 真实扣减库存（支付成功时）
@@ -57,13 +56,8 @@ func (m *defaultInventory) GetInventory(ctx context.Context, in *GetInventoryReq
 	return client.GetInventory(ctx, in, opts...)
 }
 
-func (m *defaultInventory) GetPreInventory(ctx context.Context, in *GetPreInventoryReq, opts ...grpc.CallOption) (*GetPreInventoryResp, error) {
-	client := inventory.NewInventoryClient(m.cli.Conn())
-	return client.GetPreInventory(ctx, in, opts...)
-}
-
 // UpdateInventory 增加库存，修改库存数量（直接修改）
-func (m *defaultInventory) UpdateInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error) {
+func (m *defaultInventory) UpdateInventory(ctx context.Context, in *UpdateInventoryReq, opts ...grpc.CallOption) (*InventoryResp, error) {
 	client := inventory.NewInventoryClient(m.cli.Conn())
 	return client.UpdateInventory(ctx, in, opts...)
 }

@@ -13,7 +13,8 @@ Consul:
 
 MysqlConfig:
   datasource: ${MYSQL_DATA_SOURCE}
-
+  conntimeout: 5
+  
 Log:
   ServiceName: "carts-rpc"
   Mode: 'file'
@@ -28,7 +29,7 @@ Log:
 DevServer:
   Enabled: true
   Host: 0.0.0.0
-  Port: 11003 // 服务端口+1000，如果服务端口是10001，则指标端口就是11001
+  Port: 11003  #服务端口+1000，如果服务端口是10001，则指标端口就是11001
   EnablePprof: false
 
 # 链路追踪

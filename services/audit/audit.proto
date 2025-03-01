@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package audit;
+option go_package = "./audit";
+
+
+service Audit {
+  // CreateAuditLog 创建审计日志
+  rpc CreateAuditLog(CreateAuditLogReq) returns (CreateAuditLogRes);
+
+}
+// 创建审计日志请求
+message CreateAuditLogReq {
+  uint32 user_id = 1;            // 执行操作的用户ID
+  string action_type = 2;       // 操作类型（新增、修改、删除等）
+  string action_description = 3;
+  string target_table = 4;       // 目标类型（如：商品、订单等）
+  int64 target_id = 5;          // 目标对象的ID（如商品ID、订单ID等）
+  string old_data = 6;          // 操作前的数据（JSON格式）
+  string new_data = 7;          // 操作后的数据（JSON格式）
+  int64 create_at = 8;
+  string client_ip = 9;
+  string service_name = 10;
+}
+
+// 创建审计日志响应
+message CreateAuditLogRes {
+  uint32 status_code = 1;
+  string status_msg = 2;
+  bool ok = 3;               // 审计日志的ID
+}

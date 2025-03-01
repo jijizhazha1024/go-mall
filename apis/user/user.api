@@ -35,11 +35,13 @@ type (
 	// 更新用户请求
 	UpdateRequest {
 		UserName string `json:"user_name"`
+		Avatar   string `json:"avatar"`
 	}
 	// 更新用户响应
 	UpdateResponse {
 		UserId   int64  `json:"user_id"`
 		UserName string `json:"user_name"`
+		Avatar   string `json:"avatar"`
 	}
 	// 获取用户信息请求
 	GetInfoRequest  {}
@@ -51,6 +53,7 @@ type (
 		UpdateAt  string `json:"update_at"`
 		Email     string `json:"email"`
 		UserName  string `json:"user_name"`
+		Avatar    string `json:"avatar"`
 	}
 	//  通用地址结构
 	AddressResponse {

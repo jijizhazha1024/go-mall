@@ -2,16 +2,23 @@ package logic
 
 import (
 	"context"
-	"crypto/rand"
+	"crypto/md5"
 	"database/sql"
+	"encoding/hex"
 	"errors"
-	"math/big"
+	"fmt"
+	"strconv"
+	"strings"
 
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/common/utils/cryptx"
 	"jijizhazha1024/go-mall/dal/model/user"
+	"jijizhazha1024/go-mall/services/audit/audit"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
+
+	gorse "jijizhazha1024/go-mall/common/utils/gorse"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -29,21 +36,31 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 		Logger: logx.WithContext(ctx),
 	}
 }
+func GetCravatar(email string, size int, defaultImage, rating string, imgTag bool, attrs map[string]string) string {
+	// 构建基本的 Cravatar URL
+	baseURL := "https://cravatar.cn/avatar/"
 
-var avatarList = []string{
-	"http://example.com/avatar1.jpg",
-	"http://example.com/avatar2.jpg",
-	"http://example.com/avatar3.jpg",
-	// 添加更多的头像URL
-}
+	// 清理并对电子邮件地址进行 MD5 哈希处理
+	email = strings.TrimSpace(strings.ToLower(email))
+	hash := md5.New()
+	hash.Write([]byte(email))
+	emailHash := hex.EncodeToString(hash.Sum(nil))
 
-func getRandomAvatar() (string, error) {
-	max := big.NewInt(int64(len(avatarList)))
-	n, err := rand.Int(rand.Reader, max)
-	if err != nil {
-		return "", err
+	// 构建 Cravatar URL
+	cravURL := fmt.Sprintf("%s%s?s=%d&d=%s&r=%s", baseURL, emailHash, size, defaultImage, rating)
+
+	// 如果 imgTag 为 true，则返回完整的 <img> 标签
+	if imgTag {
+		imgTagStr := fmt.Sprintf(`<img src="%s"`, cravURL)
+		for key, value := range attrs {
+			imgTagStr += fmt.Sprintf(` %s="%s"`, key, value)
+		}
+		imgTagStr += " />"
+		return imgTagStr
 	}
-	return avatarList[n.Int64()], nil
+
+	// 否则，仅返回 URL
+	return cravURL
 }
 
 // 注册方法
@@ -60,9 +77,20 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 
-			avatar, err := getRandomAvatar()
+			// 获取头像
+			size := 40
+			defaultImage := "https://www.somewhere.com/homestar.jpg"
+			rating := "g"
+
+			avatar := GetCravatar(in.Email, size, defaultImage, rating, false, nil)
+
+			// 加入布隆过滤器 在插入数据库之前防止数据库注册失败
+			err = l.svcCtx.BF.Add([]byte(in.Email))
 			if err != nil {
-				l.Logger.Infow("register get avatar failed", logx.Field("err", err))
+				l.Logger.Errorw("register bloom filter add failed", logx.Field("err", err),
+					logx.Field("email", in.Email))
+				return &users.RegisterResponse{}, err
+
 			}
 
 			// 用户不存在，直接注册
@@ -89,6 +117,37 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				}, nil
 
 			}
+			//加入用户推荐
+
+			go func() {
+				_, err := l.svcCtx.GorseClient.InsertUser(l.ctx, gorse.User{
+					UserId: strconv.FormatInt(userId, 10),
+				})
+				if err != nil {
+					l.Logger.Infow("register gorse insert user failed", logx.Field("err", err),
+						logx.Field("email", in.Email))
+				}
+			}()
+
+			//审计操作
+			auditreq := &audit.CreateAuditLogReq{
+				UserId:            uint32(userId),
+				ActionType:        biz.Create,
+				TargetTable:       "user",
+				ActionDescription: "用户注册",
+				TargetId:          int64(userId),
+				ServiceName:       "users",
+				ClientIp:          in.Ip,
+			}
+			_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, auditreq)
+			if err != nil {
+				l.Logger.Infow("add address audit failed", logx.Field("err", err),
+					logx.Field("body", auditreq))
+			}
+
+			//埋点操作
+			svc.UserRegCounter.Inc("success")
+			// 注册成功，返回用户ID
 			return &users.RegisterResponse{
 
 				UserId: uint32(userId),
@@ -118,10 +177,26 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 				l.Logger.Errorw("register update password_hash failed", logx.Field("err", updatepasswordErr),
 					logx.Field("email", in.Email))
 
-				return &users.RegisterResponse{}, err
+				return nil, err
 
 			}
+			auditreq := &audit.CreateAuditLogReq{
+				UserId:            uint32(existUser.UserId),
+				ActionType:        biz.Update,
+				TargetTable:       "user",
+				ActionDescription: "用户注册",
+				TargetId:          int64(existUser.UserId),
+				ServiceName:       "users",
+				ClientIp:          in.Ip,
+			}
+			_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, auditreq)
+			if err != nil {
+				l.Logger.Infow("register audit failed", logx.Field("err", err),
+					logx.Field("body", auditreq))
 
+			}
+			//埋点操作
+			svc.UserRegCounter.Inc("success")
 			return &users.RegisterResponse{
 				UserId: uint32(existUser.UserId),
 			}, nil
@@ -138,6 +213,6 @@ func (l *RegisterLogic) Register(in *users.RegisterRequest) (*users.RegisterResp
 
 	}
 
-	return &users.RegisterResponse{}, errors.New("register failed")
+	return nil, errors.New("register failed")
 
 }

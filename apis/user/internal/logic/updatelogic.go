@@ -29,28 +29,27 @@ func NewUpdateLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateLogi
 
 func (l *UpdateLogic) Update(req *types.UpdateRequest) (resp *types.UpdateResponse, err error) {
 
-	if req.UserName == "" {
-		return nil, errors.New(code.Fail, "用户名不能为空")
+	if req.UserName == "" && req.Avatar == "" {
+		return nil, errors.New(code.Fail, "用户名和头像不能都空")
 	}
 
 	user_id := l.ctx.Value(biz.UserIDKey).(uint32)
+	user_ip := l.ctx.Value(biz.ClientIPKey).(string)
 
 	updateresp, err := l.svcCtx.UserRpc.UpdateUser(l.ctx, &users.UpdateUserRequest{
-
-		UserId: user_id,
-
-		UsrName: req.UserName,
+		Ip:        user_ip,
+		UserId:    user_id,
+		UsrName:   req.UserName,
+		AvatarUrl: req.Avatar,
 	})
 
 	if err != nil {
 
-		l.Logger.Errorf("call rpc update failed", logx.Field("err", err))
+		l.Logger.Errorw("call rpc update failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
-	} else {
-		if updateresp.StatusCode != code.UserUpdated {
-			l.Logger.Errorf("update failed", logx.Field("status_code", updateresp.StatusCode), logx.Field("status_msg", updateresp.StatusMsg))
-			return nil, errors.New(int(updateresp.StatusCode), updateresp.StatusMsg)
-		}
+	} else if updateresp.StatusMsg != "" {
+
+		return nil, errors.New(int(updateresp.StatusCode), updateresp.StatusMsg)
 
 	}
 
@@ -58,6 +57,7 @@ func (l *UpdateLogic) Update(req *types.UpdateRequest) (resp *types.UpdateRespon
 
 		UserName: updateresp.UserName,
 		UserId:   int64(updateresp.UserId),
+		Avatar:   updateresp.AvatarUrl,
 	}
 
 	return

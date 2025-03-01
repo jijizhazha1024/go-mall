@@ -1,6 +1,7 @@
 Name: products.rpc
 ListenOn: 0.0.0.0:10002
 Mode: dev
+Timeout: 0
 
 # 服务发现配置
 Consul:
@@ -24,14 +25,15 @@ RedisConf:
   Pass: jjzzchtt # 如果有密码则填写
   Tls: false
 # Elasticsearch 配置
-ElasticsearchConfig:
-  addresses:
-    - 113.45.32.164:9200
-  max_idle_conns_per_host: 10
-  response_header_timeout: 30s
+ElasticSearch:
+  Addr: http://113.45.32.164:9200
 #七牛云
 QiNiu:
-  accessKey: $QINIU_ACCESSKEY
-  secretKey: ${QINIU_SECRETKEY}
-  bucket: ${QINIU_BUCKET}
-  domain: ${QINIU_DOMAIN}
+  accessKey: JfDRw6TYF7B-MXNjIivW1zxcZ6PrSHAHYksBcZOt
+  secretKey: ubXESZ4C3bpTh9P0yKTXmzOPXEbpaBgvzFkecWIu
+  bucket: jjzzchtt-mall
+  domain: ssa12nnvu.hn-bkt.clouddn.com
+
+GorseConfig:
+  GorseAddr: http://47.99.130.92:8088
+  GorseApikey: 5105502fc46a411c896aa5b50c31e951

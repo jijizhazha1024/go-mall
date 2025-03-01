@@ -14,6 +14,6 @@ const (
 	TokenExpire        = time.Hour * 2
 	TokenRenewalExpire = time.Hour * 24 * 7
 
-	TokenKey        = "access_token"
-	RefreshTokenKey = "refresh_token"
+	TokenKey        = "Access-Token"
+	RefreshTokenKey = "Refresh-Token"
 )

@@ -27,12 +27,10 @@ func NewIsExistProductLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Is
 	}
 }
 
-// 判断商品是否存在
+// IsExistProduct 判断商品是否存在
 func (l *IsExistProductLogic) IsExistProduct(in *product.IsExistProductReq) (*product.IsExistProductResp, error) {
-	// todo: add your logic here and delete this line
-	product_id := in.Id
 	productModel := product2.NewProductsModel(l.svcCtx.Mysql)
-	exist, err := productModel.FindProductIsExist(l.ctx, product_id)
+	exist, err := productModel.FindProductIsExist(l.ctx, in.Id)
 	if err != nil {
 		if errors.Is(err, sqlx.ErrNotFound) {
 			// 不存在并不属于错误，所以这里不需要返回错误，由调用端返回信息

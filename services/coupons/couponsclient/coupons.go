@@ -52,7 +52,7 @@ type (
 		LockCoupon(ctx context.Context, in *LockCouponReq, opts ...grpc.CallOption) (*EmptyResp, error)
 		// 释放优惠券（订单取消/超时释放）
 		ReleaseCoupon(ctx context.Context, in *ReleaseCouponReq, opts ...grpc.CallOption) (*EmptyResp, error)
-		// 使用优惠券（支付成功确认）
+		// 使用优惠券（支付成功确认后）
 		UseCoupon(ctx context.Context, in *UseCouponReq, opts ...grpc.CallOption) (*EmptyResp, error)
 	}
 
@@ -115,7 +115,7 @@ func (m *defaultCoupons) ReleaseCoupon(ctx context.Context, in *ReleaseCouponReq
 	return client.ReleaseCoupon(ctx, in, opts...)
 }
 
-// 使用优惠券（支付成功确认）
+// 使用优惠券（支付成功确认后）
 func (m *defaultCoupons) UseCoupon(ctx context.Context, in *UseCouponReq, opts ...grpc.CallOption) (*EmptyResp, error) {
 	client := coupons.NewCouponsClient(m.cli.Conn())
 	return client.UseCoupon(ctx, in, opts...)

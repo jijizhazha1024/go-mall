@@ -13,6 +13,13 @@ type RabbitMQConfig struct {
 	Pass  string
 	VHost string
 }
+type ElasticSearchConfig struct {
+	Addr string
+}
+type GorseConfig struct {
+	GorseAddr   string
+	GorseApikey string
+}
 
 func (r *RabbitMQConfig) Dns() string {
 	return fmt.Sprintf(

@@ -37,13 +37,12 @@ func (l *LogoutLogic) Logout(req *types.LogoutRequest) (resp *types.LogoutRespon
 	})
 	if err != nil {
 
-		l.Logger.Errorf("call rpc logout failed", logx.Field("err", err))
+		l.Logger.Errorw("call rpc logout failed", logx.Field("err", err))
 		return nil, errors.New(code.ServerError, code.ServerErrorMsg)
-	} else {
-		if logoutrep.StatusCode != code.LogoutSuccess {
-			l.Logger.Errorf("logout failed", logx.Field("status_code", logoutrep.StatusCode), logx.Field("status_msg", logoutrep.StatusMsg))
-			return nil, errors.New(int(logoutrep.StatusCode), logoutrep.StatusMsg)
-		}
+	} else if logoutrep.StatusMsg != "" {
+
+		return nil, errors.New(int(logoutrep.StatusCode), logoutrep.StatusMsg)
+
 	}
 
 	resp = &types.LogoutResponse{

@@ -14,29 +14,33 @@ import (
 )
 
 type (
-	CheckoutDetailReq        = checkout.CheckoutDetailReq
-	CheckoutDetailResp       = checkout.CheckoutDetailResp
-	CheckoutItem             = checkout.CheckoutItem
-	CheckoutListReq          = checkout.CheckoutListReq
-	CheckoutListResp         = checkout.CheckoutListResp
-	CheckoutOrder            = checkout.CheckoutOrder
-	CheckoutReq              = checkout.CheckoutReq
-	CheckoutReq_OrderItem    = checkout.CheckoutReq_OrderItem
-	CheckoutResp             = checkout.CheckoutResp
-	ProductSnapshot          = checkout.ProductSnapshot
-	ReleaseReq               = checkout.ReleaseReq
-	ReleaseResp              = checkout.ReleaseResp
-	UpdateCheckoutStatusReq  = checkout.UpdateCheckoutStatusReq
-	UpdateCheckoutStatusResp = checkout.UpdateCheckoutStatusResp
+	CheckoutDetailReq       = checkout.CheckoutDetailReq
+	CheckoutDetailResp      = checkout.CheckoutDetailResp
+	CheckoutItem            = checkout.CheckoutItem
+	CheckoutListReq         = checkout.CheckoutListReq
+	CheckoutListResp        = checkout.CheckoutListResp
+	CheckoutOrder           = checkout.CheckoutOrder
+	CheckoutReq             = checkout.CheckoutReq
+	CheckoutReq_OrderItem   = checkout.CheckoutReq_OrderItem
+	CheckoutResp            = checkout.CheckoutResp
+	EmptyResp               = checkout.EmptyResp
+	ReleaseReq              = checkout.ReleaseReq
+	UpdateCheckoutStatusReq = checkout.UpdateCheckoutStatusReq
+	UpdateStatusReq         = checkout.UpdateStatusReq
 
 	CheckoutService interface {
-		// 预结算（生成预订单）
+		// PrepareCheckout 预结算)生成预订单）
 		PrepareCheckout(ctx context.Context, in *CheckoutReq, opts ...grpc.CallOption) (*CheckoutResp, error)
-		// 由订单服务触发
-		ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*ReleaseResp, error)
-		UpdateCheckoutStatus2Success(ctx context.Context, in *UpdateCheckoutStatusReq, opts ...grpc.CallOption) (*UpdateCheckoutStatusResp, error)
+		// UpdateCheckoutStatus2Success 当订单超时，支付超时，支付退款
+		ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*EmptyResp, error)
+		// GetCheckoutList 获取结算列表
 		GetCheckoutList(ctx context.Context, in *CheckoutListReq, opts ...grpc.CallOption) (*CheckoutListResp, error)
+		// GetCheckoutDetail 获取结算详情
 		GetCheckoutDetail(ctx context.Context, in *CheckoutDetailReq, opts ...grpc.CallOption) (*CheckoutDetailResp, error)
+		// UpdateStatus2Order 由订单服务调用，更新结算状态为已确认
+		UpdateStatus2Order(ctx context.Context, in *UpdateStatusReq, opts ...grpc.CallOption) (*EmptyResp, error)
+		// UpdateStatus2OrderRollback 补偿操作
+		UpdateStatus2OrderRollback(ctx context.Context, in *UpdateStatusReq, opts ...grpc.CallOption) (*EmptyResp, error)
 	}
 
 	defaultCheckoutService struct {
@@ -50,29 +54,38 @@ func NewCheckoutService(cli zrpc.Client) CheckoutService {
 	}
 }
 
-// 预结算（生成预订单）
+// PrepareCheckout 预结算)生成预订单）
 func (m *defaultCheckoutService) PrepareCheckout(ctx context.Context, in *CheckoutReq, opts ...grpc.CallOption) (*CheckoutResp, error) {
 	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
 	return client.PrepareCheckout(ctx, in, opts...)
 }
 
-// 由订单服务触发
-func (m *defaultCheckoutService) ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*ReleaseResp, error) {
+// UpdateCheckoutStatus2Success 当订单超时，支付超时，支付退款
+func (m *defaultCheckoutService) ReleaseCheckout(ctx context.Context, in *ReleaseReq, opts ...grpc.CallOption) (*EmptyResp, error) {
 	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
 	return client.ReleaseCheckout(ctx, in, opts...)
 }
 
-func (m *defaultCheckoutService) UpdateCheckoutStatus2Success(ctx context.Context, in *UpdateCheckoutStatusReq, opts ...grpc.CallOption) (*UpdateCheckoutStatusResp, error) {
-	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
-	return client.UpdateCheckoutStatus2Success(ctx, in, opts...)
-}
-
+// GetCheckoutList 获取结算列表
 func (m *defaultCheckoutService) GetCheckoutList(ctx context.Context, in *CheckoutListReq, opts ...grpc.CallOption) (*CheckoutListResp, error) {
 	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
 	return client.GetCheckoutList(ctx, in, opts...)
 }
 
+// GetCheckoutDetail 获取结算详情
 func (m *defaultCheckoutService) GetCheckoutDetail(ctx context.Context, in *CheckoutDetailReq, opts ...grpc.CallOption) (*CheckoutDetailResp, error) {
 	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
 	return client.GetCheckoutDetail(ctx, in, opts...)
+}
+
+// UpdateStatus2Order 由订单服务调用，更新结算状态为已确认
+func (m *defaultCheckoutService) UpdateStatus2Order(ctx context.Context, in *UpdateStatusReq, opts ...grpc.CallOption) (*EmptyResp, error) {
+	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
+	return client.UpdateStatus2Order(ctx, in, opts...)
+}
+
+// UpdateStatus2OrderRollback 补偿操作
+func (m *defaultCheckoutService) UpdateStatus2OrderRollback(ctx context.Context, in *UpdateStatusReq, opts ...grpc.CallOption) (*EmptyResp, error) {
+	client := checkout.NewCheckoutServiceClient(m.cli.Conn())
+	return client.UpdateStatus2OrderRollback(ctx, in, opts...)
 }
