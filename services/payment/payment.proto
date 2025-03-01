@@ -41,9 +41,8 @@ message PaymentItem {
 
 message PaymentReq {
   uint32 user_id = 1;
-  string pre_order_id = 2;     // 预订单ID
+  string order_id = 2;
   PaymentMethod payment_method = 3; // 支付渠道
-  string idempotency_key = 4;  // 幂等键（唯一索引）
 }
 
 message PaymentListReq {

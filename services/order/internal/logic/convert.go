@@ -38,6 +38,7 @@ func convertToOrderResp(orderModelRes *order2.Orders) *order.Order {
 		PaymentStatus:  order.PaymentStatus(orderModelRes.PaymentStatus),
 		PaymentMethod:  order.PaymentMethod(orderModelRes.PaymentMethod.Int64),
 		OriginalAmount: orderModelRes.OriginalAmount,
+		PayableAmount:  orderModelRes.PayableAmount,
 		PaidAmount:     orderModelRes.PaidAmount.Int64,
 		PaidAt:         orderModelRes.PaidAt.Int64,
 		DiscountAmount: orderModelRes.DiscountAmount,

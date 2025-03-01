@@ -3,7 +3,6 @@ package payment
 import (
 	"context"
 	"fmt"
-	"github.com/smartwalle/alipay/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"jijizhazha1024/go-mall/services/payment/payment"
@@ -23,61 +22,28 @@ func initpayment() {
 func TestCreatePayment(t *testing.T) {
 	initpayment()
 	resp, err := payment_client.CreatePayment(context.Background(), &payment.PaymentReq{
-		UserId:         02131,
-		PreOrderId:     "2312342111110111",
-		PaymentMethod:  payment.PaymentMethod_ALIPAY,
-		IdempotencyKey: "1234567892111110111",
+		UserId:        1,
+		OrderId:       "199112649961",
+		PaymentMethod: payment.PaymentMethod_ALIPAY,
 	})
-	if err != nil {
-		return
-	}
-	fmt.Println(resp)
+
 	if err != nil {
 		t.Fatal(err)
-
 	}
-	fmt.Println(" success", resp)
 	t.Log(" success", resp)
 }
-func TestGetallProduct(t *testing.T) {
-	var appid string = "9021000144642851"
-	var privatekey string
-	var publickey string
+func TestGetAllProduct(t *testing.T) {
 	initpayment()
-	client, err := alipay.New(appid, privatekey, false)
+	listPayments, err := payment_client.ListPayments(context.Background(), &payment.PaymentListReq{
+		Pagination: &payment.PaymentListReq_Pagination{
+			Page:     1,
+			PageSize: 10,
+		},
+		UserId: 1,
+	})
 	if err != nil {
-		fmt.Printf("失败1")
-		return
-	}
-	err = client.LoadAliPayPublicKey(publickey)
-	if err != nil {
-		fmt.Printf("失败2")
-
-		return
-	}
-	// 3. 构造支付订单参数
-	var p alipay.TradePagePay
-	p.NotifyURL = "http://gk8fne.natappfree.cc/notify"
-	p.Subject = "订单支付" // 可根据实际业务动态设置
-	// 将金额从分转换为元，并格式化为字符串（保留两位小数）
-	amountYuan := float64(10000) / 100.0
-	p.TotalAmount = fmt.Sprintf("%.2f", amountYuan)
-	p.ProductCode = "FAST_INSTANT_TRADE_PAY" // 针对移动支付
-	p.OutTradeNo = "123456789011"            // 商户订单号，需保证唯一性
-
-	// 设置支付订单超时时间，转换为分钟单位的字符串，如 "30m"
-	// 4. 调用支付宝生成支付订单，返回签名后的订单字符串
-	orderString, err := client.TradePagePay(p)
-
-	if err != nil {
-		fmt.Printf("失败3")
-
 		t.Fatal(err)
-		return
 	}
-	fmt.Println(1)
-
-	fmt.Println(orderString)
-	fmt.Println(2)
+	t.Log("success", listPayments)
 
 }

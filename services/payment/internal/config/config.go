@@ -22,5 +22,7 @@ type AlipayConfig struct {
 	PrivateKey      string
 	AlipayPublicKey string
 	NotifyURL       string
+	NotifyPath      string
+	NotifyPort      int
 	ReturnURL       string
 }

@@ -34,9 +34,6 @@ func (l *ListPaymentsLogic) ListPayments(in *payment.PaymentListReq) (*payment.P
 	// 统一错误处理
 	if queryErr != nil {
 		if errors.Is(queryErr, sqlx.ErrNotFound) {
-			// 也可以记录info日志
-			// 返回空，可能是由于用户的过滤条件导致没有匹配到数据
-
 			return &payment.PaymentListResp{}, nil
 		}
 		l.Logger.Errorw("query payments failed",
@@ -64,8 +61,6 @@ func (l *ListPaymentsLogic) ListPayments(in *payment.PaymentListReq) (*payment.P
 	}
 
 	return &payment.PaymentListResp{
-		StatusCode: 0,
-		StatusMsg:  "Success",
 		Payments:   items,
 	}, nil
 }

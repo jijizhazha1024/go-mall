@@ -13,6 +13,7 @@ require (
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/qiniu/go-sdk/v7 v7.25.2
 	github.com/shopspring/decimal v1.4.0
+	github.com/smartwalle/alipay/v3 v3.2.25
 	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.10.0
 	github.com/zeromicro/go-zero v1.7.6
@@ -24,7 +25,12 @@ require (
 	google.golang.org/protobuf v1.36.1
 )
 
-require github.com/felixge/httpsnoop v1.0.3 // indirect
+require (
+	github.com/felixge/httpsnoop v1.0.3 // indirect
+	github.com/smartwalle/ncrypto v1.0.4 // indirect
+	github.com/smartwalle/ngx v1.0.9 // indirect
+	github.com/smartwalle/nsign v1.0.9 // indirect
+)
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect

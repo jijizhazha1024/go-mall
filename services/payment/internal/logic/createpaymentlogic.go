@@ -3,14 +3,17 @@ package logic
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"github.com/google/uuid"
-	"github.com/streadway/amqp"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"jijizhazha1024/go-mall/common/consts/code"
 	paymentM "jijizhazha1024/go-mall/dal/model/payment"
 	"jijizhazha1024/go-mall/services/order/order"
+	"jijizhazha1024/go-mall/services/payment/internal/mq"
 	"jijizhazha1024/go-mall/services/payment/internal/svc"
 	"jijizhazha1024/go-mall/services/payment/payment"
-	"log"
 	"time"
 )
 
@@ -56,95 +59,85 @@ func ConvertModelToPaymentItem(p *paymentM.Payments) *payment.PaymentItem {
 	}
 }
 func (l *CreatePaymentLogic) CreatePayment(in *payment.PaymentReq) (*payment.PaymentResp, error) {
-	// 1. 幂等性校验：根据 idempotency_key 查询是否已经创建过支付单
-	existingPayment, err := l.svcCtx.PaymentModel.FindOneByIdempotencyKey(l.ctx, in.IdempotencyKey)
-	if err == nil && existingPayment != nil {
-		return &payment.PaymentResp{
-			StatusCode: 0,
-			StatusMsg:  "重复请求，返回已存在的支付单",
-			Payment:    ConvertModelToPaymentItem(existingPayment),
-		}, nil
-	}
+	// 1. 幂等性校验：根据 OrderId 查询是否已经创建过支付单
+	// 2. 锁
+	res := &payment.PaymentResp{}
+	existingPayment, err := l.svcCtx.PaymentModel.FindOneByOrderId(l.ctx, in.OrderId)
+	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
+		l.Logger.Errorw("find one by order id failed", logx.Field("err", err))
+		return nil, err
 
+	}
+	if !errors.Is(err, sqlx.ErrNotFound) {
+		res.StatusCode = code.PaymentExist
+		res.StatusMsg = code.PaymentExistMsg
+		res.Payment = ConvertModelToPaymentItem(existingPayment)
+		// 幂等性校验通过，直接返回已存在的支付单
+		return res, nil
+	}
 	// 2. 获取预订单信息（调用订单服务）
-	order_Rpc := l.svcCtx.OrderRpc
-	getOrderInfo, err := order_Rpc.GetOrder(l.ctx, &order.GetOrderRequest{
-		OrderId: in.PreOrderId,
+	getOrderInfo, err := l.svcCtx.OrderRpc.GetOrder2Payment(l.ctx, &order.GetOrderRequest{
+		OrderId: in.OrderId,
 		UserId:  in.UserId,
 	})
 	if err != nil {
-		//订单查询失败
+		l.Logger.Errorw("get order info failed", logx.Field("err", err))
 		return nil, err
 	}
-	original_amount := getOrderInfo.Order.OriginalAmount
-	paid_amount := getOrderInfo.Order.PaidAmount
+	if getOrderInfo.StatusCode != code.Success {
+		res.StatusCode = getOrderInfo.StatusCode
+		res.StatusMsg = getOrderInfo.StatusMsg
+		return res, nil
+	}
 
+	originalAmount := getOrderInfo.Order.OriginalAmount
+	payableAmount := getOrderInfo.Order.PayableAmount
+	fmt.Println(payableAmount)
 	// 3. 生成支付单信息
 	paymentId := generateUUID()
-	now := time.Now().Unix()
-	expireTime := now + 1800 // 支付链接 30 分钟后过期
 	// 4. 调用第三方支付生成支付链接（此处根据不同渠道简单模拟返回 URL）
-	var payUrl string
-	switch in.PaymentMethod {
-	case payment.PaymentMethod_WECHAT_PAY:
-		payUrl = "https://wechat.pay/" + paymentId
-	case payment.PaymentMethod_ALIPAY:
-		payUrl, err = GenerateAlipayPaymentURL(l.svcCtx, paid_amount, 1800, in.PreOrderId)
-		if err != nil {
-			return nil, err
-		}
+	if in.PaymentMethod != payment.PaymentMethod_ALIPAY {
+		res.StatusCode = code.PaymentMethodNotSupport
+		res.StatusMsg = code.PaymentMethodNotSupportMsg
 	}
-
+	payUrl, err := GenerateAlipayPaymentURL(l.svcCtx, payableAmount, 1800, in.OrderId)
+	if err != nil {
+		return nil, err
+	}
 	// 5. 构造支付单记录
 	newPayment := &paymentM.Payments{
-
+		UserId:         uint64(in.UserId),
 		PaymentId:      paymentId,
-		PreOrderId:     in.PreOrderId,
-		OrderId:        sql.NullString{}, // 支付成功后更新
-		OriginalAmount: original_amount,
-		PaidAmount:     sql.NullInt64{Int64: paid_amount, Valid: true},
+		PreOrderId:     getOrderInfo.Order.PreOrderId,
+		OrderId:        sql.NullString{String: in.OrderId, Valid: true}, // 支付成功后更新
+		OriginalAmount: originalAmount,
+		PaidAmount:     sql.NullInt64{Int64: payableAmount, Valid: true},
 		PaymentMethod:  PaymentMethodToString(in.PaymentMethod),
-		TransactionId:  sql.NullString{},
 		PayUrl:         payUrl,
-		ExpireTime:     expireTime,
+		ExpireTime:     time.Now().Add(30 * time.Minute).Unix(),
 		Status:         int64(payment.PaymentStatus_PAYMENT_STATUS_UNPAID), // 初始状态：待支付
-		IdempotencyKey: in.IdempotencyKey,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
-		PaidAt:         sql.NullInt64{},
 	}
 
-	// 6. 插入支付单记录（goctl 生成的 DAL Insert 方法）
 	if _, err := l.svcCtx.PaymentModel.Insert(l.ctx, newPayment); err != nil {
 		return nil, err
 	}
-	delay := 30 * time.Minute
-	err = l.svcCtx.PaymentMQ.Publish(
-		"delayed_exchange", // 交换机名称
-		"",                 // 路由键
-		false,              // 强制发送
-		false,              // 等待确认
-		amqp.Publishing{
-			ContentType:  "text/plain",
-			Body:         []byte(in.PreOrderId), // 消息体为订单ID
-			DeliveryMode: amqp.Persistent,       // 持久化消息
-			Headers: amqp.Table{
-				"x-delay": int(delay.Milliseconds()), // 设置延迟时间（毫秒）
-			},
-		},
-	)
-	if err != nil {
-		log.Fatalf("Failed to publish message: %v", err)
+
+	if err := l.svcCtx.PaymentMQ.Product(&mq.PaymentReq{
+		OrderId: in.OrderId,
+	}); err != nil {
+		l.Logger.Errorw("product payment failed", logx.Field("err", err))
+		return nil, err
 	}
+
 	// 7. 返回创建成功的支付信息
 	return &payment.PaymentResp{
-		StatusCode: 0,
-		StatusMsg:  "支付单创建成功",
-		Payment:    ConvertModelToPaymentItem(newPayment),
+		Payment: ConvertModelToPaymentItem(newPayment),
 	}, nil
 }
 
-// paymentMethodToString 将 proto 枚举转换为数据库存储的字符串
+// PaymentMethodToString paymentMethodToString 将 proto 枚举转换为数据库存储的字符串
 func PaymentMethodToString(method payment.PaymentMethod) string {
 	switch method {
 	case payment.PaymentMethod_WECHAT_PAY:
@@ -158,5 +151,11 @@ func PaymentMethodToString(method payment.PaymentMethod) string {
 
 // generateUUID 生成一个支付单ID（UUID格式）
 func generateUUID() string {
-	return uuid.New().String()
+	var uid uuid.UUID
+	uid, err := uuid.NewV7()
+	if err != nil {
+		logx.Errorw("uuid generate failed", logx.Field("err", err))
+		uid = uuid.New()
+	}
+	return uid.String()
 }
