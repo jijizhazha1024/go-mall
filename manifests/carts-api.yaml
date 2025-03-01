@@ -69,10 +69,13 @@ spec:
     app: go-mall
     service: carts-api
   ports:
-    - name: api
+    - name: carts-api
       port: 8003
       targetPort: 8003
-    - name: metrics
+
+      protocol: TCP
+    - name: carts-api-metrics
       port: 8103
       targetPort: 8103
+      protocol: TCP
   type: ClusterIP

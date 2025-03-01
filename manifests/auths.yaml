@@ -69,7 +69,12 @@ spec:
     app: go-mall
     service: auths
   ports:
-    - name: metrics
+    - name: auths-rpc  # 内部通信端口（不暴露）
+      port: 10000         # Service 暴露的端口
+      targetPort: 10000   # 容器端口
+      protocol: TCP
+    - name: auths-metrics  # 健康检查暴露端口
       port: 11000
       targetPort: 11000
-  type: ClusterIP  # 修改点：从NodePort改为ClusterIP
+      protocol: TCP
+  type: ClusterIP         # 默认类型，仅集群内部访问

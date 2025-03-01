@@ -68,8 +68,12 @@ spec:
     app: go-mall
     service: users
   ports:
-    - name: metrics
+    - name: users-rpc  # 内部通信端口（不暴露）
+      port: 10001         # Service 暴露的端口
+      targetPort: 10001   # 容器端口
+      protocol: TCP
+    - name: users-metrics  # 健康检查暴露端口
       port: 11001
       targetPort: 11001
-      nodePort: 31101  # 按需修改
-  type: NodePort
+      protocol: TCP
+  type: ClusterIP         # 默认类型，仅集群内部访问

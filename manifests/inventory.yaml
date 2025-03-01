@@ -30,20 +30,26 @@ spec:
             - configMapRef:
                 name: go-mall-env
           resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
             limits:
-              cpu: "1"
-              memory: 500Mi
+              cpu: 1000m
+              memory: 512Mi
           volumeMounts:
             - mountPath: /app/logs
               name: inventory-logs
           livenessProbe:
-            tcpSocket:  # 高并发场景建议TCP检查
-              port: 10011
-            initialDelaySeconds: 30
+            httpGet:
+              path: /healthz
+              port: 11011
+            initialDelaySeconds: 20
+            periodSeconds: 15
           readinessProbe:
             httpGet:
-              path: /health/ready
-              port: 11011
+              path: /healthz
+              port: 11009
+            initialDelaySeconds: 5
       volumes:
         - name: inventory-logs
           hostPath:
@@ -60,10 +66,12 @@ spec:
     app: go-mall
     service: inventory
   ports:
-    - name: rpc
+    - name: inventory-rpc
       port: 10011
       targetPort: 10011
-    - name: metrics
+      protocol: TCP
+    - name: inventory-metrics
       port: 11011
       targetPort: 11011
+      protocol: TCP
   type: ClusterIP

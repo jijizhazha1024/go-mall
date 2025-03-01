@@ -69,12 +69,12 @@ spec:
     app: go-mall
     service: users-api  # 匹配API标签
   ports:
-    - name: api
-      port: 8001
-      targetPort: 8001
-      nodePort: 31801  # 按30000-32767范围分配
-    - name: metrics
-      port: 8101
-      targetPort: 8101
-      nodePort: 31811  # 保持+10递增规则
-  type: NodePort
+    - name: users-api     # 主服务端口
+      port: 8001            # 集群内访问端口
+      targetPort: 8001    # 映射到容器端口8001
+      protocol: TCP
+    - name: users-api-metrics  # 监控指标端口
+      port: 8101          # 集群内访问端口
+      targetPort: 8101    # 映射到容器健康检查端口
+      protocol: TCP
+  type: ClusterIP         # 默认服务类型

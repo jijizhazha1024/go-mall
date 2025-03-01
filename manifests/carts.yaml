@@ -70,10 +70,12 @@ spec:
     app: go-mall
     service: carts
   ports:
-    - name: http
+    - name: carts-rpc
       port: 10003
       targetPort: 10003
-    - name: metrics
+      protocol: TCP
+    - name: carts-metrics
       port: 11003
       targetPort: 11003
+      protocol: TCP
   type: ClusterIP

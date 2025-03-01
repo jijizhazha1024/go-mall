@@ -70,12 +70,12 @@ spec:
     app: go-mall
     service: product-api
   ports:
-    - name: api
+    - name: product-api
       port: 8002
       targetPort: 8002
-      nodePort: 31802
-    - name: metrics
+      protocol: TCP
+    - name: product-api-metrics
       port: 8102
       targetPort: 8102
-      nodePort: 31812
-  type: NodePort
+      protocol: TCP
+  type: ClusterIP
