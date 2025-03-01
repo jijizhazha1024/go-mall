@@ -28,25 +28,25 @@ spec:
           envFrom:
             - configMapRef:
                 name: go-mall-env
-          env:
-            - name: HEALTHCHECK_PORT
-              value: "8103"
           resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
             limits:
-              cpu: "0.5"
+              cpu: 800m
               memory: 512Mi
           volumeMounts:
             - mountPath: /app/logs
               name: app-logs
           livenessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: 8103
             initialDelaySeconds: 30
             periodSeconds: 30
           readinessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: 8103
             initialDelaySeconds: 5
             periodSeconds: 10

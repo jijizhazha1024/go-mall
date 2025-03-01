@@ -21,34 +21,32 @@ spec:
       containers:
         - name: products-service
           image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
-          command: ["/app/services/Product", "-f", "/app/etc/products.prod.yaml"]
+          command: ["/app/services/Product", "-f", "/app/etc/product.prod.yaml"]
           ports:
             - containerPort: 10002  # 主服务端口
             - containerPort: 11002  # 健康检查端口
           envFrom:
             - configMapRef:
                 name: go-mall-env
-          env:
-            - name: HEALTHCHECK_PORT
-              value: "11002"
           resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
             limits:
-              cpu: "0.5"
+              cpu: 1000m
               memory: 512Mi
           volumeMounts:
             - mountPath: /app/logs
               name: app-logs
           livenessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: 11002
             initialDelaySeconds: 30
             periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: 11002
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -70,9 +68,6 @@ spec:
     app: go-mall
     service: products
   ports:
-    - name: http
-      port: 10002
-      targetPort: 10002
     - name: metrics
       port: 11002
       targetPort: 11002

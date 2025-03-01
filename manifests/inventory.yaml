@@ -1,0 +1,69 @@
+# inventory-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-service
+  namespace: go-mall
+  labels:
+    app: go-mall
+    service: inventory
+spec:
+  replicas: 1  # 库存服务建议多副本
+  selector:
+    matchLabels:
+      app: go-mall
+      service: inventory
+  template:
+    metadata:
+      labels:
+        app: go-mall
+        service: inventory
+    spec:
+      containers:
+        - name: inventory-service
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+          command: ["/app/services/Inventory", "-f", "/app/etc/inventory.prod.yaml"]
+          ports:
+            - containerPort: 10011  # RPC服务端口
+            - containerPort: 11011  # 库存监控端口
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+          resources:
+            limits:
+              cpu: "1"
+              memory: 500Mi
+          volumeMounts:
+            - mountPath: /app/logs
+              name: inventory-logs
+          livenessProbe:
+            tcpSocket:  # 高并发场景建议TCP检查
+              port: 10011
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 11011
+      volumes:
+        - name: inventory-logs
+          hostPath:
+            path: /app/logs/inventory
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory-service
+  namespace: go-mall
+spec:
+  selector:
+    app: go-mall
+    service: inventory
+  ports:
+    - name: rpc
+      port: 10011
+      targetPort: 10011
+    - name: metrics
+      port: 11011
+      targetPort: 11011
+  type: ClusterIP

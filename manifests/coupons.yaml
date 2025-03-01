@@ -1,0 +1,104 @@
+# coupons-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coupons-service
+  namespace: go-mall
+  labels:
+    app: go-mall
+    service: coupons
+    tier: backend  # 新增分层标签
+spec:
+  replicas: 2  # 优惠券服务建议双副本
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: go-mall
+      service: coupons
+  template:
+    metadata:
+      labels:
+        app: go-mall
+        service: coupons
+        version: v1.2.3  # 版本标签
+    spec:
+      affinity:
+        podAntiAffinity:  # 反亲和性部署
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: service
+                      operator: In
+                      values: ["coupons"]
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: coupons-service
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:coupons-v1.2.3
+          command: ["/app/services/Coupons", "-f", "/app/etc/coupons.prod.yaml"]
+          ports:
+            - containerPort: 10009  # 主服务端口
+            - containerPort: 11009  # 健康检查端口
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+          env:
+            - name: HEALTHCHECK_PORT
+              value: "11009"
+            - name: COUPON_CACHE_TTL  # 优惠券缓存时间
+              value: "300s"
+          resources:
+            requests:
+              cpu: "0.5"
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          volumeMounts:
+            - mountPath: /app/logs
+              name: coupon-logs
+            - mountPath: /app/cache  # 优惠券缓存目录
+              name: coupon-cache
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 11009
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 11009
+            initialDelaySeconds: 5
+      volumes:
+        - name: coupon-logs
+          hostPath:
+            path: /app/logs/coupons
+            type: DirectoryOrCreate
+
+---
+# coupons-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: coupons-service
+  namespace: go-mall
+  annotations:
+    prometheus.io/port: "11009"  # 监控集成
+spec:
+  selector:
+    app: go-mall
+    service: coupons
+  ports:
+    - name: http
+      port: 10009
+      targetPort: 10009
+      protocol: TCP
+    - name: metrics
+      port: 11009
+      targetPort: 11009
+  type: ClusterIP

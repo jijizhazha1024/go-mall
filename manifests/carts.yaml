@@ -28,12 +28,12 @@ spec:
           envFrom:
             - configMapRef:
                 name: go-mall-env
-          env:
-            - name: HEALTHCHECK_PORT
-              value: "11003"
           resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
             limits:
-              cpu: "0.5"
+              cpu: 1000m
               memory: 512Mi
           volumeMounts:
             - mountPath: /app/logs

@@ -29,23 +29,24 @@ spec:
             - configMapRef:
                 name: go-mall-env
           resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
             limits:
-              cpu: "0.5"
+              cpu: 1000m
               memory: 512Mi
           volumeMounts:
             - mountPath: /app/logs
               name: app-logs
           livenessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: 11000
             initialDelaySeconds: 30
             periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: 11000
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -68,9 +69,6 @@ spec:
     app: go-mall
     service: auths
   ports:
-    - name: http
-      port: 10000
-      targetPort: 10000
     - name: metrics
       port: 11000
       targetPort: 11000

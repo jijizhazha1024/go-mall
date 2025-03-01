@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: users-api-service  # 保持命名规范
+  name: users-api  # 保持命名规范
   namespace: go-mall
   labels:
     app: go-mall
@@ -24,29 +24,33 @@ spec:
           image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
           command: ["/app/apis/User", "-f", "/app/etc/user-api.prod.yaml"]  # API二进制路径
           ports:
-            - containerPort: 8001  # API主端口（与docker-compose对齐）
-            - containerPort: 8101  # 健康检查端口
+            - containerPort: 8001
+            - containerPort: 8101
           envFrom:
             - configMapRef:
                 name: go-mall-env
           resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
             limits:
-              cpu: "0.5"
+              cpu: 800m
               memory: 512Mi
-          volumeMounts:
-            - mountPath: /app/logs
-              name: app-logs
           livenessProbe:
             httpGet:
-              path: /health
-              port: 8101  # 使用API健康检查端口
+              path: /healthz
+              port: 8101
             initialDelaySeconds: 30
             periodSeconds: 30
           readinessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: 8101
             initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - mountPath: /app/logs
+              name: app-logs
           imagePullPolicy: IfNotPresent
       volumes:
         - name: app-logs
@@ -58,14 +62,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: users-api-service
+  name: users-api
   namespace: go-mall
 spec:
   selector:
     app: go-mall
     service: users-api  # 匹配API标签
   ports:
-    - name: http
+    - name: api
       port: 8001
       targetPort: 8001
       nodePort: 31801  # 按30000-32767范围分配

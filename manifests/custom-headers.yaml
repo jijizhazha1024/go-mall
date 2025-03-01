@@ -1,0 +1,9 @@
+# custom-headers.yaml（新增自定义请求头配置）
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: custom-headers
+  namespace: go-mall
+data:
+  access_token: "$http_access_token"
+  refresh_token: "$http_refresh_token"
