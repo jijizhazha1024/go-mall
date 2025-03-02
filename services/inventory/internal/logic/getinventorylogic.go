@@ -99,8 +99,8 @@ func (l *GetInventoryLogic) GetInventory(in *inventory.GetInventoryReq) (*invent
 		// 执行缓存更新操作
 
 		cacheKey := fmt.Sprintf("%s:%d", biz.InventoryProductKey, in.ProductId)
-		tostr := fmt.Sprintf("%d", currentCount)
-		if err := l.svcCtx.Rdb.Set(fmt.Sprintf("%s:%d", biz.InventoryProductKey, in.ProductId), tostr); err != nil {
+		total := strconv.Itoa(int(inventoryResp.Total))
+		if err := l.svcCtx.Rdb.Set(cacheKey, total); err != nil {
 			l.Logger.Errorw("failed to update inventory cache",
 				logx.Field("product_id", in.ProductId),
 				logx.Field("error", err))

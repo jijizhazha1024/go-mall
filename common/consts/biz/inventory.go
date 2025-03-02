@@ -7,7 +7,7 @@ const (
 )
 const (
 	InventoryKeyPrefix        = "inventory:%d"
-	InventoryLockKey          = "inventory:lock:%d"
+	InventoryLockKey          = "inventory:lock:"
 	InventoryAccessKeyPrefix  = "inventory_access:%d"
 	InventoryDeductLockPrefix = "inventory:deduct:lock"
 	InventoryProductKey       = "inventory:product"
