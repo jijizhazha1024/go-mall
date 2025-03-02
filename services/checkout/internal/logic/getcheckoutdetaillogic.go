@@ -2,7 +2,9 @@ package logic
 
 import (
 	"context"
-
+	"errors"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/checkout/checkout"
 	"jijizhazha1024/go-mall/services/checkout/internal/svc"
 
@@ -25,7 +27,62 @@ func NewGetCheckoutDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) 
 
 // GetCheckoutDetail 获取结算详情
 func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailReq) (*checkout.CheckoutDetailResp, error) {
-	// todo: add your logic here and delete this line
+	checkoutRecord, err := l.svcCtx.CheckoutModel.FindOneByUserIdAndPreOrderId(l.ctx, in.UserId, in.PreOrderId)
+	res := &checkout.CheckoutDetailResp{}
+	if err != nil {
+		if errors.Is(err, sqlx.ErrNotFound) {
+			res.StatusCode = code.OutOfRecord
+			res.StatusMsg = code.OutOfRecordMsg
+			return res, nil
+		} else {
+			l.Logger.Errorw("查询结算记录失败",
+				logx.Field("err", err),
+				logx.Field("user_id", in.UserId),
+				logx.Field("pre_order_id", in.PreOrderId))
+			return nil, err
+		}
+	}
 
-	return &checkout.CheckoutDetailResp{}, nil
+	checkoutItems, err := l.svcCtx.CheckoutItemsModel.FindItemsByUserAndPreOrder(l.ctx, in.UserId, in.PreOrderId)
+	if err != nil {
+		if errors.Is(err, sqlx.ErrNotFound) {
+			res.StatusCode = code.OutOfRecord
+			res.StatusMsg = code.OutOfRecordMsg
+			return res, nil
+		} else {
+			l.Logger.Errorw("查询结算记录失败",
+				logx.Field("err", err),
+				logx.Field("user_id", in.UserId),
+				logx.Field("pre_order_id", in.PreOrderId))
+			return nil, err
+		}
+	}
+
+	orderData := &checkout.CheckoutOrder{
+		PreOrderId: checkoutRecord.PreOrderId,
+		UserId:     int64(checkoutRecord.UserId),
+		Status:     checkout.CheckoutStatus(checkoutRecord.Status),
+		ExpireTime: checkoutRecord.ExpireTime,
+		CreatedAt:  checkoutRecord.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:  checkoutRecord.UpdatedAt.String(),
+	}
+
+	var items []*checkout.CheckoutItem
+	for _, item := range checkoutItems {
+		checkoutItem := &checkout.CheckoutItem{
+			ProductId:   int32(item.ProductId),
+			Quantity:    int32(item.Quantity),
+			Price:       item.Price,
+			ProductName: item.Snapshot,
+		}
+		items = append(items, checkoutItem)
+	}
+
+	orderData.Items = items
+
+	resp := &checkout.CheckoutDetailResp{
+		Data: orderData,
+	}
+
+	return resp, nil
 }
