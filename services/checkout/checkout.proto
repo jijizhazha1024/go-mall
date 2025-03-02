@@ -27,6 +27,8 @@ message CheckoutOrder {
   string created_at = 5;           // 创建时间
   string updated_at = 6;
   repeated CheckoutItem items = 7; // 商品明细快照
+  int64 original_amount = 8;
+  int64 final_amount = 9;
 }
 
 

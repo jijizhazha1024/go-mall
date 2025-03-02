@@ -1,6 +1,6 @@
 Name: checkout.rpc
 ListenOn: 0.0.0.0:10005
-
+Timeout: 0
 Consul:
   Host: 124.71.72.124:8500 # consul endpoint
   Key: checkout.rpc
@@ -15,14 +15,16 @@ InventoryRpc:
   Target: consul://124.71.72.124:8500/inventory.rpc?wait=14s
   NonBlock: true
 
-CartsRpc:
-  Target: consul://124.71.72.124:8500/carts.rpc?wait=14s
-  NonBlock: true
+
 
 ProductRpc:
-  Target: consul://${CONSUL_HOST}/product.rpc?wait=14s
+  Target: consul://124.71.72.124:8500/products.rpc?wait=14s
   NonBlock: true
-
+  Timeout: 10000
+CouponsRpc:
+  Target: consul://124.71.72.124:8500/coupons.rpc?wait=14s
+  NonBlock: true
+  Timeout: 10000
 RedisConf:
   Host: 124.71.72.124:6379
   Type: node

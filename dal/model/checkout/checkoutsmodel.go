@@ -2,6 +2,7 @@ package checkout
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
@@ -38,9 +39,7 @@ func (m *customCheckoutsModel) withSession(session sqlx.Session) CheckoutsModel 
 }
 
 func (m *customCheckoutsModel) UpdateStatusWithSession(ctx context.Context, session sqlx.Session, status int64, userId int32, preOrderId string) error {
-	query := `UPDATE checkout_orders 
-			  SET status = ? 
-			  WHERE user_id = ? AND pre_order_id = ?`
+	query := fmt.Sprintf("UPDATE %s SET `status` = ? WHERE `user_id` = ? AND `pre_order_id` = ?", m.table)
 	_, err := session.ExecCtx(ctx, query, status, userId, preOrderId)
 	return err
 }
@@ -51,7 +50,7 @@ func (m *customCheckoutsModel) FindOneByUserIdAndPreOrderIdWithSession(ctx conte
 	var resp Checkouts
 	err := session.QueryRowCtx(ctx, &resp, query, userId, preOrderId) // 使用 session 查询
 	if err != nil {
-		if err == sqlx.ErrNotFound {
+		if errors.Is(err, sqlx.ErrNotFound) {
 			return nil, sqlx.ErrNotFound
 		}
 		return nil, err
@@ -59,18 +58,10 @@ func (m *customCheckoutsModel) FindOneByUserIdAndPreOrderIdWithSession(ctx conte
 	return &resp, nil
 }
 func (m *customCheckoutsModel) FindOneByUserIdAndPreOrderId(ctx context.Context, userId int32, preOrderId string) (*Checkouts, error) {
-	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `pre_order_id` = ? limit 1 FOR SHARE", checkoutsRows, m.table)
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE `user_id` = ? AND `pre_order_id` = ? LIMIT 1", checkoutsRows, m.table)
 	var resp Checkouts
 	err := m.conn.QueryRowCtx(ctx, &resp, query, userId, preOrderId)
-
-	switch err {
-	case nil:
-		return &resp, nil
-	case sqlx.ErrNotFound:
-		return nil, sqlx.ErrNotFound
-	default:
-		return nil, err
-	}
+	return &resp, err
 }
 func (m *customCheckoutsModel) CountByUserId(ctx context.Context, userId uint32) (int64, error) {
 	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE user_id = ?", m.table)
@@ -82,17 +73,8 @@ func (m *customCheckoutsModel) CountByUserId(ctx context.Context, userId uint32)
 	return count, nil
 }
 func (m *customCheckoutsModel) FindByUserId(ctx context.Context, userId uint32, page int32, pageSize int32) ([]*Checkouts, error) {
-	offset := (page - 1) * pageSize
-	query := fmt.Sprintf(`
-		SELECT %s FROM %s 
-		WHERE user_id = ? 
-		ORDER BY created_at DESC 
-		LIMIT ? OFFSET ?`, checkoutsRows, m.table)
-
-	var checkouts []*Checkouts
-	err := m.conn.QueryRowsCtx(ctx, &checkouts, query, userId, pageSize, offset)
-	if err != nil {
-		return nil, err
-	}
-	return checkouts, nil
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE user_id = ? ORDER BY pre_order_id DESC LIMIT ?, ?", checkoutsRows, m.table)
+	var resp []*Checkouts
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId, (page-1)*pageSize, pageSize)
+	return resp, err
 }

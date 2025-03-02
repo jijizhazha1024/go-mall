@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"jijizhazha1024/go-mall/common/consts/code"
-	"time"
-
 	"jijizhazha1024/go-mall/services/checkout/checkout"
 	"jijizhazha1024/go-mall/services/checkout/internal/svc"
 
@@ -28,7 +26,7 @@ func NewReleaseCheckoutLogic(ctx context.Context, svcCtx *svc.ServiceContext) *R
 	}
 }
 
-// UpdateCheckoutStatus2Success 当订单超时，支付超时，支付退款
+// ReleaseCheckout UpdateCheckoutStatus2Success 当订单超时，支付超时，支付退款
 func (l *ReleaseCheckoutLogic) ReleaseCheckout(in *checkout.ReleaseReq) (*checkout.EmptyResp, error) {
 	err := l.svcCtx.Mysql.Transact(func(session sqlx.Session) error {
 		cacheKey := fmt.Sprintf("checkout:preorder:%d", in.UserId)
@@ -38,12 +36,6 @@ func (l *ReleaseCheckoutLogic) ReleaseCheckout(in *checkout.ReleaseReq) (*checko
 				logx.Field("err", err),
 				logx.Field("pre_order_id", in.PreOrderId))
 			return errors.New(code.QuerySettlementRecordFailedMsg)
-		}
-		now := time.Now().Unix()
-
-		if checkoutRecord.ExpireTime > now {
-			l.Logger.Infof("订单 %s 仍未过期（expire_time: %d），无需释放", in.PreOrderId, checkoutRecord.ExpireTime)
-			return nil
 		}
 
 		if checkoutRecord.Status == int64(checkout.CheckoutStatus_CANCELLED) || checkoutRecord.Status == int64(checkout.CheckoutStatus_EXPIRED) {

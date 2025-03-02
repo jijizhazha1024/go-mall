@@ -6,7 +6,6 @@ import (
 	"github.com/zeromicro/go-zero/zrpc"
 	"jijizhazha1024/go-mall/dal/model/cart"
 	"jijizhazha1024/go-mall/dal/model/checkout"
-	"jijizhazha1024/go-mall/services/carts/cartsclient"
 	"jijizhazha1024/go-mall/services/checkout/internal/config"
 	"jijizhazha1024/go-mall/services/checkout/internal/db"
 	"jijizhazha1024/go-mall/services/coupons/couponsclient"
@@ -22,7 +21,6 @@ type ServiceContext struct {
 	CheckoutItemsModel checkout.CheckoutItemsModel
 	CartsModel         cart.CartsModel
 	InventoryRpc       inventoryclient.Inventory
-	CartsRpc           cartsclient.Cart
 	CouponsRpc         couponsclient.Coupons
 	ProductRpc         productcatalogservice.ProductCatalogService
 }
@@ -38,7 +36,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		CheckoutModel:      checkout.NewCheckoutsModel(mysql),
 		CheckoutItemsModel: checkout.NewCheckoutItemsModel(mysql),
 		InventoryRpc:       inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
-		CartsRpc:           cartsclient.NewCart(zrpc.MustNewClient(c.CartsRpc)),
 		CouponsRpc:         couponsclient.NewCoupons(zrpc.MustNewClient(c.CouponsRpc)),
 		ProductRpc:         productcatalogservice.NewProductCatalogService(zrpc.MustNewClient(c.ProductRpc)),
 	}

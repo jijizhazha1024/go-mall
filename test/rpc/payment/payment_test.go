@@ -23,7 +23,7 @@ func TestCreatePayment(t *testing.T) {
 	initpayment()
 	resp, err := payment_client.CreatePayment(context.Background(), &payment.PaymentReq{
 		UserId:        1,
-		OrderId:       "199112649961",
+		OrderId:       "019554d8-5888-7da7-909c-607cb632c4aa",
 		PaymentMethod: payment.PaymentMethod_ALIPAY,
 	})
 

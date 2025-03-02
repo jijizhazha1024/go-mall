@@ -2,19 +2,19 @@ package logic
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"jijizhazha1024/go-mall/common/consts/code"
+	checkout2 "jijizhazha1024/go-mall/dal/model/checkout"
 	"jijizhazha1024/go-mall/services/checkout/checkout"
 	"jijizhazha1024/go-mall/services/checkout/internal/svc"
-	"jijizhazha1024/go-mall/services/coupons/coupons"
+	"jijizhazha1024/go-mall/services/coupons/couponsclient"
 	"jijizhazha1024/go-mall/services/inventory/inventory"
 	"jijizhazha1024/go-mall/services/product/product"
-	"strings"
 	"time"
 )
 
@@ -64,7 +64,7 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 			return 1
 		end
 	`
-	result, err := l.svcCtx.RedisClient.Eval(luaScript, []string{cacheKey}, preOrderId, 300)
+	result, err := l.svcCtx.RedisClient.EvalCtx(l.ctx, luaScript, []string{cacheKey}, []any{300, preOrderId})
 	if err != nil {
 		l.Logger.Errorw("Redis Lua 执行失败",
 			logx.Field("err", err),
@@ -97,7 +97,6 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 			StatusMsg:  code.OrderProductEmptyMsg,
 		}, nil
 	}
-
 	// 4. 调用库存预扣接口
 	inventoryItems := make([]*inventory.InventoryReq_Items, 0)
 	for _, item := range in.OrderItems {
@@ -106,8 +105,8 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 			Quantity:  item.Quantity,
 		})
 	}
-
-	_, err = l.svcCtx.InventoryRpc.DecreasePreInventory(l.ctx, &inventory.InventoryReq{
+	res := &checkout.CheckoutResp{}
+	inventoryRes, err := l.svcCtx.InventoryRpc.DecreasePreInventory(l.ctx, &inventory.InventoryReq{
 		Items:      inventoryItems,
 		PreOrderId: preOrderId,
 		UserId:     int32(in.UserId),
@@ -144,119 +143,94 @@ func (l *PrepareCheckoutLogic) PrepareCheckout(in *checkout.CheckoutReq) (*check
 			StatusMsg:  code.OutOfInventoryMsg,
 		}, nil
 	}
-
+	if inventoryRes.StatusCode != code.Success {
+		res.StatusCode = inventoryRes.StatusCode
+		res.StatusMsg = inventoryRes.StatusMsg
+		return res, nil
+	}
 	// 5. 异步处理结算信息
-	go func() {
-		err := l.svcCtx.Mysql.Transact(func(session sqlx.Session) error {
-			var totalOriginalAmount int64
-			var finalAmount int64
-			var orderItems []*coupons.Items
-			var availableCoupons []string
-
-			// 1. 删除购物车中的商品
-			for _, item := range in.OrderItems {
-				_, err := session.Exec("DELETE FROM carts WHERE user_id = ? AND product_id = ?", in.UserId, item.ProductId)
-				if err != nil {
-					return err
-				}
-			}
-
-			// 2. 获取商品信息，计算原始总金额并插入 checkout_items
-			for _, item := range in.OrderItems {
-				productResp, err := l.svcCtx.ProductRpc.GetProduct(l.ctx, &product.GetProductReq{
-					Id: uint32(item.ProductId),
-				})
-				if err != nil || productResp.Product == nil {
-					l.Logger.Errorw("获取商品详情失败",
-						logx.Field("err", err),
-						logx.Field("product_id", item.ProductId))
-					return errors.New(code.QueryOrderProductInfoFailedMsg)
-				}
-
-				snapshotData := map[string]interface{}{"name": productResp.Product.Name, "specs": productResp.Product.Description}
-				snapshotJSON, _ := json.Marshal(snapshotData)
-
-				// 插入 checkout_items 表
-				_, err = session.Exec(
-					"INSERT INTO checkout_items (pre_order_id, product_id, quantity, price, snapshot, created_at) VALUES (?, ?, ?, ?, ?, NOW())",
-					preOrderId, item.ProductId, item.Quantity, productResp.Product.Price, string(snapshotJSON),
-				)
-				if err != nil {
-					return err
-				}
-
-				// 累加商品原始总金额
-				totalOriginalAmount += productResp.Product.Price * int64(item.Quantity)
-				orderItems = append(orderItems, &coupons.Items{
-					ProductId: item.ProductId,
-					Quantity:  item.Quantity,
-				})
-			}
-
-			userCouponsResp, err := l.svcCtx.CouponsRpc.ListUserCoupons(l.ctx, &coupons.ListUserCouponsReq{
-				UserId:     int32(in.UserId),
-				Pagination: &coupons.PaginationReq{Page: 1, Size: 50},
-			})
-			if err != nil {
-				l.Logger.Errorw("查询用户优惠券失败",
-					logx.Field("err", err))
-				return errors.New(code.QueryUserCouponFailedMsg)
-			}
-
-			finalAmount = totalOriginalAmount
-			for _, coupon := range userCouponsResp.UserCoupons {
-				couponResp, err := l.svcCtx.CouponsRpc.CalculateCoupon(l.ctx, &coupons.CalculateCouponReq{
-					UserId:   int32(in.UserId),
-					CouponId: coupon.CouponId,
-					Items:    orderItems,
-				})
-				if err != nil {
-					l.Logger.Errorw("计算优惠失败",
-						logx.Field("err", err),
-						logx.Field("coupon_id", coupon.Id))
-					continue
-				}
-
-				// 如果优惠券可用，则应用折扣
-				if couponResp.IsUsable {
-					finalAmount -= couponResp.DiscountAmount
-					availableCoupons = append(availableCoupons, coupon.CouponId)
-				}
-			}
-
-			// 确保最终金额不小于 0
-			if finalAmount < 0 {
-				finalAmount = 0
-			}
-
-			_, err = session.Exec(
-				"INSERT INTO checkouts (pre_order_id, user_id, coupon_id, original_amount, final_amount, status, expire_time, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
-				preOrderId, in.UserId, strings.Join(availableCoupons, ","), totalOriginalAmount, finalAmount, checkout.CheckoutStatus_RESERVING, time.Now().Add(10*time.Minute).Unix(),
-			)
-			if err != nil {
-				return err
-			}
-
-			return nil
+	ctx := context.TODO()
+	var totalPrice uint64
+	var finalPrice uint64
+	items := make([]*checkout2.CheckoutItems, len(in.OrderItems))
+	couponsItems := make([]*couponsclient.Items, len(in.OrderItems))
+	expireTime := time.Now().Add(10 * time.Minute).Unix()
+	for i, item := range in.OrderItems {
+		productResp, err := l.svcCtx.ProductRpc.GetProduct(ctx, &product.GetProductReq{
+			Id: uint32(item.ProductId),
 		})
-
 		if err != nil {
-			l.Logger.Errorw("处理结算信息失败",
-				logx.Field("err", err))
+			l.Logger.Errorw("获取商品详情失败",
+				logx.Field("err", err),
+				logx.Field("product_id", item.ProductId))
+			return nil, err
 		}
-	}()
+		snapshotData := map[string]interface{}{"name": productResp.Product.Name, "desc": productResp.Product.Description}
+		snapshotJSON, _ := json.Marshal(snapshotData)
+		items[i] = &checkout2.CheckoutItems{
+			PreOrderId: preOrderId,
+			ProductId:  uint64(item.ProductId),
+			Quantity:   uint64(item.Quantity),
+			Price:      productResp.Product.Price,
+			Snapshot:   string(snapshotJSON),
+		}
+		couponsItems[i] = &couponsclient.Items{
+			ProductId: item.ProductId,
+			Quantity:  item.Quantity,
+		}
+		totalPrice += uint64(productResp.Product.Price) * uint64(item.Quantity)
 
-	// 释放 Redis 锁
-	if _, err := l.svcCtx.RedisClient.Del(cacheKey); err != nil {
-		l.Logger.Errorw("删除 Redis 锁失败",
-			logx.Field("err", err),
-			logx.Field("user_id", in.UserId))
+	}
+	finalPrice = totalPrice
+	if in.CouponId != "" {
+		resp, err := l.svcCtx.CouponsRpc.CalculateCoupon(ctx, &couponsclient.CalculateCouponReq{
+			CouponId: in.CouponId,
+			UserId:   int32(in.UserId),
+			Items:    couponsItems,
+		})
+		if err != nil {
+			l.Logger.Errorw("计算优惠券失败",
+				logx.Field("err", err),
+				logx.Field("user_id", in.UserId))
+			return nil, err
+		}
+		if resp.StatusCode != code.Success {
+			res.StatusCode = int32(resp.StatusCode)
+			res.StatusMsg = resp.StatusMsg
+			return res, nil
+		}
+		finalPrice = uint64(resp.FinalAmount)
 	}
 
+	if err := l.svcCtx.Mysql.TransactCtx(ctx, func(context context.Context, session sqlx.Session) error {
+		// 2. 获取商品信息，计算原始总金额并插入 checkout_items
+		for _, item := range items {
+			if _, err := l.svcCtx.CheckoutItemsModel.WithSession(session).Insert(ctx, item); err != nil {
+				return err
+			}
+		}
+		if _, err := l.svcCtx.CheckoutModel.Insert(ctx, &checkout2.Checkouts{
+			PreOrderId:     preOrderId,
+			UserId:         uint64(in.UserId),
+			CouponId:       sql.NullString{String: in.CouponId, Valid: in.CouponId != ""},
+			OriginalAmount: int64(totalPrice),
+			FinalAmount:    int64(finalPrice),
+			ExpireTime:     expireTime,
+			Status:         int64(checkout.CheckoutStatus_RESERVING),
+		}); err != nil {
+			return err
+		}
+		return nil
+
+	}); err != nil {
+		l.Logger.Errorw("处理结算信息失败",
+			logx.Field("err", err))
+		return nil, err
+	}
 	// 6. 返回预结算信息
 	return &checkout.CheckoutResp{
 		PreOrderId: preOrderId,
-		ExpireTime: time.Now().Add(10 * time.Minute).Unix(),
+		ExpireTime: expireTime,
 		PayMethod:  []int64{1, 2},
 	}, nil
 }

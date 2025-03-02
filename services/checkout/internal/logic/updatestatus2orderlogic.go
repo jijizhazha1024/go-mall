@@ -37,10 +37,14 @@ func (l *UpdateStatus2OrderLogic) UpdateStatus2Order(in *checkout.UpdateStatusRe
 				return err
 			}
 		}
-
-		if checkoutRecord.Status == int64(checkout.CheckoutStatus_CONFIRMED) {
+		switch checkout.CheckoutStatus(checkoutRecord.Status) {
+		case checkout.CheckoutStatus_CONFIRMED:
 			l.Logger.Infof("订单 %s 已经是已确认状态", in.PreOrderId)
 			return nil
+
+		case checkout.CheckoutStatus_CANCELLED, checkout.CheckoutStatus_EXPIRED:
+			// 订单已经过期进行回滚
+			return status.Error(codes.Aborted, code.OrderStatusInvalidMsg)
 		}
 
 		err = l.svcCtx.CheckoutModel.UpdateStatusWithSession(l.ctx, session, int64(checkout.CheckoutStatus_CONFIRMED), in.UserId, in.PreOrderId)

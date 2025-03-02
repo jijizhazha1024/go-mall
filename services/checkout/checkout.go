@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 
 	"jijizhazha1024/go-mall/services/checkout/checkout"
 	"jijizhazha1024/go-mall/services/checkout/internal/config"
@@ -32,6 +34,10 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
+	if err := consul.RegisterService(c.ListenOn, c.Consul); err != nil {
+		logx.Errorw("register service error", logx.Field("err", err))
+		panic(err)
+	}
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)

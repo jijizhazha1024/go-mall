@@ -66,12 +66,12 @@ func (l *GetCheckoutListLogic) GetCheckoutList(in *checkout.CheckoutListReq) (*c
 			StatusMsg:  code.QueryOrderListFailedMsg,
 		}, nil
 	}
-
 	// 5. 查询所有订单对应的商品详情
 	preOrderIds := make([]string, 0, len(checkouts))
 	for _, c := range checkouts {
 		preOrderIds = append(preOrderIds, c.PreOrderId)
 	}
+
 	itemsMap, err := l.svcCtx.CheckoutItemsModel.FindItemsByPreOrderIds(l.ctx, preOrderIds)
 	if err != nil {
 		l.Logger.Errorw("查询订单商品详情失败",
@@ -87,13 +87,15 @@ func (l *GetCheckoutListLogic) GetCheckoutList(in *checkout.CheckoutListReq) (*c
 	var checkoutOrders []*checkout.CheckoutOrder
 	for _, c := range checkouts {
 		order := &checkout.CheckoutOrder{
-			PreOrderId: c.PreOrderId,
-			UserId:     int64(c.UserId),
-			Status:     checkout.CheckoutStatus(c.Status),
-			ExpireTime: c.ExpireTime,
-			CreatedAt:  c.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt:  c.UpdatedAt.Format("2006-01-02 15:04:05"),
-			Items:      itemsMap[c.PreOrderId],
+			PreOrderId:     c.PreOrderId,
+			UserId:         int64(c.UserId),
+			Status:         checkout.CheckoutStatus(c.Status),
+			ExpireTime:     c.ExpireTime,
+			CreatedAt:      c.CreatedAt.Format("2006-01-02 15:04:05"),
+			UpdatedAt:      c.UpdatedAt.Format("2006-01-02 15:04:05"),
+			Items:          itemsMap[c.PreOrderId],
+			OriginalAmount: c.OriginalAmount,
+			FinalAmount:    c.FinalAmount,
 		}
 		checkoutOrders = append(checkoutOrders, order)
 	}

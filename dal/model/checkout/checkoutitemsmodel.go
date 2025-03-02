@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"jijizhazha1024/go-mall/services/checkout/checkout"
+	"strings"
 )
 
 var _ CheckoutItemsModel = (*customCheckoutItemsModel)(nil)
@@ -15,8 +16,8 @@ type (
 	// and implement the added methods in customCheckoutItemsModel.
 	CheckoutItemsModel interface {
 		checkoutItemsModel
-		withSession(session sqlx.Session) CheckoutItemsModel
-		FindItemsByUserAndPreOrder(ctx context.Context, userId int32, preOrderId string) ([]CheckoutItems, error)
+		WithSession(session sqlx.Session) CheckoutItemsModel
+		FindItemsByPreOrder(ctx context.Context, preOrderId string) ([]*CheckoutItems, error)
 		FindItemsByPreOrderIds(ctx context.Context, preOrderIds []string) (map[string][]*checkout.CheckoutItem, error)
 	}
 
@@ -32,37 +33,27 @@ func NewCheckoutItemsModel(conn sqlx.SqlConn) CheckoutItemsModel {
 	}
 }
 
-func (m *customCheckoutItemsModel) withSession(session sqlx.Session) CheckoutItemsModel {
+func (m *customCheckoutItemsModel) WithSession(session sqlx.Session) CheckoutItemsModel {
 	return NewCheckoutItemsModel(sqlx.NewSqlConnFromSession(session))
 }
 
-func (m *customCheckoutItemsModel) FindItemsByUserAndPreOrder(ctx context.Context, userId int32, preOrderId string) ([]CheckoutItems, error) {
-	query := fmt.Sprintf("select %s from %s where `user_id` = ? and `pre_order_id` = ?", checkoutItemsRows, m.table)
-	var resp []CheckoutItems
-	err := m.conn.QueryRowsCtx(ctx, &resp, query, userId, preOrderId)
-	switch err {
-	case nil:
-		// Return the found checkout record
-		return resp, nil
-	case sqlx.ErrNotFound:
-		return nil, sqlx.ErrNotFound
-	default:
-		// If there is another error, return it
-		return nil, err
-	}
-}
-func (m *customCheckoutItemsModel) FindItemsByPreOrderIds(ctx context.Context, preOrderIds []string) (map[string][]*checkout.CheckoutItem, error) {
-	if len(preOrderIds) == 0 {
-		return make(map[string][]*checkout.CheckoutItem), nil
-	}
-
-	query := fmt.Sprintf("SELECT pre_order_id, product_id, quantity, snapshot, price FROM %s WHERE pre_order_id IN (?)", m.table)
+func (m *customCheckoutItemsModel) FindItemsByPreOrder(ctx context.Context, preOrderId string) ([]*CheckoutItems, error) {
+	query := fmt.Sprintf("SELECT * FROM %s WHERE pre_order_id = ?", m.table)
 	var items []*CheckoutItems
-	err := m.conn.QueryRowsCtx(ctx, &items, query, preOrderIds)
+	err := m.conn.QueryRowsCtx(ctx, &items, query, preOrderId)
 	if err != nil {
 		return nil, err
 	}
-
+	return items, nil
+}
+func (m *customCheckoutItemsModel) FindItemsByPreOrderIds(ctx context.Context, preOrderIds []string) (map[string][]*checkout.CheckoutItem, error) {
+	preOrders := strings.Join(preOrderIds, ",")
+	query := fmt.Sprintf("SELECT * FROM %s WHERE pre_order_id IN (?)", m.table)
+	items := make([]*CheckoutItems, 0)
+	err := m.conn.QueryRowsCtx(ctx, &items, query, preOrders)
+	if err != nil {
+		return nil, err
+	}
 	// 组装 map[pre_order_id] -> []CheckoutItem
 	itemsMap := make(map[string][]*checkout.CheckoutItem)
 	for _, item := range items {

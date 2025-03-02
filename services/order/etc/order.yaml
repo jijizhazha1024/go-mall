@@ -1,7 +1,7 @@
 Name: order.rpc
 ListenOn: 0.0.0.0:10004
 Mode: dev
-
+Timeout: 0
 # 服务发现
 Consul:
   Host: 124.71.72.124:8500 # consul endpoint
@@ -25,18 +25,22 @@ Log:
 MysqlConfig:
   datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
 
-#  CheckoutRpc zrpc.RpcClientConf
-#  CouponRpc   zrpc.RpcClientConf
-#  UserRpc     zrpc.RpcClientConf
+
 
 CheckoutRpc:
   Target: consul://124.71.72.124:8500/checkout.rpc?wait=14s
   NonBlock: true
+  Timeout: 10000
 
 CouponRpc:
   Target: consul://124.71.72.124:8500/coupons.rpc?wait=14s
   NonBlock: true
-
+  Timeout: 10000
 UserRpc:
   Target: consul://124.71.72.124:8500/users.rpc?wait=14s
   NonBlock: true
+  Timeout: 10000
+InventoryRpc:
+  Target: consul://124.71.72.124:8500/inventory.rpc?wait=14s
+  NonBlock: true
+  Timeout: 10000

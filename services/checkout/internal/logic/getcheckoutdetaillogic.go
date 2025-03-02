@@ -43,7 +43,7 @@ func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailRe
 		}
 	}
 
-	checkoutItems, err := l.svcCtx.CheckoutItemsModel.FindItemsByUserAndPreOrder(l.ctx, in.UserId, in.PreOrderId)
+	checkoutItems, err := l.svcCtx.CheckoutItemsModel.FindItemsByPreOrder(l.ctx, in.PreOrderId)
 	if err != nil {
 		if errors.Is(err, sqlx.ErrNotFound) {
 			res.StatusCode = code.OutOfRecord
@@ -59,12 +59,14 @@ func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailRe
 	}
 
 	orderData := &checkout.CheckoutOrder{
-		PreOrderId: checkoutRecord.PreOrderId,
-		UserId:     int64(checkoutRecord.UserId),
-		Status:     checkout.CheckoutStatus(checkoutRecord.Status),
-		ExpireTime: checkoutRecord.ExpireTime,
-		CreatedAt:  checkoutRecord.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:  checkoutRecord.UpdatedAt.String(),
+		PreOrderId:     checkoutRecord.PreOrderId,
+		UserId:         int64(checkoutRecord.UserId),
+		Status:         checkout.CheckoutStatus(checkoutRecord.Status),
+		ExpireTime:     checkoutRecord.ExpireTime,
+		CreatedAt:      checkoutRecord.CreatedAt.Format("2006-01-02 15:04:05"),
+		UpdatedAt:      checkoutRecord.UpdatedAt.String(),
+		FinalAmount:    checkoutRecord.FinalAmount,
+		OriginalAmount: checkoutRecord.OriginalAmount,
 	}
 
 	var items []*checkout.CheckoutItem
