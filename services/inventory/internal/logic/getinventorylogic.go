@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
+	"strconv"
 	"time"
 
+	"github.com/redis/rueidis/rueidislock"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"jijizhazha1024/go-mall/services/inventory/internal/svc"
@@ -48,36 +50,77 @@ func (l *GetInventoryLogic) GetInventory(in *inventory.GetInventoryReq) (*invent
 
 	//访问记录
 
-	lockKey := fmt.Sprintf("%s:%d", biz.InventoryAccessKeyPrefix, in.ProductId)
-	newcount, err := l.svcCtx.Rdb.Incr(lockKey)
+	accessKey := fmt.Sprintf(biz.InventoryAccessKeyPrefix, in.ProductId)
+	newcount, err := l.svcCtx.Rdb.Incr(accessKey)
 	if err != nil {
-		l.Logger.Infow("redis inventory incr failed", logx.Field("lock_key", lockKey))
+		l.Logger.Infow("redis inventory incr failed", logx.Field("lock_key", accessKey))
 		return nil, nil
 	}
 	// 设值过期时间，例如设置为4小时
 	expireDuration := 4 * time.Hour
 	expireInSeconds := int(expireDuration.Seconds())
-	err = l.svcCtx.Rdb.Expire(lockKey, expireInSeconds)
+	err = l.svcCtx.Rdb.Expire(accessKey, expireInSeconds)
 	if err != nil {
-		l.Logger.Infow("redis set expire failed", logx.Field("lock_key", lockKey))
+		l.Logger.Infow("redis set expire failed", logx.Field("lock_key", accessKey))
 		return nil, nil
 	}
 
-	if newcount > 500 {
-		//将其加入缓存库存
-		tostr := fmt.Sprintf("%d", inventoryResp.Total)
-		err := l.svcCtx.Rdb.Set(fmt.Sprintf("%s:%d", biz.InventoryProductKey, in.ProductId), tostr)
+	if newcount > 5 {
+		// 创建分布式锁的key
+		lockKey := fmt.Sprintf("%s:%d", biz.InventoryLockKey, in.ProductId)
+
+		// 尝试获取非阻塞锁（立即返回）
+		_, releaseLock, err := l.svcCtx.Locker.TryWithContext(l.ctx, lockKey)
 		if err != nil {
-			l.Logger.Infow("redis set failed", logx.Field("product_id", in.ProductId))
-			return nil, nil
+			if errors.Is(err, rueidislock.ErrNotLocked) {
+				// 锁已被占用，直接返回当前数据
+				l.Logger.Infow("cache update in progress by another instance",
+					logx.Field("product_id", in.ProductId))
+				res.Inventory = inventoryResp.Total
+				res.SoldCount = inventoryResp.Sold
+				return res, nil
+			}
+			// 其他错误情况处理
+			l.Logger.Errorw("failed to acquire distributed lock",
+				logx.Field("error", err),
+				logx.Field("product_id", in.ProductId))
+			return nil, err
 		}
-		expireDuration := 1 * time.Hour
-		expireInSeconds := int(expireDuration.Seconds())
-		err = l.svcCtx.Rdb.Expire(fmt.Sprintf("%s:%d", biz.InventoryProductKey, in.ProductId), expireInSeconds)
-		if err != nil {
-			l.Logger.Infow("redis set expire failed", logx.Field("product_id", in.ProductId))
-			return nil, nil
+		defer releaseLock()
+
+		// 获取锁后再次检查访问量（双重检查）
+		currentCount, err := l.svcCtx.Rdb.Get(accessKey)
+		if err == nil && currentCount <= strconv.Itoa(500) {
+			res.Inventory = inventoryResp.Total
+			res.SoldCount = inventoryResp.Sold
+			return res, nil
 		}
+
+		// 执行缓存更新操作
+
+		cacheKey := fmt.Sprintf("%s:%d", biz.InventoryProductKey, in.ProductId)
+		tostr := fmt.Sprintf("%d", currentCount)
+		if err := l.svcCtx.Rdb.Set(fmt.Sprintf("%s:%d", biz.InventoryProductKey, in.ProductId), tostr); err != nil {
+			l.Logger.Errorw("failed to update inventory cache",
+				logx.Field("product_id", in.ProductId),
+				logx.Field("error", err))
+			return nil, err
+		}
+
+		// 设置缓存过期时间
+		if err := l.svcCtx.Rdb.Expire(cacheKey, 3600); err != nil {
+			l.Logger.Infow("failed to set cache expiration",
+				logx.Field("product_id", in.ProductId),
+				logx.Field("error", err))
+		}
+
+		// 重置访问计数器（原子操作）
+		if err := l.svcCtx.Rdb.Set(accessKey, "0"); err != nil {
+			l.Logger.Errorw("failed to reset access counter",
+				logx.Field("product_id", in.ProductId),
+				logx.Field("error", err))
+		}
+
 	}
 
 	res.Inventory = inventoryResp.Total
