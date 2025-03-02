@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="5090f29b-be46-439b-be0a-ba77d8da6f69" name="local(项目级别)">
+        <fileTransfer accessType="SFTP" host="192.168.241.100" port="22" sshConfigId="1d1a4ff9-3a71-48c3-98fb-5c987bafa3b9" sshConfig="root@192.168.241.100:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="e152d397-3404-4389-a593-657ad059d642" name="华为云(项目级别)">
+        <fileTransfer accessType="SFTP" host="124.71.72.124" port="22" sshConfigId="80585c75-8bf4-48ad-a580-33ad2ffbc92c" sshConfig="root@124.71.72.124:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
