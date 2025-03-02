@@ -58,8 +58,10 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (*order.Ord
 		l.Logger.Errorw("collect order data failed")
 		return nil, err
 	}
+
 	dto.OrderID = l.generateOrderID() // 生成订单ID
 	orderValue := dto.ToOrderModel()
+	orderValue.CouponId = in.CouponId
 	res := &order.OrderDetailResponse{}
 	if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
 		orderSession := l.svcCtx.OrderModel.WithSession(session)

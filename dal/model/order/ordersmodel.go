@@ -23,12 +23,20 @@ type (
 		UpdateOrder2PaymentRollback(context.Context, string, int32) error
 		UpdateOrderStatusByOrderIDAndUserID(context.Context, string, int32, order.OrderStatus, order.PaymentStatus) error
 		CheckOrderExistByPreOrderId(context.Context, string, int32) (bool, error)
+		CancelOrder(ctx context.Context, userId int32, orderId, reason string) error
 	}
 
 	customOrdersModel struct {
 		*defaultOrdersModel
 	}
 )
+
+func (m *customOrdersModel) CancelOrder(ctx context.Context, userId int32, orderId, reason string) error {
+	query := fmt.Sprintf("update %s set `order_status` = ?,`payment_status`,`reason` = ? where `order_id` = ? and `user_id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, order.OrderStatus_ORDER_STATUS_CANCELLED,
+		order.PaymentStatus_PAYMENT_STATUS_EXPIRED, reason, orderId, userId)
+	return err
+}
 
 func (m *customOrdersModel) GetOrdersByUserID(ctx context.Context, userId int32, page, size int32) ([]*Orders, error) {
 	query := fmt.Sprintf("select %s from %s where `user_id` = ?", ordersRows, m.table)

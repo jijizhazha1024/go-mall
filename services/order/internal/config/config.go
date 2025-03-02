@@ -8,9 +8,10 @@ import (
 
 type Config struct {
 	zrpc.RpcServerConf
-	MysqlConfig config.MysqlConfig
-	Consul      consul.Conf
-	CheckoutRpc zrpc.RpcClientConf
-	CouponRpc   zrpc.RpcClientConf
-	UserRpc     zrpc.RpcClientConf
+	MysqlConfig  config.MysqlConfig
+	Consul       consul.Conf
+	CheckoutRpc  zrpc.RpcClientConf
+	CouponRpc    zrpc.RpcClientConf
+	UserRpc      zrpc.RpcClientConf
+	InventoryRpc zrpc.RpcClientConf
 }

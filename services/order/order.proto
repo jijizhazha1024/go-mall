@@ -90,6 +90,7 @@ message CancelOrderRequest {
   string order_id = 1;
   uint32 user_id = 2;            // 用于权限校验
   string cancel_reason = 3;      // 取消原因（可选）
+  bool initiative = 4; // 是否主动取消
 }
 message UpdateOrder2PaymentRequest {
   string order_id = 1;

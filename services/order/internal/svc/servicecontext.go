@@ -7,6 +7,8 @@ import (
 	"jijizhazha1024/go-mall/services/checkout/checkoutservice"
 	"jijizhazha1024/go-mall/services/coupons/coupons"
 	"jijizhazha1024/go-mall/services/coupons/couponsclient"
+	"jijizhazha1024/go-mall/services/inventory/inventory"
+	"jijizhazha1024/go-mall/services/inventory/inventoryclient"
 	"jijizhazha1024/go-mall/services/order/internal/config"
 	"jijizhazha1024/go-mall/services/users/users"
 	"jijizhazha1024/go-mall/services/users/usersclient"
@@ -20,6 +22,7 @@ type ServiceContext struct {
 	CheckoutRpc    checkoutservice.CheckoutService
 	CouponRpc      coupons.CouponsClient
 	UserRpc        users.UsersClient
+	InventoryRpc   inventory.InventoryClient
 	Model          sqlx.SqlConn
 }
 
@@ -33,5 +36,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		CheckoutRpc:    checkoutservice.NewCheckoutService(zrpc.MustNewClient(c.CheckoutRpc)),
 		CouponRpc:      couponsclient.NewCoupons(zrpc.MustNewClient(c.CouponRpc)),
 		UserRpc:        usersclient.NewUsers(zrpc.MustNewClient(c.UserRpc)),
+		InventoryRpc:   inventoryclient.NewInventory(zrpc.MustNewClient(c.InventoryRpc)),
 	}
 }
