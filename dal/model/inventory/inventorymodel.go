@@ -48,12 +48,12 @@ func (m *customInventoryModel) BatchReturnInventoryAtom(ctx context.Context, pro
 		}
 		if isLocked {
 
-			return fmt.Errorf("订单 %s 已被锁定", orderID)
+			return nil
 		}
 
 		// 阶段2: 创建锁记录（30分钟有效期）
 		if err := m.LockOrder(ctx, session, orderID, userID, m.lockreturntable); err != nil {
-			return nil
+			return fmt.Errorf("创建锁失败: %w", err)
 		}
 
 		// 阶段3: 批量锁定库存记录

@@ -3,7 +3,10 @@ package logic
 import (
 	"context"
 	"errors"
+	"fmt"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
+	"time"
 
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
@@ -41,6 +44,40 @@ func (l *GetInventoryLogic) GetInventory(in *inventory.GetInventoryReq) (*invent
 		}
 		l.Logger.Errorw("product inventory get failed", logx.Field("product_id", in.ProductId))
 		return nil, err
+	}
+
+	//访问记录
+
+	lockKey := fmt.Sprintf("%s:%d", biz.InventoryAccessKeyPrefix, in.ProductId)
+	newcount, err := l.svcCtx.Rdb.Incr(lockKey)
+	if err != nil {
+		l.Logger.Infow("redis inventory incr failed", logx.Field("lock_key", lockKey))
+		return nil, nil
+	}
+	// 设值过期时间，例如设置为4小时
+	expireDuration := 4 * time.Hour
+	expireInSeconds := int(expireDuration.Seconds())
+	err = l.svcCtx.Rdb.Expire(lockKey, expireInSeconds)
+	if err != nil {
+		l.Logger.Infow("redis set expire failed", logx.Field("lock_key", lockKey))
+		return nil, nil
+	}
+
+	if newcount > 500 {
+		//将其加入缓存库存
+		tostr := fmt.Sprintf("%d", inventoryResp.Total)
+		err := l.svcCtx.Rdb.Set(fmt.Sprintf("%s:%d", biz.InventoryProductKey, in.ProductId), tostr)
+		if err != nil {
+			l.Logger.Infow("redis set failed", logx.Field("product_id", in.ProductId))
+			return nil, nil
+		}
+		expireDuration := 1 * time.Hour
+		expireInSeconds := int(expireDuration.Seconds())
+		err = l.svcCtx.Rdb.Expire(fmt.Sprintf("%s:%d", biz.InventoryProductKey, in.ProductId), expireInSeconds)
+		if err != nil {
+			l.Logger.Infow("redis set expire failed", logx.Field("product_id", in.ProductId))
+			return nil, nil
+		}
 	}
 
 	res.Inventory = inventoryResp.Total

@@ -29,17 +29,18 @@ func NewUpdateInventoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *U
 func (l *UpdateInventoryLogic) UpdateInventory(in *inventory.UpdateInventoryReq) (*inventory.InventoryResp, error) {
 
 	for _, item := range in.Items {
+		if item.IsHot { //根据 ishot来判断是否是热销商品，如果是热销商品，则加入缓存
+			if item.Quantity <= 0 {
+				l.Logger.Errorw("quantity must be greater than 0", logx.Field("quantity", item.Quantity), logx.Field("product_id", item.ProductId))
+				return nil, biz.InvalidInventoryErr
+			}
+			tostr := fmt.Sprintf("%d", item.Quantity)
+			err := l.svcCtx.Rdb.Set(fmt.Sprintf("%s:%d", biz.InventoryProductKey, item.ProductId), tostr)
 
-		if item.Quantity <= 0 {
-			l.Logger.Errorw("quantity must be greater than 0", logx.Field("quantity", item.Quantity), logx.Field("product_id", item.ProductId))
-			return nil, biz.InvalidInventoryErr
-		}
-		tostr := fmt.Sprintf("%d", item.Quantity)
-		err := l.svcCtx.Rdb.Set(fmt.Sprintf("%s:%d", biz.InventoryProductKey, item.ProductId), tostr)
-
-		if err != nil {
-			l.Logger.Errorw("update inventory failed", logx.Field("product_id", item.ProductId), logx.Field("err", err))
-			return nil, err
+			if err != nil {
+				l.Logger.Errorw("update inventory failed", logx.Field("product_id", item.ProductId), logx.Field("err", err))
+				return nil, err
+			}
 		}
 		//执行sql
 		if err := l.svcCtx.InventoryModel.UpdateOrCreate(l.ctx, inventory2.Inventory{
