@@ -51,5 +51,6 @@ func (l *ListOrdersLogic) ListOrders(in *order.ListOrdersRequest) (*order.ListOr
 	for i, o := range orderList {
 		res.Orders[i] = convertToOrderResp(o)
 	}
+
 	return res, nil
 }

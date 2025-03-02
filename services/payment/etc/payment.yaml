@@ -42,10 +42,6 @@ OrderRpc:
   Target: consul://124.71.72.124:8500/order.rpc?wait=14s
   NonBlock: true
 
-AuditRpc:
-  Target: consul://124.71.72.124:8500/audit.rpc?wait=14s
-  NonBlock: true
-
 RabbitMQConfig:
   Host: "124.71.72.124"
   Port: 5672

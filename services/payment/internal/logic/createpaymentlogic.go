@@ -31,7 +31,6 @@ func NewCreatePaymentLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Cre
 	}
 }
 
-// convertModelToPaymentItem 将 DAL 模型转换为 proto 定义的 PaymentItem
 func ConvertModelToPaymentItem(p *paymentM.Payments) *payment.PaymentItem {
 	var method payment.PaymentMethod
 	switch p.PaymentMethod {

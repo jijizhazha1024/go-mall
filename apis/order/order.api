@@ -1,0 +1,99 @@
+syntax = "v1"
+
+// --------------- 请求结构 ---------------
+type (
+	CreateOrderReq {
+		PreOrderID    string `json:"pre_order_id"`
+		CouponID      string `json:"coupon_id,optional"`
+		AddressID     int32  `json:"address_id"`
+		PaymentMethod int32  `json:"payment_method"` // 1-WECHAT_PAY 2-ALIPAY
+	}
+	CancelOrderReq {
+		OrderID      string `json:"order_id"`
+		CancelReason string `json:"cancel_reason,optional"`
+	}
+	GetOrderReq {
+		OrderID string `json:"order_id"`
+	}
+	ListOrdersReq {
+		Statuses []int32 `json:"statuses,optional"` // 订单状态过滤列表
+		Page     int32   `json:"page,default=1"`
+		PageSize int32   `json:"page_size,default=10"`
+	}
+)
+
+// --------------- 响应结构 ---------------
+type (
+	OrderItemResp {
+		ItemID      string `json:"item_id"`
+		ProductID   uint64 `json:"product_id"`
+		Quantity    uint64 `json:"quantity"`
+		ProductName string `json:"product_name"`
+		ProductDesc string `json:"product_desc"`
+		UnitPrice   string `json:"unit_price"`
+	}
+	OrderAddressResp {
+		AddressID       uint64 `json:"address_id"`
+		RecipientName   string `json:"recipient_name"`
+		PhoneNumber     string `json:"phone_number"`
+		Province        string `json:"province"`
+		City            string `json:"city"`
+		DetailedAddress string `json:"detailed_address"`
+		CreatedAt       string `json:"created_at"`
+		UpdatedAt       string `json:"updated_at"`
+		OrderID         string `json:"order_id"`
+	}
+	OrderResp {
+		OrderID        string `json:"order_id"`
+		PreOrderID     string `json:"pre_order_id"`
+		UserID         uint32 `json:"user_id"`
+		PaymentMethod  int32  `json:"payment_method"`
+		TransactionID  string `json:"transaction_id"`
+		PaidAt         int64  `json:"paid_at"`
+		OriginalAmount string `json:"original_amount"`
+		DiscountAmount string `json:"discount_amount"`
+		PayableAmount  string `json:"payable_amount"`
+		PaidAmount     string `json:"paid_amount"`
+		OrderStatus    int32  `json:"order_status"`
+		PaymentStatus  int32  `json:"payment_status"`
+		Reason         string `json:"reason"`
+		ExpireTime     string `json:"expire_time"`
+		CreatedAt      string `json:"created_at"`
+		UpdatedAt      string `json:"updated_at"`
+	}
+	OrderDetailResp {
+		Order   OrderResp        `json:"order"`
+		Items   []OrderItemResp  `json:"items"`
+		Address OrderAddressResp `json:"address"`
+	}
+	ListOrdersResp {
+		Orders []OrderResp `json:"orders"`
+	}
+	CancelOrderResp {
+		OrderID string `json:"order_id"`
+	}
+)
+
+// --------------- 服务配置 ---------------
+@server (
+	middleware: WithClientMiddleware,WrapperAuthMiddleware
+	prefix:     /douyin/order
+)
+service order-api {
+	// 创建订单
+	@handler CreateOrderHandler
+	post /create (CreateOrderReq) returns (OrderDetailResp)
+
+	// 取消订单
+	@handler CancelOrderHandler
+	post /cancel (CancelOrderReq) returns (CancelOrderResp)
+
+	// 获取订单详情
+	@handler GetOrderHandler
+	get /detail (GetOrderReq) returns (OrderDetailResp)
+
+	// 分页查询订单列表
+	@handler ListOrdersHandler
+	get /list (ListOrdersReq) returns (ListOrdersResp)
+}
+

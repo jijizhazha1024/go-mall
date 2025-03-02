@@ -153,7 +153,7 @@ message EmptyRes {
 
 // // --------------- 服务接口定义 ---------------
 service OrderService {
-  //  CreateOrder 创建订单（需预先生成预订单）
+  //  CreateOrder 创建订单
   rpc CreateOrder(CreateOrderRequest) returns (OrderDetailResponse);
   //  CreateOrderRollback 补偿操作
   rpc CreateOrderRollback(CreateOrderRequest) returns (EmptyRes);

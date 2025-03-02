@@ -8,6 +8,7 @@ import (
 	"jijizhazha1024/go-mall/services/inventory/internal/config"
 	"jijizhazha1024/go-mall/services/inventory/internal/decreaselua"
 	"jijizhazha1024/go-mall/services/inventory/internal/returnlua"
+	"strconv"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/redis"
@@ -61,7 +62,7 @@ func (s *ServiceContext) PreheatInventoryCache() error {
 
 	for _, inv := range inventories {
 		err := s.Rdb.Hset(fmt.Sprintf("inventory:%d", inv.ProductId),
-			"total", string(rune(inv.Total)))
+			"total", strconv.FormatInt(inv.Total, 10))
 		if err != nil {
 			return fmt.Errorf("缓存库存数据失败: %v", err)
 		}

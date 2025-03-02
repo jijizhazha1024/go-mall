@@ -8,7 +8,7 @@ import (
 )
 
 func TestListOrders(t *testing.T) {
-	t.Run("获取商品列表", func(t *testing.T) {
+	t.Run("获取订单列表", func(t *testing.T) {
 		listOrders, err := orderClient.ListOrders(context.Background(), &order.ListOrdersRequest{
 			Pagination: &order.ListOrdersRequest_Pagination{
 				Page:     1,
@@ -50,9 +50,9 @@ func TestListOrders(t *testing.T) {
 
 }
 func TestGetOrder(t *testing.T) {
-	t.Run("获取商品详情", func(t *testing.T) {
+	t.Run("获取订单详情", func(t *testing.T) {
 		orderDetail, err := orderClient.GetOrder(context.Background(), &order.GetOrderRequest{
-			OrderId: "1",
+			OrderId: "019555ed-63be-7c0c-b3e0-23e375399695",
 			UserId:  1,
 		})
 		if err != nil {
@@ -69,7 +69,7 @@ func TestGetOrder(t *testing.T) {
 	t.Run("订单不存在", func(t *testing.T) {
 		// 测试空数据
 		orderDetail, err := orderClient.GetOrder(context.Background(), &order.GetOrderRequest{
-			OrderId: "100",
+			OrderId: "0aaacb632c4aa",
 			UserId:  1,
 		})
 		if err != nil {

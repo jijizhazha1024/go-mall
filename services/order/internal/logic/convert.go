@@ -9,23 +9,24 @@ import (
 )
 
 func convertToCouponItems(items []*checkout.CheckoutItem) []*coupons.Items {
-	couponItems := make([]*coupons.Items, 0, len(items))
-	for _, item := range items {
-		couponItems = append(couponItems, &coupons.Items{
-			ProductId: int32(item.ProductId),
+	couponItems := make([]*coupons.Items, len(items))
+	for i, item := range items {
+		couponItems[i] = &coupons.Items{
+			ProductId: item.ProductId,
 			Quantity:  item.Quantity,
-		})
+		}
 	}
 	return couponItems
 }
 func convertToOrderItems(orderID string, items []*checkout.CheckoutItem) []*order2.OrderItems {
-	orderItems := make([]*order2.OrderItems, 0, len(items))
-	for _, item := range items {
-		orderItems = append(orderItems, &order2.OrderItems{
+	orderItems := make([]*order2.OrderItems, len(items))
+	for i, item := range items {
+		orderItems[i] = &order2.OrderItems{
 			OrderId:   orderID,
 			ProductId: uint64(item.ProductId),
 			Quantity:  uint64(item.Quantity),
-		})
+			Price:     item.Price,
+		}
 	}
 	return orderItems
 }
@@ -48,6 +49,7 @@ func convertToOrderResp(orderModelRes *order2.Orders) *order.Order {
 		PreOrderId:     orderModelRes.PreOrderId,
 		Reason:         orderModelRes.Reason.String,
 		TransactionId:  orderModelRes.TransactionId.String,
+		UserId:         uint32(orderModelRes.UserId),
 	}
 
 	return resp

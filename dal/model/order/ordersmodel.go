@@ -25,12 +25,20 @@ type (
 		CheckOrderExistByPreOrderId(context.Context, string, int32) (bool, error)
 		GetOrderIDByPreID(context.Context, string, int32) (string, error)
 		DeleteOrderByOrderID(ctx context.Context, session sqlx.Session, orderID string) error
+		CancelOrder(ctx context.Context, userID int32, orderId string, reason string) error
 	}
 
 	customOrdersModel struct {
 		*defaultOrdersModel
 	}
 )
+
+func (m *customOrdersModel) CancelOrder(ctx context.Context, userID int32, orderId string, reason string) error {
+	query := fmt.Sprintf("update %s set `order_status` = ?,`payment_status` = ?,`reason` = ? where `order_id` = ? and `user_id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, order.OrderStatus_ORDER_STATUS_CANCELLED, order.OrderStatus_ORDER_STATUS_PENDING_PAYMENT, reason, orderId, userID)
+	return err
+
+}
 
 func (m *customOrdersModel) DeleteOrderByOrderID(ctx context.Context, session sqlx.Session, orderID string) error {
 	query := fmt.Sprintf("delete from %s where `order_id` = ?", m.table)

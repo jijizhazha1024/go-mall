@@ -11,7 +11,7 @@ func TestPrePareCheckout(t *testing.T) {
 		UserId: 1,
 		OrderItems: []*checkout.CheckoutReq_OrderItem{
 			{
-				ProductId: 1,
+				ProductId: 11,
 				Quantity:  1,
 			},
 		},

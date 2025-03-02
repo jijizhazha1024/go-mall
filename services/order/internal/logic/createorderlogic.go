@@ -29,6 +29,7 @@ type orderCreateDTO struct {
 	PaymentMethod order.PaymentMethod
 	Address       *order2.OrderAddresses
 	Items         []*checkout.CheckoutItem
+	OrderItems    []*order2.OrderItems
 	Amounts       *coupons.CalculateCouponResp
 }
 type CreateOrderLogic struct {
@@ -57,7 +58,7 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (*order.Ord
 		l.Logger.Errorw("collect order data failed")
 		return nil, err
 	}
-	dto.OrderID = l.generateOrderID() // 生成订单ID
+
 	orderValue := dto.ToOrderModel()
 	res := &order.OrderDetailResponse{}
 	if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
@@ -79,7 +80,7 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (*order.Ord
 			return err
 		}
 		// 插入订单项关联商品
-		if err := l.svcCtx.OrderItemModel.BulkInsert(session, convertToOrderItems(dto.OrderID, dto.Items)); err != nil {
+		if err := l.svcCtx.OrderItemModel.BulkInsert(session, dto.OrderItems); err != nil {
 			l.Logger.Errorw("insert order items failed", append(l.logContext(dto), logx.Field("err", err))...)
 			return err
 		}
@@ -100,22 +101,25 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (*order.Ord
 	return res, nil
 }
 func (l *CreateOrderLogic) validateRequest(in *order.CreateOrderRequest) error {
-	if in.PreOrderId == "" || in.UserId == 0 || in.AddressId == 0 || in.CouponId == "" || in.PaymentMethod == 0 {
+	if in.PreOrderId == "" || in.UserId == 0 || in.AddressId == 0 || in.PaymentMethod == 0 {
 		return status.Error(codes.Aborted, "参数不合法")
 	}
 	return nil
 }
 func (l *CreateOrderLogic) collectOrderData(in *order.CreateOrderRequest) (*orderCreateDTO, error) {
+
 	g, ctx := errgroup.WithContext(l.ctx)
 	var dto = &orderCreateDTO{
 		PreOrderID:    in.PreOrderId,
 		UserID:        int64(in.UserId),
 		PaymentMethod: in.PaymentMethod,
+		OrderID:       l.generateOrderID(),
 	}
 	g.Go(func() error {
 		// 获取订单详情
 		checkoutDetail, err := l.svcCtx.CheckoutRpc.GetCheckoutDetail(ctx, &checkout.CheckoutDetailReq{
 			PreOrderId: in.PreOrderId,
+			UserId:     int32(in.UserId),
 		})
 		if err != nil {
 			logx.Errorw("call rpc GetCheckoutDetail failed", append(l.logContext(dto), logx.Field("err", err))...)
@@ -123,6 +127,15 @@ func (l *CreateOrderLogic) collectOrderData(in *order.CreateOrderRequest) (*orde
 		}
 		if checkoutDetail.StatusCode != code.Success {
 			return status.Error(codes.Aborted, checkoutDetail.StatusMsg)
+		}
+		dto.OrderItems = convertToOrderItems(dto.OrderID, checkoutDetail.Data.Items)
+
+		if in.CouponId == "" {
+			dto.Amounts = &coupons.CalculateCouponResp{
+				OriginAmount: checkoutDetail.Data.OriginalAmount,
+				FinalAmount:  checkoutDetail.Data.FinalAmount,
+			}
+			return nil
 		}
 		// 计算优惠价格
 		couponResp, err := l.svcCtx.CouponRpc.CalculateCoupon(ctx, &coupons.CalculateCouponReq{

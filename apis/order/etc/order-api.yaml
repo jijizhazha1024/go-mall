@@ -1,0 +1,15 @@
+Name: order-api
+Host: 0.0.0.0
+Port: 8004
+
+
+
+OrderRpc:
+  Target: consul://124.71.72.124:8500/order.rpc?wait=14s
+  NonBlock: true
+
+AuthsRpc:
+  Target: consul://124.71.72.124:8500/auths.rpc?wait=14s
+  NonBlock: true
+
+

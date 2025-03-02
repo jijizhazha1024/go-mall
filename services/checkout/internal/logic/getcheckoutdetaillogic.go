@@ -7,6 +7,7 @@ import (
 	"jijizhazha1024/go-mall/common/consts/code"
 	"jijizhazha1024/go-mall/services/checkout/checkout"
 	"jijizhazha1024/go-mall/services/checkout/internal/svc"
+	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -63,8 +64,8 @@ func (l *GetCheckoutDetailLogic) GetCheckoutDetail(in *checkout.CheckoutDetailRe
 		UserId:         int64(checkoutRecord.UserId),
 		Status:         checkout.CheckoutStatus(checkoutRecord.Status),
 		ExpireTime:     checkoutRecord.ExpireTime,
-		CreatedAt:      checkoutRecord.CreatedAt.Format("2006-01-02 15:04:05"),
-		UpdatedAt:      checkoutRecord.UpdatedAt.String(),
+		CreatedAt:      checkoutRecord.CreatedAt.Format(time.DateTime),
+		UpdatedAt:      checkoutRecord.UpdatedAt.Format(time.DateTime),
 		FinalAmount:    checkoutRecord.FinalAmount,
 		OriginalAmount: checkoutRecord.OriginalAmount,
 	}
