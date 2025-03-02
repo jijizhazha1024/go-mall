@@ -35,6 +35,15 @@ func NewGetInventoryLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetI
 // GetInventory 查询库存
 func (l *GetInventoryLogic) GetInventory(in *inventory.GetInventoryReq) (*inventory.GetInventoryResp, error) {
 
+	// 先从缓存中获取数据
+	cacheKey := fmt.Sprintf("%s:%d", biz.InventoryProductKey, in.ProductId)
+	total, err := l.svcCtx.Rdb.Get(cacheKey)
+	if err == nil {
+		inventoryResp := new(inventory.GetInventoryResp)
+		inventoryResp.Inventory, _ = strconv.ParseInt(total, 10, 64)
+		return inventoryResp, nil
+	}
+
 	inventoryResp, err := l.svcCtx.InventoryModel.FindOne(l.ctx, int64(in.ProductId))
 	res := new(inventory.GetInventoryResp)
 	if err != nil {
@@ -65,7 +74,7 @@ func (l *GetInventoryLogic) GetInventory(in *inventory.GetInventoryReq) (*invent
 		return nil, nil
 	}
 
-	if newcount > 5 {
+	if newcount > 500 {
 		// 创建分布式锁的key
 		lockKey := fmt.Sprintf("%s:%d", biz.InventoryLockKey, in.ProductId)
 
@@ -96,10 +105,22 @@ func (l *GetInventoryLogic) GetInventory(in *inventory.GetInventoryReq) (*invent
 			return res, nil
 		}
 
-		// 执行缓存更新操作
+		// 获取最新当前库存
+		newinventoryResp, err := l.svcCtx.InventoryModel.FindOne(l.ctx, int64(in.ProductId))
+		res := new(inventory.GetInventoryResp)
+		if err != nil {
+			if errors.Is(err, sqlx.ErrNotFound) {
+				l.Logger.Infow("product not in inventory", logx.Field("product_id", in.ProductId))
+				res.StatusCode = code.ProductNotFoundInventory
+				res.StatusMsg = code.ProductNotFoundInventoryMsg
+				return res, nil
+			}
+			l.Logger.Errorw("product inventory get failed", logx.Field("product_id", in.ProductId))
+			return nil, err
+		}
 
 		cacheKey := fmt.Sprintf("%s:%d", biz.InventoryProductKey, in.ProductId)
-		total := strconv.Itoa(int(inventoryResp.Total))
+		total := strconv.Itoa(int(newinventoryResp.Total))
 		if err := l.svcCtx.Rdb.Set(cacheKey, total); err != nil {
 			l.Logger.Errorw("failed to update inventory cache",
 				logx.Field("product_id", in.ProductId),
