@@ -17,7 +17,9 @@ import (
 	gorse "jijizhazha1024/go-mall/common/utils/gorse"
 	"jijizhazha1024/go-mall/dal/model/products/categories"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
+	"jijizhazha1024/go-mall/services/inventory/inventory"
 	"jijizhazha1024/go-mall/services/product/product"
+	"math/rand"
 	"os"
 	"strconv"
 	"testing"
@@ -193,6 +195,37 @@ func TestProductRecommend(t *testing.T) {
 	for _, p := range recommendProduct.Products {
 		t.Log(" success", p)
 	}
+}
+
+func TestLoad2Inventory(t *testing.T) {
+	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.InventoryRpcPort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		panic(err)
+	}
+	client := inventory.NewInventoryClient(conn)
+	//client.
+	os.Setenv("MYSQL_DATA_SOURCE", "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local")
+	mysqlAddress := os.Getenv("MYSQL_DATA_SOURCE")
+	productsModel := product2.NewProductsModel(sqlx.NewMysql(mysqlAddress))
+	products, err := productsModel.QueryAllProducts(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range products {
+		_, err := client.UpdateInventory(context.Background(), &inventory.UpdateInventoryReq{
+			Items: []*inventory.UpdateInventoryReq_Items{
+				{
+					ProductId: int32(p.Id),
+					Quantity:  rand.Int31n(1000),
+				},
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
 }
 
 // 七牛云配置
