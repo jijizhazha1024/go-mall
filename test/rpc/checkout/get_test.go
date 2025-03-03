@@ -14,6 +14,7 @@ func TestGetCheckoutDetail(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	t.Log(detail)
 }
 func TestGetCheckoutList(t *testing.T) {
 	list, err := checkoutClient.GetCheckoutList(context.TODO(), &checkout.CheckoutListReq{

@@ -31,7 +31,7 @@ type (
 	UpdateOrder2PaymentSuccessRequest   = order.UpdateOrder2PaymentSuccessRequest
 
 	OrderService interface {
-		// CreateOrder 创建订单（需预先生成预订单）
+		// CreateOrder 创建订单
 		CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*OrderDetailResponse, error)
 		// CreateOrderRollback 补偿操作
 		CreateOrderRollback(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*EmptyRes, error)
@@ -63,7 +63,7 @@ func NewOrderService(cli zrpc.Client) OrderService {
 	}
 }
 
-// CreateOrder 创建订单（需预先生成预订单）
+// CreateOrder 创建订单
 func (m *defaultOrderService) CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*OrderDetailResponse, error) {
 	client := order.NewOrderServiceClient(m.cli.Conn())
 	return client.CreateOrder(ctx, in, opts...)

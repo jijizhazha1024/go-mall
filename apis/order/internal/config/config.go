@@ -7,6 +7,9 @@ import (
 
 type Config struct {
 	rest.RestConf
-	AuthsRpc zrpc.RpcClientConf
-	OrderRpc zrpc.RpcClientConf
+	AuthsRpc    zrpc.RpcClientConf
+	OrderRpc    zrpc.RpcClientConf
+	CheckoutRpc zrpc.RpcClientConf
+	CouponsRpc  zrpc.RpcClientConf
+	DtmRpc      zrpc.RpcClientConf
 }

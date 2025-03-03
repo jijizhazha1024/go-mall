@@ -14,6 +14,7 @@ const (
 	OrderAlreadyCancelled
 	OrderAlreadyClosed
 	OrderAlreadyRefund
+	CreateOrderFailed
 )
 
 const (
@@ -30,4 +31,5 @@ const (
 	OrderAlreadyCancelledMsg    = "订单已取消，请勿重复操作"
 	OrderAlreadyClosedMsg       = "订单已关闭，请勿重复操作"
 	OrderAlreadyRefundMsg       = "订单已退款，请勿重复操作"
+	CreateOrderFailedMsg        = "创建订单失败"
 )

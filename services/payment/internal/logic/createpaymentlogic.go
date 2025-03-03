@@ -98,6 +98,7 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.PaymentReq) (*payment.Pay
 	if in.PaymentMethod != payment.PaymentMethod_ALIPAY {
 		res.StatusCode = code.PaymentMethodNotSupport
 		res.StatusMsg = code.PaymentMethodNotSupportMsg
+		return res, nil
 	}
 	payUrl, err := GenerateAlipayPaymentURL(l.svcCtx, payableAmount, 1800, in.OrderId)
 	if err != nil {
@@ -118,11 +119,24 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.PaymentReq) (*payment.Pay
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	}
-
 	if _, err := l.svcCtx.PaymentModel.Insert(l.ctx, newPayment); err != nil {
 		return nil, err
 	}
-
+	// 订单变为支付中状态
+	paymentRes, err := l.svcCtx.OrderRpc.UpdateOrder2PaymentStatus(l.ctx, &order.UpdateOrder2PaymentRequest{
+		OrderId: in.OrderId,
+		UserId:  int32(in.UserId),
+	})
+	if err != nil {
+		l.Logger.Errorw("update order status failed", logx.Field("err", err))
+		return nil, err
+	}
+	if paymentRes.StatusCode != code.Success {
+		res.StatusCode = paymentRes.StatusCode
+		res.StatusMsg = paymentRes.StatusMsg
+		return res, nil
+	}
+	// 6. 发送支付单到消息队列
 	if err := l.svcCtx.PaymentMQ.Product(&mq.PaymentReq{
 		OrderId: in.OrderId,
 	}); err != nil {

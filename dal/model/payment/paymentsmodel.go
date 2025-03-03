@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"github.com/zeromicro/go-zero/core/stringx"
-	"strings"
 )
 
 var _ PaymentsModel = (*customPaymentsModel)(nil)
@@ -45,10 +43,6 @@ func NewPaymentsModel(conn sqlx.SqlConn) PaymentsModel {
 		defaultPaymentsModel: newPaymentsModel(conn),
 	}
 }
-
-var (
-	paymentsRowsWithHolder = strings.Join(stringx.Remove(paymentsFieldNames, "`pre_order_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
-)
 
 func (m *customPaymentsModel) WithSession(session sqlx.Session) PaymentsModel {
 	return NewPaymentsModel(sqlx.NewSqlConnFromSession(session))

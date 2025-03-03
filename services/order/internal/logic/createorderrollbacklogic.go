@@ -42,7 +42,7 @@ func (l *CreateOrderRollbackLogic) CreateOrderRollback(in *order.CreateOrderRequ
 	}
 	// 如果订单不存在则直接返回成功（幂等性设计）
 	if orderID == "" {
-		return nil, status.Error(codes.Aborted, "订单不存在")
+		return nil, nil
 	}
 
 	if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {

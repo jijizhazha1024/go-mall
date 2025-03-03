@@ -33,7 +33,6 @@ func (l *UseCouponLogic) UseCoupon(in *coupons.UseCouponReq) (*coupons.EmptyResp
 	res := &coupons.EmptyResp{}
 	// 修改用户优惠券状态，记录优惠券使用记录
 	if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
-
 		// --------------- check ---------------
 		// 判断用户优惠券状态是否已经是已使用，支付成功后，修改优惠券状态为已使用
 		status, err := l.svcCtx.UserCouponsModel.WithSession(session).GetStatusByUserIdCouponId(ctx, in.UserId, in.CouponId)

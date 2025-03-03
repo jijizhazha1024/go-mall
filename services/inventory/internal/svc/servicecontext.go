@@ -66,9 +66,7 @@ func (s *ServiceContext) PreheatInventoryCache() error {
 		if err := s.Rdb.Set(productKey, strconv.Itoa(int(inv.Total))); err != nil {
 			return fmt.Errorf("缓存库存数据失败: %v", err)
 		}
-		logx.Infof("缓存库存数据成功: %s=%d", productKey, inv.Total)
 	}
-
 	return nil
 
 }

@@ -13,6 +13,7 @@ import (
 	order2 "jijizhazha1024/go-mall/dal/model/order"
 	"jijizhazha1024/go-mall/services/checkout/checkout"
 	"jijizhazha1024/go-mall/services/coupons/coupons"
+	"jijizhazha1024/go-mall/services/order/internal/mq/delay"
 	"jijizhazha1024/go-mall/services/users/users"
 	"time"
 
@@ -60,6 +61,7 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (*order.Ord
 	}
 
 	orderValue := dto.ToOrderModel()
+	orderValue.CouponId = in.CouponId
 	res := &order.OrderDetailResponse{}
 	if err := l.svcCtx.Model.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
 		orderSession := l.svcCtx.OrderModel.WithSession(session)
@@ -95,8 +97,17 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (*order.Ord
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	if res.StatusCode != code.Success {
+		// 跳过，当前事务处理，确保幂等
 		l.Logger.Infow("transaction aborted", l.logContext(dto)...)
-		return nil, status.Error(codes.Aborted, res.StatusMsg)
+		return res, nil
+	}
+	// --------------- 订单超时 ---------------
+	if err := l.svcCtx.OrderDelayMQ.Product(&delay.OrderReq{
+		OrderId: dto.OrderID,
+		UserID:  int32(in.UserId),
+	}); err != nil {
+		l.Logger.Errorw("publish order delay message failed", l.logContext(dto)...)
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return res, nil
 }

@@ -80,9 +80,10 @@ func (s *PaymentService) handleAlipayNotification(writer http.ResponseWriter, re
 	case "TRADE_FINISHED":
 	// 交易完成（不可退款）
 	case "TRADE_CLOSED":
-		// 未付款超时关闭/全额退款
 		logx.Infow("Payment closed", logx.Field("order_id", notify.OutTradeNo))
 	case "TRADE_SUCCESS":
+		logx.Infow("Payment success", logx.Field("order_id", notify.OutTradeNo))
+		// 使用消息队列使用
 		// 解析时间字符串
 		paymentTime, err := time.Parse(time.DateTime, notify.GmtPayment)
 		if err != nil {
@@ -127,6 +128,7 @@ func (s *PaymentService) handleAlipayNotification(writer http.ResponseWriter, re
 				PaidAmount:    paymentRes.PaidAmount.Int64,
 				PaidAt:        timestamp,
 			},
+			UserId: int32(paymentRes.UserId),
 		})
 		if err != nil {
 			logx.Errorw("Failed to update order status", logx.Field("err", err))
@@ -136,7 +138,6 @@ func (s *PaymentService) handleAlipayNotification(writer http.ResponseWriter, re
 			logx.Errorw("Failed to update order status", logx.Field("err", err))
 			return
 		}
-		logx.Infow("Payment success", logx.Field("order_id", notify.OutTradeNo))
 
 	}
 	// 返回确认响应给支付宝

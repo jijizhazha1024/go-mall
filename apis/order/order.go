@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	_ "github.com/dtm-labs/dtmdriver-gozero"
 	_ "github.com/zeromicro/zero-contrib/zrpc/registry/consul"
-
 	"jijizhazha1024/go-mall/apis/order/internal/config"
 	"jijizhazha1024/go-mall/apis/order/internal/handler"
 	"jijizhazha1024/go-mall/apis/order/internal/svc"
@@ -19,7 +19,7 @@ func main() {
 	flag.Parse()
 
 	var c config.Config
-	conf.MustLoad(*configFile, &c)
+	conf.MustLoad(*configFile, &c, conf.UseEnv())
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()

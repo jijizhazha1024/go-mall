@@ -44,3 +44,12 @@ InventoryRpc:
   Target: consul://124.71.72.124:8500/inventory.rpc?wait=14s
   NonBlock: true
   Timeout: 10000
+
+
+
+RabbitMQConfig:
+  Host: "124.71.72.124"
+  Port: 5672
+  User: "admin"
+  Pass: "admin"
+  VHost: "/"

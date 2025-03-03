@@ -5,21 +5,21 @@ import (
 	"fmt"
 	_ "github.com/zeromicro/zero-contrib/zrpc/registry/consul"
 
-	"jijizhazha1024/go-mall/apis/checkout/internal/config"
-	"jijizhazha1024/go-mall/apis/checkout/internal/handler"
-	"jijizhazha1024/go-mall/apis/checkout/internal/svc"
+	"jijizhazha1024/go-mall/apis/payment/internal/config"
+	"jijizhazha1024/go-mall/apis/payment/internal/handler"
+	"jijizhazha1024/go-mall/apis/payment/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
 )
 
-var configFile = flag.String("f", "etc/checkout-api.yaml", "the config file")
+var configFile = flag.String("f", "etc/payment-api.yaml", "the config file")
 
 func main() {
 	flag.Parse()
 
 	var c config.Config
-	conf.MustLoad(*configFile, &c, conf.UseEnv())
+	conf.MustLoad(*configFile, &c)
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
