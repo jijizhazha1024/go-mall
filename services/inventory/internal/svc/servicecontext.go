@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/dal/model/inventory"
 	"jijizhazha1024/go-mall/services/inventory/internal/config"
 	"jijizhazha1024/go-mall/services/inventory/internal/decreaselua"
@@ -61,11 +62,11 @@ func (s *ServiceContext) PreheatInventoryCache() error {
 	// 2. 缓存库存数据
 
 	for _, inv := range inventories {
-		err := s.Rdb.Hset(fmt.Sprintf("inventory:%d", inv.ProductId),
-			"total", strconv.FormatInt(inv.Total, 10))
-		if err != nil {
+		productKey := fmt.Sprintf("%s:%d", biz.InventoryProductKey, inv.ProductId)
+		if err := s.Rdb.Set(productKey, strconv.Itoa(int(inv.Total))); err != nil {
 			return fmt.Errorf("缓存库存数据失败: %v", err)
 		}
+		logx.Infof("缓存库存数据成功: %s=%d", productKey, inv.Total)
 	}
 
 	return nil

@@ -9,14 +9,14 @@ for i=2, #KEYS do
     local deduct = tonumber(ARGV[i])  -- ARGV索引从1开始
     if stock < deduct then
     --删除锁
-    redis.call("DEL", KEYS[1])
-        return 2
-    end
+        redis.call("DEL", KEYS[1])
+            return 2
+        end
 end
 
 -- 扣减库存
 for i=2, #KEYS do
-redis.call('DECRBY', KEYS[i], tonumber(ARGV[i]))
+    redis.call('DECRBY', KEYS[i], tonumber(ARGV[i]))
 end
 
 -- 设置处理标记（30分钟过期）
