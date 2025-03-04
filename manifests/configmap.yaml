@@ -1,0 +1,26 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: go-mall-env
+  namespace: go-mall
+data:
+  TZ: "Asia/Shanghai"
+  GPT_API_KEY: "5b5ab09c-7298-40d7-b60e-433d21314f36"
+  GPT_MODEL_ID: "ep-20241002090911-md25k"
+  MYSQL_DATA_SOURCE: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  CONSUL_HOST: "124.71.72.124:8500"
+  TRACES_ENDPOINT: "http://124.71.72.124:14268/api/traces"
+  REDIS_HOST: "124.71.72.124:6379"
+  REDIS_PASSWORD: "jjzzchtt"
+  RABBITMQ_HOST: "124.71.72.124"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_USERNAME: "admin"
+  RABBITMQ_PASSWORD: "admin"
+  RABBITMQ_VHOST: "/"
+  ELASTICSEARCH_HOST: "http://113.45.32.164:9200/"
+  QINIU_ACCESS_KEY: "JfDRw6TYF7B-MXNjIivW1zxcZ6PrSHAHYksBcZOt"
+  QINIU_SECRET_KEY: "ubXESZ4C3bpTh9P0yKTXmzOPXEbpaBgvzFkecWIu"
+  QINIU_BUCKET: "jjzzchtt-mall"
+  QINIU_DOMAIN: "ssa12nnvu.hn-bkt.clouddn.com"
+  GORSE_HOST: "http://47.99.130.92:8088"
+  GORSE_APIKEY: "5105502fc46a411c896aa5b50c31e951"

@@ -1,30 +1,31 @@
+# inventory-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auths-service
+  name: inventory-service
   namespace: go-mall
   labels:
     app: go-mall
-    service: auths
+    service: inventory
 spec:
-  replicas: 1
+  replicas: 1  # 库存服务建议多副本
   selector:
     matchLabels:
       app: go-mall
-      service: auths
+      service: inventory
   template:
     metadata:
       labels:
         app: go-mall
-        service: auths
+        service: inventory
     spec:
       containers:
-        - name: auths-service
+        - name: inventory-service
           image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
-          command: ["/app/services/Auths", "-f", "/app/etc/auths.prod.yaml"]
+          command: ["/app/services/Inventory", "-f", "/app/etc/inventory.prod.yaml"]
           ports:
-            - containerPort: 10000  # 主服务端口
-            - containerPort: 11000  # 健康检查端口
+            - containerPort: 10011  # RPC服务端口
+            - containerPort: 11011  # 库存监控端口
           envFrom:
             - configMapRef:
                 name: go-mall-env
@@ -37,44 +38,40 @@ spec:
               memory: 512Mi
           volumeMounts:
             - mountPath: /app/logs
-              name: app-logs
+              name: inventory-logs
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 11000
-            initialDelaySeconds: 30
-            periodSeconds: 30
+              port: 11011
+            initialDelaySeconds: 20
+            periodSeconds: 15
           readinessProbe:
             httpGet:
               path: /healthz
-              port: 11000
+              port: 11009
             initialDelaySeconds: 5
-            periodSeconds: 10
-          imagePullPolicy: IfNotPresent
       volumes:
-        - name: app-logs
+        - name: inventory-logs
           hostPath:
-            path: /app/logs
-            type: DirectoryOrCreate
+            path: /app/logs/inventory
 
 ---
-# service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: auths-service
+  name: inventory-service
   namespace: go-mall
 spec:
   selector:
     app: go-mall
-    service: auths
+    service: inventory
   ports:
-    - name: auths-rpc  # 内部通信端口（不暴露）
-      port: 10000         # Service 暴露的端口
-      targetPort: 10000   # 容器端口
+    - name: inventory-rpc
+      port: 10011
+      targetPort: 10011
       protocol: TCP
-    - name: auths-metrics  # 健康检查暴露端口
-      port: 11000
-      targetPort: 11000
+    - name: inventory-metrics
+      port: 11011
+      targetPort: 11011
       protocol: TCP
-  type: ClusterIP         # 默认类型，仅集群内部访问
+  type: ClusterIP

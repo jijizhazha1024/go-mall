@@ -11,8 +11,6 @@ jobs:
         run: |
           echo ${{ secrets.REGISTRY_PASSWORD }} | docker login -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin swr.cn-south-1.myhuaweicloud.com
 
-          
-
       - name: Build and push
         uses: docker/build-push-action@v4
         env:

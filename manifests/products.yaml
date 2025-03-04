@@ -1,30 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auths-service
+  name: products-service
   namespace: go-mall
   labels:
     app: go-mall
-    service: auths
+    service: products
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: go-mall
-      service: auths
+      service: products
   template:
     metadata:
       labels:
         app: go-mall
-        service: auths
+        service: products
     spec:
       containers:
-        - name: auths-service
+        - name: products-service
           image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
-          command: ["/app/services/Auths", "-f", "/app/etc/auths.prod.yaml"]
+          command: ["/app/services/Product", "-f", "/app/etc/product.prod.yaml"]
           ports:
-            - containerPort: 10000  # 主服务端口
-            - containerPort: 11000  # 健康检查端口
+            - containerPort: 10002  # 主服务端口
+            - containerPort: 11002  # 健康检查端口
           envFrom:
             - configMapRef:
                 name: go-mall-env
@@ -41,13 +41,13 @@ spec:
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 11000
+              port: 11002
             initialDelaySeconds: 30
             periodSeconds: 30
           readinessProbe:
             httpGet:
               path: /healthz
-              port: 11000
+              port: 11002
             initialDelaySeconds: 5
             periodSeconds: 10
           imagePullPolicy: IfNotPresent
@@ -58,23 +58,22 @@ spec:
             type: DirectoryOrCreate
 
 ---
-# service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: auths-service
+  name: products-service
   namespace: go-mall
 spec:
   selector:
     app: go-mall
-    service: auths
+    service: products
   ports:
-    - name: auths-rpc  # 内部通信端口（不暴露）
-      port: 10000         # Service 暴露的端口
-      targetPort: 10000   # 容器端口
+    - name: product-rpc
+      port: 10002
+      targetPort: 10002
       protocol: TCP
-    - name: auths-metrics  # 健康检查暴露端口
-      port: 11000
-      targetPort: 11000
+    - name: product-metrics
+      port: 11002
+      targetPort: 11002
       protocol: TCP
-  type: ClusterIP         # 默认类型，仅集群内部访问
+  type: ClusterIP

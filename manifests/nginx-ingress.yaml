@@ -1,17 +1,17 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: go-mall-ingress
-  namespace:  go-mall
+  name: go-mall-route
+  namespace: go-mall
 spec:
   rules:
     - host: nginx.kubernetes-devops.cn
       http:
         paths:
-          - path: /douyin/user/
+          - path: /douyin/user
             pathType: ImplementationSpecific
             backend:
               service:
-                name: auths-api-stable # 对应service
+                name: users-api
                 port:
-                  number: 8888
+                  number: 8001

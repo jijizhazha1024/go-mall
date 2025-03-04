@@ -1,80 +1,80 @@
+# users-api 部署
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auths-service
+  name: users-api  # 保持命名规范
   namespace: go-mall
   labels:
     app: go-mall
-    service: auths
+    service: users-api  # 明确区分服务类型
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: go-mall
-      service: auths
+      service: users-api  # 匹配API标签
   template:
     metadata:
       labels:
         app: go-mall
-        service: auths
+        service: users-api
     spec:
       containers:
-        - name: auths-service
+        - name: users-api
           image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
-          command: ["/app/services/Auths", "-f", "/app/etc/auths.prod.yaml"]
+          command: ["/app/apis/User", "-f", "/app/etc/user-api.prod.yaml"]  # API二进制路径
           ports:
-            - containerPort: 10000  # 主服务端口
-            - containerPort: 11000  # 健康检查端口
+            - containerPort: 8001
+            - containerPort: 8101
           envFrom:
             - configMapRef:
                 name: go-mall-env
           resources:
             requests:
-              cpu: 200m
-              memory: 256Mi
+              cpu: 100m
+              memory: 128Mi
             limits:
-              cpu: 1000m
+              cpu: 800m
               memory: 512Mi
-          volumeMounts:
-            - mountPath: /app/logs
-              name: app-logs
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 11000
+              port: 8101
             initialDelaySeconds: 30
             periodSeconds: 30
           readinessProbe:
             httpGet:
               path: /healthz
-              port: 11000
+              port: 8101
             initialDelaySeconds: 5
             periodSeconds: 10
+          volumeMounts:
+            - mountPath: /app/logs
+              name: app-logs
           imagePullPolicy: IfNotPresent
       volumes:
         - name: app-logs
           hostPath:
             path: /app/logs
-            type: DirectoryOrCreate
 
 ---
-# service.yaml
+# users-api 的 Service
 apiVersion: v1
 kind: Service
 metadata:
-  name: auths-service
+  name: users-api
   namespace: go-mall
 spec:
   selector:
     app: go-mall
-    service: auths
+    service: users-api  # 匹配API标签
   ports:
-    - name: auths-rpc  # 内部通信端口（不暴露）
-      port: 10000         # Service 暴露的端口
-      targetPort: 10000   # 容器端口
+    - name: users-api     # 主服务端口
+      port: 8001            # 集群内访问端口
+      targetPort: 8001    # 映射到容器端口8001
       protocol: TCP
-    - name: auths-metrics  # 健康检查暴露端口
-      port: 11000
-      targetPort: 11000
+    - name: users-api-metrics  # 监控指标端口
+      port: 8101          # 集群内访问端口
+      targetPort: 8101    # 映射到容器健康检查端口
       protocol: TCP
-  type: ClusterIP         # 默认类型，仅集群内部访问
+  type: ClusterIP         # 默认服务类型
