@@ -25,3 +25,9 @@ Log:
 
 MysqlConfig:
   datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port:  11000
+  EnablePprof: false

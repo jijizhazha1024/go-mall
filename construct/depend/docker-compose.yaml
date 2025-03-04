@@ -86,9 +86,9 @@ services:
     ports:
       - "36789:36789"
       - "36790:36790"
-    command: [ "dtm", "-c", "/conf/dtm.yaml" ]
+    command: [ "dtm", "-c", "/app/dtm/configs/config.yaml" ]
     volumes:
-      - ./conf/dtm.yaml:/conf/dtm.yaml
+      - ./conf/dtm.yaml:/app/dtm/configs/config.yaml
     networks:
       mall:
 

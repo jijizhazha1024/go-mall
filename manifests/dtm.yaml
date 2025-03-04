@@ -63,3 +63,19 @@ data:
       Driver: 'dtm-driver-gozero' # 配置dtm使用go-zero的微服务协议
       Target: 'consul://124.71.72.124:8500/dtmservice' # 把dtm注册到consul的这个地址
       EndPoint: '0.0.0.0:36790'
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dtm-service
+  namespace: go-mall
+spec:
+  selector:
+    app: dtm  # 匹配Deployment的标签
+  ports:
+    - name: http
+      port: 36789           # 集群内访问的端口
+      targetPort: 36789  # 映射到容器端口
+      protocol: TCP
+  type: ClusterIP  # 根据实际需求可改为NodePort/LoadBalancer

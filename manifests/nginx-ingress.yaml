@@ -36,3 +36,31 @@ spec:
                 name: coupons-api
                 port:
                   number: 8009
+          - path: /douyin/checkout
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: checkout-api
+                port:
+                  number: 8005
+          - path: /douyin/order
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-api
+                port:
+                  number: 8004
+          - path: /douyin/dtm/web
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: dtm-service
+                port:
+                  number: 36789
+          - path: /douyin/payment
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: payment-api
+                port:
+                  number: 8006

@@ -23,3 +23,8 @@ OptionPathList:
   
 
 
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port: 8101 # api服务端口+100，例如api端口为8001，指标端口是8101
+  EnablePprof: false
