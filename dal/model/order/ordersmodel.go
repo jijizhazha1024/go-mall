@@ -23,12 +23,28 @@ type (
 		UpdateOrder2PaymentRollback(context.Context, string, int32) error
 		UpdateOrderStatusByOrderIDAndUserID(context.Context, string, int32, order.OrderStatus, order.PaymentStatus) error
 		CheckOrderExistByPreOrderId(context.Context, string, int32) (bool, error)
+		GetOrderIDByPreID(context.Context, string, int32) (string, error)
+		DeleteOrderByOrderID(ctx context.Context, session sqlx.Session, orderID string) error
+		CancelOrder(ctx context.Context, userID int32, orderId string, reason string) error
 	}
 
 	customOrdersModel struct {
 		*defaultOrdersModel
 	}
 )
+
+func (m *customOrdersModel) CancelOrder(ctx context.Context, userID int32, orderId string, reason string) error {
+	query := fmt.Sprintf("update %s set `order_status` = ?,`payment_status` = ?,`reason` = ? where `order_id` = ? and `user_id` = ?", m.table)
+	_, err := m.conn.ExecCtx(ctx, query, order.OrderStatus_ORDER_STATUS_CANCELLED, order.OrderStatus_ORDER_STATUS_PENDING_PAYMENT, reason, orderId, userID)
+	return err
+
+}
+
+func (m *customOrdersModel) DeleteOrderByOrderID(ctx context.Context, session sqlx.Session, orderID string) error {
+	query := fmt.Sprintf("delete from %s where `order_id` = ?", m.table)
+	_, err := session.ExecCtx(ctx, query, orderID)
+	return err
+}
 
 func (m *customOrdersModel) GetOrdersByUserID(ctx context.Context, userId int32, page, size int32) ([]*Orders, error) {
 	query := fmt.Sprintf("select %s from %s where `user_id` = ?", ordersRows, m.table)
@@ -41,6 +57,20 @@ func (m *customOrdersModel) GetOrdersByUserID(ctx context.Context, userId int32,
 		return resp, nil
 	default:
 		return nil, err
+	}
+}
+func (m *customOrdersModel) GetOrderIDByPreID(ctx context.Context, preOrderId string, userID int32) (string, error) {
+	query := fmt.Sprintf("select `order_id` from %s where `pre_order_id` = ? and `user_id` = ? LIMIT 1 FOR SHARE ",
+		m.table)
+	var orderId string
+	err := m.conn.QueryRowCtx(ctx, &orderId, query, preOrderId, userID)
+	switch {
+	case err == nil:
+		return orderId, nil
+	case errors.Is(err, sqlx.ErrNotFound):
+		return "", nil
+	default:
+		return "", err
 	}
 }
 

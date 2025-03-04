@@ -1,47 +1,80 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: auths-service
   namespace: go-mall
   labels:
-    app: auths-service
+    app: go-mall
+    service: auths
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auths-service
+      app: go-mall
+      service: auths
   template:
     metadata:
-      name: auths-service
       labels:
-        app: auths-service
+        app: go-mall
+        service: auths
     spec:
       containers:
         - name: auths-service
-          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall
-          imagePullPolicy: IfNotPresent
-          command:
-            - ./services/AuthsApi
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+          command: ["/app/services/Auths", "-f", "/app/etc/auths.prod.yaml"]
           ports:
-            - name: service-10000
-              containerPort: 10000
-              protocol: TCP
-          volumeMounts:
-            - name: project-etc-volume
-              mountPath: /app/etc
-            - name: project-logs-volume
-              mountPath: /app/logs
+            - containerPort: 10000  # 主服务端口
+            - containerPort: 11000  # 健康检查端口
           envFrom:
             - configMapRef:
                 name: go-mall-env
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          volumeMounts:
+            - mountPath: /app/logs
+              name: app-logs
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 11000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 11000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          imagePullPolicy: IfNotPresent
       volumes:
-        - name: project-etc-volume
+        - name: app-logs
           hostPath:
-            path: /data/etc
+            path: /app/logs
             type: DirectoryOrCreate
-        - name: project-logs-volume
-          hostPath:
-            path: /data/logs
-      restartPolicy: Always
-      terminationGracePeriodSeconds: 30
+
+---
+# service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: auths-service
+  namespace: go-mall
+spec:
+  selector:
+    app: go-mall
+    service: auths
+  ports:
+    - name: auths-rpc  # 内部通信端口（不暴露）
+      port: 10000         # Service 暴露的端口
+      targetPort: 10000   # 容器端口
+      protocol: TCP
+    - name: auths-metrics  # 健康检查暴露端口
+      port: 11000
+      targetPort: 11000
+      protocol: TCP
+  type: ClusterIP         # 默认类型，仅集群内部访问

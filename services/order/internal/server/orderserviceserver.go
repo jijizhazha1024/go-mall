@@ -22,7 +22,7 @@ func NewOrderServiceServer(svcCtx *svc.ServiceContext) *OrderServiceServer {
 	}
 }
 
-// CreateOrder 创建订单（需预先生成预订单）
+// CreateOrder 创建订单
 func (s *OrderServiceServer) CreateOrder(ctx context.Context, in *order.CreateOrderRequest) (*order.OrderDetailResponse, error) {
 	l := logic.NewCreateOrderLogic(ctx, s.svcCtx)
 	return l.CreateOrder(in)

@@ -35,9 +35,9 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// ================== 服务接口定义 ==================
+// // --------------- 服务接口定义 ---------------
 type OrderServiceClient interface {
-	// CreateOrder 创建订单（需预先生成预订单）
+	// CreateOrder 创建订单
 	CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*OrderDetailResponse, error)
 	// CreateOrderRollback 补偿操作
 	CreateOrderRollback(ctx context.Context, in *CreateOrderRequest, opts ...grpc.CallOption) (*EmptyRes, error)
@@ -173,9 +173,9 @@ func (c *orderServiceClient) GetOrder2Payment(ctx context.Context, in *GetOrderR
 // All implementations must embed UnimplementedOrderServiceServer
 // for forward compatibility
 //
-// ================== 服务接口定义 ==================
+// // --------------- 服务接口定义 ---------------
 type OrderServiceServer interface {
-	// CreateOrder 创建订单（需预先生成预订单）
+	// CreateOrder 创建订单
 	CreateOrder(context.Context, *CreateOrderRequest) (*OrderDetailResponse, error)
 	// CreateOrderRollback 补偿操作
 	CreateOrderRollback(context.Context, *CreateOrderRequest) (*EmptyRes, error)

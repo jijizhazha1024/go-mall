@@ -1,0 +1,49 @@
+Name: order-api
+Host: 0.0.0.0
+Port: 8004
+Mode: pro
+Verbose: false # 关闭详细日志
+Timeout: 0 # 默认为0，表示不超时
+
+
+# 日志配置
+Log:
+  ServiceName: "order-api"
+  Mode: 'file'
+  Encoding: "json"
+  Path: "./logs/order-api"
+  KeepDays: 30    # 保留30天日志
+  Compress: true  # 启用日志压缩
+  Rotation: size  # 按大小切割日志
+  MaxSize: 100    # 每个日志文件最大100MB
+
+# 链路追踪
+Telemetry:
+  Name: order-api
+  Endpoint: ${TRACES_ENDPOINT}
+  Batcher: jaeger
+  Sampler: 0.1
+
+# 指标监控配置
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port: 8104 
+  EnablePprof: false
+
+
+OrderRpc:
+  Target: consul://${CONSUL_HOST}/order.rpc?wait=14s
+  NonBlock: true
+  Timeout: 0
+
+DtmRpc:
+  Target: consul://${CONSUL_HOST}/dtmservice?wait=14s
+  NonBlock: true
+
+CheckoutRpc:
+  Target: consul://${CONSUL_HOST}/checkout.rpc?wait=14s
+  NonBlock: true
+CouponsRpc:
+  Target: consul://${CONSUL_HOST}/coupons.rpc?wait=14s
+  NonBlock: true

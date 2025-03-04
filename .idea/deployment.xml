@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData">
+  <component name="PublishConfigData" confirmBeforeUploading="false">
+    <option name="confirmBeforeUploading" value="false" />
     <serverData>
       <paths name="local">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/project/go-mall" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="local(项目级别)">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -13,6 +21,20 @@
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+<<<<<<< HEAD
+      <paths name="华为云(项目级别)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+=======
+      <paths name="阿里云k8s">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/project/go-mall" local="$PROJECT_DIR$" web="/" />
+>>>>>>> feat/lzb/ci
           </mappings>
         </serverdata>
       </paths>

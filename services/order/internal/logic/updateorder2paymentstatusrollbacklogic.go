@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"errors"
-
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -64,18 +63,15 @@ func (l *UpdateOrder2PaymentStatusRollbackLogic) UpdateOrder2PaymentStatusRollba
 		}
 
 		// --------------- 执行状态回滚 ---------------
-		if err := l.svcCtx.OrderModel.WithSession(session).
-			UpdateOrderStatusByOrderIDAndUserID(ctx,
-				in.OrderId,
-				in.UserId,
-				order.OrderStatus_ORDER_STATUS_CREATED, order.PaymentStatus_PAYMENT_STATUS_NOT_PAID); err != nil {
+		if err := l.svcCtx.OrderModel.WithSession(session).UpdateOrderStatusByOrderIDAndUserID(ctx, in.OrderId, in.UserId,
+			order.OrderStatus_ORDER_STATUS_CREATED, order.PaymentStatus_PAYMENT_STATUS_NOT_PAID); err != nil {
 			l.Logger.Errorw("rollback order status failed",
 				logx.Field("error", err),
 				logx.Field("order_id", in.OrderId))
 			return err
 		}
 
-		// --------------- 记录补偿日志（可选）---------------
+		// --------------- 记录补偿日志 ---------------
 		return nil
 	}); err != nil {
 		l.Logger.Errorw("transaction failed",

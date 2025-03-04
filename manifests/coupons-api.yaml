@@ -1,0 +1,84 @@
+# coupons-api-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coupons-api
+  namespace: go-mall
+  labels:
+    app: go-mall
+    service: coupons-api
+    tier: api
+spec:
+  replicas: 1  # API服务需要更高可用性
+  selector:
+    matchLabels:
+      app: go-mall
+      service: coupons-api
+  template:
+    metadata:
+      labels:
+        app: go-mall
+        service: coupons-api
+        version: v2.0.1
+      annotations:
+        sidecar.istio.io/inject: "true"  # 服务网格集成
+    spec:
+      containers:
+        - name: coupons-api
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+          command: ["/app/apis/Coupon", "-f", "/app/etc/coupon-api.prod.yaml"]
+          ports:
+            - containerPort: 8009  # API端口
+            - containerPort: 8109  # 监控端口
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 800m
+              memory: 512Mi
+          volumeMounts:
+            - mountPath: /app/logs
+              name: api-logs
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8109
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8109
+            initialDelaySeconds: 30
+            timeoutSeconds: 3
+      volumes:
+        - name: api-logs
+          hostPath:
+            path: /app/logs/coupons-api
+            type: DirectoryOrCreate
+
+---
+# coupons-api-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: coupons-api
+  namespace: go-mall
+spec:
+  selector:
+    app: go-mall
+    service: coupons-api
+  ports:
+    - name: coupons-api
+      port: 8009
+      targetPort: 8009
+      protocol: TCP
+    - name: coupons-api-metrics
+      port: 8109
+      targetPort: 8109
+      protocol: TCP
+  type: ClusterIP

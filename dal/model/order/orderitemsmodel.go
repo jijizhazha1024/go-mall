@@ -18,12 +18,19 @@ type (
 		// BulkInsert 批量插入
 		BulkInsert(session sqlx.Session, items []*OrderItems) error
 		QueryOrderItemsByOrderID(ctx context.Context, orderID string) ([]*OrderItems, error)
+		DeleteOrderItemByOrderID(ctx context.Context, session sqlx.Session, orderID string) error
 	}
 
 	customOrderItemsModel struct {
 		*defaultOrderItemsModel
 	}
 )
+
+func (m *customOrderItemsModel) DeleteOrderItemByOrderID(ctx context.Context, session sqlx.Session, orderID string) error {
+	query := fmt.Sprintf("delete from %s where `order_id` = ?", m.table)
+	_, err := session.ExecCtx(ctx, query, orderID)
+	return err
+}
 
 func (m *customOrderItemsModel) QueryOrderItemsByOrderID(ctx context.Context, orderID string) ([]*OrderItems, error) {
 	query := fmt.Sprintf("select %s from %s where `order_id` = ?", orderItemsRows, m.table)

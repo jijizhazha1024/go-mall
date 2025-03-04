@@ -14,7 +14,7 @@ Consul:
 MysqlConfig:
   datasource: ${MYSQL_DATA_SOURCE}
   conntimeout: 5
-  
+
 Log:
   ServiceName: "carts-rpc"
   Mode: 'file'

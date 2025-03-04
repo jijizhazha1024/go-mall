@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audit-service
+  namespace: go-mall
+  labels:
+    app: go-mall
+    service: audit
+spec:
+  replicas: 1 # 审计服务建议双副本
+  selector:
+    matchLabels:
+      app: go-mall
+      service: audit
+  template:
+    metadata:
+      labels:
+        app: go-mall
+        service: audit
+    spec:
+
+      containers:
+        - name: audit-service
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+          command: ["/app/services/Audit", "-f", "/app/etc/audit.prod.yaml"]
+          ports:
+            - containerPort: 10008  # 审计记录主端口
+            - containerPort: 11008  # 审计指标端口
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          volumeMounts:
+            - mountPath: /app/logs
+              name: audit-logs
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 11008
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 11008
+            initialDelaySeconds: 5
+      volumes:
+        - name: audit-logs
+          hostPath:
+            path: /app/logs/audit
+            type: DirectoryOrCreate
+
+---
+# audit-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: audit-service
+  namespace: go-mall
+
+spec:
+  selector:
+    app: go-mall
+    service: audit
+  ports:
+    - name: audit-metrics
+      port: 11008
+      targetPort: 11008
+      protocol: TCP
+    - name: audit-rpc
+      port: 10008
+      targetPort: 10008
+      protocol: TCP
+  type: ClusterIP

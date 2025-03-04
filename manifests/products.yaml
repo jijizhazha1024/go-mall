@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: products-service
+  namespace: go-mall
+  labels:
+    app: go-mall
+    service: products
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-mall
+      service: products
+  template:
+    metadata:
+      labels:
+        app: go-mall
+        service: products
+    spec:
+      containers:
+        - name: products-service
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+          command: ["/app/services/Product", "-f", "/app/etc/product.prod.yaml"]
+          ports:
+            - containerPort: 10002  # 主服务端口
+            - containerPort: 11002  # 健康检查端口
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          volumeMounts:
+            - mountPath: /app/logs
+              name: app-logs
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 11002
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 11002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          imagePullPolicy: IfNotPresent
+      volumes:
+        - name: app-logs
+          hostPath:
+            path: /app/logs
+            type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: products-service
+  namespace: go-mall
+spec:
+  selector:
+    app: go-mall
+    service: products
+  ports:
+    - name: product-rpc
+      port: 10002
+      targetPort: 10002
+      protocol: TCP
+    - name: product-metrics
+      port: 11002
+      targetPort: 11002
+      protocol: TCP
+  type: ClusterIP

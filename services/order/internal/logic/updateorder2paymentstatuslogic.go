@@ -73,5 +73,5 @@ func (l *UpdateOrder2PaymentStatusLogic) UpdateOrder2PaymentStatus(in *order.Upd
 
 		return nil, status.Error(codes.Aborted, res.StatusMsg)
 	}
-	return &order.EmptyRes{}, nil
+	return res, nil
 }

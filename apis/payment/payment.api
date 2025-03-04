@@ -1,0 +1,46 @@
+syntax = "v1"
+
+type (
+	// 支付状态枚举
+	// 支付单详情
+	PaymentItem {
+		PaymentID     string `json:"payment_id"`
+		OrderID       string `json:"order_id"`
+		PaidAmount    int64  `json:"paid_amount"`
+		PaymentMethod int32  `json:"payment_method"`
+		TransactionID string `json:"transaction_id"`
+		PayURL        string `json:"pay_url"`
+		Status        int32  `json:"status"`
+		CreatedAt     int64  `json:"created_at"`
+	}
+	// 支付请求
+	PaymentReq {
+		OrderID       string `json:"order_id"`
+		PaymentMethod int32  `json:"payment_method,options=1|2"`
+	}
+	// 支付列表请求
+	PaymentListReq {
+		PaymentMethod int32 `json:"method,optional"`
+		Page          int32 `json:"page,default=1"` // 页码（默认1）
+		PageSize      int32 `json:"page_size,default=10"` // 页大小（默认10）
+	}
+	PaymentResponse {
+		Data PaymentItem `json:"data"`
+	}
+	PaymentListResponse {
+		Data []PaymentItem `json:"data"`
+	}
+)
+
+@server (
+	middleware: WithClientMiddleware,WrapperAuthMiddleware
+	prefix:     /douyin/payment
+)
+service payment-api {
+	@handler createPayment
+	post /create (PaymentReq) returns (PaymentResponse)
+
+	@handler listPayments
+	get /list (PaymentListReq) returns (PaymentListResponse)
+}
+
