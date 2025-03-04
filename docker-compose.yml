@@ -81,6 +81,33 @@ services:
       - "11009:11009"
     environment:
       HEALTHCHECK_PORT: "11009"
+  checkout-service:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-checkout-service
+    command: [ "/app/services/Checkout", "-f", "/app/etc/checkout.prod.yaml" ]
+    ports:
+      - "10005:10005"
+      - "11005:11005"
+    environment:
+      HEALTHCHECK_PORT: "11005"
+  order-service:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-order-service
+    command: [ "/app/services/Order", "-f", "/app/etc/order.prod.yaml" ]
+    ports:
+      - "10004:10004"
+      - "11004:11004"
+    environment:
+      HEALTHCHECK_PORT: "11004"
+  payment-service:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-payment-service
+    command: [ "/app/services/Payment", "-f", "/app/etc/payment.prod.yaml" ]
+    ports:
+      - "10006:10006"
+      - "11006:11006"
+    environment:
+      HEALTHCHECK_PORT: "11006"
   user-api:
     <<: [ *common,*healthcheck ]
     container_name: go-mall-users-api
@@ -119,5 +146,10 @@ services:
       - "8109:8109"
     environment:
       HEALTHCHECK_PORT: "8109"
+  checkout-api:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-checkout-api
+    command: [ "/app/apis/Checkout", "-f", "/app/etc/checkout-api.prod.yaml" ]
+
 networks:
   go-mall:
