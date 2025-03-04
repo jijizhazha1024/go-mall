@@ -3,7 +3,7 @@ Host: 0.0.0.0
 Port: 8004
 Mode: pro
 Verbose: false # 关闭详细日志
-Timeout: 0 # 默认为0，表示不超时
+Timeout: 30000 # 默认为0，表示不超时
 
 
 # 日志配置
@@ -28,15 +28,13 @@ Telemetry:
 DevServer:
   Enabled: true
   Host: 0.0.0.0
-  Port: 8104 
+  Port: 8104
   EnablePprof: false
 
 
 OrderRpc:
   Target: consul://${CONSUL_HOST}/order.rpc?wait=14s
   NonBlock: true
-  Timeout: 0
-
 DtmRpc:
   Target: consul://${CONSUL_HOST}/dtmservice?wait=14s
   NonBlock: true
@@ -44,6 +42,11 @@ DtmRpc:
 CheckoutRpc:
   Target: consul://${CONSUL_HOST}/checkout.rpc?wait=14s
   NonBlock: true
+
 CouponsRpc:
   Target: consul://${CONSUL_HOST}/coupons.rpc?wait=14s
+  NonBlock: true
+
+AuthsRpc:
+  Target: consul://${CONSUL_HOST}/auths.rpc?wait=14s
   NonBlock: true

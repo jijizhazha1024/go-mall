@@ -3,7 +3,7 @@ Host: 0.0.0.0
 Port: 8005
 Mode: pro
 Verbose: false # 关闭详细日志
-Timeout: 0 # 默认为0，表示不超时
+Timeout: 20000 # 默认为0，表示不超时
 
 
 # 日志配置
@@ -35,9 +35,10 @@ DevServer:
 CheckoutRpc:
   Target: consul://${CONSUL_HOST}/checkout.rpc?wait=14s
   NonBlock: true
+  Timeout: 18000
+
 
 AuthsRpc:
   Target: consul://${CONSUL_HOST}/auths.rpc?wait=14s
   NonBlock: true
-
 

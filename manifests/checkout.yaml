@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout-service
+  namespace: go-mall
+  labels:
+    app: go-mall
+    service: checkout
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-mall
+      service: checkout
+  template:
+    metadata:
+      labels:
+        app: go-mall
+        service: checkout
+    spec:
+      containers:
+        - name: checkout-service
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+          command: [ "/app/services/Checkout", "-f", "/app/etc/checkout.prod.yaml" ]
+          ports:
+            - containerPort: 10005  # 主服务端口
+            - containerPort: 11005  # 健康检查端口
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+          volumeMounts:
+            - mountPath: /app/logs
+              name: app-logs
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 11005
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 11005
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          imagePullPolicy: Always
+      volumes:
+        - name: app-logs
+          hostPath:
+            path: /app/logs
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: checkout-service
+  namespace: go-mall
+spec:
+  selector:
+    app: go-mall
+    service: checkout
+  ports:
+    - name: checkout-rpc       # 内部通信端口
+      port: 10005
+      targetPort: 10005
+      protocol: TCP
+    - name: checkout-metrics  # 健康检查暴露端口
+      port: 11005
+      targetPort: 11005
+      protocol: TCP
+  type: ClusterIP

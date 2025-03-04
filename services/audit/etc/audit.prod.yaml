@@ -1,7 +1,7 @@
 Name: audit.rpc
 ListenOn: 0.0.0.0:10008
 Mode: pro
-
+Timeout: 5000
 # 服务发现
 Consul:
   Host: ${CONSUL_HOST}

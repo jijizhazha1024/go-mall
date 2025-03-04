@@ -2,12 +2,12 @@ Name: payment-api
 Host: 0.0.0.0
 Port: 8006
 Verbose: false # 关闭详细日志
-Timeout: 0 # 默认为0，表示不超时
+Timeout: 30000 # 默认为0，表示不超时
 
 PaymentRpc:
   Target: consul://${CONSUL_HOST}/payment.rpc?wait=14s
   NonBlock: true
-  Timeout: 0
+  Timeout: 28000
 AuthsRpc:
   Target: consul://${CONSUL_HOST}/auths.rpc?wait=14s
   NonBlock: true

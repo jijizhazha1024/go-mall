@@ -1,7 +1,7 @@
 Name: payment.rpc
 ListenOn: 0.0.0.0:10006
 Mode: pro
-
+Timeout: 30000
 # 服务发现
 Consul:
   Host: ${CONSUL_HOST}
@@ -46,6 +46,7 @@ Alipay:
 OrderRpc:
   Target: consul://${CONSUL_HOST}/order.rpc?wait=14s
   NonBlock: true
+  Timeout: 25000
 
 RabbitMQConfig:
   Host: ${RABBITMQ_HOST}

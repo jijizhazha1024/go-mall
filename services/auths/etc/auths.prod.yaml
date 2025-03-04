@@ -2,6 +2,7 @@
 Name: auths.rpc
 ListenOn: 0.0.0.0:10000 # 端口见接口文档
 Mode: pro
+Timeout: 5000
 
 # 服务发现
 Consul:

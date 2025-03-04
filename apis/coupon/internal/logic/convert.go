@@ -33,7 +33,7 @@ func convertToCouponItems(items []types.Items) []*coupons.Items {
 	return couponItems
 }
 func convertCouponUsageList2Resp(usages []*coupons.CouponUsage) []types.CouponUsage {
-	res := make([]types.CouponUsage, 0, len(usages))
+	res := make([]types.CouponUsage, len(usages))
 	for i, usage := range usages {
 		res[i] = types.CouponUsage{
 			ID:         usage.Id,

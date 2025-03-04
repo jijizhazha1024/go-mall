@@ -1,6 +1,7 @@
 Name: coupons.rpc
 ListenOn: 0.0.0.0:10009
 Mode: pro
+Timeout: 8000
 
 # 服务发现
 Consul:
@@ -39,6 +40,7 @@ RedisConf:
 ProductRpc:
   Target: consul://${CONSUL_HOST}/products.rpc?wait=14s
   NonBlock: true
+  Timeout: 5000
 
 # 指标监控配置
 DevServer:
