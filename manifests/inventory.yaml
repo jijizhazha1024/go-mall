@@ -29,13 +29,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: go-mall-env
-          resources:
-            requests:
-              cpu: 200m
-              memory: 256Mi
-            limits:
-              cpu: 1000m
-              memory: 512Mi
           volumeMounts:
             - mountPath: /app/logs
               name: inventory-logs
@@ -48,7 +41,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /healthz
-              port: 11009
+              port: 11011
             initialDelaySeconds: 5
       volumes:
         - name: inventory-logs
