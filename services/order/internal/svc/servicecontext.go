@@ -38,6 +38,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		panic(err)
 	}
 	notifyMQ, err := notify.Init(c)
+	if err != nil {
+		logx.Error(err)
+		panic(err)
+	}
 	return &ServiceContext{
 		Config:         c,
 		OrderModel:     order.NewOrdersModel(sqlx.NewMysql(c.MysqlConfig.DataSource)),
