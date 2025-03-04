@@ -32,12 +32,12 @@ func setupInventoryClient(t *testing.T) {
 
 func TestInventoryService(t *testing.T) {
 
-	t.Run("预扣库存全流程", func(t *testing.T) {
+	t.Run("预扣库存全程", func(t *testing.T) {
 		setupInventoryClient(t)
 		ctx := context.Background()
-		testProductID := int32(123) // 测试用商品ID
+		testProductID := int32(1878) // 测试用商品ID
 		// testProductID2 := int32(105)
-		testProductID3 := int32(112)
+		testProductID3 := int32(1888)
 		// testPreOrderID := "PRE_ORDER_101" // 测试用预订单ID
 		// testuserID := int32(2)            // 测试用用户ID
 		// //	初始化库存1

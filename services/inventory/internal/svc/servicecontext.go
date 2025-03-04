@@ -9,6 +9,7 @@ import (
 	"jijizhazha1024/go-mall/services/inventory/internal/returnlua"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/rueidislock"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -26,8 +27,16 @@ type ServiceContext struct {
 	ReturnInventoryShal   string
 }
 
-func NewServiceContext(c config.Config) *ServiceContext {
+var ProductAccessCounter = prometheus.NewCounterVec(
+	prometheus.CounterOpts{
+		Name: "product_access_total",
+		Help: "Total number of product accesses",
+	},
+	[]string{"product_id", "number"}, // 维度标签
+)
 
+func NewServiceContext(c config.Config) *ServiceContext {
+	prometheus.MustRegister(ProductAccessCounter)
 	lockerOpt := rueidislock.LockerOption{
 		ClientOption: rueidis.ClientOption{
 			InitAddress: []string{c.RedisConf.Host},
@@ -38,6 +47,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 
 	locker, err := rueidislock.NewLocker(lockerOpt)
+	if err != nil {
+		panic(fmt.Sprintf("创建Redis锁失败: %v", err))
+	}
 
 	// 创建ServiceContext实例
 	svcCtx := &ServiceContext{

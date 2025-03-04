@@ -28,4 +28,7 @@ RedisConf:
   Host: 124.71.72.124:6379
   Pass: jjzzchtt
   Tls: false
-
+Prometheus:
+  Host: 0.0.0.0  # 监控服务监听地址
+  Port: 9091      # 默认端口
+  Path: /metrics  # 指标暴露路径
