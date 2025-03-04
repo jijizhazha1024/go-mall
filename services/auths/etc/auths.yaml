@@ -15,6 +15,7 @@ Telemetry:
   Endpoint: http://124.71.72.124:14268/api/traces
   Batcher: jaeger
   Sampler: 1.0
+# 124.71.72.124
 
 Log:
   ServiceName: "auths-rpc"

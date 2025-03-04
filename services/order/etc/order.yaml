@@ -45,8 +45,6 @@ InventoryRpc:
   NonBlock: true
   Timeout: 10000
 
-
-
 RabbitMQConfig:
   Host: "124.71.72.124"
   Port: 5672
