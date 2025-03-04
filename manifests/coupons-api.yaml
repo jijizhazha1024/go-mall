@@ -38,16 +38,17 @@ spec:
               name: api-logs
           readinessProbe:
             httpGet:
-              path: /health/ready
+              path: /healthz
               port: 8109
             initialDelaySeconds: 10
             periodSeconds: 5
           livenessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: 8109
             initialDelaySeconds: 30
             timeoutSeconds: 3
+          imagePullPolicy: Always
       volumes:
         - name: api-logs
           hostPath:

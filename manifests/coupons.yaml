@@ -43,7 +43,7 @@ spec:
               path: /healthz
               port: 11009
             initialDelaySeconds: 5
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
       volumes:
         - name: coupon-logs
           hostPath:

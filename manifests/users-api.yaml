@@ -29,7 +29,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: go-mall-env
-
           livenessProbe:
             httpGet:
               path: /healthz
@@ -45,7 +44,7 @@ spec:
           volumeMounts:
             - mountPath: /app/logs
               name: app-logs
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
       volumes:
         - name: app-logs
           hostPath:

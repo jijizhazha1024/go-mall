@@ -43,6 +43,7 @@ spec:
               path: /healthz
               port: 11008
             initialDelaySeconds: 5
+          imagePullPolicy: Always
       volumes:
         - name: audit-logs
           hostPath:

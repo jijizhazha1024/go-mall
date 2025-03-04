@@ -43,6 +43,7 @@ spec:
               path: /healthz
               port: 11011
             initialDelaySeconds: 5
+          imagePullPolicy: Always
       volumes:
         - name: inventory-logs
           hostPath:

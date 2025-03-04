@@ -34,7 +34,7 @@ spec:
               name: app-logs
           livenessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: 11003
             initialDelaySeconds: 30
             periodSeconds: 30
@@ -42,11 +42,11 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /health
+              path: /healthz
               port: 11003
             initialDelaySeconds: 5
             periodSeconds: 10
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
       volumes:
         - name: app-logs
           hostPath:

@@ -44,7 +44,7 @@ spec:
               port: 11002
             initialDelaySeconds: 5
             periodSeconds: 10
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
       volumes:
         - name: app-logs
           hostPath:
