@@ -150,6 +150,28 @@ services:
     <<: [ *common,*healthcheck ]
     container_name: go-mall-checkout-api
     command: [ "/app/apis/Checkout", "-f", "/app/etc/checkout-api.prod.yaml" ]
-
+    ports:
+      - "8005:8005"
+      - "8105:8105"
+    environment:
+      HEALTHCHECK_PORT: "8105"
+  order-api:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-order-api
+    command: [ "/app/apis/Order", "-f", "/app/etc/order-api.prod.yaml"]
+    ports:
+      - "8004:8004"
+      - "8104:8104"
+    environment:
+      HEALTHCHECK_PORT: "8104"
+  payment-api:
+    <<: [ *common,*healthcheck ]
+    container_name: go-mall-payment-api
+    command: [ "/app/apis/Payment", "-f", "/app/etc/payment-api.prod.yaml" ]
+    ports:
+      - "8006:8006"
+      - "8106:8106"
+    environment:
+      HEALTHCHECK_PORT: "8106"
 networks:
   go-mall:

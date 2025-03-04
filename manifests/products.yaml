@@ -28,13 +28,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: go-mall-env
-          resources:
-            requests:
-              cpu: 200m
-              memory: 256Mi
-            limits:
-              cpu: 1000m
-              memory: 512Mi
+
           volumeMounts:
             - mountPath: /app/logs
               name: app-logs

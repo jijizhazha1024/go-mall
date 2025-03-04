@@ -1,5 +1,5 @@
-apiVersion: networking.k8s.io/v1
 kind: Ingress
+apiVersion: networking.k8s.io/v1
 metadata:
   name: go-mall-route
   namespace: go-mall
@@ -15,3 +15,24 @@ spec:
                 name: users-api
                 port:
                   number: 8001
+          - path: /douyin/product
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: product-api
+                port:
+                  number: 8002
+          - path: /douyin/carts
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: carts-api
+                port:
+                  number: 8003
+          - path: /douyin/coupon
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: coupons-api
+                port:
+                  number: 8009
