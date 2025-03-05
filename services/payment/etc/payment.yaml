@@ -4,14 +4,14 @@ Mode: dev
 
 # 服务发现
 Consul:
-  Host: 124.71.72.124:8500
+  Host: localhost:8500
   Key: payment.rpc
   Meta:
     Protocol: grpc
 
 Telemetry:
   Name: payment.rpc
-  Endpoint: http://124.71.72.124:14268/api/traces
+  Endpoint: http://localhost:14268/api/traces
   Batcher: jaeger
   Sampler: 1.0
 
@@ -22,10 +22,10 @@ Log:
   Path: ./logs/payment-rpc
 
 MysqlConfig:
-  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  datasource: "jjzzchtt:jjzzchtt@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
 
 RedisConf:
-  Host: 124.71.72.124:6379
+  Host: localhost:6379
   Pass: jjzzchtt
   Tls: false
 
@@ -39,11 +39,11 @@ Alipay:
   ReturnURL: https://www.baidu.com
 
 OrderRpc:
-  Target: consul://124.71.72.124:8500/order.rpc?wait=14s
+  Target: consul://localhost:8500/order.rpc?wait=14s
   NonBlock: true
 
 RabbitMQConfig:
-  Host: "124.71.72.124"
+  Host: "localhost"
   Port: 5672
   User: "admin"
   Pass: "admin"

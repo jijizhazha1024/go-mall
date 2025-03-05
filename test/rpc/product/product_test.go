@@ -205,7 +205,7 @@ func TestLoad2Inventory(t *testing.T) {
 	}
 	client := inventory.NewInventoryClient(conn)
 	//client.
-	os.Setenv("MYSQL_DATA_SOURCE", "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local")
+	os.Setenv("MYSQL_DATA_SOURCE", "jjzzchtt:jjzzchtt@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local")
 	mysqlAddress := os.Getenv("MYSQL_DATA_SOURCE")
 	productsModel := product2.NewProductsModel(sqlx.NewMysql(mysqlAddress))
 	products, err := productsModel.QueryAllProducts(context.Background())

@@ -61,7 +61,7 @@ data:
   config.yaml: |-
     MicroService:
       Driver: 'dtm-driver-gozero' # 配置dtm使用go-zero的微服务协议
-      Target: 'consul://124.71.72.124:8500/dtmservice' # 把dtm注册到consul的这个地址
+      Target: 'consul://localhost:8500/dtmservice' # 把dtm注册到consul的这个地址
       EndPoint: '0.0.0.0:36790'
 
 ---

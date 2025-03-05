@@ -5,10 +5,10 @@ Timeout: 0
 
 
 PaymentRpc:
-  Target: consul://124.71.72.124:8500/payment.rpc?wait=14s
+  Target: consul://localhost:8500/payment.rpc?wait=14s
   NonBlock: true
   Timeout: 0
 AuthsRpc:
-  Target: consul://124.71.72.124:8500/auths.rpc?wait=14s
+  Target: consul://localhost:8500/auths.rpc?wait=14s
   NonBlock: true
 

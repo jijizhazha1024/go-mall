@@ -4,7 +4,7 @@ Mode: dev
 Timeout: 0
 # 服务发现
 Consul:
-  Host: 124.71.72.124:8500 # consul endpoint
+  Host: localhost:8500 # consul endpoint
   Key: order.rpc
   Meta:
     Protocol: grpc
@@ -12,7 +12,7 @@ Consul:
 # 链路追踪
 Telemetry:
   Name: order.rpc
-  Endpoint: http://124.71.72.124:14268/api/traces
+  Endpoint: http://localhost:14268/api/traces
   Batcher: jaeger
   Sampler: 1.0
 
@@ -23,30 +23,30 @@ Log:
   Path: "./logs/order-rpc"
 
 MysqlConfig:
-  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  datasource: "jjzzchtt:jjzzchtt@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
 
 
 
 CheckoutRpc:
-  Target: consul://124.71.72.124:8500/checkout.rpc?wait=14s
+  Target: consul://localhost:8500/checkout.rpc?wait=14s
   NonBlock: true
   Timeout: 10000
 
 CouponRpc:
-  Target: consul://124.71.72.124:8500/coupons.rpc?wait=14s
+  Target: consul://localhost:8500/coupons.rpc?wait=14s
   NonBlock: true
   Timeout: 10000
 UserRpc:
-  Target: consul://124.71.72.124:8500/users.rpc?wait=14s
+  Target: consul://localhost:8500/users.rpc?wait=14s
   NonBlock: true
   Timeout: 10000
 InventoryRpc:
-  Target: consul://124.71.72.124:8500/inventory.rpc?wait=14s
+  Target: consul://localhost:8500/inventory.rpc?wait=14s
   NonBlock: true
   Timeout: 10000
 
 RabbitMQConfig:
-  Host: "124.71.72.124"
+  Host: "localhost"
   Port: 5672
   User: "admin"
   Pass: "admin"

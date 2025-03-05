@@ -2,7 +2,7 @@ Name: audit.rpc
 ListenOn: 0.0.0.0:10008
 # 服务发现
 Consul:
-  Host: 124.71.72.124:8500 # consul endpoint
+  Host: localhost:8500 # consul endpoint
   Key: audit.rpc
   Meta:
     Protocol: grpc
@@ -10,7 +10,7 @@ Consul:
 # 链路追踪
 Telemetry:
   Name: audit.rpc
-  Endpoint: http://47.99.130.92:14268/api/traces
+  Endpoint: http://localhost:14268/api/traces
   Batcher: jaeger
   Sampler: 1.0
 Log:
@@ -20,14 +20,14 @@ Log:
   Path: "./logs/audit-rpc"
 
 MysqlConfig:
-  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  datasource: "jjzzchtt:jjzzchtt@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
 
 RabbitMQ:
-  Host: "124.71.72.124"
+  Host: "localhost"
   Port: 5672
   User: "admin"
   Pass: "admin"
   VHost: "/"
 
 ElasticSearch:
-  Addr: "http://113.45.32.164:9200"
+  Addr: "http://localhost:9200"

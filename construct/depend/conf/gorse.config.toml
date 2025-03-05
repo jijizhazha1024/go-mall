@@ -1,6 +1,6 @@
 [database]
-cache_store = "redis://:jjzzchtt@124.71.72.124:6379/10"
-data_store = "mysql://jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/gorse"
+cache_store = "redis://:jjzzchtt@localhost:6379/10"
+data_store = "mysql://jjzzchtt:jjzzchtt@tcp(localhost:3306)/gorse"
 table_prefix = ""
 cache_table_prefix = ""
 data_table_prefix = ""

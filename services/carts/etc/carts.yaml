@@ -2,13 +2,13 @@ Name: carts.rpc
 ListenOn: 0.0.0.0:10003
 
 Consul:
-  Host: 124.71.72.124:8500 # consul endpoint
+  Host: localhost:8500 # consul endpoint
   Key: carts.rpc
   Meta:
     Protocol: grpc
 
 MysqlConfig:
-  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  datasource: "jjzzchtt:jjzzchtt@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
   conntimeout: 5
 
 #MysqlConfig:

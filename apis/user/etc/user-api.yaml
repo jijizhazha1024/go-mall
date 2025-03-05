@@ -4,14 +4,14 @@ Port: 8001
 
 
 UserRpc:
-  Target: consul://124.71.72.124:8500/users.rpc?wait=14s
+  Target: consul://localhost:8500/users.rpc?wait=14s
   NonBlock: true 
 AuthsRpc:
-  Target: consul://124.71.72.124:8500/auths.rpc?wait=14s
+  Target: consul://localhost:8500/auths.rpc?wait=14s
   NonBlock: true 
 
 Consul:
-  Host: 124.71.72.124:8500 # consul endpoint
+  Host: localhost:8500 # consul endpoint
   Key: 
     users.rpc
     auths.rpc
