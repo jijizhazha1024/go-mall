@@ -4,7 +4,7 @@ Mode: dev
 
 # 服务发现
 Consul:
-  Host: 124.71.72.124:8500 # consul endpoint
+  Host: localhost:8500 # consul endpoint
   Key: auths.rpc
   Meta:
     Protocol: grpc
@@ -12,10 +12,10 @@ Consul:
 # 链路追踪
 Telemetry:
   Name: auths.rpc
-  Endpoint: http://124.71.72.124:14268/api/traces
+  Endpoint: http://localhost:14268/api/traces
   Batcher: jaeger
   Sampler: 1.0
-# 124.71.72.124
+# localhost
 
 Log:
   ServiceName: "auths-rpc"
@@ -24,7 +24,7 @@ Log:
   Path: "./logs/auths-rpc"
 
 MysqlConfig:
-  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  datasource: "jjzzchtt:jjzzchtt@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
 
 DevServer:
   Enabled: true

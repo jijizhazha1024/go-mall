@@ -67,14 +67,14 @@ func TestUpdateOrder(t *testing.T) {
 
 func TestDtmSaga(t *testing.T) {
 	orderRpc := zrpc.RpcClientConf{
-		Target: "consul://124.71.72.124:8500/order.rpc", NonBlock: true,
+		Target: "consul://localhost:8500/order.rpc", NonBlock: true,
 	}
 	target, err := orderRpc.BuildTarget()
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	dtmServer := "consul://124.71.72.124:8500/dtmservice"
+	dtmServer := "consul://localhost:8500/dtmservice"
 	sagaGrpc := dtmgrpc.NewSagaGrpc(dtmServer, uuid.New().String()).
 		Add(target+order.OrderService_UpdateOrder2PaymentStatus_FullMethodName,
 			target+order.OrderService_UpdateOrder2PaymentStatusRollback_FullMethodName,

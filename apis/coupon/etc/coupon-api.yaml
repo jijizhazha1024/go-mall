@@ -5,11 +5,11 @@ Port: 8009
 
 
 CouponRpc:
-  Target: consul://124.71.72.124:8500/coupons.rpc?wait=14s
+  Target: consul://localhost:8500/coupons.rpc?wait=14s
   NonBlock: true
 
 AuthsRpc:
-  Target: consul://124.71.72.124:8500/auths.rpc?wait=14s
+  Target: consul://localhost:8500/auths.rpc?wait=14s
   NonBlock: true
 
 

@@ -1,10 +1,10 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : 124.71.72.124
+ Source Server         : localhost
  Source Server Type    : MySQL
  Source Server Version : 80040 (8.0.40)
- Source Host           : 124.71.72.124:3306
+ Source Host           : localhost:3306
  Source Schema         : mall
 
  Target Server Type    : MySQL

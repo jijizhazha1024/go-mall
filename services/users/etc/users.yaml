@@ -4,7 +4,7 @@ Mode: dev
 
 # 服务发现
 Consul:
-  Host: 124.71.72.124:8500 # consul endpoint
+  Host: localhost:8500 # consul endpoint
   Key: 
     users.rpc
   Meta:
@@ -13,12 +13,12 @@ Consul:
 # 链路追踪
 Telemetry:
   Name: users.rpc
-  Endpoint: http://124.71.72.124:14268/api/traces
+  Endpoint: http://localhost:14268/api/traces
   Batcher: jaeger
   Sampler: 1.0
 
 AuditRpc:
-  Target: consul://124.71.72.124:8500/audit.rpc?wait=14s
+  Target: consul://localhost:8500/audit.rpc?wait=14s
   NonBlock: true 
 
 Log:
@@ -28,12 +28,12 @@ Log:
   Path: "./logs/users-rpc"
 
 MysqlConfig:
-  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  datasource: "jjzzchtt:jjzzchtt@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
   Conntimeout: 5
 
 
 Cache:
-  - Host: 124.71.72.124:6379 #缓存地址
+  - Host: localhost:6379 #缓存地址
     Pass: jjzzchtt
     Type: node  
 
@@ -43,9 +43,9 @@ Prometheus:
   Path: /metrics   # 默认路径（可自定义）
 
 RedisConf:
-  Host: 124.71.72.124:6379
+  Host: localhost:6379
   Pass: jjzzchtt
   Tls: false
 GorseConfig:
-  GorseAddr: http://47.99.130.92:8088
+  GorseAddr: http://localhost:8088
   GorseApikey: 5105502fc46a411c896aa5b50c31e951

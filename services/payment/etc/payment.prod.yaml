@@ -42,7 +42,12 @@ Alipay:
   NotifyPath: ${ALIPAY_NOTIFY_PATH}
   NotifyPort: ${ALIPAY_NOTIFY_PORT}
   ReturnURL: ${ALIPAY_RETURN_URL}
-
+# 指标监控配置
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port: 11006
+  EnablePprof: false
 OrderRpc:
   Target: consul://${CONSUL_HOST}/order.rpc?wait=14s
   NonBlock: true

@@ -5,28 +5,28 @@ Timeout: 0
 
 # 服务发现配置
 Consul:
-  Host: 124.71.72.124:8500
+  Host: localhost:8500
   Key: products.rpc
   Meta:
     Protocol: grpc
 
 InventoryRpc:
-  Target: consul://124.71.72.124:8500/inventory.rpc?wait=14s
+  Target: consul://localhost:8500/inventory.rpc?wait=14s
   NonBlock: true
 
 # MySQL 配置
 MysqlConfig:
 #  datasource: "root:123@tcp(127.0.0.1:3306)/douyinmall?charset=utf8mb4&parseTime=True&loc=Local"
-  datasource: "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  datasource: "jjzzchtt:jjzzchtt@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
   conntimeout: 5
 RedisConf:
-  Host: 124.71.72.124:6379
+  Host: localhost:6379
   Type: node
   Pass: jjzzchtt # 如果有密码则填写
   Tls: false
 # Elasticsearch 配置
 ElasticSearch:
-  Addr: http://113.45.32.164:9200
+  Addr: http://localhost:9200
 #七牛云
 QiNiu:
   accessKey: JfDRw6TYF7B-MXNjIivW1zxcZ6PrSHAHYksBcZOt
@@ -35,5 +35,5 @@ QiNiu:
   domain: ssa12nnvu.hn-bkt.clouddn.com
 
 GorseConfig:
-  GorseAddr: http://47.99.130.92:8088
+  GorseAddr: http://localhost:8088
   GorseApikey: 5105502fc46a411c896aa5b50c31e951
