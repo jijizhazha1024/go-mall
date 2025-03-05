@@ -32,18 +32,6 @@ spec:
           volumeMounts:
             - mountPath: /app/logs
               name: app-logs
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 11006
-            initialDelaySeconds: 30
-            periodSeconds: 30
-          readinessProbe:
-            httpGet:
-              path: /healthz
-              port: 11006
-            initialDelaySeconds: 5
-            periodSeconds: 10
           imagePullPolicy: Always
       volumes:
         - name: app-logs
