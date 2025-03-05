@@ -1,0 +1,43 @@
+Name: product-api
+Host: 0.0.0.0
+Port: 8002
+Mode: pro
+Verbose: false # 关闭详细日志
+Timeout: 15000 # 默认为0，表示不超时
+
+
+AuthsRpc:
+  Target: consul://${CONSUL_HOST}/auths.rpc?wait=14s
+  NonBlock: true
+ProductRpc:
+  Target: consul://${CONSUL_HOST}/products.rpc?wait=14s
+  NonBlock: true
+  Timeout: 10000
+
+
+Log:
+  ServiceName: "product-api"
+  Mode: 'file'
+  Encoding: "json"
+  Path: "./logs/product-api"
+  KeepDays: 30    # 保留30天日志
+  Compress: true  # 启用日志压缩
+  Rotation: size  # 按大小切割日志
+  MaxSize: 100    # 每个日志文件最大100MB
+  # 链路追踪
+Telemetry:
+  Name: product-api
+  Endpoint: ${TRACES_ENDPOINT}
+  Batcher: jaeger
+  Sampler: 0.1
+# 指标监控配置
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port: 8102 # api服务端口+100，例如api端口为8001，指标端口是8101
+  EnablePprof: false
+OptionPathList:
+  - /douyin/product/list
+  - /douyin/product
+
+

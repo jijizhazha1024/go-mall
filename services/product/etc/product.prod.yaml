@@ -1,0 +1,63 @@
+Name: products.rpc
+ListenOn: 0.0.0.0:10002
+Mode: pro
+# 服务发现
+Consul:
+  Host: ${CONSUL_HOST} 
+  Key: products.rpc
+  Meta:
+    Protocol: grpc
+  Tag:
+    - "grpc"  # api服务就是api，rpc是grpc
+InventoryRpc:
+  Target: consul://${CONSUL_HOST}/inventory.rpc?wait=14s
+  NonBlock: true
+
+MysqlConfig:
+  datasource: ${MYSQL_DATA_SOURCE}
+  Conntimeout: 5
+
+Log:
+  ServiceName: "products-rpc"
+  Mode: 'file'
+  Encoding: "json"
+  Path: "./logs/products-rpc"
+  KeepDays: 30    # 保留30天日志
+  Compress: true  # 启用日志压缩
+  Rotation: size  # 按大小切割日志
+  MaxSize: 100    # 每个日志文件最大100MB
+
+# 指标监控配置
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port: 11002
+  EnablePprof: false
+
+# 链路追踪
+Telemetry:
+  Name: products.rpc # 与服务名称保持一致
+  Endpoint: ${TRACES_ENDPOINT}
+  Batcher: jaeger
+  Sampler: 0.1  # 采样率，1.0表示全部采集, 0.1表示10%
+
+# Elasticsearch 配置
+ElasticSearch:
+  Addr: ${ELASTICSEARCH_HOST}
+#七牛云
+QiNiu:
+  accessKey: ${QINIU_ACCESSKEY}
+  secretKey: ${QINIU_SECRETKEY}
+  bucket: ${QINIU_BUCKET}
+  domain: ${QINIU_DOMAIN}
+
+# Redis
+RedisConf:
+  Host: ${REDIS_HOST}
+  Pass: ${REDIS_PASSWORD}
+  Tls: false
+
+# Gorse
+GorseConfig:
+  GorseAddr: ${GORSE_HOST}
+  GorseApikey: ${GORSE_APIKEY}

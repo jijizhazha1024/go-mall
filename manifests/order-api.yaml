@@ -1,0 +1,74 @@
+# order-api Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-api
+  namespace: go-mall
+  labels:
+    app: go-mall
+    service: order-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-mall
+      service: order-api
+  template:
+    metadata:
+      labels:
+        app: go-mall
+        service: order-api
+    spec:
+      containers:
+        - name: order-api
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+          command: ["/app/apis/Order", "-f", "/app/etc/order-api.prod.yaml"]
+          ports:
+            - containerPort: 8004
+            - containerPort: 8104
+
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8104
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8104
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - mountPath: /app/logs
+              name: app-logs
+          imagePullPolicy: Always
+      volumes:
+        - name: app-logs
+          hostPath:
+            path: /app/logs
+
+---
+# order-api Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-api
+  namespace: go-mall
+spec:
+  selector:
+    app: go-mall
+    service: order-api
+  ports:
+    - name: order-api
+      port: 8004
+      targetPort: 8004
+      protocol: TCP
+    - name: order-api-metrics
+      port: 8104
+      targetPort: 8104
+      protocol: TCP
+  type: ClusterIP

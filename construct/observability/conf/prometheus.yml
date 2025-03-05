@@ -1,0 +1,22 @@
+# 全局配置
+global:
+  scrape_interval:     15s # 将搜刮间隔设置为每15秒一次。默认是每1分钟一次。
+  evaluation_interval: 15s # 每15秒评估一次规则。默认是每1分钟一次。
+
+# 搜刮配置
+scrape_configs:
+  - job_name: 'prometheus' # 监控Prometheus
+    # 覆盖全局默认值，每15秒从该作业中刮取一次目标
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: 'user-api'  # 新增监控任务
+    scrape_interval: 15s  # 抓取频率与全局一致
+    metrics_path: /metrics  # 默认指标端点（根据实际情况确认）
+    static_configs:
+#      - http://node01:31000
+      - targets: [ '47.96.42.228:31000' ]  # 对应 DevServer 配置的 Host:Port
+        labels:
+          namespace: go-mall
+          service: user-api        # 添加服务标签
+          environment: pro         # 对应 Mode 配置

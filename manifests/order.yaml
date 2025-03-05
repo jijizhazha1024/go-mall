@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: go-mall
+  labels:
+    app: go-mall
+    service: order
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-mall
+      service: order
+  template:
+    metadata:
+      labels:
+        app: go-mall
+        service: order
+    spec:
+      containers:
+        - name: order-service
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+          command: [ "/app/services/Order", "-f", "/app/etc/order.prod.yaml" ]
+          ports:
+            - containerPort: 10004  # 主服务端口
+            - containerPort: 11004  # 健康检查端口
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+          volumeMounts:
+            - mountPath: /app/logs
+              name: app-logs
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 11004
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 11004
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          imagePullPolicy: Always
+      volumes:
+        - name: app-logs
+          hostPath:
+            path: /app/logs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: go-mall
+spec:
+  selector:
+    app: go-mall
+    service: order
+  ports:
+    - name: order-rpc       # 内部通信端口
+      port: 10004
+      targetPort: 10004
+      protocol: TCP
+    - name: order-metrics   # 健康检查暴露端口
+      port: 11004
+      targetPort: 11004
+      protocol: TCP
+  type: ClusterIP

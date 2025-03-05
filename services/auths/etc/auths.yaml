@@ -1,0 +1,33 @@
+Name: auths.rpc
+ListenOn: 0.0.0.0:10000
+Mode: dev
+
+# 服务发现
+Consul:
+  Host: localhost:8500 # consul endpoint
+  Key: auths.rpc
+  Meta:
+    Protocol: grpc
+
+# 链路追踪
+Telemetry:
+  Name: auths.rpc
+  Endpoint: http://localhost:14268/api/traces
+  Batcher: jaeger
+  Sampler: 1.0
+# localhost
+
+Log:
+  ServiceName: "auths-rpc"
+  Mode: 'console'
+  Encoding: "json"
+  Path: "./logs/auths-rpc"
+
+MysqlConfig:
+  datasource: "jjzzchtt:jjzzchtt@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port:  11000
+  EnablePprof: false

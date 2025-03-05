@@ -1,0 +1,5 @@
+# 配置host为0.0.0.0 允许远程访问
+http.host: 0.0.0.0
+# 跨域配置
+http.cors.enabled: true
+http.cors.allow-origin: "*"

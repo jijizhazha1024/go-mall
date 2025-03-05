@@ -1,0 +1,53 @@
+Name: order.rpc
+ListenOn: 0.0.0.0:10004
+Mode: dev
+Timeout: 0
+# 服务发现
+Consul:
+  Host: localhost:8500 # consul endpoint
+  Key: order.rpc
+  Meta:
+    Protocol: grpc
+
+# 链路追踪
+Telemetry:
+  Name: order.rpc
+  Endpoint: http://localhost:14268/api/traces
+  Batcher: jaeger
+  Sampler: 1.0
+
+Log:
+  ServiceName: "order-rpc"
+  Mode: 'console'
+  Encoding: "json"
+  Path: "./logs/order-rpc"
+
+MysqlConfig:
+  datasource: "jjzzchtt:jjzzchtt@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+
+
+
+CheckoutRpc:
+  Target: consul://localhost:8500/checkout.rpc?wait=14s
+  NonBlock: true
+  Timeout: 10000
+
+CouponRpc:
+  Target: consul://localhost:8500/coupons.rpc?wait=14s
+  NonBlock: true
+  Timeout: 10000
+UserRpc:
+  Target: consul://localhost:8500/users.rpc?wait=14s
+  NonBlock: true
+  Timeout: 10000
+InventoryRpc:
+  Target: consul://localhost:8500/inventory.rpc?wait=14s
+  NonBlock: true
+  Timeout: 10000
+
+RabbitMQConfig:
+  Host: "localhost"
+  Port: 5672
+  User: "admin"
+  Pass: "admin"
+  VHost: "/"

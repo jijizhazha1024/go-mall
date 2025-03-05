@@ -1,0 +1,34 @@
+Name: checkout.rpc
+ListenOn: 0.0.0.0:10005
+Timeout: 0
+Consul:
+  Host: localhost:8500 # consul endpoint
+  Key: checkout.rpc
+  Meta:
+    Protocol: grpc
+
+MysqlConfig:
+  datasource: "jjzzchtt:jjzzchtt@tcp(localhost:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local"
+  conntimeout: 5
+
+InventoryRpc:
+  Target: consul://localhost:8500/inventory.rpc?wait=14s
+  NonBlock: true
+
+ProductRpc:
+  Target: consul://localhost:8500/products.rpc?wait=14s
+  NonBlock: true
+  Timeout: 10000
+CouponsRpc:
+  Target: consul://localhost:8500/coupons.rpc?wait=14s
+  NonBlock: true
+  Timeout: 10000
+RedisConf:
+  Host: ${REDIS_HOST}
+  Pass: ${REDIS_PASSWORD}
+  Tls: false
+
+
+#MysqlConfig:
+#  datasource: "root:123456@tcp(127.0.0.1:3306)/cart_db?charset=utf8mb4&parseTime=True&loc=Local"
+#  conntimeout: 5

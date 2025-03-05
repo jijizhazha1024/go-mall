@@ -1,0 +1,66 @@
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: go-mall-route
+  namespace: go-mall
+spec:
+  rules:
+    - host: nginx.kubernetes-devops.cn
+      http:
+        paths:
+          - path: /douyin/user
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: users-api
+                port:
+                  number: 8001
+          - path: /douyin/product
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: product-api
+                port:
+                  number: 8002
+          - path: /douyin/carts
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: carts-api
+                port:
+                  number: 8003
+          - path: /douyin/coupon
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: coupons-api
+                port:
+                  number: 8009
+          - path: /douyin/checkout
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: checkout-api
+                port:
+                  number: 8005
+          - path: /douyin/order
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: order-api
+                port:
+                  number: 8004
+          - path: /douyin/dtm/web
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: dtm-service
+                port:
+                  number: 36789
+          - path: /douyin/payment
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: payment-api
+                port:
+                  number: 8006

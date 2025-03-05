@@ -1,0 +1,16 @@
+Name: product-api
+Host: 0.0.0.0
+Port: 8002
+
+
+ProductRpc:
+  Target: consul://localhost:8500/products.rpc?wait=14s
+  NonBlock: true
+  Timeout: 5000
+AuthsRpc:
+  Target: consul://localhost:8500/auths.rpc?wait=14s
+  NonBlock: true
+
+OptionPathList:
+  - /douyin/product/list
+  - /douyin/product

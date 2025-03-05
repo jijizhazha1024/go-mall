@@ -1,0 +1,30 @@
+Name: user-api
+Host: 0.0.0.0
+Port: 8001
+
+
+UserRpc:
+  Target: consul://localhost:8500/users.rpc?wait=14s
+  NonBlock: true 
+AuthsRpc:
+  Target: consul://localhost:8500/auths.rpc?wait=14s
+  NonBlock: true 
+
+Consul:
+  Host: localhost:8500 # consul endpoint
+  Key: 
+    users.rpc
+    auths.rpc
+WhitePathList:
+  - /douyin/user/login
+  - /douyin/user/register
+OptionPathList:
+  - /douyin/user/address 
+  
+
+
+DevServer:
+  Enabled: true
+  Host: 0.0.0.0
+  Port: 8101 # api服务端口+100，例如api端口为8001，指标端口是8101
+  EnablePprof: false

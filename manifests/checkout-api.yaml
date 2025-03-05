@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout-api
+  namespace: go-mall
+  labels:
+    app: go-mall
+    service: checkout-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-mall
+      service: checkout-api
+  template:
+    metadata:
+      labels:
+        app: go-mall
+        service: checkout-api
+    spec:
+      containers:
+        - name: checkout-api
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+          command: ["/app/apis/Checkout", "-f", "/app/etc/checkout-api.prod.yaml"]
+          ports:
+            - containerPort: 8005
+            - containerPort: 8105
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8105
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8105
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - mountPath: /app/logs
+              name: app-logs
+          imagePullPolicy: Always
+      volumes:
+        - name: app-logs
+          hostPath:
+            path: /app/logs
+
+---
+# checkout-api Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: checkout-api
+  namespace: go-mall
+spec:
+  selector:
+    app: go-mall
+    service: checkout-api
+  ports:
+    - name: checkout-api
+      port: 8005
+      targetPort: 8005
+      protocol: TCP
+    - name: checkout-api-metrics
+      port: 8105
+      targetPort: 8105
+      protocol: TCP
+  type: ClusterIP

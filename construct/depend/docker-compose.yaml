@@ -1,0 +1,97 @@
+services:
+  consul:
+    image: consul:1.8.8
+    command: [
+      "agent",
+      "-dev",
+      "-client=0.0.0.0"
+    ]
+    ports:
+      - "8500:8500"
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8500/v1/status/leader" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - mall
+  redis:
+    image: redis:6-alpine
+    volumes:
+      - ./conf/redis.conf:/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - mall
+    command: [ "redis-server", "/etc/redis/redis.conf" ]
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  mysql:
+    image: mysql:8.0-debian
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d/
+    networks:
+      - mall
+    environment:
+      MYSQL_ROOT_USER: 'root'
+      MYSQL_ROOT_PASSWORD: 'root'
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  rabbitmq:
+    image: rabbitmq:3.8.17-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - mall
+    environment:
+      RABBITMQ_DEFAULT_USER: 'admin'
+      RABBITMQ_DEFAULT_PASS: 'admin'
+      RABBITMQ_DEFAULT_VHOST: '/'
+      TZ: 'Asia/Shanghai'
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "rabbitmqctl status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  gorse:
+    image: zhenghaoz/gorse-in-one
+    restart: unless-stopped
+    ports:
+      - 8086:8086
+      - 8087:8087
+      - 8088:8088
+    command: >
+      -c /etc/gorse/config.toml
+      --log-path /var/log/gorse/master.log
+      --cache-path /var/lib/gorse/master_cache.data
+    volumes:
+      - ./conf/gorse.config.toml:/etc/gorse/config.toml
+    networks:
+      mall:
+  dtm:
+    image: yedf/dtm:latest
+    ports:
+      - "36789:36789"
+      - "36790:36790"
+    command: [ "dtm", "-c", "/app/dtm/configs/config.yaml" ]
+    volumes:
+      - ./conf/dtm.yaml:/app/dtm/configs/config.yaml
+    networks:
+      mall:
+
+
+networks:
+  mall:

@@ -1,0 +1,17 @@
+server.host: 0.0.0.0
+# 监听端口
+server.port: 5601
+server.name: "kibana"
+# kibana访问es服务器的URL,就可以有多个，以逗号","隔开
+elasticsearch.hosts: ["http://elasticsearch:9200",]
+# 中文设置
+i18n.locale: "zh-CN"
+# kibana日志文件存储路径
+logging.dest: stdout
+# 此值为true时，禁止所有日志记录输出
+logging.silent: false
+# 此值为true时，禁止除错误消息之外的所有日志记录输出
+logging.quiet: false
+# 此值为true时，记录所有事件，包括系统使用信息和所有请求
+logging.verbose: false
+ops.interval: 5000

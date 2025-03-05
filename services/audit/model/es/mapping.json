@@ -1,0 +1,18 @@
+{
+  "mappings": {
+    "properties": {
+      "user_id": { "type": "integer" },
+      "action_type": { "type": "keyword" },
+      "service_name": { "type": "keyword" },
+      "action_desc": { "type": "text" },
+      "old_data": { "type": "text" },
+      "new_data": { "type": "text" },
+      "target_table": { "type": "keyword" },
+      "target_id": { "type": "integer" },
+      "client_ip": { "type": "ip" },
+      "trace_id": { "type": "keyword" },
+      "span_id": { "type": "keyword" },
+      "created_at": { "type": "date", "format": "strict_date_optional_time||epoch_millis" }
+    }
+  }
+}

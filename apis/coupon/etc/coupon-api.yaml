@@ -1,0 +1,20 @@
+Name: coupon-api
+Host: 0.0.0.0
+Port: 8009
+
+
+
+CouponRpc:
+  Target: consul://localhost:8500/coupons.rpc?wait=14s
+  NonBlock: true
+
+AuthsRpc:
+  Target: consul://localhost:8500/auths.rpc?wait=14s
+  NonBlock: true
+
+
+WhitePathList:
+  - /douyin/coupons/list
+
+OptionPathList:
+  - /douyin/coupons/detail

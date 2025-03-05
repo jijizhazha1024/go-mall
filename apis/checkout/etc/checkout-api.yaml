@@ -1,0 +1,15 @@
+Name: checkout-api
+Host: 0.0.0.0
+Port: 8005
+
+
+
+CheckoutRpc:
+  Target: consul://localhost:8500/checkout.rpc?wait=14s
+  NonBlock: true
+
+AuthsRpc:
+  Target: consul://localhost:8500/auths.rpc?wait=14s
+  NonBlock: true
+
+

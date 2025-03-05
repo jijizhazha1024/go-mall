@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package auths;
+option go_package = "./auths";
+
+message AuthReq {
+  string token = 1;
+  string client_ip = 2;
+}
+message AuthGenReq {
+  uint32 user_id = 1;
+  string username = 2;
+  string client_ip = 3;
+}
+message AuthRenewalReq {
+  string refresh_token = 1; // 用户刷新token
+  string client_ip = 2;
+}
+
+message AuthsRes{
+  uint32 status_code = 1;
+  string status_msg = 2;
+
+  uint32 user_id = 3; // 用户id
+}
+message AuthGenRes {
+  uint32 status_code = 1;
+  string status_msg = 2;
+
+  string access_token = 3; // 访问令牌
+  string refresh_token = 4; // 刷新令牌
+  int64 expires_in = 5; // 访问令牌有效期（秒）
+}
+message AuthRenewalRes {
+  uint32 status_code = 1; // 状态码，0-成功，其他值-失败
+  string status_msg = 2; // 返回状态描述
+
+  string access_token = 3; // 新的访问令牌
+  string refresh_token = 4; // 新的刷新令牌
+  int64 expires_in = 5; // 新的访问令牌有效期（秒）
+}
+
+
+service Auths {
+  //  Authentication 验证用户token合法
+  rpc Authentication (AuthReq) returns (AuthsRes);
+  // GenerateToken 生成toke
+  rpc GenerateToken (AuthGenReq) returns (AuthGenRes);
+  // RenewToken 续期身份
+  rpc RenewToken (AuthRenewalReq) returns (AuthRenewalRes);
+}
+
+// goctl rpc protoc auth.proto --go_out=./ --go-grpc_out=./ --zrpc_out=. --client=true

@@ -1,0 +1,46 @@
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.61.0
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14250:14250"
+      - "14268:14268"
+      - "14269:14269"
+      - "9411:9411"
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --spider -q http://localhost:16686/search || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - go-mall
+    restart: unless-stopped
+  prometheus:
+    image: bitnami/prometheus:latest
+    volumes:
+      - ./conf/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    networks:
+      - go-mall
+  grafana:
+    image: grafana/grafana
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_DEFAULT_LOCALE=zh-CN
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - go-mall
+networks:
+  go-mall:

@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package payment;
+option go_package = "./payment";
+
+service Payment {
+  rpc CreatePayment (PaymentReq) returns (PaymentResp);
+  rpc ListPayments (PaymentListReq) returns (PaymentListResp);
+}
+
+enum PaymentStatus {
+  PAYMENT_STATUS_UNSPECIFIED = 0; // 未指定或默认状态
+  PAYMENT_STATUS_UNPAID = 1;      // 创建支付单后，支付尚未完成
+  PAYMENT_STATUS_PAID = 2;        // 第三方支付成功回调，支付已完成
+  PAYMENT_STATUS_FAILED = 3;      // 支付接口返回错误，支付失败（如余额不足、银行卡限额）
+  PAYMENT_STATUS_FULLY_REFUNDED = 4; // 全额退款成功，订单金额全部退回
+  PAYMENT_STATUS_EXPIRED = 5;     // 支付链接超时未操作，支付单失效
+}
+
+enum PaymentMethod {
+  PAYMENT_METHOD_UNSPECIFIED = 0; // 未指定或默认状态
+  WECHAT_PAY = 1;                 // 微信支付
+  ALIPAY = 2;                     // 支付宝支付
+}
+
+message PaymentItem {
+  string payment_id = 1;       // 支付单ID（UUID）
+  string pre_order_id = 2;     // 预订单ID（外键）
+  string order_id = 3;         // 成功关联的订单ID
+  int64 original_amount = 4;   // 原价（分）
+  int64 paid_amount = 5;       // 实付金额（分）
+  PaymentMethod payment_method = 6; // 支付渠道（枚举类型）
+  string transaction_id = 7;   // 支付平台交易号
+  string pay_url = 8;          // 支付跳转链接
+  int64 expire_time = 9;       // 支付链接过期时间
+  PaymentStatus status = 10;   // 支付状态
+  int64 created_at = 11;       // 创建时间
+  int64 updated_at = 12;       // 更新时间
+  int64 paid_at = 13;          // 支付成功时间
+}
+
+message PaymentReq {
+  uint32 user_id = 1;
+  string order_id = 2;
+  PaymentMethod payment_method = 3; // 支付渠道
+}
+
+message PaymentListReq {
+  uint32 user_id = 1;
+  PaymentMethod payment_method = 2; // 支付渠道（可选过滤条件）
+  Pagination pagination = 3;    // 分页信息
+  message Pagination {
+    int32 page = 1;             // 从1开始，默认值为1
+    int32 page_size = 2;        // 最大20，默认值为10
+  }
+}
+
+message PaymentResp {
+  int32 status_code = 1;
+  string status_msg = 2;
+  PaymentItem payment = 3;
+}
+
+message PaymentListResp {
+  int32 status_code = 1;
+  string status_msg = 2;
+  repeated PaymentItem payments = 3;
+}
