@@ -1,0 +1,24 @@
+Name: order-api
+Host: 0.0.0.0
+Port: 8004
+Timeout: 0
+
+
+OrderRpc:
+  Target: consul://124.71.72.124:8500/order.rpc?wait=14s
+  NonBlock: true
+  Timeout: 0
+AuthsRpc:
+  Target: consul://${CONSUL_HOST}/coupons.rpc?wait=14s
+  NonBlock: true
+
+DtmRpc:
+  Target: consul://124.71.72.124:8500/dtmservice?wait=14s
+  NonBlock: true
+
+CheckoutRpc:
+  Target: consul://124.71.72.124:8500/checkout.rpc?wait=14s
+  NonBlock: true
+CouponsRpc:
+  Target: consul://124.71.72.124:8500/coupons.rpc?wait=14s
+  NonBlock: true

@@ -22,6 +22,17 @@ service ProductCatalogService {
 =======
   // 根据条件查询商品
   rpc QueryProduct(QueryProductReq) returns(GetAllProductsResp){}
+
+  rpc RecommendProduct(RecommendProductReq) returns(GetAllProductsResp){}
+}
+message RecommendProductReq{
+  int32 userId = 1;
+  Paginator paginator = 2;
+  repeated string category = 3;
+  message Paginator{
+    int64 page = 1;
+    int64 pageSize = 2;
+  }
 }
 
 message QueryProductReq{
@@ -81,6 +92,7 @@ message GetAllProductsResp {
 
 message GetProductReq {
   uint32 id = 1;
+  int32 user_id = 2;
 }
 
 message GetProductResp {

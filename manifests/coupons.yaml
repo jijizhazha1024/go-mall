@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coupons-service
+  namespace: go-mall
+  labels:
+    app: go-mall
+    service: coupons
+spec:
+  replicas: 1  # 优惠券服务建议双副本
+  selector:
+    matchLabels:
+      app: go-mall
+      service: coupons
+  template:
+    metadata:
+      labels:
+        app: go-mall
+        service: coupons
+    spec:
+      containers:
+        - name: coupons-service
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+          command: ["/app/services/Coupons", "-f", "/app/etc/coupons.prod.yaml"]
+          ports:
+            - containerPort: 10009  # 主服务端口
+            - containerPort: 11009  # 健康检查端口
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+
+          volumeMounts:
+            - mountPath: /app/logs
+              name: coupon-logs
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 11009
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 11009
+            initialDelaySeconds: 5
+          imagePullPolicy: Always
+      volumes:
+        - name: coupon-logs
+          hostPath:
+            path: /app/logs/coupons
+            type: DirectoryOrCreate
+
+---
+# coupons-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: coupons-service
+  namespace: go-mall
+spec:
+  selector:
+    app: go-mall
+    service: coupons
+  ports:
+    - name: coupons-rpc
+      port: 10009
+      targetPort: 10009
+      protocol: TCP
+    - name: coupons-metrics
+      port: 11009
+      targetPort: 11009
+      protocol: TCP
+  type: ClusterIP

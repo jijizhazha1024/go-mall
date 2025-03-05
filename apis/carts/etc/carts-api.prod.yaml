@@ -3,6 +3,7 @@ Host: 0.0.0.0
 Port: 8003
 Mode: pro
 Verbose: false # 关闭详细日志
+Timeout: 15000 # 默认为0，表示不超时
 
 
 # rpc服务
@@ -13,10 +14,12 @@ AuthsRpc:
 CartsRpc:
   Target: consul://${CONSUL_HOST}/carts.rpc?wait=14s
   NonBlock: true
+  Timeout: 10000
 
 ProductRpc:
   Target: consul://${CONSUL_HOST}/products.rpc?wait=14s
   NonBlock: true
+  Timeout: 10000
 
 # 日志配置
 Log:

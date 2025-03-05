@@ -1,7 +1,7 @@
 Name: checkout.rpc
 ListenOn: 0.0.0.0:10005 # 端口见接口文档
 Mode: pro
-
+Timeout: 18000
 # 服务发现
 Consul:
   Host: ${CONSUL_HOST}
@@ -13,6 +13,7 @@ Consul:
 
 MysqlConfig:
   datasource: ${MYSQL_DATA_SOURCE}
+  conntimeout: 5
 
 Log:
   ServiceName: "checkout-rpc"
@@ -28,7 +29,7 @@ Log:
 DevServer:
   Enabled: true
   Host: 0.0.0.0
-  Port: 11005 // 服务端口+1000，如果服务端口是10001，则指标端口就是11001
+  Port: 11005 # 服务端口+1000，如果服务端口是10001，则指标端口就是11001
   EnablePprof: false
 
 # 链路追踪
@@ -37,3 +38,23 @@ Telemetry:
   Endpoint: ${TRACES_ENDPOINT}
   Batcher: jaeger
   Sampler: 0.1 # 采样率，1.0表示全部采集, 0.1表示10%
+
+InventoryRpc:
+  Target: consul://${CONSUL_HOST}/inventory.rpc?wait=14s
+  NonBlock: true
+  Timeout: 3000
+
+ProductRpc:
+  Target: consul://${CONSUL_HOST}/products.rpc?wait=14s
+  NonBlock: true
+  Timeout: 5000
+
+CouponsRpc:
+  Target: consul://${CONSUL_HOST}/coupons.rpc?wait=14s
+  NonBlock: true
+  Timeout: 5000
+
+RedisConf:
+  Host: ${REDIS_HOST}
+  Pass: ${REDIS_PASSWORD}
+  Tls: false

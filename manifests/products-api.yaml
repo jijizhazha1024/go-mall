@@ -1,0 +1,75 @@
+# product-api-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-api
+  namespace: go-mall
+  labels:
+    app: go-mall
+    service: product-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-mall
+      service: product-api
+  template:
+    metadata:
+      labels:
+        app: go-mall
+        service: product-api
+    spec:
+      containers:
+        - name: product-api
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+          command: ["/app/apis/Product", "-f", "/app/etc/product-api.prod.yaml"]
+          ports:
+            - containerPort: 8002  # API服务端口
+            - containerPort: 8102  # 监控端口
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+
+          volumeMounts:
+            - mountPath: /app/logs
+              name: app-logs
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8102
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8102
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          imagePullPolicy: Always
+      volumes:
+        - name: app-logs
+          hostPath:
+            path: /app/logs
+            type: DirectoryOrCreate
+
+---
+# product-api-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-api
+  namespace: go-mall
+spec:
+  selector:
+    app: go-mall
+    service: product-api
+  ports:
+    - name: product-api
+      port: 8002
+      targetPort: 8002
+      protocol: TCP
+    - name: product-api-metrics
+      port: 8102
+      targetPort: 8102
+      protocol: TCP
+  type: ClusterIP

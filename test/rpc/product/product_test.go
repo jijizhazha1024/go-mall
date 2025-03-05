@@ -14,9 +14,12 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"io"
 	"jijizhazha1024/go-mall/common/consts/biz"
+	gorse "jijizhazha1024/go-mall/common/utils/gorse"
 	"jijizhazha1024/go-mall/dal/model/products/categories"
 	product2 "jijizhazha1024/go-mall/dal/model/products/product"
+	"jijizhazha1024/go-mall/services/inventory/inventory"
 	"jijizhazha1024/go-mall/services/product/product"
+	"math/rand"
 	"os"
 	"strconv"
 	"testing"
@@ -39,12 +42,9 @@ func TestGetallProduct(t *testing.T) {
 		Page:     1,
 		PageSize: 10,
 	})
-
 	if err != nil {
 		t.Fatal(err)
-
 	}
-	fmt.Println(" success", resp)
 	t.Log(" success", resp)
 }
 func TestProductsCreateRpc(t *testing.T) {
@@ -119,22 +119,11 @@ func TestQueryProduct(t *testing.T) {
 	fmt.Println(" success", resp)
 }
 
-type Product struct {
-	Id          int64    `json:"id"`          // 主键，自增,商品id
-	Name        string   `json:"name"`        // 商品名称
-	Description string   `json:"description"` // 商品描述
-	Picture     string   `json:"picture"`     // 商品图片信息
-	Price       int64    `json:"price"`       // 商品价格（分）
-	CreatedAt   string   `json:"created_at"`  // 创建时间
-	UpdatedAt   string   `json:"updated_at"`  // 更新时间
-	Category    []string `json:"category"`
-}
-
-func TestLoadProduct2Es(t *testing.T) {
-	os.Setenv("ELASTICSEARCH_HOST", "http://113.45.32.164:9200/")
-	os.Setenv("MYSQL_DATA_SOURCE", "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local")
+func TestLoadProduct2EsAndGorse(t *testing.T) {
 	esAddress := os.Getenv("ELASTICSEARCH_HOST")
 	mysqlAddress := os.Getenv("MYSQL_DATA_SOURCE")
+	gorseAddr := os.Getenv("GORSE_HOST")
+	gorseApikey := os.Getenv("GORSE_APIKEY")
 
 	ctx := context.TODO()
 	client, err := elastic.NewClient(elastic.SetURL(esAddress),
@@ -146,32 +135,97 @@ func TestLoadProduct2Es(t *testing.T) {
 	productsModel := product2.NewProductsModel(sqlx.NewMysql(mysqlAddress))
 	categoryModel := categories.NewCategoriesModel(sqlx.NewMysql(mysqlAddress))
 	products, err := productsModel.QueryAllProducts(ctx)
+	gorseClient := gorse.NewGorseClient(gorseAddr, gorseApikey)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, p := range products {
+	items := make([]gorse.Item, len(products))
+	for i, p := range products {
 		category, err := categoryModel.FindCategoryNameByProductID(ctx, p.Id)
-
+		if err != nil {
+			t.Fatal("query category failed", logx.Field("err", err))
+			return
+		}
 		// 创建文档（自动JSON序列化）
 		if _, err = client.Index().
 			Index(biz.ProductEsIndexName).
 			Id(strconv.FormatInt(p.Id, 10)).
-			BodyJson(&Product{
-				Id:          p.Id,
-				Name:        p.Name,
-				Description: p.Description.String,
-				Picture:     p.Picture.String,
-				Price:       p.Price,
-				CreatedAt:   p.CreatedAt.Format(time.DateTime),
-				UpdatedAt:   p.UpdatedAt.Format(time.DateTime),
-				Category:    category,
+			BodyJson(map[string]interface{}{
+				"id":          p.Id,
+				"name":        p.Name,
+				"description": p.Description.String,
+				"picture":     p.Picture.String,
+				"price":       p.Price,
+				"created_at":  p.CreatedAt.Format(time.DateTime),
+				"updated_at":  p.UpdatedAt.Format(time.DateTime),
+				"category":    category,
 			}).
 			Refresh("true").
 			Do(ctx); err != nil {
 			t.Fatal("product es creation failed", logx.Field("err", err))
 			return
 		}
+		items[i] = gorse.Item{
+			ItemId:     strconv.FormatInt(p.Id, 10),
+			IsHidden:   false,
+			Categories: category,
+			Labels:     category,
+			Comment:    p.Description.String,
+			Timestamp:  p.CreatedAt.Format(time.DateTime),
+		}
 	}
+	if _, err = gorseClient.InsertItems(ctx, items); err != nil {
+		t.Fatal("gorse insert items failed", logx.Field("err", err))
+		return
+	}
+}
+func TestProductRecommend(t *testing.T) {
+	initproduct()
+	recommendProduct, err := product_client.RecommendProduct(context.Background(), &product.RecommendProductReq{
+		UserId:   93,
+		Category: []string{"手机"},
+		Paginator: &product.RecommendProductReq_Paginator{
+			Page:     1,
+			PageSize: 10,
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range recommendProduct.Products {
+		t.Log(" success", p)
+	}
+}
+
+func TestLoad2Inventory(t *testing.T) {
+	conn, err := grpc.NewClient(fmt.Sprintf("0.0.0.0:%d", biz.InventoryRpcPort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		panic(err)
+	}
+	client := inventory.NewInventoryClient(conn)
+	//client.
+	os.Setenv("MYSQL_DATA_SOURCE", "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local")
+	mysqlAddress := os.Getenv("MYSQL_DATA_SOURCE")
+	productsModel := product2.NewProductsModel(sqlx.NewMysql(mysqlAddress))
+	products, err := productsModel.QueryAllProducts(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range products {
+		_, err := client.UpdateInventory(context.Background(), &inventory.UpdateInventoryReq{
+			Items: []*inventory.UpdateInventoryReq_Items{
+				{
+					ProductId: int32(p.Id),
+					Quantity:  rand.Int31n(1000),
+				},
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
 }
 
 // 七牛云配置

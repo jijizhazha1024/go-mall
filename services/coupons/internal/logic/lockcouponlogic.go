@@ -29,7 +29,6 @@ func NewLockCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LockCo
 // LockCoupon 锁定优惠券
 func (l *LockCouponLogic) LockCoupon(in *coupons.LockCouponReq) (*coupons.EmptyResp, error) {
 	res := &coupons.EmptyResp{}
-
 	// --------------- check ---------------
 	if in.UserId == 0 || len(in.UserCouponId) == 0 || len(in.PreOrderId) == 0 {
 		res.StatusCode = code.NotWithParam
@@ -83,7 +82,7 @@ func (l *LockCouponLogic) LockCoupon(in *coupons.LockCouponReq) (*coupons.EmptyR
 		// !!!一般数据库不会错误不需要dtm回滚，就让他一直重试
 		return nil, status.Error(codes.Internal, code.ServerErrorMsg) // 触发重试
 	}
-	if res.StatusCode != 0 {
+	if res.StatusCode != code.Success {
 		return nil, status.Error(codes.Aborted, res.StatusMsg)
 	}
 	return &coupons.EmptyResp{}, nil

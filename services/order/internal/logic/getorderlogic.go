@@ -29,7 +29,8 @@ func NewGetOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetOrder
 func (l *GetOrderLogic) GetOrder(in *order.GetOrderRequest) (*order.OrderDetailResponse, error) {
 	res := &order.OrderDetailResponse{}
 	if in.OrderId == "" || in.UserId == 0 {
-		res.StatusCode = 400
+		res.StatusCode = code.OrderParameterInvalid
+		res.StatusMsg = code.OrderParameterInvalidMsg
 		return res, nil
 	}
 	group, ctx := errgroup.WithContext(l.ctx)
@@ -81,11 +82,10 @@ func (l *GetOrderLogic) GetOrder(in *order.GetOrderRequest) (*order.OrderDetailR
 	})
 	if err := group.Wait(); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			res.StatusCode = code.OrderNotExist
-			res.StatusMsg = code.OrderNotExistMsg
 			return res, nil
 		}
 		return nil, err
 	}
+	res.Order.UserId = in.UserId
 	return res, nil
 }

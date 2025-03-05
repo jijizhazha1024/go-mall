@@ -29,6 +29,10 @@ Log:
   Rotation: size  # 按大小切割日志
   MaxSize: 100    # 每个日志文件最大100MB
 
+AuditRpc:
+  Target: consul://${CONSUL_HOST}/audit.rpc?wait=14s
+  NonBlock: true
+
 # 指标监控配置
 DevServer:
   Enabled: true
@@ -42,3 +46,10 @@ Telemetry:
   Endpoint: ${TRACES_ENDPOINT}
   Batcher: jaeger
   Sampler: 0.1  # 采样率，1.0表示全部采集, 0.1表示10%
+RedisConf:
+  Host: ${REDIS_HOST}
+  Pass: ${REDIS_PASSWORD}
+  Tls: false
+GorseConfig:
+ GorseAddr: ${GORSE HOST}
+ GorseApikey: ${GORSE_APIKEY}

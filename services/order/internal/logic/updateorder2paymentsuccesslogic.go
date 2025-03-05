@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"jijizhazha1024/go-mall/common/consts/code"
+	"jijizhazha1024/go-mall/services/order/internal/mq/notify"
 
 	"jijizhazha1024/go-mall/services/order/internal/svc"
 	"jijizhazha1024/go-mall/services/order/order"
@@ -77,10 +78,24 @@ func (l *UpdateOrder2PaymentSuccessLogic) UpdateOrder2PaymentSuccess(in *order.U
 			logx.Field("order_id", in.OrderId), logx.Field("user_id", in.UserId))
 		return nil, status.Error(codes.Internal, "更新订单状态失败")
 	}
+
+	//真实扣减库存，用户消费优惠券，优惠券使用记录
 	if res.StatusCode != code.Success {
 		l.Logger.Infow("UpdateOrder2PaymentSuccess process aborted",
 			logx.Field("order_id", in.OrderId), logx.Field("user_id", in.UserId))
 		return nil, status.Error(codes.Aborted, res.StatusMsg)
 	}
-	return &order.EmptyRes{}, nil
+	// 消息队列
+	if err := l.svcCtx.OrderNotifyMQ.Product(&notify.OrderNotifyReq{
+		OrderId:       in.OrderId,
+		UserID:        in.UserId,
+		TransactionId: in.PaymentResult.TransactionId,
+		PaidAmount:    in.PaymentResult.PaidAmount,
+		PaidAt:        in.PaymentResult.PaidAt,
+	}); err != nil {
+		l.Logger.Errorw("send order notify error", logx.Field("err", err),
+			logx.Field("order_id", in.OrderId), logx.Field("user_id", in.UserId))
+		return nil, status.Error(codes.Internal, "发送订单通知失败")
+	}
+	return res, nil
 }

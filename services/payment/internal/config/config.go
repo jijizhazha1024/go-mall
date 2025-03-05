@@ -9,14 +9,20 @@ import (
 
 type Config struct {
 	zrpc.RpcServerConf
-	Consul      consul.Conf
-	MysqlConfig config.MysqlConfig
-	RedisConf   redis.RedisConf
-	Alipay      struct {
-		AppId           string
-		PrivateKey      string
-		AlipayPublicKey string
-		NotifyURL       string
-		ReturnURL       string
-	} `yaml:"alipay"`
+	Consul         consul.Conf
+	MysqlConfig    config.MysqlConfig
+	RedisConf      redis.RedisConf
+	Alipay         AlipayConfig
+	OrderRpc       zrpc.RpcClientConf
+	RabbitMQConfig config.RabbitMQConfig
+}
+
+type AlipayConfig struct {
+	AppId           string
+	PrivateKey      string
+	AlipayPublicKey string
+	NotifyURL       string
+	NotifyPath      string
+	NotifyPort      int
+	ReturnURL       string
 }

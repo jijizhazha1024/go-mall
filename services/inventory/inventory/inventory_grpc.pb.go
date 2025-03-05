@@ -34,7 +34,7 @@ type InventoryClient interface {
 	// GetInventory 查询库存，缓存不在，再去数据库查
 	GetInventory(ctx context.Context, in *GetInventoryReq, opts ...grpc.CallOption) (*GetInventoryResp, error)
 	// UpdateInventory 增加库存，修改库存数量（直接修改）
-	UpdateInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error)
+	UpdateInventory(ctx context.Context, in *UpdateInventoryReq, opts ...grpc.CallOption) (*InventoryResp, error)
 	// DecreaseInventory 预扣减库存，此时并非真实扣除库存，而是在缓存进行--操作
 	DecreasePreInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error)
 	// DecreaseInventory 真实扣减库存（支付成功时）
@@ -63,7 +63,7 @@ func (c *inventoryClient) GetInventory(ctx context.Context, in *GetInventoryReq,
 	return out, nil
 }
 
-func (c *inventoryClient) UpdateInventory(ctx context.Context, in *InventoryReq, opts ...grpc.CallOption) (*InventoryResp, error) {
+func (c *inventoryClient) UpdateInventory(ctx context.Context, in *UpdateInventoryReq, opts ...grpc.CallOption) (*InventoryResp, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(InventoryResp)
 	err := c.cc.Invoke(ctx, Inventory_UpdateInventory_FullMethodName, in, out, cOpts...)
@@ -120,7 +120,7 @@ type InventoryServer interface {
 	// GetInventory 查询库存，缓存不在，再去数据库查
 	GetInventory(context.Context, *GetInventoryReq) (*GetInventoryResp, error)
 	// UpdateInventory 增加库存，修改库存数量（直接修改）
-	UpdateInventory(context.Context, *InventoryReq) (*InventoryResp, error)
+	UpdateInventory(context.Context, *UpdateInventoryReq) (*InventoryResp, error)
 	// DecreaseInventory 预扣减库存，此时并非真实扣除库存，而是在缓存进行--操作
 	DecreasePreInventory(context.Context, *InventoryReq) (*InventoryResp, error)
 	// DecreaseInventory 真实扣减库存（支付成功时）
@@ -142,7 +142,7 @@ type UnimplementedInventoryServer struct{}
 func (UnimplementedInventoryServer) GetInventory(context.Context, *GetInventoryReq) (*GetInventoryResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetInventory not implemented")
 }
-func (UnimplementedInventoryServer) UpdateInventory(context.Context, *InventoryReq) (*InventoryResp, error) {
+func (UnimplementedInventoryServer) UpdateInventory(context.Context, *UpdateInventoryReq) (*InventoryResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateInventory not implemented")
 }
 func (UnimplementedInventoryServer) DecreasePreInventory(context.Context, *InventoryReq) (*InventoryResp, error) {
@@ -197,7 +197,7 @@ func _Inventory_GetInventory_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _Inventory_UpdateInventory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(InventoryReq)
+	in := new(UpdateInventoryReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -209,7 +209,7 @@ func _Inventory_UpdateInventory_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: Inventory_UpdateInventory_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(InventoryServer).UpdateInventory(ctx, req.(*InventoryReq))
+		return srv.(InventoryServer).UpdateInventory(ctx, req.(*UpdateInventoryReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -39,6 +39,7 @@ type (
 		OrderId        string         `db:"order_id"`        // 订单ID（业务主键）
 		PreOrderId     string         `db:"pre_order_id"`    // 预订单ID（关联结算服务）
 		UserId         uint64         `db:"user_id"`         // 用户ID
+		CouponId       string         `db:"coupon_id"`       // 优惠券ID
 		PaymentMethod  sql.NullInt64  `db:"payment_method"`  // 支付方式（1-微信 2-支付宝）
 		TransactionId  sql.NullString `db:"transaction_id"`  // 支付平台流水号
 		PaidAt         sql.NullInt64  `db:"paid_at"`         // 支付成功时间戳（秒）
@@ -97,14 +98,14 @@ func (m *defaultOrdersModel) FindOneByPreOrderId(ctx context.Context, preOrderId
 }
 
 func (m *defaultOrdersModel) Insert(ctx context.Context, data *Orders) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, ordersRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.OrderId, data.PreOrderId, data.UserId, data.PaymentMethod, data.TransactionId, data.PaidAt, data.OriginalAmount, data.DiscountAmount, data.PayableAmount, data.PaidAmount, data.OrderStatus, data.PaymentStatus, data.Reason, data.ExpireTime)
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, ordersRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.OrderId, data.PreOrderId, data.UserId, data.CouponId, data.PaymentMethod, data.TransactionId, data.PaidAt, data.OriginalAmount, data.DiscountAmount, data.PayableAmount, data.PaidAmount, data.OrderStatus, data.PaymentStatus, data.Reason, data.ExpireTime)
 	return ret, err
 }
 
 func (m *defaultOrdersModel) Update(ctx context.Context, newData *Orders) error {
 	query := fmt.Sprintf("update %s set %s where `order_id` = ?", m.table, ordersRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, newData.PreOrderId, newData.UserId, newData.PaymentMethod, newData.TransactionId, newData.PaidAt, newData.OriginalAmount, newData.DiscountAmount, newData.PayableAmount, newData.PaidAmount, newData.OrderStatus, newData.PaymentStatus, newData.Reason, newData.ExpireTime, newData.OrderId)
+	_, err := m.conn.ExecCtx(ctx, query, newData.PreOrderId, newData.UserId, newData.CouponId, newData.PaymentMethod, newData.TransactionId, newData.PaidAt, newData.OriginalAmount, newData.DiscountAmount, newData.PayableAmount, newData.PaidAmount, newData.OrderStatus, newData.PaymentStatus, newData.Reason, newData.ExpireTime, newData.OrderId)
 	return err
 }
 

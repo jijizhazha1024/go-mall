@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"errors"
 
+	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
+	"jijizhazha1024/go-mall/services/audit/audit"
 	"jijizhazha1024/go-mall/services/users/internal/svc"
 	"jijizhazha1024/go-mall/services/users/users"
 
@@ -30,32 +32,49 @@ func NewDeleteAddressLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Del
 func (l *DeleteAddressLogic) DeleteAddress(in *users.DeleteAddressRequest) (*users.DeleteAddressResponse, error) {
 	//判断address——id和user——id是否存在
 
-	_, err := l.svcCtx.AddressModel.GetUserAddressExistsByIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
+	address1, err := l.svcCtx.AddressModel.GetUserAddressExistsByIdAndUserId(l.ctx, in.AddressId, int32(in.UserId))
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			l.Logger.Infow("delete address not found", logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId))
-			return &users.DeleteAddressResponse{
-				StatusMsg:  code.UserAddressNotFoundMsg,
-				StatusCode: code.UserAddressNotFound,
-			}, nil
-		}
-		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
-		return &users.DeleteAddressResponse{}, err
+
+		l.Logger.Errorw("find address by id and user id failed", logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
+		return nil, err
+	}
+	if !address1 {
+		return &users.DeleteAddressResponse{
+			StatusMsg:  code.UserAddressNotFoundMsg,
+			StatusCode: code.UserAddressNotFound,
+		}, nil
+
 	}
 
 	err = l.svcCtx.AddressModel.DeleteByAddressIdandUserId(l.ctx, in.AddressId, int32(in.UserId))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			l.Logger.Infow("deleteaddress address not found", logx.Field("err", err), logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId))
+
 			return &users.DeleteAddressResponse{
 
 				StatusCode: code.UserAddressNotFound,
 				StatusMsg:  code.UserAddressNotFoundMsg,
 			}, nil
 		}
-		l.Logger.Errorw(code.ServerErrorMsg, logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
-		return &users.DeleteAddressResponse{}, err
+		l.Logger.Errorw("delete address failed", logx.Field("address_id", in.AddressId), logx.Field("user_id", in.UserId), logx.Field("err", err))
+		return nil, err
+	}
+	//添加审计服务
+	auditreq := &audit.CreateAuditLogReq{
+		UserId:            uint32(in.UserId),
+		ActionType:        biz.Delete,
+		TargetTable:       "user_address",
+		ActionDescription: "删除用户地址",
+		ClientIp:          in.Ip,
+		TargetId:          int64(in.AddressId),
+		ServiceName:       "users",
+	}
+	_, err = l.svcCtx.AuditRpc.CreateAuditLog(l.ctx, auditreq)
+	if err != nil {
+		l.Logger.Infow("add address audit failed", logx.Field("err", err),
+			logx.Field("body", auditreq))
+
 	}
 
-	return &users.DeleteAddressResponse{}, nil
+	return nil, nil
 }

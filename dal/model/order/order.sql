@@ -3,6 +3,7 @@ CREATE TABLE orders
     order_id        VARCHAR(36)  NOT NULL COMMENT '订单ID（业务主键）',
     pre_order_id    VARCHAR(36)  NOT NULL COMMENT '预订单ID（关联结算服务）',
     user_id         INT UNSIGNED NOT NULL COMMENT '用户ID',
+    coupon_id       VARCHAR(36)  NOT NULL COMMENT '优惠券ID',
 
     -- 支付信息
     payment_method  TINYINT COMMENT '支付方式（1-微信 2-支付宝）',

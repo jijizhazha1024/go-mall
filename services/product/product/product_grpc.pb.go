@@ -19,13 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	ProductCatalogService_GetProduct_FullMethodName     = "/product.ProductCatalogService/GetProduct"
-	ProductCatalogService_CreateProduct_FullMethodName  = "/product.ProductCatalogService/CreateProduct"
-	ProductCatalogService_UpdateProduct_FullMethodName  = "/product.ProductCatalogService/UpdateProduct"
-	ProductCatalogService_DeleteProduct_FullMethodName  = "/product.ProductCatalogService/DeleteProduct"
-	ProductCatalogService_GetAllProduct_FullMethodName  = "/product.ProductCatalogService/GetAllProduct"
-	ProductCatalogService_IsExistProduct_FullMethodName = "/product.ProductCatalogService/IsExistProduct"
-	ProductCatalogService_QueryProduct_FullMethodName   = "/product.ProductCatalogService/QueryProduct"
+	ProductCatalogService_GetProduct_FullMethodName       = "/product.ProductCatalogService/GetProduct"
+	ProductCatalogService_CreateProduct_FullMethodName    = "/product.ProductCatalogService/CreateProduct"
+	ProductCatalogService_UpdateProduct_FullMethodName    = "/product.ProductCatalogService/UpdateProduct"
+	ProductCatalogService_DeleteProduct_FullMethodName    = "/product.ProductCatalogService/DeleteProduct"
+	ProductCatalogService_GetAllProduct_FullMethodName    = "/product.ProductCatalogService/GetAllProduct"
+	ProductCatalogService_IsExistProduct_FullMethodName   = "/product.ProductCatalogService/IsExistProduct"
+	ProductCatalogService_QueryProduct_FullMethodName     = "/product.ProductCatalogService/QueryProduct"
+	ProductCatalogService_RecommendProduct_FullMethodName = "/product.ProductCatalogService/RecommendProduct"
 )
 
 // ProductCatalogServiceClient is the client API for ProductCatalogService service.
@@ -46,6 +47,7 @@ type ProductCatalogServiceClient interface {
 	IsExistProduct(ctx context.Context, in *IsExistProductReq, opts ...grpc.CallOption) (*IsExistProductResp, error)
 	// 根据条件查询商品
 	QueryProduct(ctx context.Context, in *QueryProductReq, opts ...grpc.CallOption) (*GetAllProductsResp, error)
+	RecommendProduct(ctx context.Context, in *RecommendProductReq, opts ...grpc.CallOption) (*GetAllProductsResp, error)
 }
 
 type productCatalogServiceClient struct {
@@ -126,6 +128,16 @@ func (c *productCatalogServiceClient) QueryProduct(ctx context.Context, in *Quer
 	return out, nil
 }
 
+func (c *productCatalogServiceClient) RecommendProduct(ctx context.Context, in *RecommendProductReq, opts ...grpc.CallOption) (*GetAllProductsResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAllProductsResp)
+	err := c.cc.Invoke(ctx, ProductCatalogService_RecommendProduct_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProductCatalogServiceServer is the server API for ProductCatalogService service.
 // All implementations must embed UnimplementedProductCatalogServiceServer
 // for forward compatibility
@@ -144,6 +156,7 @@ type ProductCatalogServiceServer interface {
 	IsExistProduct(context.Context, *IsExistProductReq) (*IsExistProductResp, error)
 	// 根据条件查询商品
 	QueryProduct(context.Context, *QueryProductReq) (*GetAllProductsResp, error)
+	RecommendProduct(context.Context, *RecommendProductReq) (*GetAllProductsResp, error)
 	mustEmbedUnimplementedProductCatalogServiceServer()
 }
 
@@ -171,6 +184,9 @@ func (UnimplementedProductCatalogServiceServer) IsExistProduct(context.Context, 
 }
 func (UnimplementedProductCatalogServiceServer) QueryProduct(context.Context, *QueryProductReq) (*GetAllProductsResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method QueryProduct not implemented")
+}
+func (UnimplementedProductCatalogServiceServer) RecommendProduct(context.Context, *RecommendProductReq) (*GetAllProductsResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RecommendProduct not implemented")
 }
 func (UnimplementedProductCatalogServiceServer) mustEmbedUnimplementedProductCatalogServiceServer() {}
 
@@ -311,6 +327,24 @@ func _ProductCatalogService_QueryProduct_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProductCatalogService_RecommendProduct_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RecommendProductReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProductCatalogServiceServer).RecommendProduct(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProductCatalogService_RecommendProduct_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProductCatalogServiceServer).RecommendProduct(ctx, req.(*RecommendProductReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProductCatalogService_ServiceDesc is the grpc.ServiceDesc for ProductCatalogService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -345,6 +379,10 @@ var ProductCatalogService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "QueryProduct",
 			Handler:    _ProductCatalogService_QueryProduct_Handler,
+		},
+		{
+			MethodName: "RecommendProduct",
+			Handler:    _ProductCatalogService_RecommendProduct_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

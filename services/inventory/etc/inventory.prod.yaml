@@ -2,6 +2,7 @@
 Name: inventory.rpc
 ListenOn: 0.0.0.0:10011 # 端口见接口文档
 Mode: pro
+Timeout: 5000
 
 # 服务发现
 Consul:
@@ -29,7 +30,7 @@ Log:
 DevServer:
   Enabled: true
   Host: 0.0.0.0
-  Port: 11000
+  Port: 11011
   EnablePprof: false
 
 # 链路追踪

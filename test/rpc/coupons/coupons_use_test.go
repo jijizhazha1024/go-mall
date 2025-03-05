@@ -113,7 +113,7 @@ func Test_UseCouponLogic_UseCoupon(t *testing.T) {
 
 	t.Run("正常情况", func(t *testing.T) {
 		res, err := couponsClient.UseCoupon(context.Background(), &coupons.UseCouponReq{
-			UserId:         int32(uid),
+			UserId:         1,
 			CouponId:       cid,
 			OrderId:        oid,
 			DiscountAmount: 100,

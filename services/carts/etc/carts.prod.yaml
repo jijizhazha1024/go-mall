@@ -1,6 +1,7 @@
 Name: carts.rpc
 ListenOn: 0.0.0.0:10003 # 端口见接口文档
 Mode: pro
+Timeout: 5000
 
 # 服务发现
 Consul:
@@ -14,7 +15,7 @@ Consul:
 MysqlConfig:
   datasource: ${MYSQL_DATA_SOURCE}
   conntimeout: 5
-  
+
 Log:
   ServiceName: "carts-rpc"
   Mode: 'file'

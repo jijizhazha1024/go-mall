@@ -13,22 +13,24 @@ import (
 )
 
 type (
-	CreateProductReq          = product.CreateProductReq
-	CreateProductResp         = product.CreateProductResp
-	DeleteProductReq          = product.DeleteProductReq
-	DeleteProductResp         = product.DeleteProductResp
-	GetAllProductsReq         = product.GetAllProductsReq
-	GetAllProductsResp        = product.GetAllProductsResp
-	GetProductReq             = product.GetProductReq
-	GetProductResp            = product.GetProductResp
-	IsExistProductReq         = product.IsExistProductReq
-	IsExistProductResp        = product.IsExistProductResp
-	Product                   = product.Product
-	QueryProductReq           = product.QueryProductReq
-	QueryProductReq_Paginator = product.QueryProductReq_Paginator
-	QueryProductReq_Price     = product.QueryProductReq_Price
-	UpdateProductReq          = product.UpdateProductReq
-	UpdateProductResp         = product.UpdateProductResp
+	CreateProductReq              = product.CreateProductReq
+	CreateProductResp             = product.CreateProductResp
+	DeleteProductReq              = product.DeleteProductReq
+	DeleteProductResp             = product.DeleteProductResp
+	GetAllProductsReq             = product.GetAllProductsReq
+	GetAllProductsResp            = product.GetAllProductsResp
+	GetProductReq                 = product.GetProductReq
+	GetProductResp                = product.GetProductResp
+	IsExistProductReq             = product.IsExistProductReq
+	IsExistProductResp            = product.IsExistProductResp
+	Product                       = product.Product
+	QueryProductReq               = product.QueryProductReq
+	QueryProductReq_Paginator     = product.QueryProductReq_Paginator
+	QueryProductReq_Price         = product.QueryProductReq_Price
+	RecommendProductReq           = product.RecommendProductReq
+	RecommendProductReq_Paginator = product.RecommendProductReq_Paginator
+	UpdateProductReq              = product.UpdateProductReq
+	UpdateProductResp             = product.UpdateProductResp
 
 	ProductCatalogService interface {
 		// 根据商品id得到商品详细信息
@@ -45,6 +47,7 @@ type (
 		IsExistProduct(ctx context.Context, in *IsExistProductReq, opts ...grpc.CallOption) (*IsExistProductResp, error)
 		// 根据条件查询商品
 		QueryProduct(ctx context.Context, in *QueryProductReq, opts ...grpc.CallOption) (*GetAllProductsResp, error)
+		RecommendProduct(ctx context.Context, in *RecommendProductReq, opts ...grpc.CallOption) (*GetAllProductsResp, error)
 	}
 
 	defaultProductCatalogService struct {
@@ -98,4 +101,9 @@ func (m *defaultProductCatalogService) IsExistProduct(ctx context.Context, in *I
 func (m *defaultProductCatalogService) QueryProduct(ctx context.Context, in *QueryProductReq, opts ...grpc.CallOption) (*GetAllProductsResp, error) {
 	client := product.NewProductCatalogServiceClient(m.cli.Conn())
 	return client.QueryProduct(ctx, in, opts...)
+}
+
+func (m *defaultProductCatalogService) RecommendProduct(ctx context.Context, in *RecommendProductReq, opts ...grpc.CallOption) (*GetAllProductsResp, error) {
+	client := product.NewProductCatalogServiceClient(m.cli.Conn())
+	return client.RecommendProduct(ctx, in, opts...)
 }

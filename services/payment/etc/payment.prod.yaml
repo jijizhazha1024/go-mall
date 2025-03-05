@@ -1,0 +1,56 @@
+Name: payment.rpc
+ListenOn: 0.0.0.0:10006
+Mode: pro
+Timeout: 30000
+# 服务发现
+Consul:
+  Host: ${CONSUL_HOST}
+  Key: payment.rpc
+  Meta:
+    Protocol: grpc
+  Tag:
+    - "grpc"
+
+Telemetry:
+  Name: payment.rpc
+  Endpoint: ${TRACES_ENDPOINT}
+  Batcher: jaeger
+  Sampler: 0.1  # 采样率，1.0表示全部采集, 0.1表示10%
+Log:
+  ServiceName: "payment-rpc"
+  Mode: 'file'
+  Encoding: "json"
+  Path: "./logs/payment-rpc"
+  KeepDays: 30    # 保留30天日志
+  Compress: true  # 启用日志压缩
+  Rotation: size  # 按大小切割日志
+  MaxSize: 100    # 每个日志文件最大100MB
+
+MysqlConfig:
+  datasource: ${MYSQL_DATA_SOURCE}
+
+RedisConf:
+  Host: ${REDIS_HOST}
+  Pass: ${REDIS_PASSWORD}
+  Tls: false
+
+Alipay:
+  AppId: ${ALIPAY_APPID}
+  AlipayPublicKey: ${ALIPAY_PUBLIC_KEY}
+  PrivateKey: ${ALIPAY_PRIVATE_KEY}
+  NotifyURL: ${ALIPAY_NOTIFY_URL}
+  NotifyPath: ${ALIPAY_NOTIFY_PATH}
+  NotifyPort: ${ALIPAY_NOTIFY_PORT}
+  ReturnURL: ${ALIPAY_RETURN_URL}
+
+OrderRpc:
+  Target: consul://${CONSUL_HOST}/order.rpc?wait=14s
+  NonBlock: true
+  Timeout: 25000
+
+RabbitMQConfig:
+  Host: ${RABBITMQ_HOST}
+  Port: ${RABBITMQ_PORT}
+  User: ${RABBITMQ_USERNAME}
+  Pass: ${RABBITMQ_PASSWORD}
+  VHost: ${RABBITMQ_VHOST}

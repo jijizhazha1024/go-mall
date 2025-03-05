@@ -50,7 +50,14 @@ QiNiu:
   secretKey: ${QINIU_SECRETKEY}
   bucket: ${QINIU_BUCKET}
   domain: ${QINIU_DOMAIN}
+
+# Redis
 RedisConf:
   Host: ${REDIS_HOST}
   Pass: ${REDIS_PASSWORD}
   Tls: false
+
+# Gorse
+GorseConfig:
+  GorseAddr: ${GORSE_HOST}
+  GorseApikey: ${GORSE_APIKEY}

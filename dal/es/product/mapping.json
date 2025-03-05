@@ -39,11 +39,13 @@
       },
       "created_at": {
         "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+        "format": "yyyy-MM-dd HH:mm:ss"
+
       },
       "updated_at": {
         "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+        "format": "yyyy-MM-dd HH:mm:ss"
+
       }
     }
   }

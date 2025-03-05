@@ -1,0 +1,78 @@
+syntax = "v1"
+
+type (
+	// 请求结构体
+	CheckoutReq {
+		CouponID   string            `json:"coupon_id,optional"`
+		OrderItems []CheckoutItemReq `json:"order_items"`
+	}
+	CheckoutItemReq {
+		ProductID int32 `json:"product_id"`
+		Quantity  int32 `json:"quantity"`
+	}
+	CheckoutItem {
+		ProductID   int32  `json:"product_id"`
+		Quantity    int32  `json:"quantity"`
+		ProductName string `json:"product_name"`
+		ProductDesc string `json:"product_desc"`
+		Price       string `json:"price"`
+	}
+	CheckoutListReq {
+		Page     int32 `json:"page,default=1"`
+		PageSize int32 `json:"page_size,default=10"`
+	}
+	CheckoutDetailReq {
+		PreOrderID string `json:"pre_order_id" valid:"required"`
+	}
+	UpdateStatusReq {
+		PreOrderID string `json:"pre_order_id" valid:"required"`
+		Status     int32  `json:"status" valid:"required,range(0:4)"` // 0-4对应枚举值
+	}
+)
+
+type (
+	// 响应结构体
+	CheckoutResp {
+		ExpireTime int64   `json:"expire_time"`
+		PreOrderID string  `json:"pre_order_id"`
+		PayMethod  []int64 `json:"pay_method"`
+	}
+	CheckoutListResp {
+		Total int64           `json:"total"`
+		Data  []CheckoutOrder `json:"data"`
+	}
+	CheckoutOrder {
+		PreOrderID     string         `json:"pre_order_id"`
+		UserID         int64          `json:"user_id"`
+		Status         int32          `json:"status"` // 对应枚举值
+		ExpireTime     string         `json:"expire_time"`
+		CreatedAt      string         `json:"created_at"`
+		UpdatedAt      string         `json:"updated_at"`
+		Items          []CheckoutItem `json:"items"`
+		OriginalAmount string         `json:"original_amount"`
+		FinalAmount    string         `json:"final_amount"`
+	}
+	CheckoutDetailResp {
+		Data CheckoutOrder `json:"data"`
+	}
+)
+
+@server (
+	middleware: WithClientMiddleware,WrapperAuthMiddleware
+	prefix:     /douyin/checkout
+)
+// 服务定义
+service checkout-api {
+	@handler CheckoutHandler
+	// 预结算接口
+	post /prepare (CheckoutReq) returns (CheckoutResp)
+
+	@handler ListHandler
+	// 获取结算列表
+	get /list (CheckoutListReq) returns (CheckoutListResp)
+
+	@handler DetailHandler
+	// 获取结算详情
+	get /detail (CheckoutDetailReq) returns (CheckoutDetailResp)
+}
+

@@ -11,6 +11,10 @@ type Config struct {
 	MysqlConfig MysqlConfig
 	RedisConf   redis.RedisConf
 	Consul      consul.Conf
+
+	InventoryRpc zrpc.RpcClientConf
+	CouponsRpc   zrpc.RpcClientConf
+	ProductRpc   zrpc.RpcClientConf
 }
 
 type MysqlConfig struct {

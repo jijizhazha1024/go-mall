@@ -1,0 +1,73 @@
+# users-api 部署
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-api  # 保持命名规范
+  namespace: go-mall
+  labels:
+    app: go-mall
+    service: users-api  # 明确区分服务类型
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-mall
+      service: users-api  # 匹配API标签
+  template:
+    metadata:
+      labels:
+        app: go-mall
+        service: users-api
+    spec:
+      containers:
+        - name: users-api
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+          command: ["/app/apis/User", "-f", "/app/etc/user-api.prod.yaml"]  # API二进制路径
+          ports:
+            - containerPort: 8001
+            - containerPort: 8101
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8101
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8101
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - mountPath: /app/logs
+              name: app-logs
+          imagePullPolicy: Always
+      volumes:
+        - name: app-logs
+          hostPath:
+            path: /app/logs
+
+---
+# users-api 的 Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-api
+  namespace: go-mall
+spec:
+  selector:
+    app: go-mall
+    service: users-api  # 匹配API标签
+  ports:
+    - name: users-api     # 主服务端口
+      port: 8001            # 集群内访问端口
+      targetPort: 8001    # 映射到容器端口8001
+      protocol: TCP
+    - name: users-api-metrics  # 监控指标端口
+      port: 8101          # 集群内访问端口
+      targetPort: 8101    # 映射到容器健康检查端口
+      protocol: TCP
+  type: ClusterIP         # 默认服务类型

@@ -4,6 +4,7 @@ go 1.21
 
 require (
 	github.com/avast/retry-go v3.0.0+incompatible
+	github.com/bytedance/gopkg v0.1.1
 	github.com/dtm-labs/client v1.17.3
 	github.com/dtm-labs/driver-gozero v0.0.7
 	github.com/elastic/go-elasticsearch/v7 v7.17.10
@@ -12,22 +13,24 @@ require (
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/qiniu/go-sdk/v7 v7.25.2
 	github.com/shopspring/decimal v1.4.0
+	github.com/smartwalle/alipay/v3 v3.2.25
 	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.10.0
-	github.com/volcengine/volcengine-go-sdk v1.0.179
+	github.com/volcengine/volcengine-go-sdk v1.0.184
 	github.com/zeromicro/go-zero v1.7.6
 	github.com/zeromicro/x v0.0.0-20240408115609-8224c482b07e
 	github.com/zeromicro/zero-contrib/zrpc/registry/consul v0.0.0-20231030135404-af9ae855016f
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.45.0
 	golang.org/x/crypto v0.32.0
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.36.1
 )
 
 require (
-	github.com/dtm-labs/dtmdriver v0.0.6 // indirect
-	github.com/dtm-labs/dtmdriver-gozero v0.0.7 // indirect
-	github.com/dtm-labs/logger v0.0.1 // indirect
-	github.com/go-errors/errors v1.4.2 // indirect
+	github.com/felixge/httpsnoop v1.0.3 // indirect
+	github.com/smartwalle/ncrypto v1.0.4 // indirect
+	github.com/smartwalle/ngx v1.0.9 // indirect
+	github.com/smartwalle/nsign v1.0.9 // indirect
 	github.com/volcengine/volc-sdk-golang v1.0.23 // indirect
 )
 
@@ -45,9 +48,13 @@ require (
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/dtm-labs/dtmdriver v0.0.6 // indirect
+	github.com/dtm-labs/dtmdriver-gozero v0.0.7
+	github.com/dtm-labs/logger v0.0.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/gammazero/toposort v0.1.1 // indirect
+	github.com/go-errors/errors v1.4.2 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect

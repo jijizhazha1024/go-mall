@@ -3,11 +3,12 @@ Host: 0.0.0.0
 Port: 8001
 Mode: pro
 Verbose: false # 关闭详细日志
-
+Timeout: 12000
 
 UserRpc:
   Target: consul://${CONSUL_HOST}/users.rpc?wait=14s
   NonBlock: true
+  Timeout: 10000
 AuthsRpc:
   Target: consul://${CONSUL_HOST}/auths.rpc?wait=14s
   NonBlock: true 

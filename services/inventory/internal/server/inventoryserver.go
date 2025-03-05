@@ -30,7 +30,7 @@ func (s *InventoryServer) GetInventory(ctx context.Context, in *inventory.GetInv
 }
 
 // UpdateInventory 增加库存，修改库存数量（直接修改）
-func (s *InventoryServer) UpdateInventory(ctx context.Context, in *inventory.InventoryReq) (*inventory.InventoryResp, error) {
+func (s *InventoryServer) UpdateInventory(ctx context.Context, in *inventory.UpdateInventoryReq) (*inventory.InventoryResp, error) {
 	l := logic.NewUpdateInventoryLogic(ctx, s.svcCtx)
 	return l.UpdateInventory(in)
 }

@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: go-mall
+  labels:
+    app: go-mall
+    service: payment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-mall
+      service: payment
+  template:
+    metadata:
+      labels:
+        app: go-mall
+        service: payment
+    spec:
+      containers:
+        - name: payment-service
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+          command: [ "/app/services/Payment", "-f", "/app/etc/payment.prod.yaml" ]
+          ports:
+            - containerPort: 10006  # 主服务端口
+            - containerPort: 11111  # 支付回调端口
+            - containerPort: 11006  # 健康检查端口
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+          volumeMounts:
+            - mountPath: /app/logs
+              name: app-logs
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 11006
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 11006
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          imagePullPolicy: Always
+      volumes:
+        - name: app-logs
+          hostPath:
+            path: /app/logs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: go-mall
+spec:
+  selector:
+    app: go-mall
+    service: payment
+  ports:
+    - name: payment-rpc      # 内部通信端口
+      port: 10006
+      targetPort: 10006
+      protocol: TCP
+    - name: payment-metrics  # 健康检查暴露端口
+      port: 11006
+      targetPort: 11006
+      protocol: TCP
+    - name: alipay-callback
+      port: 11111
+      targetPort: 11111
+      nodePort: 31111
+  type: NodePort

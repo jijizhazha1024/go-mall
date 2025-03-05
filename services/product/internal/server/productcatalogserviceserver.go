@@ -63,3 +63,8 @@ func (s *ProductCatalogServiceServer) QueryProduct(ctx context.Context, in *prod
 	l := logic.NewQueryProductLogic(ctx, s.svcCtx)
 	return l.QueryProduct(in)
 }
+
+func (s *ProductCatalogServiceServer) RecommendProduct(ctx context.Context, in *product.RecommendProductReq) (*product.GetAllProductsResp, error) {
+	l := logic.NewRecommendProductLogic(ctx, s.svcCtx)
+	return l.RecommendProduct(in)
+}

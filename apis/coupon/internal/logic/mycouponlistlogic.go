@@ -63,6 +63,9 @@ func (l *MyCouponListLogic) MyCouponList(req *types.CouponListReq) (resp *types.
 func convertCouponMy2Resp(coupons []*coupons.UserCoupon) []types.CouponMy {
 	resp := make([]types.CouponMy, len(coupons))
 	for i, coupon := range coupons {
+		if coupon == nil {
+			continue
+		}
 		resp[i] = types.CouponMy{
 			CouponID:  coupon.CouponId,
 			CreatedAt: coupon.CreatedAt,

@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-api
+  namespace: go-mall
+  labels:
+    app: go-mall
+    service: payment-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-mall
+      service: payment-api
+  template:
+    metadata:
+      labels:
+        app: go-mall
+        service: payment-api
+    spec:
+      containers:
+        - name: payment-api
+          image: swr.cn-south-1.myhuaweicloud.com/jjzzchtt/go-mall:latest
+          command: [ "/app/apis/Payment", "-f", "/app/etc/payment-api.prod.yaml" ]
+          ports:
+            - containerPort: 8006
+            - containerPort: 8106
+          envFrom:
+            - configMapRef:
+                name: go-mall-env
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8106
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8106
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - mountPath: /app/logs
+              name: app-logs
+          imagePullPolicy: Always
+      volumes:
+        - name: app-logs
+          hostPath:
+            path: /app/logs
+
+---
+# payment-api Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-api
+  namespace: go-mall
+spec:
+  selector:
+    app: go-mall
+    service: payment-api
+  ports:
+    - name: payment-api
+      port: 8006
+      targetPort: 8006
+      protocol: TCP
+    - name: payment-api-metrics
+      port: 8106
+      targetPort: 8106
+      protocol: TCP
+  type: ClusterIP
