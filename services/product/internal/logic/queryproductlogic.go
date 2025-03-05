@@ -35,7 +35,7 @@ func (l *QueryProductLogic) QueryProduct(in *product.QueryProductReq) (*product.
 		pageSize = int(in.Paginator.PageSize)
 	}
 	if in.Paginator != nil && in.Paginator.Page > 0 {
-		from = int(in.Paginator.Page) * pageSize
+		from = (int(in.Paginator.Page) - 1) * pageSize
 	}
 	// 构建搜索服务
 	searchService := l.svcCtx.EsClient.Search().
@@ -82,29 +82,26 @@ func (l *QueryProductLogic) buildESQuery(req *product.QueryProductReq) *elastic.
 
 	// 商品名称模糊匹配
 	if req.Name != "" {
-		boolQuery.Must(elastic.NewMatchQuery("name", req.Name))
+		boolQuery.Filter(elastic.NewMatchQuery("name", req.Name))
 	}
 	if req.Keyword != "" {
-		boolQuery.Should(
-			// 多字段匹配（description权重更高）
-			elastic.NewMultiMatchQuery(req.Keyword,
-				"name^1",        // name字段权重1（默认）
-				"description^2", // description字段权重2
-			),
-			// 短语匹配（description权重更高）
-			elastic.NewMatchPhraseQuery("name", req.Keyword).Boost(1),        // 权重1
-			elastic.NewMatchPhraseQuery("description", req.Keyword).Boost(3), // 权重3
-			// 精确匹配
-			elastic.NewTermQuery("description.keyword", req.Keyword).Boost(5), // 最高权重
+		// 修改后代码
+		keywordBool := elastic.NewBoolQuery()
+		keywordBool.Should(
+			elastic.NewMultiMatchQuery(req.Keyword, "name^1", "description^2"),
+			elastic.NewMatchPhraseQuery("name", req.Keyword).Boost(1),
+			elastic.NewMatchPhraseQuery("description", req.Keyword).Boost(3),
+			elastic.NewWildcardQuery("description.keyword", "*"+req.Keyword+"*").Boost(2), // 新增通配符查询
+			elastic.NewTermQuery("description.keyword", req.Keyword).Boost(5),
 		)
-
-		// 设置最小匹配条件（至少满足一个should条件）
-		boolQuery.MinimumNumberShouldMatch(1)
+		keywordBool.MinimumNumberShouldMatch(1)
+		boolQuery.Must(keywordBool) // 从Filter改为Must以保留评分
 	}
 
 	// 分类筛选（数组匹配）
 	if len(req.Category) > 0 {
-		boolQuery.Filter(elastic.NewTermsQuery("category", stringSliceToInterface(req.Category)...))
+		termsQuery := elastic.NewTermsQuery("category.keyword", stringSliceToInterface(req.Category)...)
+		boolQuery.Should(termsQuery)
 	}
 
 	// 价格区间筛选

@@ -2,6 +2,7 @@ Name: ai-api
 Host: 0.0.0.0
 Port: 8007
 Mode: pro
+Timeout: 10000
 Verbose: false # 关闭详细日志
 
 
@@ -13,6 +14,7 @@ AuthsRpc:
 AIRpc:
   Target: consul://${CONSUL_HOST}/ai.rpc?wait=14s
   NonBlock: true
+  Timeout: 8000
 
 # 日志配置
 Log:

@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"fmt"
 	"jijizhazha1024/go-mall/services/ai/internal/config"
 	"jijizhazha1024/go-mall/services/ai/internal/core/strategy"
 	"jijizhazha1024/go-mall/services/ai/internal/core/vars"
@@ -31,6 +32,7 @@ func (c *Command) Handler(ctx context.Context, input string, userID int) (interf
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(ast)
 	if err := s.Validate(ctx, ast); err != nil {
 		return nil, err
 	}

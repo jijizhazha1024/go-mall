@@ -1,7 +1,7 @@
 Name: ai-api
 Host: 0.0.0.0
 Port: 8010
-
+Timeout: 15000
 
 
 # 链路追踪
@@ -18,3 +18,4 @@ AuthsRpc:
 AIRpc:
   Target: consul://124.71.72.124:8500/ai.rpc?wait=14s
   NonBlock: true
+  Timeout: 13000

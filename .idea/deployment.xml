@@ -34,7 +34,7 @@
       <paths name="阿里云">
         <serverdata>
           <mappings>
-            <mapping deploy="/project/go-mall" local="$PROJECT_DIR$" web="/" />
+            <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>

@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"jijizhazha1024/go-mall/services/ai/ai"
 	"jijizhazha1024/go-mall/services/ai/internal/core"
@@ -36,7 +35,6 @@ func (l *NLPExecutorLogic) NLPExecutor(in *ai.NLPExecutorReq) (*ai.NLPExecutorRe
 	if err != nil {
 		return res, nil
 	}
-	fmt.Println(handler)
 	marshal, err := json.Marshal(handler)
 	if err != nil {
 		return nil, err

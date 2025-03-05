@@ -12,7 +12,7 @@ import (
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.WrapperAuthMiddleware},
+			[]rest.Middleware{serverCtx.WithClientMiddleware,serverCtx.WrapperAuthMiddleware},
 			[]rest.Route{
 				{
 					Method:  http.MethodPost,

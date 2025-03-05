@@ -8,11 +8,11 @@ import (
 
 func TestCommand(t *testing.T) {
 	resp, err := aiClient.NLPExecutor(context.Background(), &aiclient.NLPExecutorReq{
-		Command: "查询智能手机，预算大概是4000到6000元,需要6.5英寸AMOLED屏幕，128GB存储",
+		Command: "查询无线耳机，预算大概是100到500元,需要续航时间24小时，支持蓝牙",
 		UserId:  1,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(resp.Data)
+	t.Log(string(resp.Data))
 }

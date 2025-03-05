@@ -10,7 +10,7 @@ type Response {
 
 @server (
 	prefix:     /douyin/ai
-	middleware: WrapperAuthMiddleware // 添加中间件
+	middleware: WrapperAuthMiddleware,WithClientMiddleware // 添加中间件
 )
 service ai-api {
 	@handler AiHandler

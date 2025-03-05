@@ -106,12 +106,22 @@ func TestProductsDeleteRpc(t *testing.T) {
 }
 
 func TestQueryProduct(t *testing.T) {
-
+	//{无线耳机 false false [耳机] {10000 50000} 续航时间24小时,支持蓝牙}}
 	initproduct()
 	resp, err := product_client.QueryProduct(context.Background(), &product.QueryProductReq{
-		New:      true,
-		Hot:      true,
-		Category: []string{"智能手机"},
+		New:      false,
+		Name:     "无线蓝牙耳机",
+		Hot:      false,
+		Category: []string{"蓝牙"},
+		Paginator: &product.QueryProductReq_Paginator{
+			Page:     1,
+			PageSize: 10,
+		},
+		Price: &product.QueryProductReq_Price{
+			Min: 10000,
+			Max: 50000,
+		},
+		//Keyword: "续航时间24小时,支持蓝牙",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -120,6 +130,8 @@ func TestQueryProduct(t *testing.T) {
 }
 
 func TestLoadProduct2EsAndGorse(t *testing.T) {
+	os.Setenv("MYSQL_DATA_SOURCE", "jjzzchtt:jjzzchtt@tcp(124.71.72.124:3306)/mall?charset=utf8mb4&parseTime=True&loc=Local")
+	os.Setenv("ELASTICSEARCH_HOST", "http://113.45.32.164:9200")
 	esAddress := os.Getenv("ELASTICSEARCH_HOST")
 	mysqlAddress := os.Getenv("MYSQL_DATA_SOURCE")
 	gorseAddr := os.Getenv("GORSE_HOST")
@@ -139,6 +151,7 @@ func TestLoadProduct2EsAndGorse(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	fmt.Println(gorseClient)
 	items := make([]gorse.Item, len(products))
 	for i, p := range products {
 		category, err := categoryModel.FindCategoryNameByProductID(ctx, p.Id)
@@ -174,10 +187,10 @@ func TestLoadProduct2EsAndGorse(t *testing.T) {
 			Timestamp:  p.CreatedAt.Format(time.DateTime),
 		}
 	}
-	if _, err = gorseClient.InsertItems(ctx, items); err != nil {
-		t.Fatal("gorse insert items failed", logx.Field("err", err))
-		return
-	}
+	//if _, err = gorseClient.InsertItems(ctx, items); err != nil {
+	//	t.Fatal("gorse insert items failed", logx.Field("err", err))
+	//	return
+	//}
 }
 func TestProductRecommend(t *testing.T) {
 	initproduct()

@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/x/errors"
 	"jijizhazha1024/go-mall/common/consts/biz"
 	"jijizhazha1024/go-mall/common/consts/code"
@@ -45,6 +46,8 @@ func (l *AiLogic) Ai(req *types.Request) (resp *types.Response, err error) {
 	if executor.StatusCode != code.Success {
 		return nil, errors.New(int(executor.StatusCode), executor.StatusMsg)
 	}
-	resp.Result = executor.Products
+	if err := jsonx.Unmarshal(executor.Data, &resp.Result); err != nil {
+		return resp, nil
+	}
 	return
 }
