@@ -16,6 +16,13 @@
           </advancedOptions>
         </fileTransfer>
       </webServer>
+      <webServer id="7f2a4e91-dafa-4357-9d2c-ee5719d5a559" name="阿里云">
+        <fileTransfer accessType="SFTP" host="47.96.42.228" port="22" sshConfigId="78f44c9f-6c70-48db-b783-568a9182f277" sshConfig="root@47.96.42.228:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
     </option>
   </component>
 </project>

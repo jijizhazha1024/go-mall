@@ -77,5 +77,6 @@ spec:
     - name: http
       port: 36789           # 集群内访问的端口
       targetPort: 36789  # 映射到容器端口
+      nodePort: 30789
       protocol: TCP
-  type: ClusterIP  # 根据实际需求可改为NodePort/LoadBalancer
+  type: NodePort
