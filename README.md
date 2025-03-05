@@ -2,10 +2,21 @@
 [![Go Version](https://img.shields.io/badge/go-1.20%2B-blue)](https://golang.org/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
+
+
 ## 🌟 项目简介
 
-基于Go语言与Go-zero框架开发的轻量级抖音电商系统，支持高并发场景与全链路监控。通过微服务架构实现高扩展性，集成AI查询、分布式事务、缓存预热等企业级功能。
-
+基于Go语言与Go-zero框架开发的轻量级抖音电商系统，支持高并发场景与全链路监控。通过微服务架构实现高扩展性，集成AI查询、分布式事务、缓存预热等功能。
+### 队员介绍
+| 角色 | 姓名 | GitHub链接 |
+| ---- | ---- | ---- |
+| 队长 | bbz1024 | [bbz1024](https://github.com/bbz1024) |
+| 副队 | xxx | [djj01](https://github.com/xxx) |
+| 组员 | djj01 | [djj01](https://github.com/orgs/jijizhazha1024/people/djj10) |
+| 组员 | Kasiery | [Kasiery](https://github.com/orgs/jijizhazha1024/people/Kasiery) |
+| 组员 | Swifter24 | [Swifter24](https://github.com/orgs/jijizhazha1024/people/Swifter24) |
+| 资源 | 失踪人员 | [失踪人员](https://github.com/404) |
+  
 ## 🚀 技术栈
 
 ### 核心框架
