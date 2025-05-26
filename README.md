@@ -18,11 +18,11 @@
 | 角色 | 姓名 | GitHub链接 |
 | ---- | ---- | ---- |
 | 队长 | bbz1024 | [bbz1024](https://github.com/bbz1024) |
-| 副队 | xxx | [djj01](https://github.com/xxx) |
+| 副队 | 薛瑞东 | [xxd](https://github.com/a1623266234) |
 | 组员 | djj01 | [djj01](https://github.com/orgs/jijizhazha1024/people/djj10) |
 | 组员 | Kasiery | [Kasiery](https://github.com/orgs/jijizhazha1024/people/Kasiery) |
 | 组员 | Swifter24 | [Swifter24](https://github.com/orgs/jijizhazha1024/people/Swifter24) |
-| 资源 | 失踪人员 | [失踪人员](https://github.com/404) |
+
   
 ## 🚀 技术栈
 
